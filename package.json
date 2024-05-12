@@ -1,0 +1,16 @@
+{
+  "name": "samdravitzki",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0"
+  },
+  "packageManager": "pnpm@9.1.0+sha1.217063ce3fcbf44f3051666f38b810f1ddefee4a"
+}
