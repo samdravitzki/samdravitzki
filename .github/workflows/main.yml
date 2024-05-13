@@ -32,20 +32,20 @@ jobs:
           path: 'dist/' 
 
   # Taken from https://github.com/actions/deploy-pages
-  # deploy:
-  #   needs: build
+  deploy:
+    needs: build
 
-  #   permissions:
-  #     pages: write     # to deploy to Pages
-  #     id-token: write  # to verify the deployment originates from an appropriate source
+    permissions:
+      pages: write     # to deploy to Pages
+      id-token: write  # to verify the deployment originates from an appropriate source
 
-  #   environment:
-  #     name: github-pages
-  #     url: ${{ steps.deployment.outputs.page_url }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
-  #   runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Deploy to Github Pages
-  #       id: deployment
-  #       uses: actions/deploy-pages@v4 
+    steps:
+      - name: Deploy to Github Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 
