@@ -1,1 +1,51 @@
+name: Deployment
 
+on:
+  push:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+      
+      - name: Build
+        run: pnpm run build
+
+      - uses: actions/upload-pages-artifact
+        with:
+          path: 'dist/' 
+
+  # Taken from https://github.com/actions/deploy-pages
+  deploy:
+    needs: build
+
+    permissions:
+      pages: write     # to deploy to Pages
+      id-token: write  # to verify the deployment originates from an appropriate source
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Github Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 
