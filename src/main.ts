@@ -3,7 +3,7 @@ import { setupCounter } from './counter.ts'
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
-    <h1>Rhiannon is cute</h1>
+    <h1>dravitzki.com</h1>
   </div>
 `
 
