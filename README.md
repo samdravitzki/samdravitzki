@@ -16,7 +16,7 @@ The implementation of snake doesn't have to be anything special
 
 
 ## Wave function collapse
-I have always wanted to build an implementation of wave function collapse
+I have always wanted to build an implementation of wave function collapse and I have tried to do it a few different times before but could never figure it all out
 
 At the moment I am thinking I want this project to include...
 1. A simple tile editor
@@ -26,10 +26,19 @@ At the moment I am thinking I want this project to include...
 3. 2D implementation of WFC algorithm
 4. Simple WFC visualisation (does not have to be as detailed as Oksta)
 
-References
+### References
 * Oksta - https://x.com/OskSta
 * Oksta WFC visualisation - https://x.com/OskSta/status/865200072685912064?lang=en
 * Boris the brave - https://www.boristhebrave.com/
+
+## Maintence and Other stuff
+All the things that need to be done to support building and maintaing these projects
+
+### TODO
+- [x] Add unit test runner
+- [x] Automate unit tests in the CI
+- [x] Add linter
+- [x] Automate linting in the CI
 
 # Technical debt
 - [x] base option required in vite config to get it to work with github pages
