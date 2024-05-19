@@ -1,4 +1,35 @@
-# DravitzkiCom playground and experiment static app
+# dravitzki.com
+The idea of this app is to have a single place I can experiment and publish various small projects
+
+# Projects
+
+The status of the project is indicated by the following a trtaffic light system where...
+* ⚪ = not started
+* 🔴 = abandoned
+* 🟡 = in progress
+* 🟢 = complete
+
+## Snake
+I want to understand what it takes to publish a working interactive experiement, so I am going to begin really simple with an implementation of snake
+
+The implementation of snake doesn't have to be anything special 
+
+
+## Wave function collapse
+I have always wanted to build an implementation of wave function collapse
+
+At the moment I am thinking I want this project to include...
+1. A simple tile editor
+    * Where you can define the tiles and it encodes how the created tile relates to other tiles 
+    * I am thinking either pixel based or a simple grid-based vector line style
+2. A tile placement system
+3. 2D implementation of WFC algorithm
+4. Simple WFC visualisation (does not have to be as detailed as Oksta)
+
+References
+* Oksta - https://x.com/OskSta
+* Oksta WFC visualisation - https://x.com/OskSta/status/865200072685912064?lang=en
+* Boris the brave - https://www.boristhebrave.com/
 
 # Technical debt
 - [x] base option required in vite config to get it to work with github pages
