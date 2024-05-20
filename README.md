@@ -9,13 +9,13 @@ The status of the project is indicated by the following a trtaffic light system 
 * 🟡 = in progress
 * 🟢 = complete
 
-## Snake
+## Simple snake 🟡
 I want to understand what it takes to publish a working interactive experiement, so I am going to begin really simple with an implementation of snake
 
 The implementation of snake doesn't have to be anything special 
 
 
-## Wave function collapse
+## Wave function collapse ⚪
 I have always wanted to build an implementation of wave function collapse and I have tried to do it a few different times before but could never figure it all out
 
 At the moment I am thinking I want this project to include...
