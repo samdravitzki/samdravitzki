@@ -52,7 +52,7 @@ new p5(sketch => {
   const playBoundsX = 500;
   const playBoundsY = 500;
   
-  let snake = createSnake(1, {x: 100, y: 100 })
+  let snake = createSnake(20, randomPosition(playBoundsX, playBoundsY));
   let slitheringDirection: Direction = 'south';
 
   let snackPosition: Position = randomPosition(playBoundsX, playBoundsY);
@@ -82,6 +82,7 @@ new p5(sketch => {
 
     const [head] = snake;
 
+    // Calculate the next position of the snake head
     let nextHeadPosition: Position = { x: head.position.x, y: head.position.y };
 
     switch (slitheringDirection) {
@@ -99,10 +100,20 @@ new p5(sketch => {
         break;
     }
 
+    // If the snake is going to collide with itself
+    if (snake.filter((chunk) => chunk.position.x === nextHeadPosition.x && chunk.position.y === nextHeadPosition.y).length > 0) {
+      // Reset the game
+      snake = createSnake(1, randomPosition(playBoundsX, playBoundsY));
+      return;
+    }
+
+
     const newHead = new SnakeChunk(nextHeadPosition);
 
+    // The approach to snake movement was based on https://github.com/taniarascia/snek/blob/master/src/Game.js
     snake.unshift(newHead);
 
+    // If the snack can be eaten
     if (newHead.position.x === snackPosition.x && newHead.position.y === snackPosition.y) {
       snackPosition = randomPosition(playBoundsX, playBoundsY);
     } else {
@@ -115,22 +126,22 @@ new p5(sketch => {
       case 'w':
         // Only allow a change in direction if its not the oppisite of the current direction
         if (slitheringDirection !== 'south') {
-        slitheringDirection = 'north';
+          slitheringDirection = 'north';
         }
         break;
       case 'd':
         if (slitheringDirection !== 'west') {
-        slitheringDirection = 'east';
+          slitheringDirection = 'east';
         }
         break;
       case 's':
         if (slitheringDirection !== 'north') {
-        slitheringDirection = 'south';
+          slitheringDirection = 'south';
         }
         break;
       case 'a':
         if (slitheringDirection !== 'east') {
-        slitheringDirection = 'west';
+          slitheringDirection = 'west';
         }
         break;
     }
