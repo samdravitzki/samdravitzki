@@ -1,5 +1,8 @@
 import p5 from 'p5';
 import './style.css'
+import randomInt from './lib/randomInt/randomInt';
+import range from './lib/range/range';
+import mod from './lib/mod/mod';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
@@ -8,16 +11,6 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   </div>
 `
 
-/**
- * The % operator in Javascript is called the remainder operator and you can use this to create
- * a modulo operator. I was confused by this as I orignally thought that % was a modulo operation
- * as I was no aware there was a difference
- * 
- * More infomation can be found at https://stackoverflow.com/questions/4467539/javascript-modulo-gives-a-negative-result-for-negative-numbers
- */
-function mod(n: number, m: number) {
-  return ((n % m) + m) % m;
-}
 
 type Direction = 'north' | 'east' | 'south' | 'west';
 type Position = { x: number, y: number };
@@ -28,14 +21,6 @@ class SnakeChunk {
   constructor(position: Position) {
     this.position = position;
   }
-}
-
-function range(length: number) {
-  return [...Array(length).keys()];
-}
-
-function randomInt(max: number, interval: number) {
-  return Math.ceil(Math.floor(Math.random() * max) / interval) * interval;
 }
 
 function createSnake(length: number, start: Position) {
