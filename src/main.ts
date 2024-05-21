@@ -113,16 +113,25 @@ new p5(sketch => {
   p.keyPressed = function keyPressed() {
     switch (p.key) {
       case 'w':
+        // Only allow a change in direction if its not the oppisite of the current direction
+        if (slitheringDirection !== 'south') {
         slitheringDirection = 'north';
+        }
         break;
       case 'd':
+        if (slitheringDirection !== 'west') {
         slitheringDirection = 'east';
+        }
         break;
       case 's':
+        if (slitheringDirection !== 'north') {
         slitheringDirection = 'south';
+        }
         break;
       case 'a':
+        if (slitheringDirection !== 'east') {
         slitheringDirection = 'west';
+        }
         break;
     }
   }
