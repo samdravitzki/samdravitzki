@@ -28,9 +28,22 @@ class SnakeChunk {
   constructor(position: Position) {
     this.position = position;
   }
+}
 
-  
-  
+function range(length: number) {
+  return [...Array(length).keys()];
+}
+
+function randomInt(max: number, interval: number) {
+  return Math.ceil(Math.floor(Math.random() * max) / interval) * interval;
+}
+
+function createSnake(length: number, start: Position) {
+  return range(length).map((i) => new SnakeChunk({ x: start.x + i * 10, y: start.y }))
+}
+
+function randomPosition(boundsX: number, boundsY: number) {
+  return { x: randomInt(boundsX, 10), y: randomInt(boundsY, 10)};
 }
 
 new p5(sketch => {
@@ -38,10 +51,11 @@ new p5(sketch => {
 
   const playBoundsX = 500;
   const playBoundsY = 500;
-
-  let position: Position = { x: 100, y: 100 };
+  
+  let snake = createSnake(1, {x: 100, y: 100 })
   let slitheringDirection: Direction = 'south';
-  let snakeLength = 22;
+
+  let snackPosition: Position = randomPosition(playBoundsX, playBoundsY);
 
 
   p.setup = function setup() {
@@ -53,25 +67,46 @@ new p5(sketch => {
   p.draw = function draw() {
     p.background(0);
     p.fill(205);
-    p.rect(position.x, position.y, 10, 10);
+
+    for (const chunk of snake) {
+      p.rect(chunk.position.x, chunk.position.y, 10, 10);
+    }
+
+    p.fill(100, 200, 100);
+    p.rect(snackPosition.x, snackPosition.y, 10, 10);
+
   };
 
   function onSlitherInterval() {
     const stepSize = 10;
 
+    const [head] = snake;
+
+    let nextHeadPosition: Position = { x: head.position.x, y: head.position.y };
+
     switch (slitheringDirection) {
       case 'north':
-        position.y = mod((position.y - stepSize), playBoundsY);
+        nextHeadPosition.y = mod((nextHeadPosition.y - stepSize), playBoundsY);
         break;
       case 'east':
-        position.x = mod((position.x + stepSize), playBoundsX);
+        nextHeadPosition.x = mod((nextHeadPosition.x + stepSize), playBoundsX);
         break;
       case 'south':
-        position.y = mod((position.y + stepSize), playBoundsY);
+        nextHeadPosition.y = mod((nextHeadPosition.y + stepSize), playBoundsY);
         break;
       case 'west':
-        position.x = mod((position.x - stepSize), playBoundsX);
+        nextHeadPosition.x = mod((nextHeadPosition.x - stepSize), playBoundsX);
         break;
+    }
+
+    const newHead = new SnakeChunk(nextHeadPosition);
+
+    snake.unshift(newHead);
+
+    if (newHead.position.x === snackPosition.x && newHead.position.y === snackPosition.y) {
+      snackPosition = randomPosition(playBoundsX, playBoundsY);
+    } else {
+      snake.pop();
     }
   }
 

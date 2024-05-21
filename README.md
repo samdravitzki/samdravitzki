@@ -14,6 +14,16 @@ I want to understand what it takes to publish a working interactive experiement,
 
 The implementation of snake doesn't have to be anything special 
 
+### TOOD
+- [] Snack self collisions
+- [] Track score
+- [] Support mobile
+- [] Refactor code
+- [] Unit test
+
+### Ideas
+* Could be cool if the snake can break out of the canvas into the html page 
+
 
 ## Wave function collapse ⚪
 I have always wanted to build an implementation of wave function collapse and I have tried to do it a few different times before but could never figure it all out
