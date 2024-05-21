@@ -40,14 +40,15 @@ At the moment I am thinking I want this project to include...
 * Oksta WFC visualisation - https://x.com/OskSta/status/865200072685912064?lang=en
 * Boris the brave - https://www.boristhebrave.com/
 
-## Maintence and Other stuff
+## Maintenance and Other stuff
 All the things that need to be done to support building and maintaing these projects
 
 ### TODO
-- [x] Add unit test runner
-- [x] Automate unit tests in the CI
-- [x] Add linter
-- [x] Automate linting in the CI
+- [ ] Add unit test runner
+- [ ] Automate unit tests in the CI
+- [ ] Add linter
+- [ ] Automate linting in the CI
+- [ ] Look into introducing a dependency updating bot into the repository
 
 # Technical debt
 - [x] base option required in vite config to get it to work with github pages
