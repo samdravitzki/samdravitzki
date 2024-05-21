@@ -96,10 +96,11 @@ new p5(sketch => {
   const playBoundsX = 500;
   const playBoundsY = 500;
   
-  let snake = createSnake(20, playBounds.randomPosition());
+  const snakeChunkSize = 10;
+  let snake = createSnake(20, playBounds.randomPosition(snakeChunkSize));
   let slitheringDirection: Direction = 'south';
 
-  let snackPosition = playBounds.randomPosition();
+  let snackPosition = playBounds.randomPosition(snakeChunkSize);
 
 
   p.setup = function setup() {
@@ -146,7 +147,7 @@ new p5(sketch => {
     // If the snake is going to collide with itself
     if (snake.filter((chunk) => chunk.position.x === nextHeadPosition.x && chunk.position.y === nextHeadPosition.y).length > 0) {
       // Reset the game
-      snake = createSnake(1, playBounds.randomPosition());
+      snake = createSnake(1, playBounds.randomPosition(snakeChunkSize));
       return;
     }
 
@@ -158,7 +159,7 @@ new p5(sketch => {
 
     // If the snack can be eaten
     if (newHead.position.equals(snackPosition)) {
-      snackPosition = playBounds.randomPosition();
+      snackPosition = playBounds.randomPosition(snakeChunkSize);
     } else {
       snake.pop();
     }
