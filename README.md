@@ -14,12 +14,11 @@ I want to understand what it takes to publish a working interactive experiement,
 
 The implementation of snake doesn't have to be anything special 
 
-### TOOD
+### TODO
 - [] Snack self collisions
 - [] Track score
+- [] Increase the speed when snack is eaten
 - [] Support mobile
-- [] Refactor code
-- [] Unit test
 
 ### Ideas
 * Could be cool if the snake can break out of the canvas into the html page 
@@ -52,3 +51,5 @@ All the things that need to be done to support building and maintaing these proj
 
 # Technical debt
 - [x] base option required in vite config to get it to work with github pages
+- [] Redesign the snake code and make it more readable, testable and maintainable
+- [] Unit test the snake code
