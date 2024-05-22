@@ -2,7 +2,7 @@ import p5 from 'p5';
 import './style.css'
 import randomInt from './lib/randomInt/randomInt';
 import range from './lib/range/range';
-import mod from './lib/mod/mod';
+import boundedMod from './lib/boundedMod/boundedMod';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
@@ -13,7 +13,6 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 
 
 type Direction = 'north' | 'east' | 'south' | 'west';
-// type Position = { x: number, y: number };
 
 /**
  * Describes a point in two-dimentional space
@@ -131,16 +130,16 @@ new p5(sketch => {
 
     switch (slitheringDirection) {
       case 'north':
-        nextHeadPosition.y = mod((nextHeadPosition.y - stepSize), playBoundsY);
+        nextHeadPosition.y = boundedMod((nextHeadPosition.y - stepSize), playBoundsY);
         break;
       case 'east':
-        nextHeadPosition.x = mod((nextHeadPosition.x + stepSize), playBoundsX);
+        nextHeadPosition.x = boundedMod((nextHeadPosition.x + stepSize), playBoundsX);
         break;
       case 'south':
-        nextHeadPosition.y = mod((nextHeadPosition.y + stepSize), playBoundsY);
+        nextHeadPosition.y = boundedMod((nextHeadPosition.y + stepSize), playBoundsY);
         break;
       case 'west':
-        nextHeadPosition.x = mod((nextHeadPosition.x - stepSize), playBoundsX);
+        nextHeadPosition.x = boundedMod((nextHeadPosition.x - stepSize), playBoundsX);
         break;
     }
 
