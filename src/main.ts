@@ -73,6 +73,18 @@ class Bounds {
 
     return Position.create(randomXPosition, randomYPosition);
   }
+
+  /**
+   * Transform given position to bounded mod within these bounds
+   * @param position 
+   * @returns position within bounds
+   */
+  boundedMod(position: Position): Position {
+    return Position.create(
+      boundedMod(position.x, this.max.x, this.min.x),
+      boundedMod(position.y, this.max.y, this.min.y)
+    )
+  }
 }
 
 class SnakeChunk {
@@ -90,10 +102,7 @@ function createSnake(length: number, start: Position) {
 new p5(sketch => {
   const p = sketch as unknown as p5;
 
-  const playBounds = Bounds.create(Position.create(0, 0), Position.create(500, 500))
-
-  const playBoundsX = 500;
-  const playBoundsY = 500;
+  const playBounds = Bounds.create(Position.create(0, 0), Position.create(500, 500));
   
   const snakeChunkSize = 10;
   let snake = createSnake(20, playBounds.randomPosition(snakeChunkSize));
@@ -130,18 +139,20 @@ new p5(sketch => {
 
     switch (slitheringDirection) {
       case 'north':
-        nextHeadPosition.y = boundedMod((nextHeadPosition.y - stepSize), playBoundsY);
+        nextHeadPosition.y = nextHeadPosition.y - stepSize;
         break;
       case 'east':
-        nextHeadPosition.x = boundedMod((nextHeadPosition.x + stepSize), playBoundsX);
+        nextHeadPosition.x = nextHeadPosition.x + stepSize;
         break;
       case 'south':
-        nextHeadPosition.y = boundedMod((nextHeadPosition.y + stepSize), playBoundsY);
+        nextHeadPosition.y = nextHeadPosition.y + stepSize;
         break;
       case 'west':
-        nextHeadPosition.x = boundedMod((nextHeadPosition.x - stepSize), playBoundsX);
+        nextHeadPosition.x = nextHeadPosition.x - stepSize;
         break;
     }
+
+    nextHeadPosition = playBounds.boundedMod(nextHeadPosition);
 
     // If the snake is going to collide with itself
     if (snake.filter((chunk) => chunk.position.x === nextHeadPosition.x && chunk.position.y === nextHeadPosition.y).length > 0) {
