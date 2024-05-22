@@ -15,13 +15,17 @@ I want to understand what it takes to publish a working interactive experiement,
 The implementation of snake doesn't have to be anything special 
 
 ### TODO
-- [ ] Snack self collisions
+- [x] Snack self collisions
 - [ ] Track score
 - [ ] Increase the speed when snack is eaten
 - [ ] Support mobile
 
+## Bugs
+- [ ] appears to be a little lag when the snake is about to eat the snack
+
 ### Ideas
 * Could be cool if the snake can break out of the canvas into the html page 
+* For the aestheic it would be cool to see if I could make it work in isometric view
 
 
 ## Wave function collapse ⚪
@@ -49,6 +53,7 @@ All the things that need to be done to support building and maintaing these proj
 - [ ] Add linter
 - [ ] Automate linting in the CI
 - [ ] Look into introducing a dependency updating bot into the repository
+- [ ] Integrate github codepspaces to make development on this more portable
 
 # Technical debt
 - [x] base option required in vite config to get it to work with github pages
