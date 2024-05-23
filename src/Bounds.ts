@@ -9,8 +9,8 @@ import randomInt from './lib/randomInt/randomInt';
  * most point of the square
  */
 export default class Bounds {
-    min: Position;
-    max: Position;
+    readonly min: Position;
+    readonly max: Position;
   
     constructor(min: Position, max: Position) {
       this.min = min;
