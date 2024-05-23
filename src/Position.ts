@@ -2,8 +2,8 @@
  * Describes a point in two-dimentional space
  */
 export default class Position {
-    x: number;
-    y: number;
+    readonly x: number;
+    readonly y: number;
 
     constructor(x: number, y: number) {
         this.x = x;
@@ -16,5 +16,17 @@ export default class Position {
 
     equals(other: Position): boolean {
         return this.x === other.x && this.y === other.y;
+    }
+
+    plus(other: Position): Position {
+        return new Position(this.x + other.x, this.y + other.y);
+    }
+
+    minus(other: Position): Position {
+        return new Position(this.x - other.x, this.y - other.y);
+    }
+
+    times(scalar: number): Position {
+        return new Position(this.x * scalar, this.y * scalar);
     }
 }
