@@ -24,6 +24,7 @@ class SnakeChunk {
 
 class Snake {
   private _chunks: SnakeChunk[]
+  readonly chunkSize: number;
 
   get chunks(): SnakeChunk[] {
     return this._chunks;
@@ -36,15 +37,16 @@ class Snake {
     return this._chunks[0].position;
   }
 
-  constructor(chunks: SnakeChunk[]) {
+  constructor(chunks: SnakeChunk[], chunkSize: number) {
     this._chunks = chunks;
+    this.chunkSize = chunkSize;
   }
 
   static create(length: number, start: Position, chunkSize: number) {
     const chunks = range(length)
       .map((i) => new SnakeChunk(Position.create(start.x + i * chunkSize, start.y )))
 
-    return new Snake(chunks);
+    return new Snake(chunks, chunkSize);
   }
 
   private getPositionChangeFromDirection(direction: Direction) {
@@ -65,17 +67,23 @@ class Snake {
     return otherChunks.filter((chunk) => chunk.position.equals(head.position)).length > 0;
   }
 
-  move(direction: Direction, bounds: Bounds, chunkSize: number) {
-    this.grow(direction, bounds, chunkSize);
+  move(direction: Direction, bounds: Bounds) {
+    this.grow(direction, bounds);
     this._chunks.pop();
   }
 
-  grow(direction: Direction, bounds: Bounds, chunkSize: number) {
+  /**
+   * Add a new chunk to the snake in any direction
+   * @param direction 
+   * @param bounds 
+   * @param chunkSize 
+   */
+  grow(direction: Direction, bounds: Bounds) {
     const changeInPosition = this.getPositionChangeFromDirection(direction);
 
     const [head] = this.chunks;
 
-    const nextHeadPosition = head.position.plus(changeInPosition.times(chunkSize));
+    const nextHeadPosition = head.position.plus(changeInPosition.times(this.chunkSize));
     const nextHeadPositionInBounds = bounds.boundedMod(nextHeadPosition);
 
     const newHead = new SnakeChunk(nextHeadPositionInBounds);
@@ -118,11 +126,12 @@ new p5(sketch => {
   function onSlitherInterval() {
 
     if (snackPosition.equals(snake.position)) {
-      snake.grow(slitheringDirection, playBounds, snakeChunkSize);
-      snackPosition = playBounds.randomPosition(snakeChunkSize).minus(Position.create(10, 10));
+      snake.grow(slitheringDirection, playBounds);
+      snackPosition = playBounds.randomPosition(snakeChunkSize)
+        .minus(Position.create(10, 10)); // To not generate 500, 500 snack position which is out of bounds
       console.log(snackPosition);
     } else {
-      snake.move(slitheringDirection, playBounds, snakeChunkSize);
+      snake.move(slitheringDirection, playBounds);
     }
 
     if (snake.isSelfColliding()) {
