@@ -9,6 +9,9 @@ The status of the project is indicated by the following a trtaffic light system 
 * 🟡 = in progress
 * 🟢 = complete
 
+They say the first 10 games you make are not going to be good, this is is a place for me to learn and experiement and learn the kind
+of skills to make unique fun interactive things
+
 ## Simple snake 🟡
 I want to understand what it takes to publish a working interactive experiement, so I am going to begin really simple with an implementation of snake
 
@@ -27,6 +30,7 @@ The implementation of snake doesn't have to be anything special
 ### Ideas
 * Could be cool if the snake can break out of the canvas into the html page 
 * For the aestheic it would be cool to see if I could make it work in isometric view
+* I would like to add some kind of original idea to snake. Maybe something like adding momentum or a third dimension could be cool?
 
 
 ## Wave function collapse ⚪
