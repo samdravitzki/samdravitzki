@@ -96,8 +96,8 @@ new p5(sketch => {
   const p = sketch as unknown as p5;
 
   const playBounds = Bounds.create(Position.create(0, 0), Position.create(500, 500));
-  
   const snakeChunkSize = 10;
+  
   let snake = Snake.create(25, Position.create(120, 120), snakeChunkSize);
   let slitheringDirection: Direction = 'south';
 
@@ -129,7 +129,6 @@ new p5(sketch => {
       snake.grow(slitheringDirection, playBounds);
       snackPosition = playBounds.randomPosition(snakeChunkSize)
         .minus(Position.create(10, 10)); // To not generate 500, 500 snack position which is out of bounds
-      console.log(snackPosition);
     } else {
       snake.move(slitheringDirection, playBounds);
     }
