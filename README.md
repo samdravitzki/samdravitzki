@@ -22,6 +22,7 @@ The implementation of snake doesn't have to be anything special
 
 ## Bugs
 - [ ] appears to be a little lag when the snake is about to eat the snack
+- [ ] when snack was eaten another snack was not rendered on the screen
 
 ### Ideas
 * Could be cool if the snake can break out of the canvas into the html page 
