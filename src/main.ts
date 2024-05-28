@@ -92,17 +92,21 @@ class Snake {
   }
 }
 
+function generateSnackPosition(bounds: Bounds) {
+  return bounds.randomPosition(10)
+  .minus(Position.create(10, 10))
+}
+
 new p5(sketch => {
   const p = sketch as unknown as p5;
 
   const playBounds = Bounds.create(Position.create(0, 0), Position.create(500, 500));
   const snakeChunkSize = 10;
-  
+
   let snake = Snake.create(25, Position.create(120, 120), snakeChunkSize);
   let slitheringDirection: Direction = 'south';
 
-  let snackPosition = playBounds.randomPosition(snakeChunkSize)
-    .minus(Position.create(10, 10)); // To not generate 500, 500 snack position which is out of bounds
+  let snackPosition = generateSnackPosition(playBounds); // To not generate 500, 500 snack position which is out of bounds
 
 
   p.setup = function setup() {
@@ -123,20 +127,24 @@ new p5(sketch => {
     p.rect(snackPosition.x, snackPosition.y, 10, 10);
   };
 
+  function reset() {
+    snackPosition = generateSnackPosition(playBounds);
+    snake = Snake.create(20, playBounds.randomPosition(snakeChunkSize), snakeChunkSize);
+    slitheringDirection = 'south'
+  }
+
   function onSlitherInterval() {
 
     if (snackPosition.equals(snake.position)) {
       snake.grow(slitheringDirection, playBounds);
-      snackPosition = playBounds.randomPosition(snakeChunkSize)
-        .minus(Position.create(10, 10)); // To not generate 500, 500 snack position which is out of bounds
+      snackPosition = generateSnackPosition(playBounds); // To not generate 500, 500 snack position which is out of bounds
     } else {
       snake.move(slitheringDirection, playBounds);
     }
 
     if (snake.isSelfColliding()) {
       // reset
-      snake = Snake.create(20, playBounds.randomPosition(snakeChunkSize), snakeChunkSize);
-      slitheringDirection = 'south'
+      reset();
     }
   }
 
