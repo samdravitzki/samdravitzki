@@ -26,6 +26,7 @@ The implementation of snake doesn't have to be anything special
 ## Bugs
 - [ ] appears to be a little lag when the snake is about to eat the snack
 - [ ] when snack was eaten another snack was not rendered on the screen
+- [ ] Snack sometimes generates in the same position as the snake
 
 ### Ideas
 * Could be cool if the snake can break out of the canvas into the html page 
@@ -44,7 +45,12 @@ At the moment I am thinking I want this project to include...
 3. 2D implementation of WFC algorithm
 4. Simple WFC visualisation (does not have to be as detailed as Oksta)
 
+### TODO
+- [ ] Implement bitmap variation of wave function collapse
+- [ ] Implement tilemap variation of wave function collapse
+
 ### References
+* Wave function collapse algorithmn - https://github.com/mxgmn/WaveFunctionCollapse?tab=readme-ov-file#algorithm
 * Oksta - https://x.com/OskSta
 * Oksta WFC visualisation - https://x.com/OskSta/status/865200072685912064?lang=en
 * Boris the brave - https://www.boristhebrave.com/
