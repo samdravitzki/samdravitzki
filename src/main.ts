@@ -3,6 +3,7 @@ import './style.css'
 import Vector from './Vector/Vector';
 import Bounds from './Bounds';
 import Snake from './Snake';
+import Direction from './Direction';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
