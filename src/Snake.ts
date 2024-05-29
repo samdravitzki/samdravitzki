@@ -56,6 +56,11 @@ export default class Snake {
         return otherChunks.filter((chunk) => chunk.position.equals(head.position)).length > 0;
     }
 
+    /**
+     * Move the snake in any direction
+     * @param direction 
+     * @param bounds 
+     */
     move(direction: Direction, bounds: Bounds) {
         this.grow(direction, bounds);
         this._chunks.pop();
@@ -64,8 +69,7 @@ export default class Snake {
     /**
      * Add a new chunk to the snake in any direction
      * @param direction 
-     * @param bounds 
-     * @param chunkSize 
+     * @param bounds
      */
     grow(direction: Direction, bounds: Bounds) {
         const changeInPosition = this.getPositionChangeFromDirection(direction);
