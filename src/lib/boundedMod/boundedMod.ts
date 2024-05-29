@@ -5,7 +5,7 @@
  * @param max the maximum number x should fall within (exclusive)
  * @param min the minimum number x should fall within (inclusive)
  * 
- * (Taken from chat gpt which said bounded_mod(x, a, b) = ((x − a) % (b − a) + (b − a)) % (b−a) + a
+ * (Taken from chat gpt which said bounded_mod(x, a, b) = ((x − a) % (b − a) + (b − a)) % (b − a) + a
  */
 export default function boundedMod(x: number, max: number, min: number = 0): number {
     return ((x - min) % (max - min) + (max - min)) % (max - min) + min;
