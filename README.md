@@ -60,8 +60,8 @@ At the moment I am thinking I want this project to include...
 All the things that need to be done to support building and maintaing these projects
 
 ### TODO
-- [ ] Add unit test runner
-- [ ] Automate unit tests in the CI
+- [x] Add unit test runner
+- [x] Automate unit tests in the CI
 - [ ] Add linter
 - [ ] Automate linting in the CI
 - [ ] Look into introducing a dependency updating bot into the repository
