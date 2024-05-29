@@ -1,7 +1,7 @@
 import p5 from 'p5';
 import './style.css'
 import range from './lib/range/range';
-import Position from './Position';
+import Vector from './Vector';
 import Bounds from './Bounds';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
@@ -15,9 +15,9 @@ type Direction = 'north' | 'east' | 'south' | 'west';
 
 
 class SnakeChunk {
-  position: Position;
+  position: Vector;
 
-  constructor(position: Position) {
+  constructor(position: Vector) {
     this.position = position;
   }
 }
@@ -33,7 +33,7 @@ class Snake {
   /**
    * The position of the snake at the head
    */
-  get position(): Position {
+  get position(): Vector {
     return this._chunks[0].position;
   }
 
@@ -42,9 +42,9 @@ class Snake {
     this.chunkSize = chunkSize;
   }
 
-  static create(length: number, start: Position, chunkSize: number) {
+  static create(length: number, start: Vector, chunkSize: number) {
     const chunks = range(length)
-      .map((i) => new SnakeChunk(Position.create(start.x + i * chunkSize, start.y )))
+      .map((i) => new SnakeChunk(Vector.create(start.x + i * chunkSize, start.y )))
 
     return new Snake(chunks, chunkSize);
   }
@@ -52,13 +52,13 @@ class Snake {
   private getPositionChangeFromDirection(direction: Direction) {
     switch (direction) {
       case 'north':
-        return new Position(0, -1);
+        return new Vector(0, -1);
       case 'east':
-        return new Position(1, 0);
+        return new Vector(1, 0);
       case 'south':
-        return new Position(0, 1);
+        return new Vector(0, 1);
       case 'west':
-        return new Position(-1, 0);
+        return new Vector(-1, 0);
     }
   }
 
@@ -94,16 +94,16 @@ class Snake {
 
 function generateSnackPosition(bounds: Bounds) {
   return bounds.randomPosition(10)
-  .minus(Position.create(10, 10))
+  .minus(Vector.create(10, 10))
 }
 
 new p5(sketch => {
   const p = sketch as unknown as p5;
 
-  const playBounds = Bounds.create(Position.create(0, 0), Position.create(500, 500));
+  const playBounds = Bounds.create(Vector.create(0, 0), Vector.create(500, 500));
   const snakeChunkSize = 10;
 
-  let snake = Snake.create(25, Position.create(120, 120), snakeChunkSize);
+  let snake = Snake.create(25, Vector.create(120, 120), snakeChunkSize);
   let slitheringDirection: Direction = 'south';
 
   let snackPosition = generateSnackPosition(playBounds); // To not generate 500, 500 snack position which is out of bounds
