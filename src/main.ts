@@ -1,7 +1,7 @@
 import p5 from 'p5';
 import './style.css'
 import range from './lib/range/range';
-import Vector from './Vector';
+import Vector from './Vector/Vector';
 import Bounds from './Bounds';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `

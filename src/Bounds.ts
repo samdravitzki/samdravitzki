@@ -1,4 +1,4 @@
-import Vector from './Vector';
+import Vector from './Vector/Vector';
 import boundedMod from './lib/boundedMod/boundedMod';
 import randomInt from './lib/randomInt/randomInt';
 
