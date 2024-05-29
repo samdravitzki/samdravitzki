@@ -1,5 +1,5 @@
 /**
- * Generate a random integer between a minimum and maximum
+ * Generate a random integer between a minimum and maximum inclusive
  * 
  * Based on https://stackoverflow.com/questions/1527803/generating-random-whole-numbers-in-javascript-in-a-specific-range
  * 
