@@ -21,7 +21,7 @@ The implementation of snake doesn't have to be anything special
 - [x] Snack self collisions
 - [ ] Track score
 - [ ] Increase the speed when snack is eaten
-- [ ] Support mobile
+- [ ] Hide the snake game somewhere in the page
 
 ## Bugs
 - [ ] appears to be a little lag when the snake is about to eat the snack
@@ -32,6 +32,7 @@ The implementation of snake doesn't have to be anything special
 * Could be cool if the snake can break out of the canvas into the html page 
 * For the aestheic it would be cool to see if I could make it work in isometric view
 * I would like to add some kind of original idea to snake. Maybe something like adding momentum or a third dimension could be cool?
+* Support mobile
 
 
 ## Wave function collapse ⚪
