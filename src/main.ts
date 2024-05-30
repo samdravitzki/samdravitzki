@@ -29,9 +29,7 @@ new p5(sketch => {
 
   let snackPosition = generateSnackPosition(playBounds); // To not generate 500, 500 snack position which is out of bounds
 
-  function calculateScore() {
-    return snake.length - snakeStartingSize
-  }
+  let score = 0;
 
   p.setup = function setup() {
     p.createCanvas(...playBounds.size);
@@ -40,7 +38,6 @@ new p5(sketch => {
   };
 
   p.draw = function draw() {
-    const score = calculateScore();
 
     p.background(0);
     p.fill(205);
@@ -57,10 +54,12 @@ new p5(sketch => {
     p.textSize(32);
     p.text(score, 15, 35);
   };
+
   function reset() {
     snackPosition = generateSnackPosition(playBounds);
     snake = Snake.create(20, playBounds.randomPosition(snakeChunkSize), snakeChunkSize);
-    slitheringDirection = 'south'
+    slitheringDirection = 'south';
+    score = 0;
   }
 
   function onSlitherInterval() {
@@ -68,6 +67,7 @@ new p5(sketch => {
     if (snackPosition.equals(snake.position)) {
       snake.grow(slitheringDirection, playBounds);
       snackPosition = generateSnackPosition(playBounds); // To not generate 500, 500 snack position which is out of bounds
+      score += 1;
     } else {
       snake.move(slitheringDirection, playBounds);
     }
