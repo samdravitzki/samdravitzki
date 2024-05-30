@@ -1,5 +1,8 @@
 # dravitzki.com
-The idea of this app is to have a single place I can experiment and publish various small projects
+The idea of this app is to have a single place I can experiment and publish various small projects focused around learning to build fun and original interactive experiences (games)
+
+They say the first 10 games you make are not going to be good, this is is a place for me to learn and experiement and learn the kind
+of skills to make unique fun interactive things
 
 # Projects
 
@@ -9,19 +12,20 @@ The status of the project is indicated by the following a trtaffic light system 
 * 🟡 = in progress
 * 🟢 = complete
 
-They say the first 10 games you make are not going to be good, this is is a place for me to learn and experiement and learn the kind
-of skills to make unique fun interactive things
 
 ## Simple snake 🟡
-I want to understand what it takes to publish a working interactive experiement, so I am going to begin really simple with an implementation of snake
+### Brief
+I want to understand what it takes to publish a working interactive experiement, so I am going to begin really simple with an implementation of snake and then try do something orginal with it
 
-The implementation of snake doesn't have to be anything special 
+### Scope
+The implementation of snake doesn't have to be anything special but there has to be some kind of original twist
 
 ### TODO
 - [x] Snack self collisions
-- [ ] Track score
+- [x] Track score
 - [ ] Increase the speed when snack is eaten
 - [ ] Hide the snake game somewhere in the page
+- [ ] Come up with some kind of orginal idea
 
 ## Bugs
 - [ ] appears to be a little lag when the snake is about to eat the snack
