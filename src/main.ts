@@ -57,7 +57,7 @@ new p5(sketch => {
 
   function reset() {
     snackPosition = generateSnackPosition(playBounds);
-    snake = Snake.create(20, playBounds.randomPosition(snakeChunkSize), snakeChunkSize);
+    snake = Snake.create(snakeStartingSize, playBounds.randomPosition(snakeChunkSize), snakeChunkSize);
     slitheringDirection = 'south';
     score = 0;
   }
