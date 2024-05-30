@@ -21,11 +21,12 @@ I want to understand what it takes to publish a working interactive experiement,
 The implementation of snake doesn't have to be anything special but there has to be some kind of original twist
 
 ### TODO
-- [x] Snack self collisions
-- [x] Track score
-- [ ] Increase the speed when snack is eaten
-- [ ] Hide the snake game somewhere in the page
-- [ ] Come up with some kind of orginal idea
+- [ ] Implement basic snake game
+    - [x] Snack self collisions
+    - [x] Track score
+    - [ ] Increase the speed when snack is eaten
+    - [ ] Hide the snake game somewhere in the page
+- [ ] Come up with some kind of orginal idea to add a twist to the classic snake game
 
 ## Bugs
 - [ ] appears to be a little lag when the snake is about to eat the snack
