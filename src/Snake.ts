@@ -19,6 +19,10 @@ export default class Snake {
         return this._chunks;
     }
 
+    get length(): number {
+        return this._chunks.length;
+    }
+
     /**
      * The position of the snake at the head
      */
