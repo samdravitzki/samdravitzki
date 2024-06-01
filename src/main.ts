@@ -42,7 +42,7 @@ new p5(sketch => {
     p.background(0);
     p.fill(205);
 
-    p.stroke(0);
+    p.strokeWeight(0);
     for (const chunk of snake.chunks) {
       p.rect(chunk.position.x, chunk.position.y, 10, 10);
     }
