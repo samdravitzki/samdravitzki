@@ -33,16 +33,30 @@ new p5(sketch => {
 
   p.setup = function setup() {
     p.createCanvas(...playBounds.size);
+    p.colorMode(p.HSB, 360, 100, 100, 100);
+    p.noStroke();
 
+    // move snake every second
     setInterval(onSlitherInterval, 100);
   };
 
   p.draw = function draw() {
 
+    const gradient = p.drawingContext.createLinearGradient(
+      playBounds.min.x, playBounds.min.y,
+      playBounds.max.x, playBounds.max.y
+    );
+
+    gradient.addColorStop(0, p.color(310, 100, 100, 100));
+    gradient.addColorStop(1, p.color(250, 100, 100, 100));
+
+    p.drawingContext.fillStyle = gradient;
+
     p.background(0);
+    p.rect(playBounds.min.x, playBounds.min.y, playBounds.max.x, playBounds.max.y);
+
     p.fill(205);
 
-    p.strokeWeight(0);
     for (const chunk of snake.chunks) {
       p.rect(chunk.position.x, chunk.position.y, 10, 10);
     }

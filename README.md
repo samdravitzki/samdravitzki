@@ -26,7 +26,8 @@ The implementation of snake doesn't have to be anything special but there has to
     - [x] Track score
     - [ ] Increase the speed when snack is eaten
     - [ ] Hide the snake game somewhere in the page
-- [ ] Come up with some kind of orginal idea to add a twist to the classic snake game
+- [ ] Snake controlled by gravity
+    - [ ] control gradient of background with input
 
 ## Bugs
 - [ ] appears to be a little lag when the snake is about to eat the snack
