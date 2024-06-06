@@ -7,10 +7,42 @@ import Direction from './Direction';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
-    <h1>dravitzki.com</h1>
-    <div id="sketch"></div>
+    <div id="main-content">
+      <h1>dravitzki.com</h1>
+      <button id="snake-button">🐍</button>
+    </div>
+    <div id="snake-game" style="display:none;">
+      <button id="exit-snake-button">❌</button>
+      <div id="sketch"></div>
+    </div>
   </div>
 `
+
+document.getElementById('snake-button')?.addEventListener('click', () => {
+  const snakeGame = document.getElementById('snake-game')!;
+  const mainContent = document.getElementById('main-content')!;
+
+  if (snakeGame.style.display === 'block') {
+    snakeGame.style.display = 'none';
+    mainContent.style.display = 'block';
+  } else {
+    snakeGame.style.display = 'block';
+    mainContent.style.display = 'none';
+  }
+});
+
+document.getElementById('exit-snake-button')?.addEventListener('click', () => {
+  const snakeGame = document.getElementById('snake-game')!;
+  const mainContent = document.getElementById('main-content')!;
+
+  if (snakeGame.style.display === 'block') {
+    snakeGame.style.display = 'none';
+    mainContent.style.display = 'block';
+  } else {
+    snakeGame.style.display = 'block';
+    mainContent.style.display = 'none';
+  }
+});
 
 function generateSnackPosition(bounds: Bounds) {
   return bounds.randomPosition(10)
