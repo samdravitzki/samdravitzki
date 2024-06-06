@@ -42,19 +42,6 @@ export default class Snake {
         return new Snake(chunks, chunkSize);
     }
 
-    private getPositionChangeFromDirection(direction: Direction) {
-        switch (direction) {
-            case 'north':
-                return new Vector(0, -1);
-            case 'east':
-                return new Vector(1, 0);
-            case 'south':
-                return new Vector(0, 1);
-            case 'west':
-                return new Vector(-1, 0);
-    }
-    }
-
     isSelfColliding(): boolean {
         const [head, ...otherChunks] = this._chunks;
         return otherChunks.filter((chunk) => chunk.position.equals(head.position)).length > 0;
@@ -76,7 +63,7 @@ export default class Snake {
      * @param bounds
      */
     grow(direction: Direction, bounds: Bounds) {
-        const changeInPosition = this.getPositionChangeFromDirection(direction);
+        const changeInPosition = direction.toVector();
 
         const [head] = this.chunks;
 

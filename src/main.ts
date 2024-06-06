@@ -25,7 +25,7 @@ new p5(sketch => {
 
   const snakeStartingSize = 3;
   let snake = Snake.create(snakeStartingSize, Vector.create(120, 120), snakeChunkSize);
-  let slitheringDirection: Direction = 'south';
+  let slitheringDirection = new Direction('south');
 
   let snackPosition = generateSnackPosition(playBounds); // To not generate 500, 500 snack position which is out of bounds
 
@@ -72,7 +72,7 @@ new p5(sketch => {
   function reset() {
     snackPosition = generateSnackPosition(playBounds);
     snake = Snake.create(snakeStartingSize, playBounds.randomPosition(snakeChunkSize), snakeChunkSize);
-    slitheringDirection = 'south';
+    slitheringDirection = new Direction('south');
     score = 0;
   }
 
@@ -96,23 +96,23 @@ new p5(sketch => {
     switch (p.key) {
       case 'w':
         // Only allow a change in direction if its not the oppisite of the current direction
-        if (slitheringDirection !== 'south') {
-          slitheringDirection = 'north';
+        if (slitheringDirection.value !== 'south') {
+          slitheringDirection = new Direction('north');
         }
         break;
       case 'd':
-        if (slitheringDirection !== 'west') {
-          slitheringDirection = 'east';
+        if (slitheringDirection.value !== 'west') {
+          slitheringDirection = new Direction('east');
         }
         break;
       case 's':
-        if (slitheringDirection !== 'north') {
-          slitheringDirection = 'south';
+        if (slitheringDirection.value !== 'north') {
+          slitheringDirection = new Direction('south');
         }
         break;
       case 'a':
-        if (slitheringDirection !== 'east') {
-          slitheringDirection = 'west';
+        if (slitheringDirection.value !== 'east') {
+          slitheringDirection = new Direction('west');
         }
         break;
     }
