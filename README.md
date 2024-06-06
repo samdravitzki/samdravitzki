@@ -29,7 +29,7 @@ The implementation of snake doesn't have to be anything special but there has to
 - [ ] Snake controlled by gravity
     - [ ] control gradient of background with input
 
-## Bugs
+### Bugs
 - [ ] appears to be a little lag when the snake is about to eat the snack
 - [ ] when snack was eaten another snack was not rendered on the screen
 - [ ] Snack sometimes generates in the same position as the snake
@@ -39,6 +39,15 @@ The implementation of snake doesn't have to be anything special but there has to
 * For the aestheic it would be cool to see if I could make it work in isometric view
 * I would like to add some kind of original idea to snake. Maybe something like adding momentum or a third dimension could be cool?
 * Support mobile
+
+## Twenty games challenge
+Twenty games challenge is a guided sylabus designed to build skills in game development
+
+My goal is to build up the skills to be able to create fun, origninal interactive experiences, this seems like a
+great structured way to start developing these skills
+
+### Resources
+- The challenge - https://20_games_challenge.gitlab.io/challenge/
 
 
 ## Wave function collapse ⚪
