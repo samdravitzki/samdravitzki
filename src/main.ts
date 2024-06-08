@@ -10,7 +10,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   </div>
 `
 
-import('./snake-game/snake-game');
+import('./snake/snake-game');
 
 document.getElementById('snake-button')?.addEventListener('click', () => {
   const snakeGame = document.getElementById('snake-game')!;
