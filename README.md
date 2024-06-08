@@ -25,7 +25,7 @@ The implementation of snake doesn't have to be anything special but there has to
     - [x] Snack self collisions
     - [x] Track score
     - [ ] Increase the speed when snack is eaten
-    - [ ] Hide the snake game somewhere in the page
+    - [x] Hide the snake game somewhere in the page
 - [ ] Snake controlled by gravity
     - [ ] control gradient of background with input
 
@@ -45,6 +45,14 @@ Twenty games challenge is a guided sylabus designed to build skills in game deve
 
 My goal is to build up the skills to be able to create fun, origninal interactive experiences, this seems like a
 great structured way to start developing these skills
+
+### Scope
+Complete "The Challenge" defined in https://20_games_challenge.gitlab.io/challenge/
+
+### TODO
+    - [ ] Implement pong (Game #1)
+    - [ ] Implement breakout (Game #2)
+    - [ ] Implement the rest of the 10 games
 
 ### Resources
 - The challenge - https://20_games_challenge.gitlab.io/challenge/
@@ -81,6 +89,9 @@ All the things that need to be done to support building and maintaing these proj
 - [ ] Automate linting in the CI
 - [ ] Look into introducing a dependency updating bot into the repository
 - [ ] Integrate github codepspaces to make development on this more portable
+- [ ] Implement more extensible approach to adding new games to the site 
+    - that also dont require the use of dynamic module imports
+    - and have a better method for toggling the visbility of the games
 
 # Technical debt
 - [x] base option required in vite config to get it to work with github pages
