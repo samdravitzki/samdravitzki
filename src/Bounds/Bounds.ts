@@ -1,6 +1,6 @@
-import Vector from './Vector/Vector';
-import boundedMod from './lib/boundedMod/boundedMod';
-import randomInt from './lib/randomInt/randomInt';
+import Vector from '../Vector/Vector';
+import boundedMod from '../lib/boundedMod/boundedMod';
+import randomInt from '../lib/randomInt/randomInt';
 
 /**
  * Describes a square boudary in two-dimentional space

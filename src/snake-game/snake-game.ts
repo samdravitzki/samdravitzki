@@ -1,7 +1,7 @@
 import p5 from 'p5';
-import Direction from '../Direction';
+import Direction from '../Direction/Direction';
 import Snake from './Snake';
-import Bounds from '../Bounds';
+import Bounds from '../Bounds/Bounds';
 import Vector from '../Vector/Vector';
 
 document.getElementById('snake-game')!.innerHTML = `

@@ -1,5 +1,5 @@
-import Bounds from '../Bounds';
-import Direction from '../Direction';
+import Bounds from '../Bounds/Bounds';
+import Direction from '../Direction/Direction';
 import Vector from '../Vector/Vector';
 import range from '../lib/range/range';
 
