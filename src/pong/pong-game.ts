@@ -4,8 +4,22 @@ import Vector from '../Vector/Vector';
 
 
 document.getElementById('pong-game')!.innerHTML = `
+    <button id="exit-pong-button">❌</button>
     <div id="pong-sketch"></div>
 `;
+
+document.getElementById('exit-pong-button')?.addEventListener('click', () => {
+    const snakeGame = document.getElementById('pong-game')!;
+    const mainContent = document.getElementById('main-content')!;
+
+    if (snakeGame.style.display === 'block') {
+        snakeGame.style.display = 'none';
+        mainContent.style.display = 'block';
+    } else {
+        snakeGame.style.display = 'block';
+        mainContent.style.display = 'none';
+    }
+});
 
 new p5(sketch => {
     const p = sketch as unknown as p5;
@@ -23,7 +37,6 @@ new p5(sketch => {
         p.createCanvas(...playBounds.size);
         p.colorMode(p.HSB, 360, 100, 100, 100);
         p.noStroke();
-        p.noCursor();
     };
 
     p.draw = function draw() {
