@@ -7,10 +7,12 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <button id="snake-button">🐍</button>
     </div>
     <div id="snake-game" style="display:none;"></div>
+    <div id="pong-game"></div>
   </div>
 `
 
 import('./snake/snake-game');
+import('./pong/pong-game');
 
 document.getElementById('snake-button')?.addEventListener('click', () => {
   const snakeGame = document.getElementById('snake-game')!;

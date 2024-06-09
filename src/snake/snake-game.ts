@@ -6,7 +6,7 @@ import Vector from '../Vector/Vector';
 
 document.getElementById('snake-game')!.innerHTML = `
     <button id="exit-snake-button">❌</button>
-    <div id="sketch"></div>
+    <div id="snake-sketch"></div>
 `;
 
 document.getElementById('exit-snake-button')?.addEventListener('click', () => {
@@ -128,4 +128,4 @@ new p5(sketch => {
         }
     }
   
-}, document.getElementById('sketch')!);
+}, document.getElementById('snake-sketch')!);
