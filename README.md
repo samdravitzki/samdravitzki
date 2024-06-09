@@ -51,6 +51,13 @@ Complete "The Challenge" defined in https://20_games_challenge.gitlab.io/challen
 
 ### TODO
     - [ ] Implement pong (Game #1)
+        - [x] Implement basic game
+        - [ ] Add a menu
+        - [ ] Add and end state
+        - [ ] Add sound effects
+        - [ ] Implement an AI
+        - [ ] Increase difficulty as game goes on
+        - [ ] Clamp the paddles to only fit within the walls
     - [ ] Implement breakout (Game #2)
     - [ ] Implement the rest of the 10 games
 

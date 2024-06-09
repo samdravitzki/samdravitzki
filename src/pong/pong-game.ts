@@ -26,8 +26,8 @@ new p5(sketch => {
 
     const playBounds = Bounds.create(Vector.create(0, 0), Vector.create(500, 250));
 
-    let ballPosition = Vector.create(100, 100);
-    let ballVelocity = Vector.create(-1, 0.5).times(2);
+    let ballPosition = Vector.create(playBounds.size[0] / 2, playBounds.size[1] / 2);
+    let ballVelocity = Vector.create(1, 0.5);
     const ballRadius = 5;
     
     let playerOneScore = 0;
