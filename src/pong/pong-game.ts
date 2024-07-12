@@ -21,6 +21,10 @@ document.getElementById('exit-pong-button')?.addEventListener('click', () => {
     }
 });
 
+// It is already getting really difficult to manage all the logic so I want to introduce some design to make things easier to manange
+// To do this I am going to try using ecs
+// Main resource: https://bevy-cheatbook.github.io/programming/ecs-intro.html
+
 new p5(sketch => {
     const p = sketch as unknown as p5;
 
