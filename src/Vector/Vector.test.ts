@@ -78,3 +78,35 @@ describe('times method', () => {
     });
     
 });
+
+describe ('distance method', () => {
+    test('should return a distance of 50 when given the vectors (10, 10) and (40, 50)', () => {
+        const v1 = new Vector(10, 10);
+        const v2 = new Vector(40, 50);
+
+        const result = v1.distance(v2);
+
+        expect(result).toEqual(50);
+    })
+})
+
+describe ('length method', () => {
+    test('should return a length of 50 when given the vector have values (30, 40)', () => {
+        const vector = new Vector(30, 40);
+
+        const result = vector.length();
+
+        expect(result).toEqual(50);
+    })
+})
+
+describe ('normalised method', () => {
+    test('should return a vector with values (0.6, 0.8) when given vector with values (30, 40)', () => {
+        const vector = new Vector(30, 40);
+
+        const result = vector.normalised();
+
+        expect(result.x).toEqual(0.6);
+        expect(result.y).toEqual(0.8);
+    })
+})
