@@ -3,14 +3,79 @@ import World from './World';
 import Entity from '../Entity/Entity';
 import Component from '../Component/Component';
 
+describe('addComponent method', () => {
+    test('should add a component', () => {
+        // ARRANGE
+        const world = new World();
+        const entity1 = new Entity();
+        const componentA = { entityId: entity1.id, name: 'A' };
+        
+        world.addEntity(entity1);
+
+        // ACT
+        world.addComponent(componentA);
+
+        // ASSERT
+        expect(world.components).toEqual([componentA])
+    });
+
+    // Based on https://stackoverflow.com/questions/20720360/ecs-can-an-entity-have-more-than-one-component-of-given-type
+    test('should throw error when component of the same type already exists associated with the same entity', () => {
+        // ARRANGE
+        const world = new World();
+        const entity1 = new Entity();
+        const componentA = { entityId: entity1.id, name: 'A' };
+
+        world.addEntity(entity1);
+        world.addComponent(componentA);
+
+        // ACT and ASSERT
+        expect(() => world.addComponent(componentA)).toThrowError()
+    })
+});
+
+describe('replaceComponent method', () => {
+    test('should add a component', () => {
+        // ARRANGE
+        const world = new World();
+        const entity1 = new Entity();
+        const componentA = { entityId: entity1.id, name: 'A' };
+        
+        world.addEntity(entity1);
+
+        // ACT
+        world.replaceComponent(componentA);
+
+        // ASSERT
+        expect(world.components).toEqual([componentA])
+    });
+
+    test('should replace component when one already exists associated with the same entity', () => {
+        // ARRANGE
+        const world = new World();
+        const entity1 = new Entity();
+        const componentAV1 = { entityId: entity1.id, name: 'A', value: 1 };
+        const componentAV2 = { entityId: entity1.id, name: 'A', value: 2 };
+        
+        world.addEntity(entity1);
+        world.addComponent(componentAV1)
+
+        // ACT
+        world.replaceComponent(componentAV2);
+
+        // ASSERT
+        expect(world.components).toEqual([componentAV2])
+    });
+});
+
 describe('query method', () => {
 
     test('should return entities when requesting a single component type', () => {
         // ARRANGE
         const entity1 = new Entity();
         const entity2 = new Entity();
-        const componentA1: Component = { entityId: entity1.id, name: 'A' }
-        const componentA2: Component = { entityId: entity2.id, name: 'A' }
+        const componentA1: Component = { entityId: entity1.id, name: 'A' };
+        const componentA2: Component = { entityId: entity2.id, name: 'A' };
 
         const world = new World();
         world.addEntity(entity1);

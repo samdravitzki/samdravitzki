@@ -5,12 +5,44 @@ export default class World {
     private _entities: Entity[] = [];
     private _components: Component[] = [];
 
+    get entities() {
+        return this._entities;
+    }
+
+    get components() {
+        return this._components;
+    }
+
     addEntity(entity: Entity) {
         this._entities.push(entity);
     }
 
     addComponent(component: Component) {
+        const result = this
+        .query([component.name])
+        .filter(entitiesComponents => entitiesComponents[0].entityId === component.entityId);
+
+        if (result.length !== 0) {
+            throw new Error(`Entity cannot have more than one component of type '${component.name}'`)
+        }
+        
         this._components.push(component);
+    }
+
+    replaceComponent(component: Component) {
+        const matchingComponent = this._components
+            .filter(component => component.name === component.name && component.entityId === component.entityId);
+        
+        if (matchingComponent.length !== 0) {
+            const item = matchingComponent[0];
+            const index = this._components.indexOf(item)
+
+            if (index > -1) {
+                this._components.splice(index, 1);
+            }
+        }
+        
+        this.addComponent(component);
     }
 
     /**
