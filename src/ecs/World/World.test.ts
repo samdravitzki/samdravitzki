@@ -66,6 +66,25 @@ describe('replaceComponent method', () => {
         // ASSERT
         expect(world.components).toEqual([componentAV2])
     });
+
+    test('should cause existing components to be removed', () => {
+        // ARRANGE
+        const world = new World();
+        const entity1 = new Entity();
+        const componentAV1 = { entityId: entity1.id, name: 'A', value: 1 };
+        const componentAV2 = { entityId: entity1.id, name: 'A', value: 2 };
+        const componentB = { entityId: entity1.id, name: 'B' };
+        
+        world.addEntity(entity1);
+        world.addComponent(componentAV1)
+        world.addComponent(componentB)
+
+        // ACT
+        world.replaceComponent(componentAV2);
+
+        // ASSERT
+        expect(world.components).toEqual([componentB, componentAV2])
+    });
 });
 
 describe('query method', () => {

@@ -31,7 +31,10 @@ export default class World {
 
     replaceComponent(component: Component) {
         const matchingComponent = this._components
-            .filter(component => component.name === component.name && component.entityId === component.entityId);
+            .filter(existingComponent => (
+                existingComponent.name === component.name 
+                && existingComponent.entityId === component.entityId
+            ));
         
         if (matchingComponent.length !== 0) {
             const item = matchingComponent[0];
@@ -41,7 +44,7 @@ export default class World {
                 this._components.splice(index, 1);
             }
         }
-        
+
         this.addComponent(component);
     }
 
