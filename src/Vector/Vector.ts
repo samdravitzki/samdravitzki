@@ -30,6 +30,10 @@ export default class Vector {
         return new Vector(this.x * scalar, this.y * scalar);
     }
 
+    dot(other: Vector): number {
+        return this.x * other.x + this.y * other.y
+    }
+
     /**
      * Return the distance between two points
      * @param other 

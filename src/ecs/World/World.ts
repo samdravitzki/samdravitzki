@@ -48,6 +48,10 @@ export default class World {
         this.addComponent(component);
     }
 
+    removeComponent(component: Component) {
+        this._components = this._components.filter(c => !(c.entityId === component.entityId && c.name === component.name))
+    }
+
     /**
      * Query the components of entities
      * Given a set of component names retrieve the list of the requested components for
