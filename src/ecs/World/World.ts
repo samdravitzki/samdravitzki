@@ -5,11 +5,11 @@ export default class World {
     private _entities: Entity[] = [];
     private _components: Component[] = [];
 
-    get entities() {
+    get entities(): Readonly<Entity>[] {
         return this._entities;
     }
 
-    get components() {
+    get components(): Readonly<Component>[] {
         return this._components;
     }
 
