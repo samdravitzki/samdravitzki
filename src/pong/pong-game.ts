@@ -1,9 +1,10 @@
 import p5 from 'p5';
 import Bounds from '../Bounds/Bounds';
 import Vector from '../Vector/Vector';
-import Component from '../ecs/Component/Component';
 import Entity from '../ecs/Entity/Entity';
 import World from '../ecs/World/World';
+import { ScoreComponent, PrimitiveShape, Position, Velocity, Collider, BallComponent, PaddleComponent, PlayerComponent, AiComponent, BackboardComponent, Collision } from './components';
+import { collisionLoggingSystem, collisionSystem } from './collision-system';
 
 
 document.getElementById('pong-game')!.innerHTML = `
@@ -43,75 +44,6 @@ const rightBackboard = new Entity();
 const centerLine = new Entity();
 const playerScore = new Entity();
 const aiScore = new Entity();
-
-
-type Position = Component & {
-    name: 'position',
-    position: Vector,
-};
-
-type Velocity = Component & {
-    name: 'velocity',
-    velocity: Vector,
-};
-
-type PrimitiveShape = Component & {
-    name: 'primitive',
-    stroke: number[],
-    strokeWeight: number,
-    fill: false | number[],
-    dash?: number[],
-} & ({
-    type: 'circle',
-    radius: number,
-} | {
-    type: 'line',
-    start: Vector,
-    end: Vector,
-} | {
-    type: 'square',
-    width: number,
-    height: number,
-} | {
-    type: 'text',
-    align: 'left' | 'right',
-    size: number,
-    text: string,
-});
-
-type Collider = Component & {
-    name: 'collider',
-}  & ({
-    type: 'aabb', // Axis-aligned bounding box (Just a rectangle that doesnt rotate)
-    width: number,
-    height: number,
-});
-
-type BallComponent = Component & {
-    name: 'ball',
-}
-
-type PaddleComponent = Component & {
-    name: 'paddle',
-}
-
-type PlayerComponent = Component & {
-    name: 'player',
-}
-
-type AiComponent = Component & {
-    name: 'ai',
-}
-
-type BackboardComponent = Component & {
-    name: 'backboard',
-    owner: 'player' | 'ai',
-}
-
-type ScoreComponent = Component & {
-    name: 'score',
-    value: number,
-}
 
 const playerScoreComponent: ScoreComponent = {
     entityId: playerScore.id,
@@ -223,16 +155,6 @@ const rightPaddleComponent: PaddleComponent = {
 const rightPaddleAiComponent: AiComponent = {
     entityId: rightPaddle.id,
     name: 'ai',
-}
-
-type Collision = Component & {
-    name: 'collision',
-    // The collision point of the entity in local space
-    contactPoint: Vector,
-    // The normal of the point collided with
-    normal: Vector,
-    // The depth in which the collision occured
-    penetration: number,
 }
 
 const northWallShape: PrimitiveShape = {
@@ -480,221 +402,175 @@ world.addComponent({
 
 world.addEntity(rightBackboard);
 
+function ballCollisionHandlingSystem(world: World) {
+    for (const res of world.query(['velocity', 'collision', 'ball']) as [Velocity, Collision, BallComponent][]) {
 
-new p5(sketch => {
-    const p = sketch as unknown as p5;
+        const [ballV, ballCol] = res;
+        if (ballCol.normal) {
+            // From https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
+            // I do not understand how this maths works
+            ballV.velocity = ballV.velocity.reflect(ballCol.normal);
+        }
+    }
+}
 
-    const playBounds = Bounds.create(Vector.create(0, 0), Vector.create(500, 250));
-    
-    p.setup = function setup() {
-        p.createCanvas(...playBounds.size);
-        p.colorMode(p.HSB, 360, 100, 100, 100);
-        p.noStroke();
-        p.rectMode(p.CENTER);
-    };
+function backboardCollisionHandlingSystem(world: World) {
+    for (const [backboard] of world.query(['backboard', 'collision']) as [BackboardComponent, Collision][]) {
+        const [ballPosi] = world.query(['position', 'ball'])[0] as [Position, BallComponent];
 
-    p.draw = function draw() {
-        p.background(240, 90, 60);
+        ballPosi.position = new Vector(200, 40);
 
-        // Collision system
-        const colliders = world.query(['position', 'collider']) as [Position, Collider][];
+        if (backboard.owner == 'player') {
+            const [score, primitive] = world.query(['score', 'primitive', 'player-score'])[0] as [ScoreComponent, PrimitiveShape];
+            score.value += 1;
+            if (primitive.type === 'text') {
+                primitive.text = String(score.value);
+            }
+        }
 
-        // Remove any collisions in the world
+        if (backboard.owner == 'ai') {
+            const [score, primitive] = world.query(['score', 'primitive', 'ai-score'])[0] as [ScoreComponent, PrimitiveShape];
+            score.value += 1;
+            if (primitive.type === 'text') {
+                primitive.text = String(score.value);
+            }
+        }
+    }
+}
 
-        for (const [positionA, colliderA] of colliders) {
-            for (const [positionB, colliderB] of colliders) {
+function aiPaddleSystem(world: World) {
+    for (const [pos] of world.query(['position', 'paddle', 'ai']) as [Position][]) {
+        const [ballPosi] = world.query(['position', 'ball'])[0] as [Position, BallComponent];
 
-                if (positionA.entityId === positionB.entityId) {
-                    // Exclude collisions with itself
-                    continue;
+        pos.position = new Vector(pos.position.x, ballPosi.position.y)
+    }
+}
+
+function ballMovementSystem(world: World) {
+    const [ballVel, ballPos] = world.query(['velocity', 'position', 'ball'])[0] as [Velocity, Position, BallComponent];
+    ballPos.position = ballPos.position.plus(ballVel.velocity);
+}
+
+/**
+ * Remove all the collisions that exist in the world
+ * 
+ * Designed to be used to cleanup the collisions at the end of tick so that collisions
+ * are not left over after they have completed
+ * @param world 
+ */
+export function collisionCleanupSystem(world: World) {
+    for (const [col] of world.query(['collision']) as [Collision][]) {
+        world.removeComponent(col);
+    }
+}
+
+type System = (world: World) => void;
+
+/**
+ * Built based bevy ecs api for rust https://bevy-cheatbook.github.io/programming/app-builder.html
+ */
+class App {
+    private _world: World = new World();
+    private _systems: System[] = [];
+
+    private _element: HTMLElement;
+
+    constructor(element: HTMLElement) {
+        this._element = element;
+    }
+
+    setWorld(world: World): App {
+        this._world = world;
+        return this;
+    }
+
+    addSystem(system: System): App {
+        this._systems.push(system);
+        return this;
+    }
+
+
+    run() {
+        const sys = this._systems;
+        const wor = this._world;
+        new p5(sketch => {
+            const p = sketch as unknown as p5;
+            const playBounds = Bounds.create(Vector.create(0, 0), Vector.create(500, 250));
+
+            p.setup = function setup() {
+                p.createCanvas(...playBounds.size);
+                p.colorMode(p.HSB, 360, 100, 100, 100);
+                p.noStroke();
+                p.rectMode(p.CENTER);
+            }
+
+            p.draw = function draw() {
+                p.background(240, 90, 60);
+
+                sys.forEach((system) => system(wor));
+
+                // Move player paddle system
+                for (const [pos] of world.query(['position', 'paddle', 'player']) as [Position][]) {
+                    pos.position = new Vector(pos.position.x, p.mouseY)
                 }
 
-                if (colliderA.type === 'aabb' && colliderB.type === 'aabb') {
-                    // From https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/physicstutorials/4collisiondetection/Physics%20-%20Collision%20Detection.pdf
-                    const deltaPosition = positionA.position.minus(positionB.position);
-                    const combinedWidth = (colliderA.width + colliderB.width) / 2;
-                    const combinedHeight = (colliderA.height + colliderB.height) / 2;
+                // Render system
+                for (const [position, primitive] of world.query(['position', 'primitive']) as [Position, PrimitiveShape][]) {
+                    p.strokeWeight(primitive.strokeWeight);
+                    p.stroke(primitive.stroke)
 
-                    if (Math.abs(deltaPosition.x) < combinedWidth && Math.abs(deltaPosition.y) < combinedHeight) {
-                        console.log('collision');
-                        const sqaureFaces = [
-                            new Vector(0, 1), // top
-                            new Vector(1, 0), // right
-                            new Vector(0, -1), // bottom
-                            new Vector(-1, 0), // left
-                        ];
+                    if (!primitive.fill) {
+                        p.noFill()
+                    } else {
+                        p.fill(primitive.fill)
+                    }
 
-                        const colliderAMaximumPoint = new Vector(
-                            positionA.position.x + colliderA.width / 2,
-                            positionA.position.y + colliderA.height / 2,
-                        );
+                    if (primitive.type === 'circle') {
+                        p.circle(position.position.x, position.position.y, primitive.radius * 2);
+                    }
 
-                        const colliderAMinimumPoint = new Vector(
-                            positionA.position.x - colliderA.width / 2,
-                            positionA.position.y - colliderA.height / 2,
-                        );
+                    if (primitive.type === 'line') {
+                        p.line(
+                            primitive.start.x + position.position.x, primitive.start.y + position.position.y,
+                            primitive.end.x + position.position.x, primitive.end.y + position.position.y
+                        )
+                    }
 
-                        const colliderBMaximumPoint = new Vector(
-                            positionB.position.x + colliderB.width / 2,
-                            positionB.position.y + colliderB.height / 2,
-                        );
+                    if (primitive.type === 'square') {
+                        p.rect(position.position.x, position.position.y, primitive.width, primitive.height)
+                    }
 
-                        const colliderBMinimumPoint = new Vector(
-                            positionB.position.x - colliderB.width / 2,
-                            positionB.position.y - colliderB.height / 2,
-                        );
+                    if (primitive.type === 'text') {
+                        p.textSize(primitive.size);
 
-                        const distances = [
-                            (colliderAMaximumPoint.y - colliderBMinimumPoint.y), // Distance from 'top' of 'a' to 'bottom' of 'b'
-                            (colliderAMaximumPoint.x - colliderBMinimumPoint.x), // Distance from 'right' of 'a' to 'left' of 'b'
-                            (colliderBMaximumPoint.y - colliderAMinimumPoint.y), // Distance from 'bottom' of 'a' to 'top' of 'b'
-                            (colliderBMaximumPoint.x - colliderAMinimumPoint.x), // Distance from 'left' of 'a' to 'right' of 'b'
-                        ];
+                        if (primitive.align === 'left') p.textAlign(p.LEFT);
+                        if (primitive.align === 'right') p.textAlign(p.RIGHT);
 
-                        let bestAxis: Vector = new Vector(0, 0);
-                        let penetration: number = Infinity;
+                        p.text(primitive.text, position.position.x, position.position.y);
+                    }
+                }
 
-                        for (let i = 0; i < 6; i++) {
-                            if (distances[i] < penetration) {
-                                penetration = distances[i];
-                                bestAxis = sqaureFaces[i];
-                            }
-                        }
-
-                        const collision: Collision = {
-                            entityId: colliderA.entityId,
-                            name: 'collision',
-                            contactPoint: new Vector(0, 0), // Contact point on a AABB is just its local origin
-                            normal: bestAxis,
-                            penetration: penetration,
-                        }
-
-                        world.replaceComponent(collision)
+                // Collider rendering system
+                for (const [col, pos] of world.query(['collider', 'position']) as [Collider, Position][]) {
+                    if (col.type === 'aabb') {
+                        p.stroke(111, 100, 100);
+                        p.strokeWeight(0.5)
+                        p.noFill()
+                        p.rect(pos.position.x, pos.position.y, col.width, col.height);
                     }
                 }
             }
-        }
-
-        // Collision logging system
-        for (const [col] of world.query(['collision']) as [Collision][]) {
-            console.log(JSON.stringify(col))
-        }
-
-        // Ball collision handling system
-        for (const res of world.query(['velocity', 'collision', 'ball']) as [Velocity, Collision, BallComponent][]) {
-
-            const [ballV, ballCol] = res;
-            if (ballCol.normal) {
-                // From https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
-                // I do not understand how this maths works
-                ballV.velocity = ballV.velocity.minus(ballCol.normal.times(ballV.velocity.dot(ballCol.normal) * 2))
-            }
-        }
-
-        // Backboard collision handling system
-        for (const [backboard] of world.query(['backboard', 'collision']) as [BackboardComponent, Collision][]) {
-            const [ballPosi] = world.query(['position', 'ball'])[0] as [Position, BallComponent];
-
-            ballPosi.position = new Vector(200, 40);
-
-            if (backboard.owner == 'player') {
-                const [score, primitive] = world.query(['score', 'primitive', 'player-score'])[0] as [ScoreComponent, PrimitiveShape];
-                score.value += 1;
-                if (primitive.type === 'text') {
-                    primitive.text = String(score.value);
-                }
-            }
-
-            if (backboard.owner == 'ai') {
-                const [score, primitive] = world.query(['score', 'primitive', 'ai-score'])[0] as [ScoreComponent, PrimitiveShape];
-                score.value += 1;
-                if (primitive.type === 'text') {
-                    primitive.text = String(score.value);
-                }
-            }
-        }
-
-        // Move player paddle system
-        for (const [pos] of world.query(['position', 'paddle', 'player']) as [Position][]) {
-            pos.position = new Vector(pos.position.x, p.mouseY)
-        }
-
-        // Move ai paddle system
-        for (const [pos] of world.query(['position', 'paddle', 'ai']) as [Position][]) {
-            const [ballPosi] = world.query(['position', 'ball'])[0] as [Position, BallComponent];
-
-            pos.position = new Vector(pos.position.x, ballPosi.position.y)
-        }
-
-
-        // Move ball system
-        const [ballVel, ballPos] = world.query(['velocity', 'position', 'ball'])[0] as [Velocity, Position, BallComponent];
-        ballPos.position = ballPos.position.plus(ballVel.velocity);
-
-        // Render system
-        for (const [position, primitive] of world.query(['position', 'primitive']) as [Position, PrimitiveShape][]) {
-            p.strokeWeight(primitive.strokeWeight);
-            p.stroke(primitive.stroke)
-
-            if (!primitive.fill) {
-                p.noFill()
-            } else {
-                p.fill(primitive.fill)
-            }
-
-            if (primitive.type === 'circle') {
-                p.circle(position.position.x, position.position.y, primitive.radius * 2);
-            }
-
-            if (primitive.type === 'line') {
-                p.line(
-                    primitive.start.x + position.position.x, primitive.start.y + position.position.y,
-                    primitive.end.x + position.position.x, primitive.end.y + position.position.y
-                )
-            }
-
-            if (primitive.type === 'square') {
-                p.rect(position.position.x, position.position.y, primitive.width, primitive.height)
-            }
-
-            if (primitive.type === 'text') {
-                p.textSize(primitive.size);
-
-                if (primitive.align === 'left') p.textAlign(p.LEFT);
-                if (primitive.align === 'right') p.textAlign(p.RIGHT);
-
-                p.text(primitive.text, position.position.x, position.position.y);
-            }
-        }
-
-        
-
-        // Collider rendering system
-        // for (const [col, pos] of world.query(['collider', 'position']) as [Collider, Position][]) {
-        //     if (col.type === 'aabb') {
-        //         p.stroke(111, 100, 100);
-        //         p.strokeWeight(2)
-        //         p.noFill()
-        //         p.rect(pos.position.x, pos.position.y, col.width, col.height);
-        //     }
-        // }
-
-        // Collision clean up system
-        for (const [col] of world.query(['collision']) as [Collision][]) {
-            world.removeComponent(col);
-        }
-
-        // // Draw scores
-        // const textCenterOffset = 5;
-        // p.fill(255);
-        // p.textSize(25);
-        // p.textAlign(p.RIGHT);
-        // p.text(playerOneScore, playWidth / 2 - textCenterOffset, 30);
-        // p.textAlign(p.LEFT);
-        // p.text(playerTwoScore, playWidth / 2 + textCenterOffset, 30);
+        }, this._element);
     }
+}
 
-    function lineDash(array: number[]) {
-        p.drawingContext.setLineDash(array);
-    }
-}, document.getElementById('pong-sketch')!)
+new App(document.getElementById('pong-sketch')!)
+    .setWorld(world)
+    .addSystem(collisionSystem)
+    .addSystem(collisionLoggingSystem)
+    .addSystem(ballCollisionHandlingSystem)
+    .addSystem(backboardCollisionHandlingSystem)
+    .addSystem(aiPaddleSystem)
+    .addSystem(ballMovementSystem)
+    .addSystem(collisionCleanupSystem)
+    .run()
