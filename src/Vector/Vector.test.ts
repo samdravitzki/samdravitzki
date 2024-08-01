@@ -110,3 +110,26 @@ describe ('normalised method', () => {
         expect(result.y).toEqual(0.8);
     })
 })
+
+describe('dot method', () => {
+    test('should return 14 when given the vectors (1, 2) and (4, 5)', () => {
+        const v1 = new Vector(1, 2);
+        const v2 = new Vector(4, 5);
+
+        const result = v1.dot(v2);
+
+        expect(result).toEqual(14);
+    });
+});
+
+describe('reflect method', () => {
+    test('should return the vector when the vector (4, -2) is reflected against the normal (1, -1)', () => {
+        const vector = new Vector(1, 2);
+        const normal = new Vector(4, 5);
+
+        const result = vector.reflect(normal);
+
+        expect(result.x).toEqual(-111);
+        expect(result.y).toEqual(-138);
+    });
+});

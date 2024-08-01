@@ -29,11 +29,6 @@ export default class Vector {
     times(scalar: number): Vector {
         return new Vector(this.x * scalar, this.y * scalar);
     }
-
-    dot(other: Vector): number {
-        return this.x * other.x + this.y * other.y
-    }
-
     /**
      * Return the distance between two points
      * @param other 
@@ -54,4 +49,27 @@ export default class Vector {
     normalised(): Vector {
         return new Vector(this.x / this.length(), this.y / this.length());
     }
+
+    /**
+     * Return the dot product of this vector and the supplied vector
+     * @param other 
+     * @returns the dot product
+     */
+    dot(other: Vector): number {
+        return this.x * other.x + this.y * other.y
+    }
+
+    /**
+     * Return a new vector of this vector reflected around 
+     * a supplied normal vector
+     * 
+     * From https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
+     * I do not understand how this maths works
+     * 
+     * This looks worth reading to learn more https://chicio.medium.com/how-to-calculate-the-reflection-vector-7f8cab12dc42
+     */
+    reflect(normal: Vector): Vector {
+        return this.minus(normal.times(this.dot(normal) * 2))
+    }
+
 }
