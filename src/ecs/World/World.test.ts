@@ -87,6 +87,24 @@ describe('replaceComponent method', () => {
     });
 });
 
+describe('removeComponent method', () => {
+    test('should remove supplied component from world', () => {
+         // ARRANGE
+        const world = new World();
+        const entity1 = new Entity();
+        const componentA = { entityId: entity1.id, name: 'A' };
+
+        world.addEntity(entity1);
+        world.addComponent(componentA);
+
+        // ACT
+        world.removeComponent(componentA);
+
+        // ASSERT
+        expect(world.components).toEqual([]);
+    });
+});
+
 describe('query method', () => {
 
     test('should return entities when requesting a single component type', () => {
