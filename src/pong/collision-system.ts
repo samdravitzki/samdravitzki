@@ -20,7 +20,6 @@ export function collisionSystem(world: World) {
                 const combinedHeight = (colliderA.height + colliderB.height) / 2;
 
                 if (Math.abs(deltaPosition.x) < combinedWidth && Math.abs(deltaPosition.y) < combinedHeight) {
-                    console.log('collision');
                     const sqaureFaces = [
                         new Vector(0, 1), // top
                         new Vector(1, 0), // right
