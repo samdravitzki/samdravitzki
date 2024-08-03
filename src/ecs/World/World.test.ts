@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import World from './World';
 import Entity from '../Entity/Entity';
 import Component from '../Component/Component';
+import Bundle from '../Bundle/Bundle';
 
 describe('addComponent method', () => {
     test('should add a component', () => {
@@ -84,6 +85,44 @@ describe('replaceComponent method', () => {
 
         // ASSERT
         expect(world.components).toEqual([componentB, componentAV2])
+    });
+});
+
+describe('addBundle method', () => {
+    test('should add entity from bundle to world', () => {
+        // ARRANGE
+        const world = new World();
+
+        const bundle: Bundle = {
+            entity: new Entity(),
+            components: [],
+        };
+
+        // ACT
+        world.addBundle(bundle);
+
+        // ASSERT
+        expect(world.entities).toEqual([bundle.entity]);
+    });
+
+    test('should add components from bundle to world', () => {
+        // ARRANGE
+        const world = new World();
+        
+        const bundleEntity = new Entity();
+        const bundle: Bundle = {
+            entity: bundleEntity,
+            components: [
+                { entityId: bundleEntity.id, name: 'A' },
+                { entityId: bundleEntity.id, name: 'B' },
+            ],
+        };
+
+        // ACT
+        world.addBundle(bundle);
+
+        // ASSERT
+        expect(world.components).toEqual(bundle.components);
     });
 });
 

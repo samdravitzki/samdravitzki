@@ -1,3 +1,4 @@
+import Bundle from '../Bundle/Bundle';
 import Component from '../Component/Component';
 import Entity from '../Entity/Entity';
 
@@ -32,6 +33,14 @@ export default class World {
         }
         
         this._components.push(component);
+    }
+
+    addBundle(bundle: Bundle) {
+        this.addEntity(bundle.entity);
+
+        bundle.components.forEach((component) => {
+            this.addComponent(component);
+        });
     }
 
     replaceComponent(component: Component) {
