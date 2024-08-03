@@ -2,7 +2,7 @@ import World from '../ecs/World/World';
 import Vector from '../Vector/Vector';
 import { Position, Collider, Collision } from './components';
 
-export function collisionSystem(world: World) {
+function collisionSystem(world: World) {
     const colliders = world.query(['position', 'collider']) as [Position, Collider][];
 
     for (const [positionA, colliderA] of colliders) {
@@ -79,9 +79,27 @@ export function collisionSystem(world: World) {
     }
 }
 
-export function collisionLoggingSystem(world: World) {
+function collisionLoggingSystem(world: World) {
     for (const [col] of world.query(['collision']) as [Collision][]) {
         console.log(JSON.stringify(col))
     }
 }
 
+/**
+ * Remove all the collisions that exist in the world
+ * 
+ * Designed to be used to cleanup the collisions at the end of tick so that collisions
+ * are not left over after they have completed
+ * @param world 
+ */
+function collisionCleanupSystem(world: World) {
+    for (const [col] of world.query(['collision']) as [Collision][]) {
+        world.removeComponent(col);
+    }
+}
+
+export {
+    collisionCleanupSystem,
+    collisionLoggingSystem,
+    collisionSystem,
+}
