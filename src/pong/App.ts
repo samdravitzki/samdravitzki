@@ -55,8 +55,17 @@ class App {
 
                 // Render system
                 for (const [position, primitive] of wor.query(['position', 'primitive']) as [Position, PrimitiveShape][]) {
-                    p.strokeWeight(primitive.strokeWeight);
-                    p.stroke(primitive.stroke)
+                    if (!primitive.strokeWeight) {
+                        p.strokeWeight(0);
+                    } else {
+                        p.strokeWeight(primitive.strokeWeight);
+                    }
+
+                    if (!primitive.stroke) {
+                        p.noStroke();
+                    } else {
+                        p.stroke(primitive.stroke);
+                    }
 
                     if (!primitive.fill) {
                         p.noFill()

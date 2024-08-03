@@ -14,8 +14,8 @@ export type Velocity = Component & {
 
 export type PrimitiveShape = Component & {
     name: 'primitive',
-    stroke: number[],
-    strokeWeight: number,
+    stroke?: number[],
+    strokeWeight?: number,
     fill: false | number[],
     dash?: number[],
 } & ({

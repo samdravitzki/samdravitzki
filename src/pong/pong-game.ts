@@ -89,9 +89,7 @@ const ballComponent: BallComponent = {
 const leftPaddleShape: PrimitiveShape = {
     entityId: leftPaddle.id,
     name: 'primitive',
-    stroke: [240, 60, 100],
-    strokeWeight: 4,
-    fill: false,
+    fill: [240, 60, 100],
     type: 'square',
     width: 5,
     height: 20
@@ -124,9 +122,7 @@ const leftPaddlePlayerComponent: PlayerComponent = {
 const rightPaddleShape: PrimitiveShape = {
     entityId: rightPaddle.id,
     name: 'primitive',
-    stroke: [240, 60, 100],
-    strokeWeight: 4,
-    fill: false,
+    fill: [240, 60, 100],
     type: 'square',
     width: 5,
     height: 20
@@ -159,8 +155,6 @@ const rightPaddleAiComponent: AiComponent = {
 const northWallShape: PrimitiveShape = {
     entityId: northWall.id,
     name: 'primitive',
-    stroke: [240, 60, 100],
-    strokeWeight: 2,
     fill:  [240, 60, 100],
     type: 'square',
     width: 500,
@@ -184,8 +178,6 @@ const northWallCollider: Collider = {
 const southWallShape: PrimitiveShape = {
     entityId: southWall.id,
     name: 'primitive',
-    stroke: [240, 60, 100],
-    strokeWeight: 2,
     fill:  [240, 60, 100],
     type: 'square',
     width: 500,
@@ -226,8 +218,6 @@ const centerLinePosition: Position = {
 const leftBackboardShape: PrimitiveShape = {
     entityId: leftBackboard.id,
     name: 'primitive',
-    stroke: [352, 94, 100],
-    strokeWeight: 2,
     fill:  [352, 94, 100],
     type: 'square',
     width: 5,
@@ -257,8 +247,6 @@ const leftBackboardComponent: BackboardComponent = {
 const rightBackboardShape: PrimitiveShape = {
     entityId: rightBackboard.id,
     name: 'primitive',
-    stroke: [352, 94, 100],
-    strokeWeight: 2,
     fill:  [352, 94, 100],
     type: 'square',
     width: 5,
@@ -387,7 +375,7 @@ world.addComponent(playerScoreText);
 world.addComponent({
     entityId: playerScore.id,
     name: 'player-score'
-})
+});
 
 world.addEntity(aiScore);
 world.addComponent(aiScoreComponent);
@@ -396,10 +384,7 @@ world.addComponent(aiScoreText);
 world.addComponent({
     entityId: aiScore.id,
     name: 'ai-score'
-})
-
-
-world.addEntity(rightBackboard);
+});
 
 function ballCollisionHandlingSystem(world: World) {
     for (const res of world.query(['velocity', 'collision', 'ball']) as [Velocity, Collision, BallComponent][]) {
