@@ -1,6 +1,11 @@
 import Component from '../Component/Component';
 import Entity from '../Entity/Entity';
 
+/**
+ * Reason for choosing an ECS approach is that I have worked with alot of game engines before
+ * and they are all very inheritance based and I wanted to see how it would work using one
+ * that prefers composition over inheritance.
+ */
 export default class World {
     private _entities: Entity[] = [];
     private _components: Component[] = [];
