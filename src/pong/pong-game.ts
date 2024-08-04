@@ -44,6 +44,10 @@ const ballBundle = createBundle([
         velocity: new Vector(1, 0.15),
     },
     {
+        name: 'speed',
+        value: 3,
+    },
+    {
         name: 'collider',
         type: 'aabb',
         width: 10,
@@ -301,8 +305,8 @@ function aiPaddleSystem(world: World) {
 }
 
 function ballMovementSystem(world: World) {
-    const [ballVel, ballPos] = world.query(['velocity', 'position', 'ball'])[0] as [Velocity, Position, BallComponent];
-    ballPos.position = ballPos.position.plus(ballVel.velocity);
+    const [ballVel, ballPos, speed] = world.query(['velocity', 'position', 'speed', 'ball', ])[0] as [Velocity, Position, { name: 'speed'; value: number }, BallComponent];
+    ballPos.position = ballPos.position.plus(ballVel.velocity.times(speed.value));
 }
 
 
