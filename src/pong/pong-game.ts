@@ -262,10 +262,8 @@ world.addBundle(playerScoreBundle);
 world.addBundle(aiScoreBundle);
 
 function ballCollisionHandlingSystem(world: World) {
-    for (const res of world.query(['velocity', 'collision', 'ball']) as [Velocity, Collision, BallComponent][]) {
-
-        const [ballV, ballCol] = res;
-        ballV.velocity = ballV.velocity.reflect(ballCol.normal);
+    for (const [velocity, collision] of world.query(['velocity', 'collision', 'ball']) as [Velocity, Collision, BallComponent][]) {
+        velocity.velocity = velocity.velocity.reflect(collision.normal);
 
         const meow = new Audio(meowUrl);
         meow.play();
@@ -274,9 +272,9 @@ function ballCollisionHandlingSystem(world: World) {
 
 function backboardCollisionHandlingSystem(world: World) {
     for (const [backboard] of world.query(['backboard', 'collision']) as [BackboardComponent, Collision][]) {
-        const [ballPosi] = world.query(['position', 'ball'])[0] as [Position, BallComponent];
+        const [ballPosition] = world.query(['position', 'ball'])[0] as [Position, BallComponent];
 
-        ballPosi.position = new Vector(200, 40);
+        ballPosition.position = new Vector(200, 40);
 
         if (backboard.owner == 'player') {
             const [score, primitive] = world.query(['score', 'primitive', 'player-score'])[0] as [ScoreComponent, PrimitiveShape];
@@ -297,16 +295,16 @@ function backboardCollisionHandlingSystem(world: World) {
 }
 
 function aiPaddleSystem(world: World) {
-    for (const [pos] of world.query(['position', 'paddle', 'ai']) as [Position][]) {
-        const [ballPosi] = world.query(['position', 'ball'])[0] as [Position, BallComponent];
+    for (const [position] of world.query(['position', 'paddle', 'ai']) as [Position][]) {
+        const [ballPosition] = world.query(['position', 'ball'])[0] as [Position, BallComponent];
 
-        pos.position = new Vector(pos.position.x, ballPosi.position.y)
+        position.position = new Vector(position.position.x, ballPosition.position.y)
     }
 }
 
 function ballMovementSystem(world: World) {
-    const [ballVel, ballPos, speed] = world.query(['velocity', 'position', 'speed', 'ball', ])[0] as [Velocity, Position, { name: 'speed'; value: number }, BallComponent];
-    ballPos.position = ballPos.position.plus(ballVel.velocity.times(speed.value));
+    const [velocity, position, speed] = world.query(['velocity', 'position', 'speed', 'ball', ])[0] as [Velocity, Position, { name: 'speed'; value: number }, BallComponent];
+    position.position = position.position.plus(velocity.velocity.times(speed.value));
 }
 
 

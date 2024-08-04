@@ -80,8 +80,8 @@ function collisionSystem(world: World) {
 }
 
 function collisionLoggingSystem(world: World) {
-    for (const [col] of world.query(['collision']) as [Collision][]) {
-        console.log(JSON.stringify(col))
+    for (const [collision] of world.query(['collision']) as [Collision][]) {
+        console.log(JSON.stringify(collision))
     }
 }
 
@@ -93,8 +93,8 @@ function collisionLoggingSystem(world: World) {
  * @param world 
  */
 function collisionCleanupSystem(world: World) {
-    for (const [col] of world.query(['collision']) as [Collision][]) {
-        world.removeComponent(col);
+    for (const [collision] of world.query(['collision']) as [Collision][]) {
+        world.removeComponent(collision);
     }
 }
 
