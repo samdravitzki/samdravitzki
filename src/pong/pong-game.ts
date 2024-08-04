@@ -1,7 +1,6 @@
 import Vector from '../Vector/Vector';
-import Entity from '../ecs/Entity/Entity';
 import World from '../ecs/World/World';
-import { ScoreComponent, PrimitiveShape, Position, Velocity, Collider, BallComponent, PaddleComponent, PlayerComponent, AiComponent, BackboardComponent, Collision } from './components';
+import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision } from './components';
 import { collisionCleanupSystem, collisionLoggingSystem, collisionSystem } from './collision-system';
 import App from './App';
 import createBundle from '../ecs/Bundle/createBundle';
@@ -24,12 +23,6 @@ document.getElementById('exit-pong-button')?.addEventListener('click', () => {
         mainContent.style.display = 'none';
     }
 });
-
-// Entities
-const southWall = new Entity();
-const rightBackboard = new Entity();
-const playerScore = new Entity();
-const aiScore = new Entity();
 
 const ballBundle = createBundle([
     'ball',
@@ -56,12 +49,6 @@ const ballBundle = createBundle([
         height: 10
     }
 ]);
-
-const playerScoreComponent: ScoreComponent = {
-    entityId: playerScore.id,
-    name: 'score',
-    value: 0,
-}
 
 const leftPaddleBundle = createBundle([
     'player',
@@ -137,12 +124,10 @@ const southWallBundle = createBundle([
         height: 10
     },
     {
-        entityId: southWall.id,
         name: 'position',
         position: new Vector(250, 245),
     },
     {
-        entityId: southWall.id,
         name: 'collider',
         type: 'aabb',
         width: 500,
@@ -192,7 +177,6 @@ const leftBackboardBundle = createBundle([
 
 const rightBackboardBundle = createBundle([
     {
-        entityId: rightBackboard.id,
         name: 'primitive',
         fill:  [352, 94, 100],
         type: 'square',
@@ -200,12 +184,10 @@ const rightBackboardBundle = createBundle([
         height: 250
     },
     {
-        entityId: rightBackboard.id,
         name: 'position',
         position: new Vector(497.5, 125),
     },
     {
-        entityId: rightBackboard.id,
         name: 'collider',
         type: 'aabb',
         width: 5,
@@ -217,50 +199,49 @@ const rightBackboardBundle = createBundle([
     },
 ]);
 
+const playerScoreBundle = createBundle([
+    'player-score',
+    {
+        name: 'score',
+        value: 0,
+    },
+    {
+        name: 'position',
+        position: new Vector(245, 35),
+    },
+    {
+        name: 'primitive',
+        stroke: [240, 60, 100],
+        strokeWeight: 2,
+        fill: [240, 60, 100],
+        type: 'text',
+        text: '0',
+        align: 'right',
+        size: 25,
+    }
+]);
 
-const playerScoreText: PrimitiveShape = {
-    entityId: playerScore.id,
-    name: 'primitive',
-    stroke: [240, 60, 100],
-    strokeWeight: 2,
-    fill: [240, 60, 100],
-    type: 'text',
-    text: '0',
-    align: 'right',
-    size: 25,
-}
-
-const playerScorePosition: Position = {
-    entityId: playerScore.id,
-    name: 'position',
-    position: new Vector(245, 35),
-}
-
-const aiScoreComponent: ScoreComponent = {
-    entityId: aiScore.id,
-    name: 'score',
-    value: 0,
-}
-
-const aiScoreText: PrimitiveShape = {
-    entityId: aiScore.id,
-    name: 'primitive',
-    stroke: [240, 60, 100],
-    strokeWeight: 2,
-    fill: [240, 60, 100],
-    type: 'text',
-    text: '0',
-    align: 'left',
-    size: 25,
-}
-
-const aiScorePosition: Position = {
-    entityId: aiScore.id,
-    name: 'position',
-    position: new Vector(255, 35),
-}
-
-
+const aiScoreBundle = createBundle([
+    'ai-score',
+    {
+        name: 'score',
+        value: 0,
+    },
+    {
+        name: 'position',
+        position: new Vector(255, 35),
+    },
+    {
+        name: 'primitive',
+        stroke: [240, 60, 100],
+        strokeWeight: 2,
+        fill: [240, 60, 100],
+        type: 'text',
+        text: '0',
+        align: 'left',
+        size: 25,
+    }
+]);
 
 const world = new World();
 
@@ -272,34 +253,14 @@ world.addBundle(southWallBundle);
 world.addBundle(centerLineBundle);
 world.addBundle(leftBackboardBundle);
 world.addBundle(rightBackboardBundle);
-
-world.addEntity(playerScore);
-world.addComponent(playerScoreComponent);
-world.addComponent(playerScorePosition);
-world.addComponent(playerScoreText);
-world.addComponent({
-    entityId: playerScore.id,
-    name: 'player-score'
-});
-
-world.addEntity(aiScore);
-world.addComponent(aiScoreComponent);
-world.addComponent(aiScorePosition);
-world.addComponent(aiScoreText);
-world.addComponent({
-    entityId: aiScore.id,
-    name: 'ai-score'
-});
+world.addBundle(playerScoreBundle);
+world.addBundle(aiScoreBundle);
 
 function ballCollisionHandlingSystem(world: World) {
     for (const res of world.query(['velocity', 'collision', 'ball']) as [Velocity, Collision, BallComponent][]) {
 
         const [ballV, ballCol] = res;
-        if (ballCol.normal) {
-            // From https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
-            // I do not understand how this maths works
-            ballV.velocity = ballV.velocity.reflect(ballCol.normal);
-        }
+        ballV.velocity = ballV.velocity.reflect(ballCol.normal);
     }
 }
 
