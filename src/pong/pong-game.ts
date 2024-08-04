@@ -4,6 +4,7 @@ import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, Back
 import { collisionCleanupSystem, collisionLoggingSystem, collisionSystem } from './collision-system';
 import Engine from './Engine';
 import createBundle from '../ecs/Bundle/createBundle';
+import meowUrl from './meow-1.mp3';
 
 
 document.getElementById('pong-game')!.innerHTML = `
@@ -261,6 +262,9 @@ function ballCollisionHandlingSystem(world: World) {
 
         const [ballV, ballCol] = res;
         ballV.velocity = ballV.velocity.reflect(ballCol.normal);
+
+        const meow = new Audio(meowUrl);
+        meow.play();
     }
 }
 
