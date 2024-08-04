@@ -2,7 +2,7 @@ import Vector from '../Vector/Vector';
 import World from '../ecs/World/World';
 import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision } from './components';
 import { collisionCleanupSystem, collisionLoggingSystem, collisionSystem } from './collision-system';
-import App from './App';
+import Engine from './Engine';
 import createBundle from '../ecs/Bundle/createBundle';
 
 
@@ -302,7 +302,7 @@ function ballMovementSystem(world: World) {
 }
 
 
-new App(document.getElementById('pong-sketch')!)
+new Engine(document.getElementById('pong-sketch')!)
     .setWorld(world)
     .addSystem(collisionSystem)
     .addSystem(collisionLoggingSystem)

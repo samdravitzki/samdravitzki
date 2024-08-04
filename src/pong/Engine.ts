@@ -8,7 +8,7 @@ import { Collider, Position, PrimitiveShape } from './components';
 /**
  * Built based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
  */
-class App {
+class Engine {
     private _world: World = new World();
     private _systems: System[] = [];
 
@@ -18,12 +18,12 @@ class App {
         this._element = element;
     }
 
-    setWorld(world: World): App {
+    setWorld(world: World): Engine {
         this._world = world;
         return this;
     }
 
-    addSystem(system: System): App {
+    addSystem(system: System): Engine {
         this._systems.push(system);
         return this;
     }
@@ -112,4 +112,4 @@ class App {
     }
 }
 
-export default App;
+export default Engine;
