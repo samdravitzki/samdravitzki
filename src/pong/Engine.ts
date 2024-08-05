@@ -3,7 +3,15 @@ import System from '../ecs/System/System';
 import World from '../ecs/World/World';
 import Bounds from '../Bounds/Bounds';
 import Vector from '../Vector/Vector';
-import { Collider, Position, PrimitiveShape } from './components';
+import { Position, PrimitiveShape } from './components';
+import Entity from '../ecs/Entity/Entity';
+import Component from '../ecs/Component/Component';
+
+export type MousePositionComponent = Component & {
+    name: 'mouse-position',
+    x: number,
+    y: number,
+}
 
 /**
  * Built based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
@@ -41,17 +49,28 @@ class Engine {
                 p.colorMode(p.HSB, 360, 100, 100, 100);
                 p.noStroke();
                 p.rectMode(p.CENTER);
+
+                const inputEntity = new Entity();
+                const mousePositionComponent: MousePositionComponent = {
+                    name: 'mouse-position',
+                    entityId: inputEntity.id,
+                    x: 0,
+                    y: 0,
+                }
+                
+                wor.addEntity(inputEntity);
+                wor.addComponent(mousePositionComponent);
             }
 
             p.draw = function draw() {
                 p.background(240, 90, 60);
 
-                sys.forEach((system) => system(wor));
+                // Mouse position input system
+                const [mousePosition] = wor.query(['mouse-position'])[0] as [MousePositionComponent];
+                mousePosition.x = p.mouseX;
+                mousePosition.y = p.mouseY;
 
-                // Move player paddle system
-                for (const [pos] of wor.query(['position', 'paddle', 'player']) as [Position][]) {
-                    pos.position = new Vector(pos.position.x, p.mouseY)
-                }
+                sys.forEach((system) => system(wor));
 
                 // Render system
                 for (const [position, primitive] of wor.query(['position', 'primitive']) as [Position, PrimitiveShape][]) {
@@ -99,14 +118,14 @@ class Engine {
                 }
 
                 // Collider rendering system
-                for (const [col, pos] of wor.query(['collider', 'position']) as [Collider, Position][]) {
-                    if (col.type === 'aabb') {
-                        p.stroke(111, 100, 100);
-                        p.strokeWeight(0.5)
-                        p.noFill()
-                        p.rect(pos.position.x, pos.position.y, col.width, col.height);
-                    }
-                }
+                // for (const [col, pos] of wor.query(['collider', 'position']) as [Collider, Position][]) {
+                //     if (col.type === 'aabb') {
+                //         p.stroke(111, 100, 100);
+                //         p.strokeWeight(0.5)
+                //         p.noFill()
+                //         p.rect(pos.position.x, pos.position.y, col.width, col.height);
+                //     }
+                // }
             }
         }, this._element);
     }

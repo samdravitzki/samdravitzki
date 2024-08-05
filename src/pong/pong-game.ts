@@ -2,7 +2,7 @@ import Vector from '../Vector/Vector';
 import World from '../ecs/World/World';
 import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision } from './components';
 import { collisionCleanupSystem, collisionLoggingSystem, collisionSystem } from './collision-system';
-import Engine from './Engine';
+import Engine, { MousePositionComponent } from './Engine';
 import createBundle from '../ecs/Bundle/createBundle';
 import meowUrl from './meow-1.mp3';
 
@@ -261,12 +261,16 @@ world.addBundle(rightBackboardBundle);
 world.addBundle(playerScoreBundle);
 world.addBundle(aiScoreBundle);
 
+const sound = false;
+
 function ballCollisionHandlingSystem(world: World) {
     for (const [velocity, collision] of world.query(['velocity', 'collision', 'ball']) as [Velocity, Collision, BallComponent][]) {
         velocity.velocity = velocity.velocity.reflect(collision.normal);
 
-        const meow = new Audio(meowUrl);
-        meow.play();
+        if (sound) {
+            const meow = new Audio(meowUrl);
+            meow.play();
+        }
     }
 }
 
@@ -302,6 +306,14 @@ function aiPaddleSystem(world: World) {
     }
 }
 
+function playerPaddleSystem(world: World) {
+    const [mousePosition] = world.query(['mouse-position'])[0] as [MousePositionComponent];
+
+    for (const [pos] of world.query(['position', 'paddle', 'player']) as [Position][]) {
+        pos.position = new Vector(pos.position.x, mousePosition.y)
+    }
+}
+
 function ballMovementSystem(world: World) {
     const [velocity, position, speed] = world.query(['velocity', 'position', 'speed', 'ball', ])[0] as [Velocity, Position, { name: 'speed'; value: number }, BallComponent];
     position.position = position.position.plus(velocity.velocity.times(speed.value));
@@ -314,6 +326,7 @@ new Engine(document.getElementById('pong-sketch')!)
     .addSystem(collisionLoggingSystem)
     .addSystem(ballCollisionHandlingSystem)
     .addSystem(backboardCollisionHandlingSystem)
+    .addSystem(playerPaddleSystem)
     .addSystem(aiPaddleSystem)
     .addSystem(ballMovementSystem)
     .addSystem(collisionCleanupSystem)
