@@ -4,7 +4,9 @@ import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, Back
 import { collisionCleanupSystem, collisionLoggingSystem, collisionSystem } from './collision-system';
 import Engine, { MousePositionComponent } from './Engine';
 import createBundle from '../ecs/Bundle/createBundle';
-import meowUrl from './meow-1.mp3';
+import minionBongUrl from './sounds/minion-bong.mp3';
+
+const ballHitAudio = new Audio(minionBongUrl);
 
 
 document.getElementById('pong-game')!.innerHTML = `
@@ -261,15 +263,14 @@ world.addBundle(rightBackboardBundle);
 world.addBundle(playerScoreBundle);
 world.addBundle(aiScoreBundle);
 
-const sound = false;
+const sound = true;
 
 function ballCollisionHandlingSystem(world: World) {
     for (const [velocity, collision] of world.query(['velocity', 'collision', 'ball']) as [Velocity, Collision, BallComponent][]) {
         velocity.velocity = velocity.velocity.reflect(collision.normal);
 
         if (sound) {
-            const meow = new Audio(meowUrl);
-            meow.play();
+            ballHitAudio.play();
         }
     }
 }
