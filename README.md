@@ -36,14 +36,14 @@ The implementation of snake doesn't have to be anything special but there has to
 
 ### Ideas
 * Could be cool if the snake can break out of the canvas into the html page 
-* For the aestheic it would be cool to see if I could make it work in isometric view
+* For the aesthetic it would be cool to see if I could make it work in isometric view
 * I would like to add some kind of original idea to snake. Maybe something like adding momentum or a third dimension could be cool?
 * Support mobile
 
 ## Twenty games challenge
-Twenty games challenge is a guided sylabus designed to build skills in game development
+Twenty games challenge is a guided syllabus designed to build skills in game development
 
-My goal is to build up the skills to be able to create fun, origninal interactive experiences, this seems like a
+My goal is to build up the skills to be able to create fun, original interactive experiences, this seems like a
 great structured way to start developing these skills
 
 ### Scope
@@ -64,6 +64,14 @@ Complete "The Challenge" defined in https://20_games_challenge.gitlab.io/challen
 ### Resources
 - The challenge - https://20_games_challenge.gitlab.io/challenge/
 
+### Ideas
+* Make pong paddles rotate with the velocity of the mouse movement so that its not just hitting a flat object (make it a bit more interesting)
+* Since I had to create a generic collision system it might be worth creating some demos to be able to test the different types of collisions work as expected
+
+### Notes
+Since I have to create so many different games I saw this as an opportunity to look into learn about game engine design. This lead to introducing a bit of 
+abstraction creating a simple and basic structural implementation of ecs and a collision system
+
 
 ## Wave function collapse ⚪
 I have always wanted to build an implementation of wave function collapse and I have tried to do it a few different times before but could never figure it all out
@@ -78,16 +86,16 @@ At the moment I am thinking I want this project to include...
 
 ### TODO
 - [ ] Implement bitmap variation of wave function collapse
-- [ ] Implement tilemap variation of wave function collapse
+- [ ] Implement tile map variation of wave function collapse
 
 ### References
-* Wave function collapse algorithmn - https://github.com/mxgmn/WaveFunctionCollapse?tab=readme-ov-file#algorithm
+* Wave function collapse algorithm - https://github.com/mxgmn/WaveFunctionCollapse?tab=readme-ov-file#algorithm
 * Oksta - https://x.com/OskSta
 * Oksta WFC visualisation - https://x.com/OskSta/status/865200072685912064?lang=en
 * Boris the brave - https://www.boristhebrave.com/
 
 ## Maintenance and Other stuff
-All the things that need to be done to support building and maintaing these projects
+All the things that need to be done to support building and maintain these projects
 
 ### TODO
 - [x] Add unit test runner
@@ -95,12 +103,12 @@ All the things that need to be done to support building and maintaing these proj
 - [ ] Add linter
 - [ ] Automate linting in the CI
 - [ ] Look into introducing a dependency updating bot into the repository
-- [ ] Integrate github codepspaces to make development on this more portable
+- [ ] Integrate GitHub code spaces to make development on this more portable
 - [ ] Implement more extensible approach to adding new games to the site 
-    - that also dont require the use of dynamic module imports
-    - and have a better method for toggling the visbility of the games
+    - that also don't require the use of dynamic module imports
+    - and have a better method for toggling the visibility of the games
 
 # Technical debt
-- [x] base option required in vite config to get it to work with github pages
+- [x] base option required in Vite config to get it to work with GitHub pages
 - [ ] Redesign the snake code and make it more readable, testable and maintainable
 - [ ] Unit test the snake code
