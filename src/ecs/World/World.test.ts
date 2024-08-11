@@ -128,7 +128,7 @@ describe('addBundle method', () => {
 
 describe('removeComponent method', () => {
     test('should remove supplied component from world', () => {
-         // ARRANGE
+        // ARRANGE
         const world = new World();
         const entity1 = new Entity();
         const componentA = { entityId: entity1.id, name: 'A' };
@@ -143,6 +143,36 @@ describe('removeComponent method', () => {
         expect(world.components).toEqual([]);
     });
 });
+
+describe('removeEntity method', () => {
+    test('should remove entity from world with supplied id', () => {
+        // ARRANGE
+        const world = new World();
+        const entity1 = new Entity();
+        const componentA = { entityId: entity1.id, name: 'A' };
+        world.addEntity(entity1);
+        world.addComponent(componentA);
+
+        // ACT
+        world.removeEntity(entity1.id);
+
+        // ASSERT
+        expect(world.components).toEqual([]);
+    });
+
+    test('should components from world associated with entity', () => {
+        // ARRANGE
+        const world = new World();
+        const entity1 = new Entity();
+        world.addEntity(entity1);
+
+        // ACT
+        world.removeEntity(entity1.id);
+
+        // ASSERT
+        expect(world.entities).toEqual([]);
+    });
+})
 
 describe('query method', () => {
 

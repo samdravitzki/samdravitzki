@@ -66,6 +66,16 @@ export default class World {
         this._components = this._components.filter(c => !(c.entityId === component.entityId && c.name === component.name))
     }
 
+    removeEntity(entityId: string) {
+        this._entities = this._entities.filter((entity) => entity.id !== entityId);
+
+        const entityComponents = this._components.filter((component) => component.entityId === entityId);
+
+        entityComponents.forEach((entityComponent) => {
+            this.removeComponent(entityComponent);
+        })
+    }
+
     /**
      * Query the components of entities
      * Given a set of component names retrieve the list of the requested components for
