@@ -16,7 +16,7 @@ export type PrimitiveShape = Component & {
     name: 'primitive',
     stroke?: number[],
     strokeWeight?: number,
-    fill: false | number[],
+    fill: false | number[], // Fill doesn't make sense for line
     dash?: number[],
 } & ({
     type: 'circle',
@@ -36,9 +36,15 @@ export type PrimitiveShape = Component & {
     text: string,
 });
 
+export type Speed = { 
+    name: 'speed';
+    value: number; 
+}
+
 export type Collider = Component & {
     name: 'collider',
-}  & ({
+    layer?: string,
+} & ({
     type: 'aabb', // Axis-aligned bounding box (Just a rectangle that doesnt rotate)
     width: number,
     height: number,

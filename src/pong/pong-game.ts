@@ -1,10 +1,12 @@
 import Vector from '../Vector/Vector';
 import World from '../ecs/World/World';
-import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision } from './components';
-import { collisionCleanupSystem, collisionLoggingSystem, collisionSystem } from './collision-system';
+import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed, Collider } from './components';
+import { castRay, collisionCleanupSystem, collisionLoggingSystem, collisionSystem } from './collision-system';
 import Engine, { MousePositionComponent } from './Engine';
 import createBundle from '../ecs/Bundle/createBundle';
 import minionBongUrl from './sounds/minion-bong.mp3';
+import Component from '../ecs/Component/Component';
+import Entity from '../ecs/Entity/Entity';
 
 const ballHitAudio = new Audio(minionBongUrl);
 
@@ -57,7 +59,7 @@ const ballBundle = createBundle([
     }
 ]);
 
-const leftPaddleBundle = createBundle([
+const playerPaddleBundle = createBundle([
     'player',
     'paddle',
     {
@@ -80,7 +82,7 @@ const leftPaddleBundle = createBundle([
 
 ]);
 
-const rightPaddleBundle = createBundle([
+const aiPaddleBundle = createBundle([
     'ai',
     'paddle',
     {
@@ -93,6 +95,10 @@ const rightPaddleBundle = createBundle([
     {
         name: 'position',
         position: new Vector(490, 70),
+    },
+    {
+        name: 'speed',
+        value: 3,
     },
     {
         name: 'collider',
@@ -116,6 +122,7 @@ const northWallBundle = createBundle([
     },
     {
         name: 'collider',
+        layer: 'wall',
         type: 'aabb',
         width: 500,
         height: 10
@@ -137,6 +144,7 @@ const southWallBundle = createBundle([
     {
         name: 'collider',
         type: 'aabb',
+        layer: 'wall',
         width: 500,
         height: 10
     },
@@ -173,6 +181,7 @@ const leftBackboardBundle = createBundle([
     {
         name: 'collider',
         type: 'aabb',
+        layer: 'wall',
         width: 5,
         height: 230
     },
@@ -197,6 +206,7 @@ const rightBackboardBundle = createBundle([
     {
         name: 'collider',
         type: 'aabb',
+        layer: 'wall',
         width: 5,
         height: 230
     },
@@ -253,8 +263,8 @@ const aiScoreBundle = createBundle([
 const world = new World();
 
 world.addBundle(ballBundle);
-world.addBundle(leftPaddleBundle);
-world.addBundle(rightPaddleBundle);
+world.addBundle(playerPaddleBundle);
+world.addBundle(aiPaddleBundle);
 world.addBundle(northWallBundle);
 world.addBundle(southWallBundle);
 world.addBundle(centerLineBundle);
@@ -263,7 +273,7 @@ world.addBundle(rightBackboardBundle);
 world.addBundle(playerScoreBundle);
 world.addBundle(aiScoreBundle);
 
-const sound = true;
+const sound = false;
 
 function ballCollisionHandlingSystem(world: World) {
     for (const [velocity, collision] of world.query(['velocity', 'collision', 'ball']) as [Velocity, Collision, BallComponent][]) {
@@ -300,24 +310,93 @@ function backboardCollisionHandlingSystem(world: World) {
 }
 
 function aiPaddleSystem(world: World) {
-    for (const [position] of world.query(['position', 'paddle', 'ai']) as [Position][]) {
+    for (const [position, speed] of world.query(['position', 'speed', 'paddle', 'ai']) as [Position, Speed][]) {
         const [ballPosition] = world.query(['position', 'ball'])[0] as [Position, BallComponent];
 
-        position.position = new Vector(position.position.x, ballPosition.position.y)
+        // Cant just move it to where the ball is, need to move it to where the ball is going to be when it hits on the ai side
+        position.position = position.position.plus(Vector.create(0, (ballPosition.position.y - position.position.y) * 0.05))
+
+        if (position.position.y < 20) {
+            position.position = Vector.create(position.position.x, 20);
+        }
+
+        if (position.position.y > 230) {
+            position.position = Vector.create(position.position.x, 230);
+        }
     }
 }
 
 function playerPaddleSystem(world: World) {
     const [mousePosition] = world.query(['mouse-position'])[0] as [MousePositionComponent];
 
-    for (const [pos] of world.query(['position', 'paddle', 'player']) as [Position][]) {
-        pos.position = new Vector(pos.position.x, mousePosition.y)
+    for (const [position] of world.query(['position', 'paddle', 'player']) as [Position][]) {
+        position.position = new Vector(position.position.x, mousePosition.y);
+        
+        if (position.position.y < 20) {
+            position.position = Vector.create(position.position.x, 20);
+        }
+
+        if (position.position.y > 230) {
+            position.position = Vector.create(position.position.x, 230);
+        }
     }
 }
 
 function ballMovementSystem(world: World) {
-    const [velocity, position, speed] = world.query(['velocity', 'position', 'speed', 'ball', ])[0] as [Velocity, Position, { name: 'speed'; value: number }, BallComponent];
+    const [velocity, position, speed] = world.query(['velocity', 'position', 'speed', 'ball', ])[0] as [Velocity, Position, Speed, BallComponent];
     position.position = position.position.plus(velocity.velocity.times(speed.value));
+}
+
+type TrajectoryLineSegmentComponent = Component & { name: 'trajectory-line-segment' };
+
+function ballTrajectorySystem(world: World) {
+    const [ballPosition, ballVelocity] = world.query(['position', 'velocity', 'ball'])[0] as [Position, Velocity, BallComponent];
+
+    for (const [segment] of world.query(['trajectory-line']) as [TrajectoryLineSegmentComponent][]) {
+        world.removeEntity(segment.entityId);
+    }
+
+    const bounces = 20;
+    let linesAdded = 0;
+
+    let start = ballPosition.position;
+    let direction = ballVelocity.velocity;
+
+    // render trajectory line of each collision
+    while(linesAdded < bounces) {
+        const hit = castRay(world, {
+            position: start,
+            direction,
+            length: 1000,
+        })[0];
+
+        if (!hit) {
+            break;
+        }
+
+        world.addBundle(createBundle([
+            'trajectory-line',
+            {
+                name: 'position',
+                position: start,
+            },
+            {
+                name: 'primitive',
+                stroke: [(111 + 50 * linesAdded) % 255, 100, 100],
+                strokeWeight: 2,
+                type: 'line',
+                start: Vector.create(0, 0),
+                end: hit.position.minus(start),
+            }
+        ]));
+
+
+        start = hit.position;
+        direction = direction.reflect(hit.normal).normalised();
+
+        linesAdded += 1;
+    }
+    
 }
 
 
@@ -330,5 +409,6 @@ new Engine(document.getElementById('pong-sketch')!)
     .addSystem(playerPaddleSystem)
     .addSystem(aiPaddleSystem)
     .addSystem(ballMovementSystem)
+    .addSystem(ballTrajectorySystem)
     .addSystem(collisionCleanupSystem)
     .run()

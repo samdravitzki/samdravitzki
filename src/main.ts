@@ -8,7 +8,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <button id="pong-button">🎾</button>
     </div>
     <div id="snake-game" style="display:none;"></div>
-    <div id="pong-game" style="display:none;"></div>
+    <div id="pong-game"></div>
   </div>
 `
 

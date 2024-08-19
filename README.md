@@ -1,21 +1,21 @@
 # dravitzki.com
 The idea of this app is to have a single place I can experiment and publish various small projects focused around learning to build fun and original interactive experiences (games)
 
-They say the first 10 games you make are not going to be good, this is is a place for me to learn and experiement and learn the kind
+They say the first 10 games you make are not going to be good, this is is a place for me to learn and experiment and learn the kind
 of skills to make unique fun interactive things
 
 # Projects
 
-The status of the project is indicated by the following a trtaffic light system where...
+The status of the project is indicated by the following a traffic light system where...
 * ⚪ = not started
 * 🔴 = abandoned
 * 🟡 = in progress
 * 🟢 = complete
 
 
-## Simple snake 🟡
+## Simple snake 🟢
 ### Brief
-I want to understand what it takes to publish a working interactive experiement, so I am going to begin really simple with an implementation of snake and then try do something orginal with it
+I want to understand what it takes to publish a working interactive experiment, so I am going to begin really simple with an implementation of snake and then try do something orginal with it
 
 ### Scope
 The implementation of snake doesn't have to be anything special but there has to be some kind of original twist
@@ -40,7 +40,7 @@ The implementation of snake doesn't have to be anything special but there has to
 * I would like to add some kind of original idea to snake. Maybe something like adding momentum or a third dimension could be cool?
 * Support mobile
 
-## Twenty games challenge
+## Twenty games challenge 🟡
 Twenty games challenge is a guided syllabus designed to build skills in game development
 
 My goal is to build up the skills to be able to create fun, original interactive experiences, this seems like a
@@ -66,6 +66,7 @@ Complete "The Challenge" defined in https://20_games_challenge.gitlab.io/challen
 
 ### Ideas
 * Make pong paddles rotate with the velocity of the mouse movement so that its not just hitting a flat object (make it a bit more interesting)
+    * Could do this only when the player is clicking and if they're not clicking it causes the ball to spin
 * Since I had to create a generic collision system it might be worth creating some demos to be able to test the different types of collisions work as expected
 
 ### Notes

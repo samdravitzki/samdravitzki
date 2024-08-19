@@ -3,7 +3,7 @@ import System from '../ecs/System/System';
 import World from '../ecs/World/World';
 import Bounds from '../Bounds/Bounds';
 import Vector from '../Vector/Vector';
-import { Position, PrimitiveShape } from './components';
+import { Collider, Position, PrimitiveShape } from './components';
 import Entity from '../ecs/Entity/Entity';
 import Component from '../ecs/Component/Component';
 
@@ -118,14 +118,14 @@ class Engine {
                 }
 
                 // Collider rendering system
-                // for (const [col, pos] of wor.query(['collider', 'position']) as [Collider, Position][]) {
-                //     if (col.type === 'aabb') {
-                //         p.stroke(111, 100, 100);
-                //         p.strokeWeight(0.5)
-                //         p.noFill()
-                //         p.rect(pos.position.x, pos.position.y, col.width, col.height);
-                //     }
-                // }
+                for (const [col, pos] of wor.query(['collider', 'position']) as [Collider, Position][]) {
+                    if (col.type === 'aabb') {
+                        p.stroke(111, 100, 100);
+                        p.strokeWeight(0.5)
+                        p.noFill()
+                        p.rect(pos.position.x, pos.position.y, col.width, col.height);
+                    }
+                }
             }
         }, this._element);
     }
