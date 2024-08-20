@@ -24,8 +24,8 @@ function lineNormals(line: Line): [Vector, Vector] {
     const dx = line.x2 - line.x1;
     const dy = line.y2 - line.y1;
 
-    const normal1 = Vector.create(-dy, dx);
-    const normal2 = Vector.create(dy, -dx);
+    const normal1 = Vector.create(dy === 0 ? 0 : -dy, dx);
+    const normal2 = Vector.create(dy, dx === 0 ? 0 : -dx);
 
     return [normal1.normalised(), normal2.normalised()];
 }
@@ -51,7 +51,9 @@ function lineLineIntersection(line1: Line, line2: Line): Vector | null {
     const uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
     const uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
 
-    if (uA > 0 && uA < 1 && uB > 0 && uB < 1) {
+    const epsilon = 0.01;
+
+    if (uA >= 0 + epsilon && uA <= 1 - epsilon && uB >= 0 + epsilon && uB <= 1 - epsilon) {
         const intersectionX = x1 + (uA * (x2-x1));
         const intersectionY = y1 + (uA * (y2-y1));
 
@@ -136,7 +138,7 @@ function lineRectangleIntersection(line: Line, rectangle: Rectangle): Intersecti
         y2: bottomRight.y,
     }
 
-    const bottomNormal = lineNormals(rectangleRightLine)[1]
+    const bottomNormal = lineNormals(rectangleBottomLine)[1]
 
     const leftIntersection = lineLineIntersection(line, rectangleLeftLine);
     const topIntersection = lineLineIntersection(line, rectangleTopLine);

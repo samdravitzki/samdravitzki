@@ -40,11 +40,11 @@ const ballBundle = createBundle([
     },
     {
         name: 'position',
-        position: new Vector(200, 40),
+        position: new Vector(300, 200),
     },
     {
         name: 'velocity',
-        velocity: new Vector(1, 0.15),
+        velocity: new Vector(-0.5, -0.5),
     },
     {
         name: 'speed',
@@ -355,7 +355,7 @@ function ballTrajectorySystem(world: World) {
         world.removeEntity(segment.entityId);
     }
 
-    const bounces = 20;
+    const bounces = 10;
     let linesAdded = 0;
 
     let start = ballPosition.position;
@@ -389,6 +389,12 @@ function ballTrajectorySystem(world: World) {
                 end: hit.position.minus(start),
             }
         ]));
+
+        const length = start.minus(hit.position).length();
+
+        console.log(`bounce ${linesAdded + 1} length`, length);
+        console.log('hit pos', hit.position)
+        console.log('hit normal', hit.normal)
 
 
         start = hit.position;
