@@ -1,12 +1,11 @@
 import Vector from '../Vector/Vector';
 import World from '../ecs/World/World';
-import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed, Collider } from './components';
+import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed } from './components';
 import { castRay, collisionCleanupSystem, collisionLoggingSystem, collisionSystem } from './collision-system';
 import Engine, { MousePositionComponent } from './Engine';
 import createBundle from '../ecs/Bundle/createBundle';
 import minionBongUrl from './sounds/minion-bong.mp3';
 import Component from '../ecs/Component/Component';
-import Entity from '../ecs/Entity/Entity';
 
 const ballHitAudio = new Audio(minionBongUrl);
 
@@ -310,7 +309,7 @@ function backboardCollisionHandlingSystem(world: World) {
 }
 
 function aiPaddleSystem(world: World) {
-    for (const [position, speed] of world.query(['position', 'speed', 'paddle', 'ai']) as [Position, Speed][]) {
+    for (const [position] of world.query(['position', 'speed', 'paddle', 'ai']) as [Position, Speed][]) {
         const [ballPosition] = world.query(['position', 'ball'])[0] as [Position, BallComponent];
 
         // Cant just move it to where the ball is, need to move it to where the ball is going to be when it hits on the ai side
@@ -363,6 +362,7 @@ function ballTrajectorySystem(world: World) {
     let direction = ballVelocity.velocity;
 
     // render trajectory line of each collision
+    // Issue: the rays hitting the bottom and left walls appear to be clipping sometimes
     while(linesAdded < bounces) {
         const hit = castRay(world, {
             position: start,

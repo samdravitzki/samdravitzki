@@ -68,6 +68,7 @@ Complete "The Challenge" defined in https://20_games_challenge.gitlab.io/challen
 * Make pong paddles rotate with the velocity of the mouse movement so that its not just hitting a flat object (make it a bit more interesting)
     * Could do this only when the player is clicking and if they're not clicking it causes the ball to spin
 * Since I had to create a generic collision system it might be worth creating some demos to be able to test the different types of collisions work as expected
+* Have feature flags for ones I want to show, but rather than fully hiding the stuff that is WIP from viewers of the site put it under its own WIP section
 
 ### Notes
 Since I have to create so many different games I saw this as an opportunity to look into learn about game engine design. This lead to introducing a bit of 
