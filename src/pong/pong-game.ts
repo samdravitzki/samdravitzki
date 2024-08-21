@@ -370,7 +370,7 @@ function ballTrajectorySystem(world: World) {
             position: start,
             direction,
             length: 1000,
-        })[0];
+        }, { layer: 'wall' })[0];
 
         if (!hit) {
             break;

@@ -178,21 +178,29 @@ type Hit = {
     normal: Vector;
 }
 
+type CastRayOptions = {
+    layer?: string; // The collision layer that ray will collide with
+};
+
 /**
  * Given the world and a ray return the components of entities in which the ray intersects and the
  * points in which the ray intersects with them
  * 
  * Acts like a specialised form of query on the world
- * @param world 
- * @param ray 
+ * @param world the world to cast ray within
+ * @param ray the ray that is cast within the world
  * @returns the position and normal in which the ray collided
  */
-export function castRay(world: World, ray: Ray): Hit[] {
+export function castRay(world: World, ray: Ray, options?: CastRayOptions): Hit[] {
     const colliders = world.query(['position', 'collider']) as [Position, Collider][];
+
+    const filteredColliders = options?.layer === undefined 
+        ? colliders 
+        : colliders.filter(([,c]) => c.layer === options.layer);
 
     const hits: Hit[] = [];
 
-    for (const [position, collider] of colliders.filter(([,c]) => c.layer === 'wall')) {
+    for (const [position, collider] of filteredColliders) {
         if (collider.type === 'aabb') {
 
             const line: Line = {
