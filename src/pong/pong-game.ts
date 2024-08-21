@@ -75,6 +75,7 @@ const playerPaddleBundle = createBundle([
     {
         name: 'collider',
         type: 'aabb',
+        layer: 'wall',
         width: 5,
         height: 20
     },
@@ -102,6 +103,7 @@ const aiPaddleBundle = createBundle([
     {
         name: 'collider',
         type: 'aabb',
+        layer: 'wall',
         width: 5,
         height: 20
     }
@@ -355,14 +357,14 @@ function ballTrajectorySystem(world: World) {
         world.removeEntity(segment.entityId);
     }
 
-    const bounces = 10;
+    const bounces = 4;
     let linesAdded = 0;
 
-    let start = ballPosition.position;
+    // Start the ray a little back from the start of the center of the ball to mitigate issues with tunneling
+    let start = ballPosition.position.minus(ballVelocity.velocity.times(10));
     let direction = ballVelocity.velocity;
 
     // render trajectory line of each collision
-    // Issue: the rays hitting the bottom and left walls appear to be clipping sometimes
     while(linesAdded < bounces) {
         const hit = castRay(world, {
             position: start,
@@ -373,6 +375,8 @@ function ballTrajectorySystem(world: World) {
         if (!hit) {
             break;
         }
+
+        const end = hit.position;
 
         world.addBundle(createBundle([
             'trajectory-line',
@@ -386,18 +390,11 @@ function ballTrajectorySystem(world: World) {
                 strokeWeight: 2,
                 type: 'line',
                 start: Vector.create(0, 0),
-                end: hit.position.minus(start),
+                end: end.minus(start),
             }
         ]));
 
-        const length = start.minus(hit.position).length();
-
-        console.log(`bounce ${linesAdded + 1} length`, length);
-        console.log('hit pos', hit.position)
-        console.log('hit normal', hit.normal)
-
-
-        start = hit.position;
+        start = end;
         direction = direction.reflect(hit.normal).normalised();
 
         linesAdded += 1;

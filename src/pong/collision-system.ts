@@ -178,6 +178,15 @@ type Hit = {
     normal: Vector;
 }
 
+/**
+ * Given the world and a ray return the components of entities in which the ray intersects and the
+ * points in which the ray intersects with them
+ * 
+ * Acts like a specialised form of query on the world
+ * @param world 
+ * @param ray 
+ * @returns the position and normal in which the ray collided
+ */
 export function castRay(world: World, ray: Ray): Hit[] {
     const colliders = world.query(['position', 'collider']) as [Position, Collider][];
 
