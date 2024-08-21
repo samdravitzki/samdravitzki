@@ -51,13 +51,18 @@ Complete "The Challenge" defined in https://20_games_challenge.gitlab.io/challen
 
 ### TODO
     - [ ] Implement pong (Game #1)
-        - [x] Implement basic game
+        - [x] Create an arena with two walls and a divider.
+        - [x] Add a paddle on either end of the play field. Use player inputs to move the paddles up and down.
+        - [x] Add a ball that moves around the playfield and bounces off of the paddles and walls.
+        - [x] Detect when the ball leaves the playfield. Assign a point to the player who scored.
+        - [x] Track and display the score for each player.
+        - [ ] Change ball trajectory on contact with paddle (so trajectory doesn't stay the same the entire time)
         - [ ] Add a menu
-        - [ ] Add and end state
+        - [ ] Add an end state
         - [ ] Add sound effects
         - [ ] Implement an AI
         - [ ] Increase difficulty as game goes on
-        - [ ] Clamp the paddles to only fit within the walls
+        - [ ] Add ability to pause
     - [ ] Implement breakout (Game #2)
     - [ ] Implement the rest of the 10 games
 

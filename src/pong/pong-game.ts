@@ -1,6 +1,6 @@
 import Vector from '../Vector/Vector';
 import World from '../ecs/World/World';
-import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed } from './components';
+import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed, PaddleComponent, PlayerComponent } from './components';
 import { castRay, collisionCleanupSystem, collisionLoggingSystem, collisionSystem } from './collision-system';
 import Engine, { MousePositionComponent } from './Engine';
 import createBundle from '../ecs/Bundle/createBundle';
@@ -73,6 +73,14 @@ const playerPaddleBundle = createBundle([
         position: new Vector(10, 50),
     },
     {
+        name: 'speed',
+        value: 0.05,
+    },
+    {
+        name: 'velocity',
+        velocity: new Vector(0, 3),
+    },
+    {
         name: 'collider',
         type: 'aabb',
         layer: 'wall',
@@ -98,7 +106,7 @@ const aiPaddleBundle = createBundle([
     },
     {
         name: 'speed',
-        value: 3,
+        value: 0.05,
     },
     {
         name: 'collider',
@@ -279,6 +287,15 @@ const sound = false;
 function ballCollisionHandlingSystem(world: World) {
     for (const [velocity, collision] of world.query(['velocity', 'collision', 'ball']) as [Velocity, Collision, BallComponent][]) {
         velocity.velocity = velocity.velocity.reflect(collision.normal);
+    }
+}
+
+function paddleCollisionHandlingSystem(world: World) {
+    const [paddleSpeed] = world.query(['speed', 'paddle', 'player'])[0] as [Speed, PaddleComponent, PlayerComponent];
+    const [ballVelocity] = world.query(['velocity', 'ball'])[0] as [Velocity, BallComponent]
+
+    for (const [] of world.query(['velocity', 'collision', 'paddle']) as [Velocity, Collision, BallComponent][]) {
+        ballVelocity.velocity = ballVelocity.velocity.plus(Vector.create(paddleSpeed.value / 20, paddleSpeed.value / 10));
 
         if (sound) {
             ballHitAudio.play();
@@ -288,9 +305,9 @@ function ballCollisionHandlingSystem(world: World) {
 
 function backboardCollisionHandlingSystem(world: World) {
     for (const [backboard] of world.query(['backboard', 'collision']) as [BackboardComponent, Collision][]) {
-        const [ballPosition] = world.query(['position', 'ball'])[0] as [Position, BallComponent];
+        const [ballPosition, ballVelocity] = world.query(['position', 'velocity', 'ball'])[0] as [Position, Velocity, BallComponent];
 
-        ballPosition.position = new Vector(200, 40);
+        ballPosition.position = Vector.create(200, 40);
 
         if (backboard.owner == 'player') {
             const [score, primitive] = world.query(['score', 'primitive', 'player-score'])[0] as [ScoreComponent, PrimitiveShape];
@@ -298,6 +315,8 @@ function backboardCollisionHandlingSystem(world: World) {
             if (primitive.type === 'text') {
                 primitive.text = String(score.value);
             }
+
+            ballVelocity.velocity =  new Vector(-0.5, -0.5);
         }
 
         if (backboard.owner == 'ai') {
@@ -306,16 +325,18 @@ function backboardCollisionHandlingSystem(world: World) {
             if (primitive.type === 'text') {
                 primitive.text = String(score.value);
             }
+
+            ballVelocity.velocity =  new Vector(0.5, -0.5);
         }
     }
 }
 
 function aiPaddleSystem(world: World) {
-    for (const [position] of world.query(['position', 'speed', 'paddle', 'ai']) as [Position, Speed][]) {
+    for (const [position, speed] of world.query(['position', 'speed', 'paddle', 'ai']) as [Position, Speed][]) {
         const [ballPosition] = world.query(['position', 'ball'])[0] as [Position, BallComponent];
 
         // Cant just move it to where the ball is, need to move it to where the ball is going to be when it hits on the ai side
-        position.position = position.position.plus(Vector.create(0, (ballPosition.position.y - position.position.y) * 0.05))
+        position.position = position.position.plus(Vector.create(0, (ballPosition.position.y - position.position.y) * speed.value))
 
         if (position.position.y < 20) {
             position.position = Vector.create(position.position.x, 20);
@@ -330,8 +351,11 @@ function aiPaddleSystem(world: World) {
 function playerPaddleSystem(world: World) {
     const [mousePosition] = world.query(['mouse-position'])[0] as [MousePositionComponent];
 
-    for (const [position] of world.query(['position', 'paddle', 'player']) as [Position][]) {
-        position.position = new Vector(position.position.x, mousePosition.y);
+    for (const [position, speed] of world.query(['position', 'speed', 'paddle', 'player']) as [Position, Speed][]) {
+        const positionChange = mousePosition.y - position.position.y
+        position.position = position.position.plus(Vector.create(0, positionChange));
+
+        speed.value = positionChange;
         
         if (position.position.y < 20) {
             position.position = Vector.create(position.position.x, 20);
@@ -345,6 +369,7 @@ function playerPaddleSystem(world: World) {
 
 function ballMovementSystem(world: World) {
     const [velocity, position, speed] = world.query(['velocity', 'position', 'speed', 'ball', ])[0] as [Velocity, Position, Speed, BallComponent];
+
     position.position = position.position.plus(velocity.velocity.times(speed.value));
 }
 
@@ -361,7 +386,7 @@ function ballTrajectorySystem(world: World) {
     let linesAdded = 0;
 
     // Start the ray a little back from the start of the center of the ball to mitigate issues with tunneling
-    let start = ballPosition.position.minus(ballVelocity.velocity.times(10));
+    let start = ballPosition.position.minus(ballVelocity.velocity.normalised().times(10));
     let direction = ballVelocity.velocity;
 
     // render trajectory line of each collision
@@ -409,6 +434,7 @@ new Engine(document.getElementById('pong-sketch')!)
     .addSystem(collisionLoggingSystem)
     .addSystem(ballCollisionHandlingSystem)
     .addSystem(backboardCollisionHandlingSystem)
+    .addSystem(paddleCollisionHandlingSystem)
     .addSystem(playerPaddleSystem)
     .addSystem(aiPaddleSystem)
     .addSystem(ballMovementSystem)
