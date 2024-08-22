@@ -41,6 +41,19 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 import('./snake/snake-game');
 import('./pong/pong-game');
 
+// Load persisted state from localStorage
+const savedGameState = localStorage.getItem('activeGame');
+
+// Restore game displayed based on saved state
+if (savedGameState) {
+  const mainContent = document.getElementById('main-content')!;
+  mainContent.style.display = 'none';
+  
+  const activeGame = document.getElementById(`${savedGameState}-game`)!;
+  activeGame.style.display = 'block';
+}
+
+
 games.forEach((game) => {
   const pongGame = document.getElementById(`${game.name}-game`)!;
   const mainContent = document.getElementById('main-content')!;
@@ -48,10 +61,16 @@ games.forEach((game) => {
   document.getElementById(`${game.name}-button`)?.addEventListener('click', () => {
     pongGame.style.display = 'block';
     mainContent.style.display = 'none';
+
+    // Save the current active game to localStorage
+    localStorage.setItem('activeGame', game.name);
   });
 
   document.getElementById(`exit-${game.name}-button`)?.addEventListener('click', () => {
     pongGame.style.display = 'none';
     mainContent.style.display = 'block';
+
+    // Clear the saved game state
+    localStorage.removeItem('activeGame');
   });
 })
