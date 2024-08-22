@@ -4,25 +4,6 @@ import Snake from './Snake';
 import Bounds from '../Bounds/Bounds';
 import Vector from '../Vector/Vector';
 
-document.getElementById('snake-game')!.innerHTML = `
-    <button id="exit-snake-button">❌</button>
-    <div id="snake-sketch"></div>
-`;
-
-document.getElementById('exit-snake-button')?.addEventListener('click', () => {
-  const snakeGame = document.getElementById('snake-game')!;
-  const mainContent = document.getElementById('main-content')!;
-
-  if (snakeGame.style.display === 'block') {
-    snakeGame.style.display = 'none';
-    mainContent.style.display = 'block';
-  } else {
-    snakeGame.style.display = 'block';
-    mainContent.style.display = 'none';
-  }
-});
-
-
 
 function generateSnackPosition(bounds: Bounds) {
     return bounds.randomPosition(10)

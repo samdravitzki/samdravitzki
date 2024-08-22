@@ -9,25 +9,6 @@ import Component from '../ecs/Component/Component';
 
 const ballHitAudio = new Audio(minionBongUrl);
 
-
-document.getElementById('pong-game')!.innerHTML = `
-    <button id="exit-pong-button">❌</button>
-    <div id="pong-sketch"></div>
-`;
-
-document.getElementById('exit-pong-button')?.addEventListener('click', () => {
-    const snakeGame = document.getElementById('pong-game')!;
-    const mainContent = document.getElementById('main-content')!;
-
-    if (snakeGame.style.display === 'block') {
-        snakeGame.style.display = 'none';
-        mainContent.style.display = 'block';
-    } else {
-        snakeGame.style.display = 'block';
-        mainContent.style.display = 'none';
-    }
-});
-
 const ballBundle = createBundle([
     'ball',
     {

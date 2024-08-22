@@ -1,44 +1,57 @@
 import './style.css'
 
+type Game = {
+  name: string;
+  symbol: string;
+  gameId: string; 
+}
+
+const pong: Game = {
+  name: 'pong',
+  symbol: '🎾',
+  gameId: 'pong-sketch',
+}
+
+const snake: Game = {
+  name: 'snake',
+  symbol: '🐍',
+  gameId: 'snake-sketch',
+}
+
+const games = [snake, pong];
+
+
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
     <div id="main-content">
       <h1>dravitzki.com</h1>
-      <button id="snake-button">🐍</button>
-      <button id="pong-button">🎾</button>
+      ${games.map((game) => (`
+        <button id="${game.name}-button">${game.symbol}</button>
+      `)).join('')}
     </div>
-    <div id="snake-game" style="display:none;"></div>
-    <div id="pong-game"></div>
+    ${games.map((game) => (`
+      <div id="${game.name}-game" style="display:none;">
+        <button id="exit-${game.name}-button">❌</button>
+        <div id="${game.gameId}"></div>
+      </div>
+    `)).join('')}
   </div>
-`
+`;
 
 import('./snake/snake-game');
 import('./pong/pong-game');
 
-document.getElementById('snake-button')?.addEventListener('click', () => {
-  const snakeGame = document.getElementById('snake-game')!;
+games.forEach((game) => {
+  const pongGame = document.getElementById(`${game.name}-game`)!;
   const mainContent = document.getElementById('main-content')!;
 
-  if (snakeGame.style.display === 'block') {
-    snakeGame.style.display = 'none';
-    mainContent.style.display = 'block';
-  } else {
-    snakeGame.style.display = 'block';
-    mainContent.style.display = 'none';
-  }
-});
-
-document.getElementById('pong-button')?.addEventListener('click', () => {
-  const pongGame = document.getElementById('pong-game')!;
-  const mainContent = document.getElementById('main-content')!;
-
-  if (pongGame.style.display === 'block') {
-    pongGame.style.display = 'none';
-    mainContent.style.display = 'block';
-  } else {
+  document.getElementById(`${game.name}-button`)?.addEventListener('click', () => {
     pongGame.style.display = 'block';
     mainContent.style.display = 'none';
-  }
-});
+  });
 
-
+  document.getElementById(`exit-${game.name}-button`)?.addEventListener('click', () => {
+    pongGame.style.display = 'none';
+    mainContent.style.display = 'block';
+  });
+})
