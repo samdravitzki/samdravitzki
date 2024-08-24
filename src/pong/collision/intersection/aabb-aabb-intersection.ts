@@ -1,4 +1,5 @@
 import Vector from '../../../Vector/Vector';
+import { Aabb } from './collision-shapes';
 
 type AabbAabbIntersection = {
     contactPoint: Vector;
@@ -6,14 +7,6 @@ type AabbAabbIntersection = {
     penetration: number;
 };
 
-/**
- * Axis aligned bounding box
- */
-type Aabb = {
-    position: Vector;
-    width: number;
-    height: number;
-}
 /**
  * From https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/physicstutorials/4collisiondetection/Physics%20-%20Collision%20Detection.pdf
  * @param aabb1 
@@ -81,4 +74,4 @@ function aabbAabbIntersection(aabb1: Aabb, aabb2: Aabb): AabbAabbIntersection | 
 }
 
 export default aabbAabbIntersection;
-export type { Aabb, AabbAabbIntersection };
+export type { AabbAabbIntersection };

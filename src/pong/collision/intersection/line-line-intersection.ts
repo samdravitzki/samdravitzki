@@ -1,11 +1,5 @@
 import Vector from '../../../Vector/Vector';
-
-type Line = {
-    x1: number;
-    y1: number;
-    x2: number;
-    y2: number;
-}
+import { Line } from './collision-shapes';
 
 
 /**
@@ -43,4 +37,3 @@ function lineLineIntersection(line1: Line, line2: Line): Vector | null {
 }
 
 export default lineLineIntersection;
-export type { Line };

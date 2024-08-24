@@ -1,12 +1,6 @@
 import Vector from '../../../Vector/Vector';
-import lineLineIntersection, { Line } from './line-line-intersection';
-
-type Rectangle = {
-    x: number;
-    y: number;
-    height: number;
-    width: number;
-}
+import { Line, Rectangle } from './collision-shapes';
+import lineLineIntersection from './line-line-intersection';
 
 /**
  * Given a line return the two normal vectors perpendicular to that line
@@ -126,4 +120,4 @@ function lineRectangleIntersection(line: Line, rectangle: Rectangle): LineRectan
 }
 
 export default lineRectangleIntersection;
-export type { Rectangle };
+export type { LineRectangleIntersection };
