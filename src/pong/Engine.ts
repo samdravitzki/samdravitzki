@@ -70,6 +70,11 @@ class Engine {
                 
                 self._world.addEntity(inputEntity);
                 self._world.addComponent(mousePositionComponent);
+
+                
+                const startSystems = self._systems.get('start') ?? [];
+
+                startSystems.forEach((system) => system(self._world));
             }
 
             p.draw = function draw() {
