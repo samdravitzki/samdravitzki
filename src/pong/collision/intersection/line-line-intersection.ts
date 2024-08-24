@@ -11,14 +11,14 @@ import { Line } from './intersection-shapes';
  * @param line2 
  */
 function lineLineIntersection(line1: Line, line2: Line): Vector | null {
-    const x1 = line1.x1;
-    const x2 = line1.x2;
-    const x3 = line2.x1;
-    const x4 = line2.x2;
-    const y1 = line1.y1;
-    const y2 = line1.y2;
-    const y3 = line2.y1;
-    const y4 = line2.y2;
+    const x1 = line1.start.x;
+    const x2 = line1.end.x;
+    const x3 = line2.start.x;
+    const x4 = line2.end.x;
+    const y1 = line1.start.y;
+    const y2 = line1.end.y;
+    const y3 = line2.start.y;
+    const y4 = line2.end.y;
 
     const uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
     const uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));

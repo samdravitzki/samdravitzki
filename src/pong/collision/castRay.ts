@@ -42,10 +42,8 @@ function castRay(world: World, ray: Ray, options?: CastRayOptions): Hit[] {
         if (collider.type === 'aabb') {
 
             const line: Line = {
-                x1: ray.position.x,
-                y1: ray.position.y,
-                x2: ray.position.x + (ray.direction.x * ray.length), 
-                y2: ray.position.y + (ray.direction.y * ray.length), 
+                start: ray.position,
+                end: ray.position.plus(ray.direction.times(ray.length)),
             }
 
             const rectangle: Aabb = {

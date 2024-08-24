@@ -7,8 +7,8 @@ import lineLineIntersection from './line-line-intersection';
  * @param line 
  */
 function lineNormals(line: Line): [Vector, Vector] {
-    const dx = line.x2 - line.x1;
-    const dy = line.y2 - line.y1;
+    const dx = line.end.x - line.start.x;
+    const dy = line.end.y - line.start.y;
 
     const normal1 = Vector.create(dy === 0 ? 0 : -dy, dx);
     const normal2 = Vector.create(dy, dx === 0 ? 0 : -dx);
@@ -29,65 +29,57 @@ type LineAabbIntersection = { contactPoint: Vector, normal: Vector };
  */
 function lineAabbIntersection(line: Line, aabb: Aabb): LineAabbIntersection[] {
     // top-left point of aabb
-    const topLeft = {
-        x: aabb.position.x - aabb.width / 2,
-        y: aabb.position.y - aabb.height / 2,
-    };
+    const topLeft = Vector.create(
+        aabb.position.x - aabb.width / 2,
+        aabb.position.y - aabb.height / 2,
+    );
 
     // top-right point of aabb
-    const topRight = {
-        x: aabb.position.x + aabb.width / 2,
-        y: aabb.position.y - aabb.height / 2,
-    };
+    const topRight = Vector.create(
+        aabb.position.x + aabb.width / 2,
+        aabb.position.y - aabb.height / 2,
+    );
 
     // bottom-right point of aabb
-    const bottomRight = {
-        x: aabb.position.x + aabb.width / 2,
-        y: aabb.position.y + aabb.height / 2,
-    };
+    const bottomRight = Vector.create(
+        aabb.position.x + aabb.width / 2,
+        aabb.position.y + aabb.height / 2,
+    );
 
     // bottom-left point of aabb
-    const bottomLeft = {
-        x: aabb.position.x - aabb.width / 2,
-        y: aabb.position.y + aabb.height / 2,
-    };
+    const bottomLeft = Vector.create(
+        aabb.position.x - aabb.width / 2,
+        aabb.position.y + aabb.height / 2,
+    );
 
     // Line from top-left to bottom-left of aabb
     const aabbLeftLine = {
-        x1: topLeft.x,
-        y1: topLeft.y,
-        x2: bottomLeft.x,
-        y2: bottomLeft.y,
+        start: topLeft,
+        end: bottomLeft,
     }
 
     const leftNormal = lineNormals(aabbLeftLine)[0]
 
     // Line from top-left to top-right of aabb
     const aabbTopLine = {
-        x1: topLeft.x,
-        y1: topLeft.y,
-        x2: topRight.x,
-        y2: topRight.y,
+        start: topLeft,
+        end: topRight,
     }
 
     const topNormal = lineNormals(aabbTopLine)[0]
 
     // Line from top-right to bottom-right of aabb
     const aabbRightLine = {
-        x1: topRight.x,
-        y1: topRight.y,
-        x2: bottomRight.x,
-        y2: bottomRight.y,
+        start: topRight,
+        end: bottomRight,
     }
 
     const rightNormal = lineNormals(aabbRightLine)[1]
 
     // Line from bottom-right to bottom-left of aabb
     const aabbBottomLine = {
-        x1: bottomLeft.x,
-        y1: bottomLeft.y,
-        x2: bottomRight.x,
-        y2: bottomRight.y,
+        start: bottomLeft,
+        end: bottomRight,
     }
 
     const bottomNormal = lineNormals(aabbBottomLine)[1]
