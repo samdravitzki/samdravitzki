@@ -1,7 +1,8 @@
 import Vector from '../Vector/Vector';
 import World from '../ecs/World/World';
 import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed, PaddleComponent, PlayerComponent } from './components';
-import { castRay, collisionCleanupSystem, collisionLoggingSystem, collisionSystem } from './collision/collision-system';
+import collisionSystem, { collisionCleanupSystem, collisionLoggingSystem } from './collision/collision-system';
+import castRay from './collision/castRay';
 import Engine, { MousePositionComponent } from './Engine';
 import createBundle from '../ecs/Bundle/createBundle';
 import minionBongUrl from './sounds/minion-bong.mp3';

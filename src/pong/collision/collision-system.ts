@@ -1,6 +1,5 @@
 import World from '../../ecs/World/World';
 import { Position, Collider, Collision } from '../components';
-import castRay from './castRay';
 import aabbAabbIntersection from './intersection/aabb-aabb-intersection';
 import { Aabb } from './intersection/intersection-shapes';
 
@@ -66,9 +65,9 @@ function collisionCleanupSystem(world: World) {
     }
 }
 
+export default collisionSystem;
+
 export {
     collisionCleanupSystem,
     collisionLoggingSystem,
-    collisionSystem,
-    castRay,
 }
