@@ -3,7 +3,7 @@ import System from '../ecs/System/System';
 import World from '../ecs/World/World';
 import Bounds from '../Bounds/Bounds';
 import Vector from '../Vector/Vector';
-import { Collider, Position, PrimitiveShape } from './components';
+import { Position, PrimitiveShape } from './components';
 import Entity from '../ecs/Entity/Entity';
 import Component from '../ecs/Component/Component';
 
@@ -38,6 +38,7 @@ class Engine {
 
 
     run() {
+        // Have to rescope this because the p5 callback hs its own this
         const sys = this._systems;
         const wor = this._world;
         new p5(sketch => {

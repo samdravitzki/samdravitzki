@@ -366,6 +366,8 @@ function ballTrajectorySystem(world: World) {
     const bounces = 4;
     let linesAdded = 0;
 
+    // Issue: when the ball is moving really slow the ball dissapears
+
     // Start the ray a little back from the start of the center of the ball to mitigate issues with tunneling
     let start = ballPosition.position.minus(ballVelocity.velocity.normalised().times(10));
     let direction = ballVelocity.velocity;
