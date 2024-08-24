@@ -13,12 +13,14 @@ export type MousePositionComponent = Component & {
     y: number,
 }
 
+type EngineLifecycleEvent = 'start' | 'update';
+
 /**
  * Built based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
  */
 class Engine {
     private _world: World = new World();
-    private _systems: System[] = [];
+    private _systems = new Map<EngineLifecycleEvent, System[]>();
 
     private _element: HTMLElement;
 
@@ -31,16 +33,23 @@ class Engine {
         return this;
     }
 
-    addSystem(system: System): Engine {
-        this._systems.push(system);
+    addSystem(event: EngineLifecycleEvent, system: System): Engine {
+        const eventSystems = this._systems.get(event);
+
+        if (!eventSystems) {
+            this._systems.set(event, [system]);
+        } else {
+            eventSystems.push(system)
+        }
+        
         return this;
     }
 
 
     run() {
         // Have to rescope this because the p5 callback hs its own this
-        const sys = this._systems;
-        const wor = this._world;
+        const self = this;
+
         new p5(sketch => {
             const p = sketch as unknown as p5;
             const playBounds = Bounds.create(Vector.create(0, 0), Vector.create(500, 250));
@@ -59,22 +68,24 @@ class Engine {
                     y: 0,
                 }
                 
-                wor.addEntity(inputEntity);
-                wor.addComponent(mousePositionComponent);
+                self._world.addEntity(inputEntity);
+                self._world.addComponent(mousePositionComponent);
             }
 
             p.draw = function draw() {
                 p.background(240, 90, 60);
 
                 // Mouse position input system
-                const [mousePosition] = wor.query(['mouse-position'])[0] as [MousePositionComponent];
+                const [mousePosition] = self._world.query(['mouse-position'])[0] as [MousePositionComponent];
                 mousePosition.x = p.mouseX;
                 mousePosition.y = p.mouseY;
 
-                sys.forEach((system) => system(wor));
+                const updateSystems = self._systems.get('update') ?? [];
+
+                updateSystems.forEach((system) => system(self._world));
 
                 // Render system
-                for (const [position, primitive] of wor.query(['position', 'primitive']) as [Position, PrimitiveShape][]) {
+                for (const [position, primitive] of self._world.query(['position', 'primitive']) as [Position, PrimitiveShape][]) {
                     if (!primitive.strokeWeight) {
                         p.strokeWeight(0);
                     } else {
@@ -133,3 +144,4 @@ class Engine {
 }
 
 export default Engine;
+export type { EngineLifecycleEvent };
