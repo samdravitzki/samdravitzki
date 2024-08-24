@@ -28,11 +28,6 @@ class Engine {
         this._element = element;
     }
 
-    setWorld(world: World): Engine {
-        this._world = world;
-        return this;
-    }
-
     addSystem(event: EngineLifecycleEvent, system: System): Engine {
         const eventSystems = this._systems.get(event);
 

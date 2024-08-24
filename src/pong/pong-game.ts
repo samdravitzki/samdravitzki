@@ -162,7 +162,6 @@ function ballTrajectorySystem(world: World) {
 }
 
 new Engine(document.getElementById('pong-sketch')!)
-    .setWorld(new World())
     .addSystem('start', setupBall)
     .addSystem('start', setupPaddles)
     .addSystem('start', setupBoundaries)
