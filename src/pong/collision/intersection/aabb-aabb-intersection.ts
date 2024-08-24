@@ -1,5 +1,5 @@
 import Vector from '../../../Vector/Vector';
-import { Aabb } from './collision-shapes';
+import { Aabb } from './intersection-shapes';
 
 type AabbAabbIntersection = {
     contactPoint: Vector;

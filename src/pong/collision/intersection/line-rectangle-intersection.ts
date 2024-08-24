@@ -1,5 +1,5 @@
 import Vector from '../../../Vector/Vector';
-import { Line, Rectangle } from './collision-shapes';
+import { Line, Rectangle } from './intersection-shapes';
 import lineLineIntersection from './line-line-intersection';
 
 /**
