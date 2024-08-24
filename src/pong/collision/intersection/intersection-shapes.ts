@@ -7,13 +7,6 @@ export type Line = {
     y2: number;
 }
 
-export type Rectangle = {
-    x: number;
-    y: number;
-    height: number;
-    width: number;
-}
-
 /**
  * Axis aligned bounding box
  */

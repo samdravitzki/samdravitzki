@@ -1,8 +1,8 @@
 import World from '../../ecs/World/World';
 import Vector from '../../Vector/Vector';
 import { Collider, Position } from '../components';
-import { Line } from './intersection/line-line-intersection';
-import lineRectangleIntersection, { Rectangle } from './intersection/line-rectangle-intersection';
+import { Aabb, Line } from './intersection/intersection-shapes';
+import lineAabbIntersection from './intersection/line-aabb-intersection';
 
 
 type Ray = {
@@ -48,14 +48,13 @@ function castRay(world: World, ray: Ray, options?: CastRayOptions): Hit[] {
                 y2: ray.position.y + (ray.direction.y * ray.length), 
             }
 
-            const rectangle: Rectangle = {
-                x: position.position.x,
-                y: position.position.y,
+            const rectangle: Aabb = {
+                position: position.position,
                 width: collider.width,
                 height: collider.height,
             }
 
-            const intersections = lineRectangleIntersection(line, rectangle);
+            const intersections = lineAabbIntersection(line, rectangle);
 
             // Sort is a mutating method so it cannot be chained
             intersections.sort((intersectionA, intersectionB) => (
@@ -78,3 +77,4 @@ function castRay(world: World, ray: Ray, options?: CastRayOptions): Hit[] {
 }
 
 export default castRay;
+export type { Ray, CastRayOptions, Hit };
