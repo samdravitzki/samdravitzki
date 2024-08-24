@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import checker from 'vite-plugin-checker'
 
 
 export default defineConfig({
@@ -8,5 +9,10 @@ export default defineConfig({
             enabled: true,
             provider: 'v8',
         }
-    }
+    },
+    plugins: [
+        checker({
+            typescript: true,
+        }),
+    ]
 }) 
