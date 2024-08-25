@@ -18,14 +18,6 @@ function setupPaddles(world: World) {
             position: new Vector(10, 50),
         },
         {
-            name: 'speed',
-            value: 0.05,
-        },
-        {
-            name: 'velocity',
-            velocity: new Vector(0, 3),
-        },
-        {
             name: 'collider',
             type: 'aabb',
             layer: 'wall',

@@ -1,6 +1,6 @@
 import Vector from '../Vector/Vector';
 import World from '../ecs/World/World';
-import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed, PaddleComponent, PlayerComponent } from './components';
+import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed, PaddleComponent } from './components';
 import collisionSystem, { collisionCleanupSystem, collisionLoggingSystem } from './collision/collision-system';
 import castRay from './collision/castRay';
 import Engine, { MousePositionComponent } from './Engine';
@@ -23,11 +23,16 @@ function ballCollisionHandlingSystem(world: World) {
 }
 
 function paddleCollisionHandlingSystem(world: World) {
-    const [paddleSpeed] = world.query(['speed', 'paddle', 'player'])[0] as [Speed, PaddleComponent, PlayerComponent];
-    const [ballVelocity] = world.query(['velocity', 'ball'])[0] as [Velocity, BallComponent]
+    const [, ballSpeed] = world.query(['velocity', 'speed', 'ball'])[0] as [Velocity, Speed, BallComponent]
 
-    for (const [] of world.query(['velocity', 'collision', 'paddle']) as [Velocity, Collision, BallComponent][]) {
-        ballVelocity.velocity = ballVelocity.velocity.plus(Vector.create(paddleSpeed.value / 20, paddleSpeed.value / 10));
+    // Describes bow the collision handling worked in the orginial pong game
+    // https://www.vbforums.com/showthread.php?634246-RESOLVED-How-did-collision-in-the-original-Pong-happen
+
+    for (const [] of world.query(['collision', 'paddle']) as [Collision, PaddleComponent][]) {
+
+        // Increase ball velocity by 10%
+        ballSpeed.value += ballSpeed.value * 0.1;
+        console.log('ball speed', ballSpeed.value)
 
         if (sound) {
             ballHitAudio.play();
@@ -37,7 +42,7 @@ function paddleCollisionHandlingSystem(world: World) {
 
 function backboardCollisionHandlingSystem(world: World) {
     for (const [backboard] of world.query(['backboard', 'collision']) as [BackboardComponent, Collision][]) {
-        const [ballPosition, ballVelocity] = world.query(['position', 'velocity', 'ball'])[0] as [Position, Velocity, BallComponent];
+        const [ballPosition, ballVelocity, ballSpeed] = world.query(['position', 'velocity', 'speed', 'ball'])[0] as [Position, Velocity, Speed, BallComponent];
 
         ballPosition.position = Vector.create(200, 40);
 
@@ -60,6 +65,8 @@ function backboardCollisionHandlingSystem(world: World) {
 
             ballVelocity.velocity =  new Vector(0.5, -0.5);
         }
+
+        ballSpeed.value = 3
     }
 }
 
@@ -83,11 +90,9 @@ function aiPaddleSystem(world: World) {
 function playerPaddleSystem(world: World) {
     const [mousePosition] = world.query(['mouse-position'])[0] as [MousePositionComponent];
 
-    for (const [position, speed] of world.query(['position', 'speed', 'paddle', 'player']) as [Position, Speed][]) {
+    for (const [position] of world.query(['position', 'paddle', 'player']) as [Position][]) {
         const positionChange = mousePosition.y - position.position.y
         position.position = position.position.plus(Vector.create(0, positionChange));
-
-        speed.value = positionChange;
         
         if (position.position.y < 20) {
             position.position = Vector.create(position.position.x, 20);
