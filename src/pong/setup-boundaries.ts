@@ -1,27 +1,34 @@
+import Bounds from '../Bounds/Bounds';
 import createBundle from '../ecs/Bundle/createBundle';
 import World from '../ecs/World/World';
 import Vector from '../Vector/Vector';
 
 
 function setupBoundaries(world: World) {
+    const playBounds = Bounds.create(Vector.create(0, 0), Vector.create(500, 250));
+
+    const walllThickness = 10;
+
+    const backboardThickness = 5;
+    
     const northWallBundle = createBundle([
         {
             name: 'primitive',
             fill:  [240, 60, 100],
             type: 'square',
-            width: 500,
-            height: 10
+            width: playBounds.max.x,
+            height: walllThickness
         },
         {
             name: 'position',
-            position: new Vector(250, 5),
+            position: new Vector(playBounds.center.x, playBounds.min.y + walllThickness / 2),
         },
         {
             name: 'collider',
             layer: 'wall',
             type: 'aabb',
-            width: 500,
-            height: 10
+            width: playBounds.max.x,
+            height: walllThickness
         }
     ]);
     
@@ -30,19 +37,19 @@ function setupBoundaries(world: World) {
             name: 'primitive',
             fill:  [240, 60, 100],
             type: 'square',
-            width: 500,
-            height: 10
+            width: playBounds.max.x,
+            height: walllThickness
         },
         {
             name: 'position',
-            position: new Vector(250, 245),
+            position: new Vector(playBounds.center.x, playBounds.max.y - walllThickness / 2),
         },
         {
             name: 'collider',
             type: 'aabb',
             layer: 'wall',
-            width: 500,
-            height: 10
+            width: playBounds.max.x,
+            height: walllThickness
         },
     ]);
     
@@ -53,12 +60,12 @@ function setupBoundaries(world: World) {
             strokeWeight: 2,
             fill:  [240, 60, 100],
             type: 'line',
-            start: new Vector(0, -125),
-            end: new Vector(0, 125)
+            start: new Vector(0, -playBounds.center.y),
+            end: new Vector(0, playBounds.center.y)
         },
         {
             name: 'position',
-            position: new Vector(250, 125),
+            position: playBounds.center,
         },
     ]);
     
@@ -67,18 +74,18 @@ function setupBoundaries(world: World) {
             name: 'primitive',
             fill:  [352, 94, 100],
             type: 'square',
-            width: 5,
-            height: 250
+            width: backboardThickness,
+            height: playBounds.max.y
         },
         {
             name: 'position',
-            position: new Vector(2.5, 125),
+            position: new Vector(playBounds.min.x + backboardThickness / 2, playBounds.center.y),
         },
         {
             name: 'collider',
             type: 'aabb',
             layer: 'wall',
-            width: 5,
+            width: backboardThickness,
             height: 230
         },
         {
@@ -92,18 +99,18 @@ function setupBoundaries(world: World) {
             name: 'primitive',
             fill:  [352, 94, 100],
             type: 'square',
-            width: 5,
-            height: 250
+            width: backboardThickness,
+            height: playBounds.max.y
         },
         {
             name: 'position',
-            position: new Vector(497.5, 125),
+            position: new Vector(playBounds.max.x - backboardThickness / 2, playBounds.center.y),
         },
         {
             name: 'collider',
             type: 'aabb',
             layer: 'wall',
-            width: 5,
+            width: backboardThickness,
             height: 230
         },
         {
