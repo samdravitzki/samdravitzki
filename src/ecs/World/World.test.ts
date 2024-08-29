@@ -9,12 +9,12 @@ describe('addComponent method', () => {
         // ARRANGE
         const world = new World();
         const entity1 = new Entity();
-        const componentA = { entityId: entity1.id, name: 'A' };
+        const componentA: Component = { name: 'A' };
         
         world.addEntity(entity1);
 
         // ACT
-        world.addComponent(componentA);
+        world.addComponent(entity1.id, componentA);
 
         // ASSERT
         expect(world.components).toEqual([componentA])
@@ -25,13 +25,13 @@ describe('addComponent method', () => {
         // ARRANGE
         const world = new World();
         const entity1 = new Entity();
-        const componentA = { entityId: entity1.id, name: 'A' };
+        const componentA: Component = { name: 'A' };
 
         world.addEntity(entity1);
-        world.addComponent(componentA);
+        world.addComponent(entity1.id, componentA);
 
         // ACT and ASSERT
-        expect(() => world.addComponent(componentA)).toThrowError()
+        expect(() => world.addComponent(entity1.id, componentA)).toThrowError()
     })
 });
 
@@ -40,12 +40,12 @@ describe('replaceComponent method', () => {
         // ARRANGE
         const world = new World();
         const entity1 = new Entity();
-        const componentA = { entityId: entity1.id, name: 'A' };
+        const componentA: Component = { name: 'A' };
         
         world.addEntity(entity1);
 
         // ACT
-        world.replaceComponent(componentA);
+        world.replaceComponent(entity1.id, componentA);
 
         // ASSERT
         expect(world.components).toEqual([componentA])
@@ -55,14 +55,14 @@ describe('replaceComponent method', () => {
         // ARRANGE
         const world = new World();
         const entity1 = new Entity();
-        const componentAV1 = { entityId: entity1.id, name: 'A', value: 1 };
-        const componentAV2 = { entityId: entity1.id, name: 'A', value: 2 };
+        const componentAV1 = { name: 'A', value: 1 };
+        const componentAV2 = { name: 'A', value: 2 };
         
         world.addEntity(entity1);
-        world.addComponent(componentAV1)
+        world.addComponent(entity1.id, componentAV1)
 
         // ACT
-        world.replaceComponent(componentAV2);
+        world.replaceComponent(entity1.id, componentAV2);
 
         // ASSERT
         expect(world.components).toEqual([componentAV2])
@@ -72,19 +72,19 @@ describe('replaceComponent method', () => {
         // ARRANGE
         const world = new World();
         const entity1 = new Entity();
-        const componentAV1 = { entityId: entity1.id, name: 'A', value: 1 };
-        const componentAV2 = { entityId: entity1.id, name: 'A', value: 2 };
-        const componentB = { entityId: entity1.id, name: 'B' };
+        const componentAV1 = { name: 'A', value: 1 };
+        const componentAV2 = { name: 'A', value: 2 };
+        const componentB = { name: 'B' };
         
         world.addEntity(entity1);
-        world.addComponent(componentAV1)
-        world.addComponent(componentB)
+        world.addComponent(entity1.id, componentAV1)
+        world.addComponent(entity1.id, componentB)
 
         // ACT
-        world.replaceComponent(componentAV2);
+        world.replaceComponent(entity1.id, componentAV2);
 
         // ASSERT
-        expect(world.components).toEqual([componentB, componentAV2])
+        expect(world.components).toEqual([componentAV2, componentB])
     });
 });
 
@@ -113,8 +113,8 @@ describe('addBundle method', () => {
         const bundle: Bundle = {
             entity: bundleEntity,
             components: [
-                { entityId: bundleEntity.id, name: 'A' },
-                { entityId: bundleEntity.id, name: 'B' },
+                { name: 'A' },
+                { name: 'B' },
             ],
         };
 
@@ -134,10 +134,10 @@ describe('removeComponent method', () => {
         const componentA = { entityId: entity1.id, name: 'A' };
 
         world.addEntity(entity1);
-        world.addComponent(componentA);
+        world.addComponent(entity1.id, componentA);
 
         // ACT
-        world.removeComponent(componentA);
+        world.removeComponent(entity1.id, componentA);
 
         // ASSERT
         expect(world.components).toEqual([]);
@@ -151,7 +151,7 @@ describe('removeEntity method', () => {
         const entity1 = new Entity();
         const componentA = { entityId: entity1.id, name: 'A' };
         world.addEntity(entity1);
-        world.addComponent(componentA);
+        world.addComponent(entity1.id, componentA);
 
         // ACT
         world.removeEntity(entity1.id);
@@ -160,7 +160,7 @@ describe('removeEntity method', () => {
         expect(world.components).toEqual([]);
     });
 
-    test('should components from world associated with entity', () => {
+    test('should remove components from world associated with entity', () => {
         // ARRANGE
         const world = new World();
         const entity1 = new Entity();
@@ -176,21 +176,21 @@ describe('removeEntity method', () => {
 
 describe('query method', () => {
 
-    test('should return entities when requesting a single component type', () => {
+    test('should return entities with component when requesting a single component type', () => {
         // ARRANGE
         const entity1 = new Entity();
         const entity2 = new Entity();
-        const componentA1: Component = { entityId: entity1.id, name: 'A' };
-        const componentA2: Component = { entityId: entity2.id, name: 'A' };
+        const componentA1: Component = { name: 'A' };
+        const componentA2: Component = { name: 'A' };
 
         const world = new World();
         world.addEntity(entity1);
         world.addEntity(entity2);
-        world.addComponent(componentA1);
-        world.addComponent(componentA2);
+        world.addComponent(entity1.id, componentA1);
+        world.addComponent(entity2.id, componentA2);
         
         // ACT
-        const result = world.query(['A']);
+        const result = world.query(['A']).map(({ components }) => components);
         
         // ASSERT
         expect(result).toEqual([
@@ -203,21 +203,21 @@ describe('query method', () => {
         // ARRANGE
         const entity1 = new Entity();
         const entity2 = new Entity();
-        const componentA1: Component = { entityId: entity1.id, name: 'A' };
-        const componentB1: Component = { entityId: entity1.id, name: 'B' };
-        const componentA2: Component = { entityId: entity2.id, name: 'A' };
-        const componentB2: Component = { entityId: entity2.id, name: 'B' };
+        const componentA1: Component = { name: 'A' };
+        const componentB1: Component = { name: 'B' };
+        const componentA2: Component = { name: 'A' };
+        const componentB2: Component = { name: 'B' };
 
         const world = new World();
         world.addEntity(entity1);
         world.addEntity(entity2);
-        world.addComponent(componentA1);
-        world.addComponent(componentB1);
-        world.addComponent(componentA2);
-        world.addComponent(componentB2);
+        world.addComponent(entity1.id, componentA1);
+        world.addComponent(entity1.id, componentB1);
+        world.addComponent(entity2.id, componentA2);
+        world.addComponent(entity2.id, componentB2);
         
         // ACT
-        const result = world.query(['A', 'B']);
+        const result = world.query(['A', 'B']).map(({ components }) => components);;
         
         // ASSERT
         expect(result).toEqual([
@@ -229,18 +229,18 @@ describe('query method', () => {
     test('should only return requested components of entities', () => {
          // ARRANGE
          const entity1 = new Entity();
-         const componentA1: Component = { entityId: entity1.id, name: 'A' };
-         const componentB1: Component = { entityId: entity1.id, name: 'B' };
-         const componentC1: Component = { entityId: entity1.id, name: 'C' };
+         const componentA1: Component = { name: 'A' };
+         const componentB1: Component = { name: 'B' };
+         const componentC1: Component = { name: 'C' };
 
          const world = new World();
          world.addEntity(entity1);
-         world.addComponent(componentA1);
-         world.addComponent(componentB1);
-         world.addComponent(componentC1);
+         world.addComponent(entity1.id, componentA1);
+         world.addComponent(entity1.id, componentB1);
+         world.addComponent(entity1.id, componentC1);
          
          // ACT
-         const result = world.query(['A', 'B']);
+         const result = world.query(['A', 'B']).map(({ components }) => components);;
          
          // ASSERT
          expect(result).toEqual([
@@ -252,19 +252,19 @@ describe('query method', () => {
         // ARRANGE
         const entity1 = new Entity();
         const entity2 = new Entity();
-        const componentA1: Component = { entityId: entity1.id, name: 'A' };
-        const componentB1: Component = { entityId: entity1.id, name: 'B' };
-        const componentA2: Component = { entityId: entity2.id, name: 'A' };
+        const componentA1: Component = { name: 'A' };
+        const componentB1: Component = { name: 'B' };
+        const componentA2: Component = { name: 'A' };
 
         const world = new World();
         world.addEntity(entity1);
         world.addEntity(entity2);
-        world.addComponent(componentA1);
-        world.addComponent(componentB1);
-        world.addComponent(componentA2);
+        world.addComponent(entity1.id, componentA1);
+        world.addComponent(entity1.id, componentB1);
+        world.addComponent(entity2.id, componentA2);
         
         // ACT
-        const result = world.query(['A', 'B']);
+        const result = world.query(['A', 'B']).map(({ components }) => components);;
         
         // ASSERT
         expect(result).toEqual([
@@ -275,11 +275,11 @@ describe('query method', () => {
     test('should return empty list when requesting a component type that does not exist', () => {
         // ARRANGE
         const entity1 = new Entity();
-        const componentA1: Component = { entityId: entity1.id, name: 'A' };
+        const componentA1: Component = { name: 'A' };
 
         const world = new World();
         world.addEntity(entity1);
-        world.addComponent(componentA1);
+        world.addComponent(entity1.id, componentA1);
         
         // ACT
         const result = world.query(['i-dont-exist']);
@@ -296,7 +296,7 @@ describe('query method', () => {
         world.addEntity(entity1);
         
         // ACT
-        const result = world.query([]);
+        const result = world.query([]).map(({ components }) => components).flat();
         
         // ASSERT
         expect(result).toEqual([]);
@@ -316,18 +316,18 @@ describe('query method', () => {
     test('should return components in requested order', () => {
          // ARRANGE
          const entity1 = new Entity();
-         const componentA1: Component = { entityId: entity1.id, name: 'A' };
-         const componentB1: Component = { entityId: entity1.id, name: 'B' };
-         const componentC1: Component = { entityId: entity1.id, name: 'C' };
+         const componentA1: Component = { name: 'A' };
+         const componentB1: Component = { name: 'B' };
+         const componentC1: Component = { name: 'C' };
  
          const world = new World();
          world.addEntity(entity1);
-         world.addComponent(componentA1);
-         world.addComponent(componentB1);
-         world.addComponent(componentC1);
+         world.addComponent(entity1.id, componentA1);
+         world.addComponent(entity1.id, componentB1);
+         world.addComponent(entity1.id, componentC1);
          
          // ACT
-         const result = world.query(['C', 'B', 'A']);
+         const result = world.query(['C', 'B', 'A']).map(({ components }) => components);;
          
          // ASSERT
          expect(result).toEqual([

@@ -2,86 +2,101 @@ import Bundle from '../Bundle/Bundle';
 import Component from '../Component/Component';
 import Entity from '../Entity/Entity';
 
+type EntityId = string;
+
+type WorldQueryResultItem<T extends Component[]> = { entityId: string, components: T };
+
 /**
  * Reason for choosing an ECS approach is that I have worked with alot of game engines before
  * and they are all very inheritance based and I wanted to see how it would work using one
  * that prefers composition over inheritance.
  */
 export default class World {
+    // Note: This entity array is pretty useless now so i should remove it
     private _entities: Entity[] = [];
-    private _components: Component[] = [];
+
+    private _components_by_entity = new Map<EntityId, Map<string, Component>>;
 
     get entities(): Readonly<Entity>[] {
         return this._entities;
     }
 
     get components(): Readonly<Component>[] {
-        return this._components;
+        const componentMaps = Array.from(this._components_by_entity.values());
+
+        const allComponents = componentMaps.map((component) => {
+            return Array.from(component.values());
+        }).flat();
+
+        return allComponents;
     }
 
     addEntity(entity: Entity) {
         this._entities.push(entity);
+        this._components_by_entity.set(entity.id, new Map());
     }
 
-    addComponent(component: Component) {
-        const result = this
-        .query([component.name])
-        .filter(entitiesComponents => entitiesComponents[0].entityId === component.entityId);
+    addComponent(entityId: string, component: Component) {
+        const entitiesComponents = this._components_by_entity.get(entityId);
 
-        if (result.length !== 0) {
+        if (!entitiesComponents) {
+            throw new Error(`Entity with id ${entityId} does not exist`)
+        }
+
+        const result = entitiesComponents.get(component.name);
+
+        if (result !== undefined) {
             throw new Error(`Entity cannot have more than one component of type '${component.name}'`)
         }
         
-        this._components.push(component);
+        entitiesComponents.set(component.name, component);
     }
 
     addBundle(bundle: Bundle) {
         this.addEntity(bundle.entity);
 
         bundle.components.forEach((component) => {
-            this.addComponent(component);
+            this.addComponent(bundle.entity.id, component);
         });
     }
 
-    replaceComponent(component: Component) {
-        const matchingComponent = this._components
-            .filter(existingComponent => (
-                existingComponent.name === component.name 
-                && existingComponent.entityId === component.entityId
-            ));
-        
-        if (matchingComponent.length !== 0) {
-            const item = matchingComponent[0];
-            const index = this._components.indexOf(item)
+    replaceComponent(entityId: string, component: Component) {
+        const entitiesComponents = this._components_by_entity.get(entityId);
 
-            if (index > -1) {
-                this._components.splice(index, 1);
-            }
+        if (!entitiesComponents) {
+            throw new Error(`Entity with id ${entityId} does not exist`)
         }
 
-        this.addComponent(component);
+        entitiesComponents.set(component.name, component);
     }
 
-    removeComponent(component: Component) {
-        this._components = this._components.filter(c => !(c.entityId === component.entityId && c.name === component.name))
+    removeComponent(entityId: string, component: Component) {
+        const entitiesComponents = this._components_by_entity.get(entityId);
+
+        if (!entitiesComponents) {
+            throw new Error(`Entity with id ${entityId} does not exist`)
+        }
+
+        entitiesComponents.delete(component.name);
     }
 
     removeEntity(entityId: string) {
         this._entities = this._entities.filter((entity) => entity.id !== entityId);
 
-        const entityComponents = this._components.filter((component) => component.entityId === entityId);
 
-        entityComponents.forEach((entityComponent) => {
-            this.removeComponent(entityComponent);
-        })
+        const entityExists = this._components_by_entity.has(entityId);
+
+        if (!entityExists) {
+            throw new Error(`Entity with id ${entityId} does not exist`)
+        }
+    
+        this._components_by_entity.delete(entityId);
     }
 
     /**
      * Query the components of entities
      * Given a set of component names retrieve the list of the requested components for
      * each entity with those components
-     * 
-     * Each set of components returned relates to one entity
      * 
      * You can assume that for each of the components returned are in the order of the
      * supplied component names
@@ -90,32 +105,28 @@ export default class World {
      * associated with a particular entity that has those components)
      * @param components a list of component names
      */
-    query(components: string[]): Component[][] {
+    query<T extends Component[]>(components: string[]): WorldQueryResultItem<T>[] {
 
-        const entityComponentGroups: Record<string, Component[]> = {};
+        const result: WorldQueryResultItem<T>[] = [];
 
-        components.forEach((componentName) => {
-            const matchingComponents = this._components.filter((component) => component.name === componentName);
+        for (var [entityId, entitiesComponents] of this._components_by_entity.entries()) {
+            const queriedComponents = components.map((componentName) => {
+                return entitiesComponents.get(componentName);
+            })
 
-            matchingComponents.forEach((matchedComponent) => {
-                if (!entityComponentGroups[matchedComponent.entityId]) {
-                    entityComponentGroups[matchedComponent.entityId] = [];
-                }
-                entityComponentGroups[matchedComponent.entityId].push(matchedComponent);
-            });
-        });
+            const hasAllComponents = queriedComponents
+                .every((queriedComponent) => queriedComponent !== undefined);
 
-        const simplifiedEntityComponentGroups = Object.values(entityComponentGroups);
+            if (hasAllComponents) {
+                result.push({
+                    entityId,
+                    components: queriedComponents as T,
+                });
+            }
 
-        // Filter out entities that only matched some of the supplied components
-        const onlyMatchingComponents = simplifiedEntityComponentGroups
-            .filter((group) => {
-                const includesAllComponentsRequested = group.every(item => components.includes(item.name));
-                const sameLengthAsRequestedComponents = group.length === components.length
 
-                return includesAllComponentsRequested && sameLengthAsRequestedComponents;
-            });
+        }
 
-        return onlyMatchingComponents;
+        return result;
     }
 }

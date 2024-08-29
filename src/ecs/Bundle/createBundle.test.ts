@@ -25,16 +25,3 @@ test('should return bundle containing component object when component info objec
     expect(result.components[0].name).toEqual(componentInfo.name);
     expect(result.components[0]).toHaveProperty('value');
 });
-
-test('should return bundle containing components all referencing the bundles entities id', () => {
-    const result = createBundle([
-        { name: 'abc' },
-        { name: 'efg' }
-    ]);
-
-    const expectedEntityId = result.entity.id;
-
-    result.components.forEach((component) => {
-        expect(component.entityId).toEqual(expectedEntityId);
-    });
-});

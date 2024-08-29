@@ -117,5 +117,3 @@ All the things that need to be done to support building and maintain these proje
 
 # Technical debt
 - [x] base option required in Vite config to get it to work with GitHub pages
-- [ ] Redesign the snake code and make it more readable, testable and maintainable
-- [ ] Unit test the snake code

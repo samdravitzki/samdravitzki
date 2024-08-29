@@ -58,13 +58,12 @@ class Engine {
                 const inputEntity = new Entity();
                 const mousePositionComponent: MousePositionComponent = {
                     name: 'mouse-position',
-                    entityId: inputEntity.id,
                     x: 0,
                     y: 0,
                 }
                 
                 self._world.addEntity(inputEntity);
-                self._world.addComponent(mousePositionComponent);
+                self._world.addComponent(inputEntity.id, mousePositionComponent);
 
                 
                 const startSystems = self._systems.get('start') ?? [];
@@ -76,7 +75,7 @@ class Engine {
                 p.background(240, 90, 60);
 
                 // Mouse position input system
-                const [mousePosition] = self._world.query(['mouse-position'])[0] as [MousePositionComponent];
+                const { components: [mousePosition] } = self._world.query<[MousePositionComponent]>(['mouse-position'])[0];
                 mousePosition.x = p.mouseX;
                 mousePosition.y = p.mouseY;
 
@@ -85,7 +84,7 @@ class Engine {
                 updateSystems.forEach((system) => system(self._world));
 
                 // Render system
-                for (const [position, primitive] of self._world.query(['position', 'primitive']) as [Position, PrimitiveShape][]) {
+                for (const { components: [position, primitive] } of self._world.query<[Position, PrimitiveShape]>(['position', 'primitive'])) {
                     if (!primitive.strokeWeight) {
                         p.strokeWeight(0);
                     } else {

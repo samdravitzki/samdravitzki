@@ -5,12 +5,12 @@ import { Aabb } from './intersection/intersection-shapes';
 
 
 function collisionSystem(world: World) {
-    const colliders = world.query(['position', 'collider']) as [Position, Collider][];
+    const colliders = world.query<[Position, Collider]>(['position', 'collider']);
 
-    for (const [positionA, colliderA] of colliders) {
-        for (const [positionB, colliderB] of colliders) {
+    for (const { entityId: entityA, components: [positionA, colliderA]} of colliders) {
+        for (const { entityId: entityB, components: [positionB, colliderB] } of colliders) {
 
-            if (positionA.entityId === positionB.entityId) {
+            if (entityA === entityB) {
                 // Exclude collisions with itself
                 continue;
             }
@@ -32,14 +32,13 @@ function collisionSystem(world: World) {
 
                 if (intersection) {
                     const collision: Collision = {
-                        entityId: colliderA.entityId,
                         name: 'collision',
                         contactPoint: intersection.contactPoint, // Contact point on a AABB is just its local origin
                         normal: intersection.normal,
                         penetration: intersection.penetration,
                     }
 
-                    world.replaceComponent(collision)
+                    world.replaceComponent(entityA, collision)
                 }
             }
         }
@@ -47,7 +46,7 @@ function collisionSystem(world: World) {
 }
 
 function collisionLoggingSystem(world: World) {
-    for (const [collision] of world.query(['collision']) as [Collision][]) {
+    for (const { components: [collision] } of world.query<[Collision]>(['collision'])) {
         console.log(JSON.stringify(collision))
     }
 }
@@ -60,8 +59,8 @@ function collisionLoggingSystem(world: World) {
  * @param world 
  */
 function collisionCleanupSystem(world: World) {
-    for (const [collision] of world.query(['collision']) as [Collision][]) {
-        world.removeComponent(collision);
+    for (const { entityId, components: [collision] } of world.query<[Collision]>(['collision'])) {
+        world.removeComponent(entityId, collision);
     }
 }
 
