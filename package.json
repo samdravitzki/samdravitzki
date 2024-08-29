@@ -13,7 +13,7 @@
     "@types/p5": "^1.7.6",
     "@vitest/coverage-v8": "^1.6.0",
     "jsdom": "^24.1.1",
-    "typescript": "^5.2.2",
+    "typescript": "^5.5.4",
     "vite": "^5.2.0",
     "vite-plugin-checker": "^0.7.2",
     "vitest": "^1.6.0"

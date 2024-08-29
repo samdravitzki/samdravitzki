@@ -22,14 +22,14 @@ importers:
         specifier: ^24.1.1
         version: 24.1.1
       typescript:
-        specifier: ^5.2.2
-        version: 5.4.5
+        specifier: ^5.5.4
+        version: 5.5.4
       vite:
         specifier: ^5.2.0
         version: 5.2.11
       vite-plugin-checker:
         specifier: ^0.7.2
-        version: 0.7.2(typescript@5.4.5)(vite@5.2.11)
+        version: 0.7.2(typescript@5.5.4)(vite@5.2.11)
       vitest:
         specifier: ^1.6.0
         version: 1.6.0(jsdom@24.1.1)
@@ -932,8 +932,8 @@ packages:
     resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
     engines: {node: '>=10'}
 
-  typescript@5.4.5:
-    resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
+  typescript@5.5.4:
+    resolution: {integrity: sha512-Mtq29sKDAEYP7aljRgtPOpTvOfbwRWlS6dPRzwjdE+C0R4brX/GUyhHSecbHMFLNBLcJIPt9nl9yG5TZ1weH+Q==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -1962,7 +1962,7 @@ snapshots:
 
   type-fest@0.21.3: {}
 
-  typescript@5.4.5: {}
+  typescript@5.5.4: {}
 
   ufo@1.5.3: {}
 
@@ -1992,7 +1992,7 @@ snapshots:
       - supports-color
       - terser
 
-  vite-plugin-checker@0.7.2(typescript@5.4.5)(vite@5.2.11):
+  vite-plugin-checker@0.7.2(typescript@5.5.4)(vite@5.2.11):
     dependencies:
       '@babel/code-frame': 7.24.7
       ansi-escapes: 4.3.2
@@ -2010,7 +2010,7 @@ snapshots:
       vscode-languageserver-textdocument: 1.0.12
       vscode-uri: 3.0.8
     optionalDependencies:
-      typescript: 5.4.5
+      typescript: 5.5.4
 
   vite@5.2.11:
     dependencies:
