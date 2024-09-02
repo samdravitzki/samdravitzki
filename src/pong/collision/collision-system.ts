@@ -5,10 +5,10 @@ import { Aabb } from './intersection/intersection-shapes';
 
 
 function collisionSystem(world: World) {
-    const colliders = world.query<[Position, Collider]>(['position', 'collider']);
+    const colliders = world.query<[string, Position, Collider]>(['entity-id', 'position', 'collider']);
 
-    for (const { entityId: entityA, components: [positionA, colliderA]} of colliders) {
-        for (const { entityId: entityB, components: [positionB, colliderB] } of colliders) {
+    for (const [entityA, positionA, colliderA] of colliders) {
+        for (const [entityB, positionB, colliderB] of colliders) {
 
             if (entityA === entityB) {
                 // Exclude collisions with itself
@@ -46,7 +46,7 @@ function collisionSystem(world: World) {
 }
 
 function collisionLoggingSystem(world: World) {
-    for (const { components: [collision] } of world.query<[Collision]>(['collision'])) {
+    for (const [collision] of world.query<[Collision]>(['collision'])) {
         console.log(JSON.stringify(collision))
     }
 }
@@ -59,7 +59,7 @@ function collisionLoggingSystem(world: World) {
  * @param world 
  */
 function collisionCleanupSystem(world: World) {
-    for (const { entityId, components: [collision] } of world.query<[Collision]>(['collision'])) {
+    for (const [entityId, collision] of world.query<[string, Collision]>(['entity-id', 'collision'])) {
         world.removeComponent(entityId, collision);
     }
 }

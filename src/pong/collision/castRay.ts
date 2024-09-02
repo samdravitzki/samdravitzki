@@ -30,7 +30,7 @@ type CastRayOptions = {
  * @returns the position and normal in which the ray collided
  */
 function castRay(world: World, ray: Ray, options?: CastRayOptions): Hit[] {
-    const colliders = world.query<[Position, Collider]>(['position', 'collider']).map(({ components}) => components);
+    const colliders = world.query<[Position, Collider]>(['position', 'collider']);
 
     const filteredColliders = options?.layer === undefined 
         ? colliders 

@@ -4,7 +4,6 @@ import Entity from '../Entity/Entity';
 
 type EntityId = string;
 
-type WorldQueryResultItem<T extends Component[]> = { entityId: string, components: T };
 
 /**
  * Reason for choosing an ECS approach is that I have worked with alot of game engines before
@@ -103,28 +102,27 @@ export default class World {
      * 
      * (In other words, each resulting array element is the list of compomemts requested 
      * associated with a particular entity that has those components)
-     * @param components a list of component names
+     * @param query a list of components to query for (if 'entity-id' is supplied the it will return the entities id)
      */
-    query<T extends Component[]>(components: string[]): WorldQueryResultItem<T>[] {
+    query<T extends (EntityId | Component)[]>(query: string[]): T[] {
 
-        const result: WorldQueryResultItem<T>[] = [];
+        const result: T[] = [];
 
         for (var [entityId, entitiesComponents] of this._components_by_entity.entries()) {
-            const queriedComponents = components.map((componentName) => {
-                return entitiesComponents.get(componentName);
+            const queriedComponents = query.map((queryItem) => {
+                if (queryItem === 'entity-id') {
+                    return entityId;
+                }
+
+                return entitiesComponents.get(queryItem);
             })
 
             const hasAllComponents = queriedComponents
                 .every((queriedComponent) => queriedComponent !== undefined);
 
-            if (hasAllComponents) {
-                result.push({
-                    entityId,
-                    components: queriedComponents as T,
-                });
+            if (hasAllComponents && queriedComponents.length > 0) {
+                result.push(queriedComponents as T);
             }
-
-
         }
 
         return result;

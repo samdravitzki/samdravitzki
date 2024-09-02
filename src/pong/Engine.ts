@@ -75,7 +75,7 @@ class Engine {
                 p.background(240, 90, 60);
 
                 // Mouse position input system
-                const { components: [mousePosition] } = self._world.query<[MousePositionComponent]>(['mouse-position'])[0];
+                const [mousePosition] = self._world.query<[MousePositionComponent]>(['mouse-position'])[0];
                 mousePosition.x = p.mouseX;
                 mousePosition.y = p.mouseY;
 
@@ -84,7 +84,7 @@ class Engine {
                 updateSystems.forEach((system) => system(self._world));
 
                 // Render system
-                for (const { components: [position, primitive] } of self._world.query<[Position, PrimitiveShape]>(['position', 'primitive'])) {
+                for (const [position, primitive] of self._world.query<[Position, PrimitiveShape]>(['position', 'primitive'])) {
                     if (!primitive.strokeWeight) {
                         p.strokeWeight(0);
                     } else {

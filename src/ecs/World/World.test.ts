@@ -176,6 +176,25 @@ describe('removeEntity method', () => {
 
 describe('query method', () => {
 
+    test('should return id of entity when \'entity-id\' is supplied as a query string', () => {
+            // ARRANGE
+            const entity = new Entity();
+            const componentA1: Component = { name: 'A' };
+
+            const world = new World();
+            world.addEntity(entity);
+            world.addComponent(entity.id, componentA1);
+
+            // ACT
+            const result = world.query(['A', 'entity-id']);
+
+            // ASSERT
+            expect(result).toEqual([
+                [componentA1, entity.id],
+            ]);
+    });
+
+
     test('should return entities with component when requesting a single component type', () => {
         // ARRANGE
         const entity1 = new Entity();
@@ -190,7 +209,7 @@ describe('query method', () => {
         world.addComponent(entity2.id, componentA2);
         
         // ACT
-        const result = world.query(['A']).map(({ components }) => components);
+        const result = world.query(['A']);
         
         // ASSERT
         expect(result).toEqual([
@@ -217,7 +236,7 @@ describe('query method', () => {
         world.addComponent(entity2.id, componentB2);
         
         // ACT
-        const result = world.query(['A', 'B']).map(({ components }) => components);;
+        const result = world.query(['A', 'B']);
         
         // ASSERT
         expect(result).toEqual([
@@ -240,7 +259,7 @@ describe('query method', () => {
          world.addComponent(entity1.id, componentC1);
          
          // ACT
-         const result = world.query(['A', 'B']).map(({ components }) => components);;
+         const result = world.query(['A', 'B']);
          
          // ASSERT
          expect(result).toEqual([
@@ -264,7 +283,7 @@ describe('query method', () => {
         world.addComponent(entity2.id, componentA2);
         
         // ACT
-        const result = world.query(['A', 'B']).map(({ components }) => components);;
+        const result = world.query(['A', 'B']);
         
         // ASSERT
         expect(result).toEqual([
@@ -296,7 +315,7 @@ describe('query method', () => {
         world.addEntity(entity1);
         
         // ACT
-        const result = world.query([]).map(({ components }) => components).flat();
+        const result = world.query([]);
         
         // ASSERT
         expect(result).toEqual([]);
@@ -327,7 +346,7 @@ describe('query method', () => {
          world.addComponent(entity1.id, componentC1);
          
          // ACT
-         const result = world.query(['C', 'B', 'A']).map(({ components }) => components);;
+         const result = world.query(['C', 'B', 'A']);
          
          // ASSERT
          expect(result).toEqual([
