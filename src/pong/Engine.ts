@@ -4,7 +4,6 @@ import World from '../ecs/World/World';
 import Bounds from '../Bounds/Bounds';
 import Vector from '../Vector/Vector';
 import { Position, PrimitiveShape } from './components';
-import Entity from '../ecs/Entity/Entity';
 import Component from '../ecs/Component/Component';
 
 export type MousePositionComponent = Component & {
@@ -55,14 +54,13 @@ class Engine {
                 p.noStroke();
                 p.rectMode(p.CENTER);
 
-                const inputEntity = new Entity();
+                const inputEntity = self._world.createEntity();
                 const mousePositionComponent: MousePositionComponent = {
                     name: 'mouse-position',
                     x: 0,
                     y: 0,
                 }
                 
-                self._world.addEntity(inputEntity);
                 self._world.addComponent(inputEntity.id, mousePositionComponent);
 
                 

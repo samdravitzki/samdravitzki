@@ -1,8 +1,40 @@
 import Bundle from '../Bundle/Bundle';
 import Component from '../Component/Component';
-import Entity from '../Entity/Entity';
 
 type EntityId = string;
+
+type ComponentId = string;
+
+class Entity {
+    readonly id: EntityId = window.crypto.randomUUID();
+    private _components = new Map<ComponentId, Component>();
+
+    get components() {
+        return Array.from(this._components.values());
+    }
+
+    getComponent(componentName: string) {
+        return this._components.get(componentName);
+    }
+
+    addComponent(component: Component) {
+        const result = this._components.get(component.name);
+
+        if (result !== undefined) {
+            throw new Error(`Entity cannot have more than one component of type '${component.name}'`)
+        }
+        
+        this._components.set(component.name, component);
+    }
+
+    replaceComponent(component: Component) {
+        this._components.set(component.name, component);
+    }
+
+    removeComponent(componentName: string) {
+        this._components.delete(componentName);
+    }
+}
 
 
 /**
@@ -11,85 +43,70 @@ type EntityId = string;
  * that prefers composition over inheritance.
  */
 export default class World {
-    // Note: This entity array is pretty useless now so i should remove it
-    private _entities: Entity[] = [];
+    private _entities = new Map<EntityId, Entity>;
 
-    private _components_by_entity = new Map<EntityId, Map<string, Component>>;
-
-    get entities(): Readonly<Entity>[] {
-        return this._entities;
+    get entities(): string[] {
+        return Array.from(this._entities.keys());
     }
 
     get components(): Readonly<Component>[] {
-        const componentMaps = Array.from(this._components_by_entity.values());
-
-        const allComponents = componentMaps.map((component) => {
-            return Array.from(component.values());
-        }).flat();
-
+        const entities = Array.from(this._entities.values());
+        const allComponents = entities.map((entity) => entity.components).flat();
         return allComponents;
     }
 
-    addEntity(entity: Entity) {
-        this._entities.push(entity);
-        this._components_by_entity.set(entity.id, new Map());
+    createEntity(): Entity {
+        const entity = new Entity();
+        this._entities.set(entity.id, entity);
+        return entity;
     }
 
     addComponent(entityId: string, component: Component) {
-        const entitiesComponents = this._components_by_entity.get(entityId);
+        const entity = this._entities.get(entityId);
 
-        if (!entitiesComponents) {
+        if (!entity) {
             throw new Error(`Entity with id ${entityId} does not exist`)
         }
 
-        const result = entitiesComponents.get(component.name);
-
-        if (result !== undefined) {
-            throw new Error(`Entity cannot have more than one component of type '${component.name}'`)
-        }
-        
-        entitiesComponents.set(component.name, component);
+        entity.addComponent(component);
     }
 
     addBundle(bundle: Bundle) {
-        this.addEntity(bundle.entity);
+        const entity = this.createEntity();
 
         bundle.components.forEach((component) => {
-            this.addComponent(bundle.entity.id, component);
+            this.addComponent(entity.id, component);
         });
     }
 
     replaceComponent(entityId: string, component: Component) {
-        const entitiesComponents = this._components_by_entity.get(entityId);
+        const entity = this._entities.get(entityId);
 
-        if (!entitiesComponents) {
+        if (!entity) {
             throw new Error(`Entity with id ${entityId} does not exist`)
         }
 
-        entitiesComponents.set(component.name, component);
+        entity.addComponent(component);
     }
 
     removeComponent(entityId: string, component: Component) {
-        const entitiesComponents = this._components_by_entity.get(entityId);
+        const entity = this._entities.get(entityId);
 
-        if (!entitiesComponents) {
+        if (!entity) {
             throw new Error(`Entity with id ${entityId} does not exist`)
         }
 
-        entitiesComponents.delete(component.name);
+        entity.removeComponent(component.name);
     }
 
     removeEntity(entityId: string) {
-        this._entities = this._entities.filter((entity) => entity.id !== entityId);
-
-
-        const entityExists = this._components_by_entity.has(entityId);
+        const entityExists = this._entities.has(entityId);
 
         if (!entityExists) {
             throw new Error(`Entity with id ${entityId} does not exist`)
         }
     
-        this._components_by_entity.delete(entityId);
+        this._entities.delete(entityId);
     }
 
     /**
@@ -108,13 +125,13 @@ export default class World {
 
         const result: T[] = [];
 
-        for (var [entityId, entitiesComponents] of this._components_by_entity.entries()) {
+        for (var [entityId, entitiesComponents] of this._entities.entries()) {
             const queriedComponents = query.map((queryItem) => {
                 if (queryItem === 'entity-id') {
                     return entityId;
                 }
 
-                return entitiesComponents.get(queryItem);
+                return entitiesComponents.getComponent(queryItem);
             })
 
             const hasAllComponents = queriedComponents

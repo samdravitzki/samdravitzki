@@ -1,5 +1,4 @@
-import Component from '../Component/Component'
-import Entity from '../Entity/Entity'
+import Component from '../Component/Component';
 
 /**
  * Used to make the process of adding components and entities into the world easier allowing
@@ -9,7 +8,6 @@ import Entity from '../Entity/Entity'
  * Based on the same concept that exists in bevy https://bevy-cheatbook.github.io/programming/bundle.html
  */
 type Bundle = {
-    entity: Entity,
     components: Component[],
 }
 
