@@ -14,6 +14,7 @@ type Ray = {
 type Hit = {
     position: Vector;
     normal: Vector;
+    entityId: string;
 }
 
 type CastRayOptions = {
@@ -30,7 +31,7 @@ type CastRayOptions = {
  * @returns the position and normal in which the ray collided
  */
 function castRay(world: World, ray: Ray, options?: CastRayOptions): Hit[] {
-    const colliders = world.query<[Position, Collider]>(['position', 'collider']);
+    const colliders = world.query<[Position, Collider, string]>(['position', 'collider', 'entity-id']);
 
     const filteredColliders = options?.layer === undefined 
         ? colliders 
@@ -38,7 +39,7 @@ function castRay(world: World, ray: Ray, options?: CastRayOptions): Hit[] {
 
     const hits: Hit[] = [];
 
-    for (const [position, collider] of filteredColliders) {
+    for (const [position, collider, entityId] of filteredColliders) {
         if (collider.type === 'aabb') {
 
             const line: Line = {
@@ -65,6 +66,7 @@ function castRay(world: World, ray: Ray, options?: CastRayOptions): Hit[] {
                 hits.push({
                     position: closestIntersection.contactPoint,
                     normal: closestIntersection.normal,
+                    entityId,
                 });
             }
         }
