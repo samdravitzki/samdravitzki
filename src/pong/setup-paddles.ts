@@ -3,6 +3,8 @@ import World from '../ecs/World/World';
 import Vector from '../Vector/Vector';
 
 function setupPaddles(world: World) {
+    const paddleSize = 40;
+
     const playerPaddleBundle = createBundle([
         'player',
         'paddle',
@@ -11,7 +13,7 @@ function setupPaddles(world: World) {
             fill: [240, 60, 100],
             type: 'square',
             width: 5,
-            height: 20
+            height: paddleSize
         },
         {
             name: 'position',
@@ -22,9 +24,18 @@ function setupPaddles(world: World) {
             type: 'aabb',
             layer: 'wall',
             width: 5,
-            height: 20
+            height: paddleSize
         },
     
+    ]);
+
+    // The position the ai paddle is aiming to end up in
+    const aiPaddleTarget = createBundle([
+        'ai-paddle-target',
+        {
+            name: 'position',
+            position: new Vector(0, 0),
+        },
     ]);
     
     const aiPaddleBundle = createBundle([
@@ -35,7 +46,7 @@ function setupPaddles(world: World) {
             fill: [240, 60, 100],
             type: 'square',
             width: 5,
-            height: 20
+            height: paddleSize
         },
         {
             name: 'position',
@@ -48,12 +59,12 @@ function setupPaddles(world: World) {
         {
             name: 'collider',
             type: 'aabb',
-            layer: 'wall',
             width: 5,
-            height: 20
+            height: paddleSize
         }
     ]);
     
+    world.addBundle(aiPaddleTarget);
     world.addBundle(playerPaddleBundle);
     world.addBundle(aiPaddleBundle);
 };

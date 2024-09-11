@@ -2,7 +2,7 @@ import Vector from '../Vector/Vector';
 import World from '../ecs/World/World';
 import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed, PaddleComponent } from './components';
 import collisionSystem, { collisionCleanupSystem, collisionLoggingSystem } from './collision/collision-system';
-import castRay from './collision/castRay';
+import castRay from './collision/cast-ray';
 import Engine, { MousePositionComponent } from './Engine';
 import createBundle from '../ecs/Bundle/createBundle';
 import minionBongUrl from './sounds/minion-bong.mp3';
@@ -23,16 +23,17 @@ function ballCollisionHandlingSystem(world: World) {
 }
 
 function paddleCollisionHandlingSystem(world: World) {
-    const [, ballSpeed] = world.query<[Velocity, Speed, BallComponent]>(['velocity', 'speed', 'ball'])[0]; 
+    // const [, ballSpeed] = world.query<[Velocity, Speed, BallComponent]>(['velocity', 'speed', 'ball'])[0]; 
 
     // Describes bow the collision handling worked in the orginial pong game
     // https://www.vbforums.com/showthread.php?634246-RESOLVED-How-did-collision-in-the-original-Pong-happen
 
     for (const {} of world.query<[Collision, PaddleComponent]>(['collision', 'paddle'])) {
 
+        // Buggy so commented it out for now: Seems to be randomly speeding up heaps
         // Increase ball velocity by 10%
-        ballSpeed.value += ballSpeed.value * 0.1;
-        console.log('ball speed', ballSpeed.value)
+        // ballSpeed.value += ballSpeed.value * 0.1;
+        // console.log('ball speed', ballSpeed.value)
 
         if (sound) {
             ballHitAudio.play();
@@ -71,11 +72,11 @@ function backboardCollisionHandlingSystem(world: World) {
 }
 
 function aiPaddleSystem(world: World) {
+    const [targetPosition] = world.query<[Position]>(['position', 'ai-paddle-target'])[0];
     for (const [position, speed] of world.query<[Position, Speed]>(['position', 'speed', 'paddle', 'ai'])) {
-        const [ballPosition] = world.query<[Position, BallComponent]>(['position', 'ball'])[0];
 
         // Cant just move it to where the ball is, need to move it to where the ball is going to be when it hits on the ai side
-        position.position = position.position.plus(Vector.create(0, (ballPosition.position.y - position.position.y) * speed.value))
+        position.position = position.position.plus(Vector.create(0, (targetPosition.position.y - position.position.y) * speed.value))
 
         if (position.position.y < 20) {
             position.position = Vector.create(position.position.x, 20);
@@ -105,7 +106,7 @@ function playerPaddleSystem(world: World) {
 }
 
 function ballMovementSystem(world: World) {
-    const [velocity, position, speed] = world.query(['velocity', 'position', 'speed', 'ball', ])[0] as [Velocity, Position, Speed, BallComponent];
+    const [velocity, position, speed] = world.query<[Velocity, Position, Speed, BallComponent]>(['velocity', 'position', 'speed', 'ball', ])[0];
 
     position.position = position.position.plus(velocity.velocity.times(speed.value));
 }
@@ -113,13 +114,15 @@ function ballMovementSystem(world: World) {
 type TrajectoryLineSegmentComponent = Component & { name: 'trajectory-line-segment' };
 
 function ballTrajectorySystem(world: World) {
-    const [ballPosition, ballVelocity] = world.query(['position', 'velocity', 'ball'])[0] as [Position, Velocity, BallComponent];
+    const [targetPosition] = world.query<[Position]>(['position', 'ai-paddle-target'])[0];
+
+    const [ballPosition, ballVelocity] = world.query<[Position, Velocity, BallComponent]>(['position', 'velocity', 'ball'])[0];
 
     for (const [entityId] of world.query<[string, TrajectoryLineSegmentComponent]>(['entity-id', 'trajectory-line'])) {
         world.removeEntity(entityId);
     }
 
-    const bounces = 4;
+    const bounces = 20;
     let linesAdded = 0;
 
     // Issue: when the ball is moving really slow the ball dissapears
@@ -158,10 +161,20 @@ function ballTrajectorySystem(world: World) {
             }
         ]));
 
+        const hitEntity = world.entity(hit.entityId);
+
+        const backBoardComponent = hitEntity.components.find(comp => comp.name === 'backboard') as BackboardComponent | undefined;
+
+        if (backBoardComponent && backBoardComponent.owner === 'ai') {
+            targetPosition.position = hit.position;
+            break;
+        }
+
         start = end;
         direction = direction.reflect(hit.normal).normalised();
 
         linesAdded += 1;
+        
     }
     
 }
