@@ -21,9 +21,26 @@ export default class World {
         return allComponents;
     }
 
+    /**
+     * Create an entity and add it to the world
+     * @returns the entity added to the world
+     */
     createEntity(): Entity {
         const entity = new Entity();
         this._entities.set(entity.id, entity);
+        return entity;
+    }
+
+    /**
+     * Get entity with supplied id
+     */
+    entity(id: string): Entity {
+        const entity = this._entities.get(id);
+
+        if (!entity) {
+            throw new Error(`Entity with id ${id} does not exist`);
+        }
+
         return entity;
     }
 
@@ -52,7 +69,7 @@ export default class World {
             throw new Error(`Entity with id ${entityId} does not exist`)
         }
 
-        entity.addComponent(component);
+        entity.replaceComponent(component);
     }
 
     removeComponent(entityId: string, component: Component) {

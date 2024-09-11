@@ -173,6 +173,26 @@ describe('removeEntity method', () => {
     });
 })
 
+describe('entity method', () => { 
+    test('should return entity with supplied id', () => {
+        // ARRANGE
+        const world = new World();
+        const entity = world.createEntity();
+        // ACT
+        const result = world.entity(entity.id)
+
+        // ASSERT
+        expect(result.id).toEqual(entity.id);
+    });
+
+    test('should throw error if entity with id doesn not exist', () => {
+        // ARRANGE
+        const world = new World();
+        // ACT / ASSERT
+        expect(() => world.entity('fake-entity-id')).toThrow(Error);
+    })
+ })
+
 describe('query method', () => {
 
     test('should return id of entity when \'entity-id\' is supplied as a query string', () => {
