@@ -23,17 +23,21 @@ function ballCollisionHandlingSystem(world: World) {
 }
 
 function paddleCollisionHandlingSystem(world: World) {
-    // const [, ballSpeed] = world.query<[Velocity, Speed, BallComponent]>(['velocity', 'speed', 'ball'])[0]; 
+    const [, ballSpeed] = world.query<[Velocity, Speed, BallComponent]>(['velocity', 'speed', 'ball'])[0]; 
 
     // Describes bow the collision handling worked in the orginial pong game
     // https://www.vbforums.com/showthread.php?634246-RESOLVED-How-did-collision-in-the-original-Pong-happen
 
-    for (const {} of world.query<[Collision, PaddleComponent]>(['collision', 'paddle'])) {
+    for (const [collision] of world.query<[Collision, PaddleComponent]>(['collision', 'paddle'])) {
 
-        // Buggy so commented it out for now: Seems to be randomly speeding up heaps
-        // Increase ball velocity by 10%
-        // ballSpeed.value += ballSpeed.value * 0.1;
-        // console.log('ball speed', ballSpeed.value)
+
+        if (world.entity(collision.entityId).components.find((component) => component.name === 'ball')) {
+            // Buggy so commented it out for now: Seems to be randomly speeding up heaps
+            // Increase ball velocity by 10%
+            ballSpeed.value += ballSpeed.value * 0.1;
+            // console.log('ball speed', ballSpeed.value)
+        }
+
 
         if (sound) {
             ballHitAudio.play();

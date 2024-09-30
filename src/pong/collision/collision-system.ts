@@ -36,6 +36,7 @@ function collisionSystem(world: World) {
                         contactPoint: intersection.contactPoint, // Contact point on a AABB is just its local origin
                         normal: intersection.normal,
                         penetration: intersection.penetration,
+                        entityId: entityB
                     }
 
                     world.replaceComponent(entityA, collision)

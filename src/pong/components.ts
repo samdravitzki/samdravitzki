@@ -84,4 +84,6 @@ export type Collision = Component & {
     normal: Vector,
     // The depth in which the collision occured
     penetration: number,
+    // The id of the entity colided with
+    entityId: string,
 }
