@@ -23,7 +23,7 @@ function setupBall(world: World) {
         },
         {
             name: 'speed',
-            value: 3,
+            value: 5,
         },
         {
             name: 'collider',

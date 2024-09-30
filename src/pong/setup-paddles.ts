@@ -54,7 +54,7 @@ function setupPaddles(world: World) {
         },
         {
             name: 'speed',
-            value: 0.05,
+            value: 0.01,
         },
         {
             name: 'collider',

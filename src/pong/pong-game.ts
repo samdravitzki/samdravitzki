@@ -166,14 +166,14 @@ function ballTrajectorySystem(world: World) {
                 name: 'position',
                 position: start,
             },
-            {
-                name: 'primitive',
-                stroke: [(111 + 50 * linesAdded) % 255, 100, 100],
-                strokeWeight: 2,
-                type: 'line',
-                start: Vector.create(0, 0),
-                end: end.minus(start),
-            }
+            // {
+            //     name: 'primitive',
+            //     stroke: [(111 + 50 * linesAdded) % 255, 100, 100],
+            //     strokeWeight: 2,
+            //     type: 'line',
+            //     start: Vector.create(0, 0),
+            //     end: end.minus(start),
+            // }
         ]));
 
         const hitEntity = world.entity(hit.entityId);
