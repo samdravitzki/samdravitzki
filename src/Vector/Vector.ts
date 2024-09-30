@@ -29,6 +29,7 @@ export default class Vector {
     times(scalar: number): Vector {
         return new Vector(this.x * scalar, this.y * scalar);
     }
+    
     /**
      * Return the distance between two points
      * @param other 

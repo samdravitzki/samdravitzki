@@ -17,25 +17,36 @@ const ballHitAudio = new Audio(minionBongUrl);
 const sound = false;
 
 function ballCollisionHandlingSystem(world: World) {
-    for (const [velocity, collision] of world.query<[Velocity, Collision, BallComponent]>(['velocity', 'collision', 'ball'])) {
+    for (const [velocity, collision, position] of world.query<[Velocity, Collision, Position, BallComponent]>(['velocity', 'collision', 'position', 'ball'])) {
+        const collidee = world.entity(collision.entityId);
+
         velocity.velocity = velocity.velocity.reflect(collision.normal);
+        
+        if (collidee.components.find((c) => c.name === 'paddle')) {
+            const paddlePosition = collidee.getComponent('position') as Position;
+
+            const yDistanceFromPaddleCenter = paddlePosition.position.minus(position.position).y;
+
+
+
+            velocity.velocity = Vector.create(velocity.velocity.x, -yDistanceFromPaddleCenter / 25);
+        }
+        
     }
 }
 
+
+
+// Describes bow the collision handling worked in the orginial pong game
+// https://www.vbforums.com/showthread.php?634246-RESOLVED-How-did-collision-in-the-original-Pong-happen
 function paddleCollisionHandlingSystem(world: World) {
     const [, ballSpeed] = world.query<[Velocity, Speed, BallComponent]>(['velocity', 'speed', 'ball'])[0]; 
-
-    // Describes bow the collision handling worked in the orginial pong game
-    // https://www.vbforums.com/showthread.php?634246-RESOLVED-How-did-collision-in-the-original-Pong-happen
 
     for (const [collision] of world.query<[Collision, PaddleComponent]>(['collision', 'paddle'])) {
 
 
-        if (world.entity(collision.entityId).components.find((component) => component.name === 'ball')) {
-            // Buggy so commented it out for now: Seems to be randomly speeding up heaps
-            // Increase ball velocity by 10%
+        if (world.entity(collision.entityId).components.find((c) => c.name === 'ball')) {
             ballSpeed.value += ballSpeed.value * 0.1;
-            // console.log('ball speed', ballSpeed.value)
         }
 
 
