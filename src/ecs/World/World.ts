@@ -62,42 +62,12 @@ export default class World {
         return entity;
     }
 
-    addComponent(entityId: string, component: Component) {
-        const entity = this._entities.get(entityId);
-
-        if (!entity) {
-            throw new Error(`Entity with id ${entityId} does not exist`)
-        }
-
-        entity.addComponent(component);
-    }
-
     addBundle(bundle: Bundle) {
         const entity = this.createEntity();
 
         bundle.components.forEach((component) => {
-            this.addComponent(entity.id, component);
+            entity.addComponent(component);
         });
-    }
-
-    replaceComponent(entityId: string, component: Component) {
-        const entity = this._entities.get(entityId);
-
-        if (!entity) {
-            throw new Error(`Entity with id ${entityId} does not exist`)
-        }
-
-        entity.replaceComponent(component);
-    }
-
-    removeComponent(entityId: string, component: Component) {
-        const entity = this._entities.get(entityId);
-
-        if (!entity) {
-            throw new Error(`Entity with id ${entityId} does not exist`)
-        }
-
-        entity.removeComponent(component.name);
     }
 
     removeEntity(entityId: string) {

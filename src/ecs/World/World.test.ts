@@ -16,83 +16,6 @@ describe('createEntity method', () => {
     })
 });
 
-
-describe('addComponent method', () => {
-    test('should add a component', () => {
-        // ARRANGE
-        const world = new World();
-        const entity1 = world.createEntity();
-        const componentA: Component = { name: 'A' };
-
-        // ACT
-        world.addComponent(entity1.id, componentA);
-
-        // ASSERT
-        expect(world.components).toEqual([componentA])
-    });
-
-    // Based on https://stackoverflow.com/questions/20720360/ecs-can-an-entity-have-more-than-one-component-of-given-type
-    test('should throw error when component of the same type already exists associated with the same entity', () => {
-        // ARRANGE
-        const world = new World();
-        const entity1 = world.createEntity();
-        const componentA: Component = { name: 'A' };
-        world.addComponent(entity1.id, componentA);
-
-        // ACT and ASSERT
-        expect(() => world.addComponent(entity1.id, componentA)).toThrowError()
-    })
-});
-
-describe('replaceComponent method', () => {
-    test('should add a component', () => {
-        // ARRANGE
-        const world = new World();
-        const entity1 = world.createEntity();
-        const componentA: Component = { name: 'A' };
-
-        // ACT
-        world.replaceComponent(entity1.id, componentA);
-
-        // ASSERT
-        expect(world.components).toEqual([componentA])
-    });
-
-    test('should replace component when one already exists associated with the same entity', () => {
-        // ARRANGE
-        const world = new World();
-        const entity1 = world.createEntity();
-        const componentAV1 = { name: 'A', value: 1 };
-        const componentAV2 = { name: 'A', value: 2 };
-        
-        world.addComponent(entity1.id, componentAV1)
-
-        // ACT
-        world.replaceComponent(entity1.id, componentAV2);
-
-        // ASSERT
-        expect(world.components).toEqual([componentAV2])
-    });
-
-    test('should cause existing components to be removed', () => {
-        // ARRANGE
-        const world = new World();
-        const entity1 = world.createEntity();
-        const componentAV1 = { name: 'A', value: 1 };
-        const componentAV2 = { name: 'A', value: 2 };
-        const componentB = { name: 'B' };
-        
-        world.addComponent(entity1.id, componentAV1)
-        world.addComponent(entity1.id, componentB)
-
-        // ACT
-        world.replaceComponent(entity1.id, componentAV2);
-
-        // ASSERT
-        expect(world.components).toEqual([componentAV2, componentB])
-    });
-});
-
 describe('addBundle method', () => {
     test('should add entityto world when bundle is added to world', () => {
         // ARRANGE
@@ -128,30 +51,13 @@ describe('addBundle method', () => {
     });
 });
 
-describe('removeComponent method', () => {
-    test('should remove supplied component from world', () => {
-        // ARRANGE
-        const world = new World();
-        const entity1 = world.createEntity();
-        const componentA = { entityId: entity1.id, name: 'A' };
-
-        world.addComponent(entity1.id, componentA);
-
-        // ACT
-        world.removeComponent(entity1.id, componentA);
-
-        // ASSERT
-        expect(world.components).toEqual([]);
-    });
-});
-
 describe('removeEntity method', () => {
     test('should remove entity from world with supplied id', () => {
         // ARRANGE
         const world = new World();
         const entity1 = world.createEntity();
         const componentA = { entityId: entity1.id, name: 'A' };
-        world.addComponent(entity1.id, componentA);
+        entity1.addComponent(componentA);
 
         // ACT
         world.removeEntity(entity1.id);
@@ -201,7 +107,7 @@ describe('query method', () => {
 
             const world = new World();
             const entity = world.createEntity();
-            world.addComponent(entity.id, componentA1);
+            entity.addComponent(componentA1);
 
             // ACT
             const result = world.query(['A', 'entity-id']);
@@ -221,8 +127,9 @@ describe('query method', () => {
         const world = new World();
         const entity1 = world.createEntity();
         const entity2 = world.createEntity();
-        world.addComponent(entity1.id, componentA1);
-        world.addComponent(entity2.id, componentA2);
+
+        entity1.addComponent(componentA1);
+        entity2.addComponent(componentA2);
         
         // ACT
         const result = world.query(['A']);
@@ -244,10 +151,10 @@ describe('query method', () => {
         const world = new World();
         const entity1 = world.createEntity();
         const entity2 = world.createEntity();
-        world.addComponent(entity1.id, componentA1);
-        world.addComponent(entity1.id, componentB1);
-        world.addComponent(entity2.id, componentA2);
-        world.addComponent(entity2.id, componentB2);
+        entity1.addComponent(componentA1);
+        entity1.addComponent(componentB1);
+        entity2.addComponent(componentA2);
+        entity2.addComponent(componentB2);
         
         // ACT
         const result = world.query(['A', 'B']);
@@ -267,9 +174,9 @@ describe('query method', () => {
 
          const world = new World();
          const entity1 = world.createEntity();
-         world.addComponent(entity1.id, componentA1);
-         world.addComponent(entity1.id, componentB1);
-         world.addComponent(entity1.id, componentC1);
+         entity1.addComponent(componentA1);
+         entity1.addComponent(componentB1);
+         entity1.addComponent(componentC1);
          
          // ACT
          const result = world.query(['A', 'B']);
@@ -289,9 +196,9 @@ describe('query method', () => {
         const world = new World();
         const entity1 = world.createEntity();
         const entity2 = world.createEntity();
-        world.addComponent(entity1.id, componentA1);
-        world.addComponent(entity1.id, componentB1);
-        world.addComponent(entity2.id, componentA2);
+        entity1.addComponent(componentA1);
+        entity1.addComponent(componentB1);
+        entity2.addComponent(componentA2);
         
         // ACT
         const result = world.query(['A', 'B']);
@@ -308,7 +215,7 @@ describe('query method', () => {
 
         const world = new World();
         const entity1 = world.createEntity();
-        world.addComponent(entity1.id, componentA1);
+        entity1.addComponent(componentA1);
         
         // ACT
         const result = world.query(['i-dont-exist']);
@@ -349,9 +256,9 @@ describe('query method', () => {
  
          const world = new World();
          const entity1 = world.createEntity();
-         world.addComponent(entity1.id, componentA1);
-         world.addComponent(entity1.id, componentB1);
-         world.addComponent(entity1.id, componentC1);
+         entity1.addComponent(componentA1);
+         entity1.addComponent(componentB1);
+         entity1.addComponent(componentC1);
          
          // ACT
          const result = world.query(['C', 'B', 'A']);

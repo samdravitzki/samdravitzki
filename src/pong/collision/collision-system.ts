@@ -39,7 +39,7 @@ function collisionSystem(world: World) {
                         entityId: entityB
                     }
 
-                    world.replaceComponent(entityA, collision)
+                    world.entity(entityA).replaceComponent(collision);
                 }
             }
         }
@@ -61,7 +61,7 @@ function collisionLoggingSystem(world: World) {
  */
 function collisionCleanupSystem(world: World) {
     for (const [entityId, collision] of world.query<[string, Collision]>(['entity-id', 'collision'])) {
-        world.removeComponent(entityId, collision);
+        world.entity(entityId).removeComponent(collision.name);
     }
 }
 

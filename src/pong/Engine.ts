@@ -60,8 +60,8 @@ class Engine {
                     x: 0,
                     y: 0,
                 }
-                
-                self._world.addComponent(inputEntity.id, mousePositionComponent);
+
+                inputEntity.addComponent(mousePositionComponent);
 
                 
                 const startSystems = self._systems.get('start') ?? [];
