@@ -76,6 +76,8 @@ export type ScoreComponent = Component & {
     value: number,
 }
 
+export type TrajectoryLineSegmentComponent = Component & { name: 'trajectory-line-segment' };
+
 export type Collision = Component & {
     name: 'collision',
     // The collision point of the entity in local space

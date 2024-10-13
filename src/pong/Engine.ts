@@ -1,24 +1,36 @@
 import p5 from 'p5';
-import System from '../ecs/System/System';
+import System, { MousePosition } from '../ecs/System/System';
 import World from '../ecs/World/World';
 import Bounds from '../Bounds/Bounds';
 import Vector from '../Vector/Vector';
 import { Position, PrimitiveShape } from './components';
-import Component from '../ecs/Component/Component';
-
-export type MousePositionComponent = Component & {
-    name: 'mouse-position',
-    x: number,
-    y: number,
-}
 
 type EngineLifecycleEvent = 'start' | 'update';
 
+
 /**
- * Built based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
+ * Global state shared between systems that is not associated with any
+ * entity in particular
+ * 
+ * Resources add the flexibility to break out of the ecs pattern adding 
+ * the ability to implement solutions in different ways that may be more 
+ * appropiate to solve the problem at hand
+ * 
+ * Examples of this type of state could be score or the current key pressed 
+ * 
+ * Reference
+ * - https://bevy-cheatbook.github.io/programming/res.html
+ * - https://www.gamedev.net/forums/topic/710271-where-should-shared-resources-live-in-an-ecs-engine/
+ */
+// type Resource = {
+
+// }
+
+/**
+ * Designed based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
  */
 class Engine {
-    private _world: World = new World();
+    private _world = new World();
     private _systems = new Map<EngineLifecycleEvent, System[]>();
 
     private _element: HTMLElement;
@@ -54,32 +66,27 @@ class Engine {
                 p.noStroke();
                 p.rectMode(p.CENTER);
 
-                const inputEntity = self._world.createEntity();
-                const mousePositionComponent: MousePositionComponent = {
-                    name: 'mouse-position',
+                const mousePosition: MousePosition = {
                     x: 0,
                     y: 0,
-                }
+                };
 
-                inputEntity.addComponent(mousePositionComponent);
-
-                
                 const startSystems = self._systems.get('start') ?? [];
 
-                startSystems.forEach((system) => system(self._world));
+                startSystems.forEach((system) => system(self._world, { mousePosition }));
             }
 
             p.draw = function draw() {
                 p.background(240, 90, 60);
 
-                // Mouse position input system
-                const [mousePosition] = self._world.query<[MousePositionComponent]>(['mouse-position'])[0];
-                mousePosition.x = p.mouseX;
-                mousePosition.y = p.mouseY;
-
                 const updateSystems = self._systems.get('update') ?? [];
 
-                updateSystems.forEach((system) => system(self._world));
+                const mousePosition: MousePosition = {
+                    x: p.mouseX,
+                    y: p.mouseY,
+                };
+
+                updateSystems.forEach((system) => system(self._world, { mousePosition }));
 
                 // Render system
                 for (const [position, primitive] of self._world.query<[Position, PrimitiveShape]>(['position', 'primitive'])) {

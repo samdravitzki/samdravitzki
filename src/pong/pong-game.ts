@@ -1,16 +1,16 @@
 import Vector from '../Vector/Vector';
 import World from '../ecs/World/World';
-import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed, PaddleComponent } from './components';
+import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed, PaddleComponent, TrajectoryLineSegmentComponent } from './components';
 import collisionSystem, { collisionCleanupSystem, collisionLoggingSystem } from './collision/collision-system';
 import castRay from './collision/cast-ray';
-import Engine, { MousePositionComponent } from './Engine';
+import Engine from './Engine';
 import createBundle from '../ecs/Bundle/createBundle';
 import minionBongUrl from './sounds/minion-bong.mp3';
-import Component from '../ecs/Component/Component';
 import setupBoundaries from './setup-boundaries';
 import setupBall from './setup-ball';
 import setupPaddles from './setup-paddles';
 import setupScoreboard from './setup-scoreboard';
+import { MousePosition } from '../ecs/System/System';
 
 const ballHitAudio = new Audio(minionBongUrl);
 
@@ -103,9 +103,9 @@ function aiPaddleSystem(world: World) {
     }
 }
 
-function playerPaddleSystem(world: World) {
-    const [mousePosition] = world.query<[MousePositionComponent]>(['mouse-position'])[0];
+// type System = (world: World, )
 
+function playerPaddleSystem(world: World, { mousePosition }: { mousePosition: MousePosition }) {
     for (const [position] of world.query<[Position]>(['position', 'paddle', 'player'])) {
         const positionChange = mousePosition.y - position.position.y
         position.position = position.position.plus(Vector.create(0, positionChange));
@@ -126,7 +126,6 @@ function ballMovementSystem(world: World) {
     position.position = position.position.plus(velocity.velocity.times(speed.value));
 }
 
-type TrajectoryLineSegmentComponent = Component & { name: 'trajectory-line-segment' };
 
 function ballTrajectorySystem(world: World) {
     const [targetPosition] = world.query<[Position]>(['position', 'ai-paddle-target'])[0];

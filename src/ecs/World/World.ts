@@ -2,29 +2,16 @@ import Bundle from '../Bundle/Bundle';
 import Component from '../Component/Component';
 import Entity, { EntityId } from '../Entity/Entity';
 
-
-/**
- * Global state shared between systems that is not associated with any
- * entity in particular
- * 
- * Resources add the flexibility to break out of the ecs pattern adding 
- * the ability to implement solutions in different ways that may be more 
- * appropiate to solve the problem at hand
- * 
- * Examples of this type of state could be score or the current key pressed 
- * 
- * Reference
- * - https://bevy-cheatbook.github.io/programming/res.html
- * - https://www.gamedev.net/forums/topic/710271-where-should-shared-resources-live-in-an-ecs-engine/
- */
-// type Resource = {
-
-// }
-
 /**
  * Reason for choosing an ECS approach is that I have worked with alot of game engines before
  * and they are all very inheritance based and I wanted to see how it would work using one
  * that prefers composition over inheritance.
+ */
+
+/**
+ * The world contains a collection of entities and their associated compoenents
+ * and provides the ability to query over them. Systems read and mutate the state
+ * of the world implementing the logic to create a game.
  */
 export default class World {
     private _entities = new Map<EntityId, Entity>;
