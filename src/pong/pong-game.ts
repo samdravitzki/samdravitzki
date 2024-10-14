@@ -27,8 +27,6 @@ function ballCollisionHandlingSystem(world: World) {
 
             const yDistanceFromPaddleCenter = paddlePosition.position.minus(position.position).y;
 
-
-
             velocity.velocity = Vector.create(velocity.velocity.x, -yDistanceFromPaddleCenter / 25);
         }
         
@@ -193,19 +191,24 @@ function ballTrajectorySystem(world: World) {
     
 }
 
+// Pause functionality
+// When the pause button is pressed
+// 1. Freeze time
+// 2. Disable any input from affecting anything that is paused
+
 new Engine(document.getElementById('pong-sketch')!)
     .addSystem('start', setupBall)
     .addSystem('start', setupPaddles)
     .addSystem('start', setupBoundaries)
     .addSystem('start', setupScoreboard) 
-    .addSystem('update', collisionSystem)
-    .addSystem('update', collisionLoggingSystem)
-    .addSystem('update', ballCollisionHandlingSystem)
-    .addSystem('update', backboardCollisionHandlingSystem)
-    .addSystem('update', paddleCollisionHandlingSystem)
-    .addSystem('update', playerPaddleSystem)
-    .addSystem('update', aiPaddleSystem)
-    .addSystem('update', ballMovementSystem)
-    .addSystem('update', ballTrajectorySystem)
-    .addSystem('update', collisionCleanupSystem)
+    .addSystem('update', collisionSystem, 'in-game')
+    .addSystem('update', collisionLoggingSystem, 'in-game')
+    .addSystem('update', ballCollisionHandlingSystem, 'in-game')
+    .addSystem('update', backboardCollisionHandlingSystem, 'in-game')
+    .addSystem('update', paddleCollisionHandlingSystem, 'in-game')
+    .addSystem('update', playerPaddleSystem, 'in-game')
+    .addSystem('update', aiPaddleSystem, 'in-game')
+    .addSystem('update', ballMovementSystem, 'in-game')
+    .addSystem('update', ballTrajectorySystem, 'in-game')
+    .addSystem('update', collisionCleanupSystem, 'in-game')
     .run()

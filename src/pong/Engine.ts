@@ -9,6 +9,8 @@ type EngineLifecycleEvent = 'start' | 'update';
 
 
 /**
+ * Resources:
+ * 
  * Global state shared between systems that is not associated with any
  * entity in particular
  * 
@@ -27,11 +29,51 @@ type EngineLifecycleEvent = 'start' | 'update';
 // }
 
 /**
+ * Conditional Systems:
+ * 
+ * Implementations of ECS all seem to eventually need a way to orchestrate in what situations 
+ * systems will run. Both Unity and Bevy implement a mechanism for doing this with Unitys being
+ * Component System Groups and Bevys being States
+ * 
+ * Reference
+ * - https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/systems-update-order.html
+ * - https://github.com/bevyengine/bevy/blob/main/examples/games/game_menu.rs
+ * 
+ * Currently I am running into an issue where I want the game to have a pause menu and a main menu,
+ * but in each menu you want different systems to run and others to stop. It looks like I will need
+ * to introduce a similiar concept to orchestrate functions into this codebase to introduce menus.
+ * The goal is I should end up with something that can stop the game systems when opening the pause 
+ * menu, trigger some systems to run to setup the menu and run systems while the menu is open. Then 
+ * when the menu is closed a set of systems runs to close the menu and unpause. This should also
+ * be generalised so that it can be applied to other scenarios in which I want to conditionally run
+ * systems
+ * 
+ * These states could be modeled in a simlar way to how they are in react?
+ * 
+ * An alternative approach to conditional systems is to have multiple worlds and conditions for determining
+ * which world is available to the user. The issue for me with this tho is it is almost exactly the same
+ * as doing conditional systems except for if you can't have the same systems that run no matter whether
+ * the game is paused or not meaning its just seems less flexible
+ */
+
+type ApplicationState = 'paused' | 'main-menu' | 'in-game';
+
+
+type SystemRegistration = {
+    system: System,
+    // run system depending on the application state, if non specified run always
+    runCondition?: ApplicationState
+}
+
+/**
  * Designed based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
  */
 class Engine {
     private _world = new World();
-    private _systems = new Map<EngineLifecycleEvent, System[]>();
+    private _systems = new Map<EngineLifecycleEvent, SystemRegistration[]>();
+
+    // Need to generalise this to support any states created by the user of the Engine class
+    private applicationState: ApplicationState = 'main-menu';
 
     private _element: HTMLElement;
 
@@ -39,13 +81,18 @@ class Engine {
         this._element = element;
     }
 
-    addSystem(event: EngineLifecycleEvent, system: System): Engine {
+    addSystem(event: EngineLifecycleEvent, system: System, runCondition?: ApplicationState): Engine {
         const eventSystems = this._systems.get(event);
 
+        const systemRegistration = {
+            system,
+            runCondition,
+        }
+
         if (!eventSystems) {
-            this._systems.set(event, [system]);
+            this._systems.set(event, [systemRegistration]);
         } else {
-            eventSystems.push(system)
+            eventSystems.push(systemRegistration)
         }
         
         return this;
@@ -73,7 +120,12 @@ class Engine {
 
                 const startSystems = self._systems.get('start') ?? [];
 
-                startSystems.forEach((system) => system(self._world, { mousePosition }));
+                startSystems.forEach(({ system }) => system(self._world, { mousePosition }));
+
+                let button = p.createButton('click me');
+                button.position(250, 125);
+
+                button.mousePressed(() => self.applicationState = 'in-game')
             }
 
             p.draw = function draw() {
@@ -86,7 +138,11 @@ class Engine {
                     y: p.mouseY,
                 };
 
-                updateSystems.forEach((system) => system(self._world, { mousePosition }));
+                updateSystems.forEach(({ system, runCondition }) => {
+                    if (runCondition === undefined || runCondition === self.applicationState) {
+                        system(self._world, { mousePosition });
+                    }
+                });
 
                 // Render system
                 for (const [position, primitive] of self._world.query<[Position, PrimitiveShape]>(['position', 'primitive'])) {
