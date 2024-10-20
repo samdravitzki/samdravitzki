@@ -48,7 +48,7 @@ function collisionSystem(world: World) {
 
 function collisionLoggingSystem(world: World) {
     for (const [collision] of world.query<[Collision]>(['collision'])) {
-        console.log(JSON.stringify(collision))
+        console.debug(JSON.stringify(collision))
     }
 }
 
