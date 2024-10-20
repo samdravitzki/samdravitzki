@@ -197,18 +197,28 @@ function ballTrajectorySystem(world: World) {
 // 2. Disable any input from affecting anything that is paused
 
 new Engine(document.getElementById('pong-sketch')!)
-    .addSystem('start', setupBall)
-    .addSystem('start', setupPaddles)
-    .addSystem('start', setupBoundaries)
-    .addSystem('start', setupScoreboard) 
-    .addSystem('update', collisionSystem, 'in-game')
-    .addSystem('update', collisionLoggingSystem, 'in-game')
-    .addSystem('update', ballCollisionHandlingSystem, 'in-game')
-    .addSystem('update', backboardCollisionHandlingSystem, 'in-game')
-    .addSystem('update', paddleCollisionHandlingSystem, 'in-game')
-    .addSystem('update', playerPaddleSystem, 'in-game')
-    .addSystem('update', aiPaddleSystem, 'in-game')
-    .addSystem('update', ballMovementSystem, 'in-game')
-    .addSystem('update', ballTrajectorySystem, 'in-game')
-    .addSystem('update', collisionCleanupSystem, 'in-game')
+    .addSystems({ event: 'start' }, [
+        setupBall,
+        setupPaddles,
+        setupBoundaries,
+        setupScoreboard
+    ])
+    .addSystems({ event: 'update', state: 'in-game' }, [
+        collisionSystem,
+        collisionLoggingSystem,
+        ballCollisionHandlingSystem,
+        backboardCollisionHandlingSystem,
+        paddleCollisionHandlingSystem,
+        playerPaddleSystem,
+        aiPaddleSystem,
+        ballMovementSystem,
+        ballTrajectorySystem,
+        collisionCleanupSystem,
+    ])
+    .addSystem({ event: 'update', state: 'in-game', onEnter: true }, (world) => {
+        const [primitive] = world.query<[PrimitiveShape, BallComponent]>(['primitive', 'ball'])[0];
+
+        console.log('Triggered onEnter to in game')
+        primitive.stroke = [10, 82, 56];
+    })
     .run()

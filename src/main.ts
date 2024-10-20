@@ -32,7 +32,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     ${games.map((game) => (`
       <div id="${game.name}-game" style="display:none;">
         <button id="exit-${game.name}-button">❌</button>
-        <div id="${game.gameId}"></div>
+        <div style="position: relative;" id="${game.gameId}"></div>
       </div>
     `)).join('')}
   </div>

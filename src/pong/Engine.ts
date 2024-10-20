@@ -5,8 +5,6 @@ import Bounds from '../Bounds/Bounds';
 import Vector from '../Vector/Vector';
 import { Position, PrimitiveShape } from './components';
 
-type EngineLifecycleEvent = 'start' | 'update';
-
 
 /**
  * Resources:
@@ -57,12 +55,53 @@ type EngineLifecycleEvent = 'start' | 'update';
  */
 
 type ApplicationState = 'paused' | 'main-menu' | 'in-game';
+type EngineLifecycleEvent = 'start' | 'update';
 
 
 type SystemRegistration = {
     system: System,
     // run system depending on the application state, if non specified run always
-    runCondition?: ApplicationState
+    runCondition?: Trigger
+}
+
+type Trigger = {
+    event: EngineLifecycleEvent;
+    state?: ApplicationState;
+    onEnter?: true;
+};
+
+class State<T> {
+    private _value: T;
+
+    private _onEnterListers: (() => void)[] = [];
+    private _onExitListers: (() => void)[] = [];
+
+    constructor(startingValue: T) {
+        this._value = startingValue;
+    }
+
+    get value() {
+        return this._value;
+    }
+
+    registerOnEnterLister(listener: () => void) {
+        this._onEnterListers.push(listener);
+    }
+
+    private handleEnter() {
+        this._onEnterListers.forEach((listener) => listener());
+    }
+
+    private handleExit() {
+        this._onExitListers.forEach((listener) => listener());
+    }
+
+    setValue(value: T) {
+        this.handleEnter();
+        this._value = value;
+        this.handleExit();
+    }
+
 }
 
 /**
@@ -73,7 +112,7 @@ class Engine {
     private _systems = new Map<EngineLifecycleEvent, SystemRegistration[]>();
 
     // Need to generalise this to support any states created by the user of the Engine class
-    private applicationState: ApplicationState = 'main-menu';
+    private _applicationState = new State<ApplicationState>('main-menu');
 
     private _element: HTMLElement;
 
@@ -81,20 +120,30 @@ class Engine {
         this._element = element;
     }
 
-    addSystem(event: EngineLifecycleEvent, system: System, runCondition?: ApplicationState): Engine {
-        const eventSystems = this._systems.get(event);
+    
+
+    addSystem(trigger: Trigger, system: System): Engine {
+        const eventSystems = this._systems.get(trigger.event);
 
         const systemRegistration = {
             system,
-            runCondition,
+            runCondition: trigger,
         }
 
         if (!eventSystems) {
-            this._systems.set(event, [systemRegistration]);
+            this._systems.set(trigger.event, [systemRegistration]);
         } else {
             eventSystems.push(systemRegistration)
         }
         
+        return this;
+    }
+
+    addSystems(trigger: Trigger, systems: System[]) {
+        systems.forEach((system) => {
+            this.addSystem(trigger, system);
+        })
+
         return this;
     }
 
@@ -118,14 +167,35 @@ class Engine {
                     y: 0,
                 };
 
+                // Register onEnter systems
+                const onEnterSystems = self._systems.get('update')?.filter((reg) => reg.runCondition?.onEnter === true);
+
+                onEnterSystems?.forEach(({ system }) => {
+                    // Not sure but the mouse position passed to this system might be out of date
+                    self._applicationState.registerOnEnterLister(() => system(self._world, { mousePosition }))
+                })
+
                 const startSystems = self._systems.get('start') ?? [];
 
                 startSystems.forEach(({ system }) => system(self._world, { mousePosition }));
 
-                let button = p.createButton('click me');
-                button.position(250, 125);
+                let button = p.createButton('start game');
+                button.position(0, 250, 'absolute');
 
-                button.mousePressed(() => self.applicationState = 'in-game')
+                button.mousePressed(() => {
+                    const appState = self._applicationState.value;
+                    console.log(appState);
+
+                    if (appState === 'in-game') {
+                        self._applicationState.setValue('main-menu');
+                        return;
+                    };
+
+                    if (appState === 'main-menu') {
+                        self._applicationState.setValue('in-game');
+                        return;
+                    };
+                })
             }
 
             p.draw = function draw() {
@@ -139,7 +209,10 @@ class Engine {
                 };
 
                 updateSystems.forEach(({ system, runCondition }) => {
-                    if (runCondition === undefined || runCondition === self.applicationState) {
+                    if (runCondition === undefined 
+                        || (runCondition.state === self._applicationState.value 
+                            && (runCondition.onEnter === undefined))
+                        ) {
                         system(self._world, { mousePosition });
                     }
                 });
@@ -204,4 +277,3 @@ class Engine {
 }
 
 export default Engine;
-export type { EngineLifecycleEvent };
