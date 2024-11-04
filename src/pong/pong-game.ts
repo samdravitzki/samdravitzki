@@ -215,10 +215,16 @@ new Engine(document.getElementById('pong-sketch')!)
         ballTrajectorySystem,
         collisionCleanupSystem,
     ])
-    .addSystem({ event: 'update', state: 'in-game', onEnter: true }, (world) => {
+    .addSystem({ event: 'update', state: 'in-game', trigger: 'on-enter' }, (world) => {
         const [primitive] = world.query<[PrimitiveShape, BallComponent]>(['primitive', 'ball'])[0];
 
-        console.log('Triggered onEnter to in game')
+        console.log('Triggered onEnter in-game')
         primitive.stroke = [10, 82, 56];
+    })
+    .addSystem({ event: 'update', state: 'main-menu', trigger: 'on-enter' }, (world) => {
+        const [primitive] = world.query<[PrimitiveShape, BallComponent]>(['primitive', 'ball'])[0];
+
+        console.log('Triggered onEnter menu')
+        primitive.stroke = [240, 60, 100];
     })
     .run()

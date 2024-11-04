@@ -61,20 +61,21 @@ type EngineLifecycleEvent = 'start' | 'update';
 type SystemRegistration = {
     system: System,
     // run system depending on the application state, if non specified run always
-    runCondition?: Trigger
+    runCondition?: RunCondition
 }
 
-type Trigger = {
+type RunCondition = {
     event: EngineLifecycleEvent;
     state?: ApplicationState;
-    onEnter?: true;
+    trigger?: 'on-enter' | 'on-exit' // When triggers is excluded its run every frame
 };
+
+type StateChange = 'on-enter' | 'on-exit';
 
 class State<T> {
     private _value: T;
 
-    private _onEnterListers: (() => void)[] = [];
-    private _onExitListers: (() => void)[] = [];
+    private _listeners = new Map<T, Record<StateChange, (() => void)[]>>();
 
     constructor(startingValue: T) {
         this._value = startingValue;
@@ -84,22 +85,54 @@ class State<T> {
         return this._value;
     }
 
-    registerOnEnterLister(listener: () => void) {
-        this._onEnterListers.push(listener);
+    /**
+     * Register a callback that will be invoked when the change in
+     * state specified by the user occurs
+     * 
+     * i.e. when a particular state exits, call the supplied function
+     * @param stateChange 
+     * @param listener 
+     */
+    registerListener(value: T, stateChange: StateChange, listener: () => void) {
+        if (!this._listeners.has(value)) {
+            this._listeners.set(value, {
+                'on-enter': [],
+                'on-exit': []
+            });
+        }
+
+        // We can assume there is an entry for value because of the above line
+        const valueStateListeners = this._listeners.get(value)!;
+
+        valueStateListeners[stateChange].push(listener);
     }
 
-    private handleEnter() {
-        this._onEnterListers.forEach((listener) => listener());
+    /**
+     * Trigger on-enter listeners asscociated with value of state
+     */
+    private handleEnter(value: T) {
+        const valueStateListeners = this._listeners.get(value)?.['on-enter'];
+
+        if (valueStateListeners !== undefined){
+            valueStateListeners.forEach((listener) => listener())
+        }
     }
 
-    private handleExit() {
-        this._onExitListers.forEach((listener) => listener());
+    /**
+     * Trigger on-exit listeners asscociated with value of state
+     */
+    private handleExit(value: T) {
+        const valueStateListeners = this._listeners.get(value)?.['on-exit'];
+
+        if (valueStateListeners !== undefined){
+            valueStateListeners.forEach((listener) => listener())
+        }
     }
 
     setValue(value: T) {
-        this.handleEnter();
+        this.handleEnter(value);
         this._value = value;
-        this.handleExit();
+        this.handleExit(value);
     }
 
 }
@@ -122,16 +155,16 @@ class Engine {
 
     
 
-    addSystem(trigger: Trigger, system: System): Engine {
-        const eventSystems = this._systems.get(trigger.event);
+    addSystem(condition: RunCondition, system: System): Engine {
+        const eventSystems = this._systems.get(condition.event);
 
         const systemRegistration = {
             system,
-            runCondition: trigger,
+            runCondition: condition,
         }
 
         if (!eventSystems) {
-            this._systems.set(trigger.event, [systemRegistration]);
+            this._systems.set(condition.event, [systemRegistration]);
         } else {
             eventSystems.push(systemRegistration)
         }
@@ -139,9 +172,9 @@ class Engine {
         return this;
     }
 
-    addSystems(trigger: Trigger, systems: System[]) {
+    addSystems(condition: RunCondition, systems: System[]) {
         systems.forEach((system) => {
-            this.addSystem(trigger, system);
+            this.addSystem(condition, system);
         })
 
         return this;
@@ -167,13 +200,20 @@ class Engine {
                     y: 0,
                 };
 
-                // Register onEnter systems
-                const onEnterSystems = self._systems.get('update')?.filter((reg) => reg.runCondition?.onEnter === true);
+                const eventTriggeredSystems = self._systems.get('update')?.filter((reg) => (
+                    reg.runCondition?.trigger !== undefined
+                ));
 
-                onEnterSystems?.forEach(({ system }) => {
-                    // Not sure but the mouse position passed to this system might be out of date
-                    self._applicationState.registerOnEnterLister(() => system(self._world, { mousePosition }))
-                })
+                if (eventTriggeredSystems !== undefined) {
+                    eventTriggeredSystems?.forEach(({ system, runCondition }) => {
+                        if (runCondition?.trigger === undefined || runCondition.state === undefined) {
+                            return;
+                        }
+                        // Not sure but the mouse position passed to this system might be out of date
+                        self._applicationState.registerListener(runCondition.state, runCondition.trigger, () => system(self._world, { mousePosition }))
+                    });
+                }
+
 
                 const startSystems = self._systems.get('start') ?? [];
 
@@ -211,7 +251,7 @@ class Engine {
                 updateSystems.forEach(({ system, runCondition }) => {
                     if (runCondition === undefined 
                         || (runCondition.state === self._applicationState.value 
-                            && (runCondition.onEnter === undefined))
+                            && (runCondition.trigger === undefined))
                         ) {
                         system(self._world, { mousePosition });
                     }
