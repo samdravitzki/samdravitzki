@@ -1,7 +1,7 @@
 import p5 from 'p5';
 import Vector from '../Vector/Vector';
 import World from '../ecs/World/World';
-import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed, PaddleComponent, TrajectoryLineSegmentComponent, Collider } from './components';
+import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed, PaddleComponent, TrajectoryLineSegmentComponent } from './components';
 import collisionSystem, { collisionCleanupSystem, collisionLoggingSystem } from './collision/collision-system';
 import castRay from './collision/cast-ray';
 import Engine from './Engine';
@@ -193,8 +193,6 @@ function ballTrajectorySystem(world: World) {
 }
 
 function renderSystem(world: World, { p }: { p: p5 }) {
-    console.log('hello')
-
     for (const [position, primitive] of world.query<[Position, PrimitiveShape]>(['position', 'primitive'])) {
         if (!primitive.strokeWeight) {
             p.strokeWeight(0);
