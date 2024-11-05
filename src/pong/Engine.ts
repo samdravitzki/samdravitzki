@@ -3,7 +3,6 @@ import System, { MousePosition } from '../ecs/System/System';
 import World from '../ecs/World/World';
 import Bounds from '../Bounds/Bounds';
 import Vector from '../Vector/Vector';
-import { Position, PrimitiveShape } from './components';
 
 
 /**
@@ -61,7 +60,7 @@ type EngineLifecycleEvent = 'start' | 'update';
 type SystemRegistration = {
     system: System,
     // run system depending on the application state, if non specified run always
-    runCondition?: RunCondition
+    runCondition: RunCondition
 }
 
 type RunCondition = {
@@ -210,14 +209,14 @@ class Engine {
                             return;
                         }
                         // Not sure but the mouse position passed to this system might be out of date
-                        self._applicationState.registerListener(runCondition.state, runCondition.trigger, () => system(self._world, { mousePosition }))
+                        self._applicationState.registerListener(runCondition.state, runCondition.trigger, () => system(self._world, { mousePosition, p }))
                     });
                 }
 
 
                 const startSystems = self._systems.get('start') ?? [];
 
-                startSystems.forEach(({ system }) => system(self._world, { mousePosition }));
+                startSystems.forEach(({ system }) => system(self._world, { mousePosition, p }));
 
                 let button = p.createButton('start game');
                 button.position(0, 250, 'absolute');
@@ -249,68 +248,14 @@ class Engine {
                 };
 
                 updateSystems.forEach(({ system, runCondition }) => {
-                    if (runCondition === undefined 
-                        || (runCondition.state === self._applicationState.value 
-                            && (runCondition.trigger === undefined))
-                        ) {
-                        system(self._world, { mousePosition });
+                    if (runCondition.state === undefined || (
+                        runCondition.state === self._applicationState.value 
+                        && runCondition.trigger === undefined
+                    )) {
+                        system(self._world, { mousePosition, p });
                     }
                 });
-
-                // Render system
-                for (const [position, primitive] of self._world.query<[Position, PrimitiveShape]>(['position', 'primitive'])) {
-                    if (!primitive.strokeWeight) {
-                        p.strokeWeight(0);
-                    } else {
-                        p.strokeWeight(primitive.strokeWeight);
-                    }
-
-                    if (!primitive.stroke) {
-                        p.noStroke();
-                    } else {
-                        p.stroke(primitive.stroke);
-                    }
-
-                    if (!primitive.fill) {
-                        p.noFill()
-                    } else {
-                        p.fill(primitive.fill)
-                    }
-
-                    if (primitive.type === 'circle') {
-                        p.circle(position.position.x, position.position.y, primitive.radius * 2);
-                    }
-
-                    if (primitive.type === 'line') {
-                        p.line(
-                            primitive.start.x + position.position.x, primitive.start.y + position.position.y,
-                            primitive.end.x + position.position.x, primitive.end.y + position.position.y
-                        )
-                    }
-
-                    if (primitive.type === 'square') {
-                        p.rect(position.position.x, position.position.y, primitive.width, primitive.height)
-                    }
-
-                    if (primitive.type === 'text') {
-                        p.textSize(primitive.size);
-
-                        if (primitive.align === 'left') p.textAlign(p.LEFT);
-                        if (primitive.align === 'right') p.textAlign(p.RIGHT);
-
-                        p.text(primitive.text, position.position.x, position.position.y);
-                    }
-                }
-
-                // Collider rendering system
-                // for (const [col, pos] of wor.query(['collider', 'position']) as [Collider, Position][]) {
-                //     if (col.type === 'aabb') {
-                //         p.stroke(111, 100, 100);
-                //         p.strokeWeight(0.5)
-                //         p.noFill()
-                //         p.rect(pos.position.x, pos.position.y, col.width, col.height);
-                //     }
-                // }
+                
             }
         }, this._element);
     }

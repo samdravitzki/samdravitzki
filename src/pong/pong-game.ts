@@ -1,6 +1,7 @@
+import p5 from 'p5';
 import Vector from '../Vector/Vector';
 import World from '../ecs/World/World';
-import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed, PaddleComponent, TrajectoryLineSegmentComponent } from './components';
+import { ScoreComponent, PrimitiveShape, Position, Velocity, BallComponent, BackboardComponent, Collision, Speed, PaddleComponent, TrajectoryLineSegmentComponent, Collider } from './components';
 import collisionSystem, { collisionCleanupSystem, collisionLoggingSystem } from './collision/collision-system';
 import castRay from './collision/cast-ray';
 import Engine from './Engine';
@@ -191,6 +192,66 @@ function ballTrajectorySystem(world: World) {
     
 }
 
+function renderSystem(world: World, { p }: { p: p5 }) {
+    console.log('hello')
+
+    for (const [position, primitive] of world.query<[Position, PrimitiveShape]>(['position', 'primitive'])) {
+        if (!primitive.strokeWeight) {
+            p.strokeWeight(0);
+        } else {
+            p.strokeWeight(primitive.strokeWeight);
+        }
+
+        if (!primitive.stroke) {
+            p.noStroke();
+        } else {
+            p.stroke(primitive.stroke);
+        }
+
+        if (!primitive.fill) {
+            p.noFill()
+        } else {
+            p.fill(primitive.fill)
+        }
+
+        if (primitive.type === 'circle') {
+            p.circle(position.position.x, position.position.y, primitive.radius * 2);
+        }
+
+        if (primitive.type === 'line') {
+            p.line(
+                primitive.start.x + position.position.x, primitive.start.y + position.position.y,
+                primitive.end.x + position.position.x, primitive.end.y + position.position.y
+            )
+        }
+
+        if (primitive.type === 'square') {
+            p.rect(position.position.x, position.position.y, primitive.width, primitive.height)
+        }
+
+        if (primitive.type === 'text') {
+            p.textSize(primitive.size);
+
+            if (primitive.align === 'left') p.textAlign(p.LEFT);
+            if (primitive.align === 'right') p.textAlign(p.RIGHT);
+
+            p.text(primitive.text, position.position.x, position.position.y);
+        }
+    }
+
+}
+
+// function collisionRenderSystem(world: World, { p }: { p: p5 }) {
+//     for (const [col, pos] of world.query(['collider', 'position']) as [Collider, Position][]) {
+//         if (col.type === 'aabb') {
+//             p.stroke(111, 100, 100);
+//             p.strokeWeight(0.5)
+//             p.noFill()
+//             p.rect(pos.position.x, pos.position.y, col.width, col.height);
+//         }
+//     }
+// }
+
 // Pause functionality
 // When the pause button is pressed
 // 1. Freeze time
@@ -203,6 +264,8 @@ new Engine(document.getElementById('pong-sketch')!)
         setupBoundaries,
         setupScoreboard
     ])
+    .addSystem({ event: 'update'}, renderSystem)
+    // .addSystem({ event: 'update'}, collisionRenderSystem)
     .addSystems({ event: 'update', state: 'in-game' }, [
         collisionSystem,
         collisionLoggingSystem,
