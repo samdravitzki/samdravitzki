@@ -251,32 +251,50 @@ function renderSystem(world: World, { p }: { p: p5 }) {
 //     }
 // }
 
-// Pause functionality
-// When the pause button is pressed
-// 1. Freeze time
-// 2. Disable any input from affecting anything that is paused
+function showGameMenu(_world: World, { p }: { p: p5 }, { appState }: { appState: State<ApplicationState>}) {
+    const gameMenu = p.createDiv();
+    gameMenu.position(0, 250, 'absolute');
+    gameMenu.id('game-menu');
+
+    
+    const pauseButton = p.createButton('pause');
+    pauseButton.parent(gameMenu);
+
+    pauseButton.mousePressed(() => {
+        console.log(appState);
+
+        if (appState.value === 'in-game') {
+            appState.setValue('paused');
+            return;
+        };
+
+        if (appState.value === 'paused') {
+            appState.setValue('in-game');
+            return;
+        };
+    });
+}
+
+function hideGameMenu(_world: World, { p }: { p: p5 }) {
+    const mainMenu = p.select('#game-menu');
+    mainMenu?.hide();
+}
 
 
 function showMainMenu(_world: World, { p }: { p: p5 }, { appState }: { appState: State<ApplicationState>}) {
     const mainMenu = p.createDiv();
     mainMenu.position(0, 0, 'absolute');
+    mainMenu.size(500, 250);
+    mainMenu.style('display', 'flex');
+    mainMenu.style('place-content', 'center');
+    mainMenu.style('align-items', 'center');
     mainMenu.id('main-menu');
 
-    const button = p.createButton('start game');
-    button.parent(mainMenu);
-    button.mousePressed(() => {
-        console.log(appState);
-
-        if (appState.value === 'in-game') {
-            appState.setValue('main-menu');
-            return;
-        };
-
-        if (appState.value === 'main-menu') {
-            appState.setValue('in-game');
-            return;
-        };
-    })
+    const startGameButton = p.createButton('start game');
+    startGameButton.parent(mainMenu);
+    startGameButton.mousePressed(() => {
+        appState.setValue('in-game');
+    });
 }
 
 function hideMainMenu(_world: World, { p }: { p: p5 }) {
@@ -305,6 +323,6 @@ new Engine(document.getElementById('pong-sketch')!)
         ballTrajectorySystem,
         collisionCleanupSystem,
     ])
-    .addSystem({ event: 'update', state: 'in-game', trigger: 'on-enter' }, hideMainMenu)
-    .addSystem({ event: 'update', state: 'main-menu', trigger: 'on-enter' }, showMainMenu)
+    .addSystems({ event: 'update', state: 'in-game', trigger: 'on-enter' }, [hideMainMenu, showGameMenu])
+    .addSystems({ event: 'update', state: 'main-menu', trigger: 'on-enter' }, [showMainMenu, hideGameMenu])
     .run()
