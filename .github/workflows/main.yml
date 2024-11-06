@@ -2,7 +2,7 @@ name: Deployment
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: "20.x"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -27,7 +27,7 @@ jobs:
 
       - name: Test
         run: pnpm run test
-      
+
       - name: Build
         run: pnpm run build
 
@@ -37,15 +37,15 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'dist/' 
+          path: "dist/"
 
   # Taken from https://github.com/actions/deploy-pages
   deploy:
     needs: build
 
     permissions:
-      pages: write     # to deploy to Pages
-      id-token: write  # to verify the deployment originates from an appropriate source
+      pages: write # to deploy to Pages
+      id-token: write # to verify the deployment originates from an appropriate source
 
     environment:
       name: github-pages
@@ -56,4 +56,4 @@ jobs:
     steps:
       - name: Deploy to Github Pages
         id: deployment
-        uses: actions/deploy-pages@v4 
+        uses: actions/deploy-pages@v4

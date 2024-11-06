@@ -1,6 +1,5 @@
-
 type Component = {
-    name: string;
-}
+  name: string;
+};
 
 export default Component;

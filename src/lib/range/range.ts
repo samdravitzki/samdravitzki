@@ -1,3 +1,3 @@
 export default function range(length: number): number[] {
-    return [...Array(length).keys()];
+  return [...Array(length).keys()];
 }

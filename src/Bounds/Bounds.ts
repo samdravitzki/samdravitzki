@@ -1,11 +1,11 @@
-import Vector from '../Vector/Vector';
-import boundedMod from '../lib/boundedMod/boundedMod';
-import randomInt from '../lib/randomInt/randomInt';
+import Vector from "../Vector/Vector";
+import boundedMod from "../lib/boundedMod/boundedMod";
+import randomInt from "../lib/randomInt/randomInt";
 
 /**
  * Describes a square boudary in two-dimentional space
- * 
- * Where min is the top-left most point and max is the bottom-right 
+ *
+ * Where min is the top-left most point and max is the bottom-right
  * most point of the square
  */
 export default class Bounds {
@@ -36,7 +36,7 @@ export default class Bounds {
   /**
    * Generates a random position in the bounds
    * @param increment only generate a random position that is a multiple of the supplied increment
-   * @returns 
+   * @returns
    */
   randomPosition(increment: number = 1): Vector {
     const randomXPosition = randomInt(this.max.x, this.min.x, increment);
@@ -47,13 +47,13 @@ export default class Bounds {
 
   /**
    * Transform given position to bounded mod within these bounds
-   * @param position 
+   * @param position
    * @returns position within bounds
    */
   boundedMod(position: Vector): Vector {
     return Vector.create(
       boundedMod(position.x, this.max.x, this.min.x),
-      boundedMod(position.y, this.max.y, this.min.y)
-    )
+      boundedMod(position.y, this.max.y, this.min.y),
+    );
   }
 }

@@ -1,18 +1,17 @@
-import { defineConfig } from 'vite'
-import checker from 'vite-plugin-checker'
-
+import { defineConfig } from "vite";
+import checker from "vite-plugin-checker";
 
 export default defineConfig({
-    test: {
-        environment: 'jsdom',
-        coverage: {
-            enabled: true,
-            provider: 'v8',
-        }
+  test: {
+    environment: "jsdom",
+    coverage: {
+      enabled: true,
+      provider: "v8",
     },
-    plugins: [
-        checker({
-            typescript: true,
-        }),
-    ]
-}) 
+  },
+  plugins: [
+    checker({
+      typescript: true,
+    }),
+  ],
+});

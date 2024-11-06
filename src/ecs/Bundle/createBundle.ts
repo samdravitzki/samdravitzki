@@ -1,5 +1,5 @@
-import Component from '../Component/Component';
-import Bundle from './Bundle';
+import Component from "../Component/Component";
+import Bundle from "./Bundle";
 
 // type ComponentName = string;
 
@@ -7,15 +7,16 @@ import Bundle from './Bundle';
  * Component data used to create each component associated with an enitity
  */
 
-export default function createBundle<T extends Component>(componentInfo: (string | T)[]): Bundle {
+export default function createBundle<T extends Component>(
+  componentInfo: (string | T)[],
+): Bundle {
+  const components = componentInfo.map<Component>((info) => {
+    if (typeof info === "string") {
+      return { name: info };
+    }
 
-    const components = componentInfo.map<Component>((info) => {
-        if (typeof info === 'string') {
-            return { name: info };
-        }
+    return info;
+  });
 
-        return info;
-    });
-
-    return { components }
+  return { components };
 }
