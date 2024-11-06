@@ -1,5 +1,6 @@
 import p5 from 'p5';
 import World from '../World/World';
+import State from '../State/State';
 
 /**
  * resource containing the position of the mouse on screen
@@ -14,14 +15,29 @@ export type MousePosition = {
     y: number,
 }
 
+
+/**
+ * The main states of the applicaton
+ * 
+ * NOTE: Similar to resources states should be defined by the consumer of the 
+ * Engine and so they should be configurable and customised by the user.
+ * ApplicationState likely only makes sense in the scenario of this pong
+ * example
+ */
+export type ApplicationState = 'paused' | 'main-menu' | 'in-game';
+
 /**
  * An ECS system, create systems to implement behaviour on the ECS world
  * 
- * NOTE: Ideally p5 shouldn't be available as a resource because that way it will be
- * easier to move away from in the future. It is added as a resource so that I can directly
- * use its ui features without requiring an abstraction to save a bit of time. Another benefit
- * is that rendering and other things that rely on p5 can be factored out to systems
+ * NOTE: I don't intend p5 to be available as a resource because I dont want this tool to be
+ * coupled to p5. It is added as a resource so that I can the p5 ui features directly as a short term solution
+ * so that dont have to create a ui abstraction based on entities and components just yet
+ * 
+ * IDEA: It would be useful to have access to the bounds as a resource to help with positioning
+ * 
+ * GOAL: pull this back to a simple interface not dependent on any third party depedencies and make
+ * resources and state customisable by user with some default resources
  */
-type System = (world: World, resources: { mousePosition: MousePosition, p: p5 }) => void;
+type System = (world: World, resources: { mousePosition: MousePosition, p: p5 }, state: { appState: State<ApplicationState> }) => void;
 
 export default System;

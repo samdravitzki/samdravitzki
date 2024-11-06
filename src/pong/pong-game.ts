@@ -11,7 +11,8 @@ import setupBoundaries from './setup-boundaries';
 import setupBall from './setup-ball';
 import setupPaddles from './setup-paddles';
 import setupScoreboard from './setup-scoreboard';
-import { MousePosition } from '../ecs/System/System';
+import { ApplicationState, MousePosition } from '../ecs/System/System';
+import State from '../ecs/State/State';
 
 const ballHitAudio = new Audio(minionBongUrl);
 
@@ -255,6 +256,36 @@ function renderSystem(world: World, { p }: { p: p5 }) {
 // 1. Freeze time
 // 2. Disable any input from affecting anything that is paused
 
+
+function showMainMenu(_world: World, { p }: { p: p5 }, { appState }: { appState: State<ApplicationState>}) {
+    const mainMenu = p.createDiv();
+    mainMenu.position(0, 0, 'absolute');
+    mainMenu.width('500px')
+    mainMenu.height('250px')
+    mainMenu.id('main-menu');
+
+    const button = p.createButton('start game');
+    button.parent(mainMenu);
+    button.mousePressed(() => {
+        console.log(appState);
+
+        if (appState.value === 'in-game') {
+            appState.setValue('main-menu');
+            return;
+        };
+
+        if (appState.value === 'main-menu') {
+            appState.setValue('in-game');
+            return;
+        };
+    })
+}
+
+function hideMainMenu(_world: World, { p }: { p: p5 }) {
+    const mainMenu = p.select('#main-menu');
+    mainMenu?.hide();
+}
+
 new Engine(document.getElementById('pong-sketch')!)
     .addSystems({ event: 'start' }, [
         setupBall,
@@ -276,16 +307,6 @@ new Engine(document.getElementById('pong-sketch')!)
         ballTrajectorySystem,
         collisionCleanupSystem,
     ])
-    .addSystem({ event: 'update', state: 'in-game', trigger: 'on-enter' }, (world) => {
-        const [primitive] = world.query<[PrimitiveShape, BallComponent]>(['primitive', 'ball'])[0];
-
-        console.log('Triggered onEnter in-game')
-        primitive.stroke = [10, 82, 56];
-    })
-    .addSystem({ event: 'update', state: 'main-menu', trigger: 'on-enter' }, (world) => {
-        const [primitive] = world.query<[PrimitiveShape, BallComponent]>(['primitive', 'ball'])[0];
-
-        console.log('Triggered onEnter menu')
-        primitive.stroke = [240, 60, 100];
-    })
+    .addSystem({ event: 'update', state: 'in-game', trigger: 'on-enter' }, hideMainMenu)
+    .addSystem({ event: 'update', state: 'main-menu', trigger: 'on-enter' }, showMainMenu)
     .run()

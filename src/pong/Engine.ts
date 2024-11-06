@@ -1,8 +1,9 @@
 import p5 from 'p5';
-import System, { MousePosition } from '../ecs/System/System';
+import System, { ApplicationState, MousePosition } from '../ecs/System/System';
 import World from '../ecs/World/World';
 import Bounds from '../Bounds/Bounds';
 import Vector from '../Vector/Vector';
+import State from '../ecs/State/State';
 
 
 /**
@@ -53,7 +54,7 @@ import Vector from '../Vector/Vector';
  * the game is paused or not meaning its just seems less flexible
  */
 
-type ApplicationState = 'paused' | 'main-menu' | 'in-game';
+
 type EngineLifecycleEvent = 'start' | 'update';
 
 
@@ -69,72 +70,7 @@ type RunCondition = {
     trigger?: 'on-enter' | 'on-exit' // When triggers is excluded its run every frame
 };
 
-type StateChange = 'on-enter' | 'on-exit';
 
-class State<T> {
-    private _value: T;
-
-    private _listeners = new Map<T, Record<StateChange, (() => void)[]>>();
-
-    constructor(startingValue: T) {
-        this._value = startingValue;
-    }
-
-    get value() {
-        return this._value;
-    }
-
-    /**
-     * Register a callback that will be invoked when the change in
-     * state specified by the user occurs
-     * 
-     * i.e. when a particular state exits, call the supplied function
-     * @param stateChange 
-     * @param listener 
-     */
-    registerListener(value: T, stateChange: StateChange, listener: () => void) {
-        if (!this._listeners.has(value)) {
-            this._listeners.set(value, {
-                'on-enter': [],
-                'on-exit': []
-            });
-        }
-
-        // We can assume there is an entry for value because of the above line
-        const valueStateListeners = this._listeners.get(value)!;
-
-        valueStateListeners[stateChange].push(listener);
-    }
-
-    /**
-     * Trigger on-enter listeners asscociated with value of state
-     */
-    private handleEnter(value: T) {
-        const valueStateListeners = this._listeners.get(value)?.['on-enter'];
-
-        if (valueStateListeners !== undefined){
-            valueStateListeners.forEach((listener) => listener())
-        }
-    }
-
-    /**
-     * Trigger on-exit listeners asscociated with value of state
-     */
-    private handleExit(value: T) {
-        const valueStateListeners = this._listeners.get(value)?.['on-exit'];
-
-        if (valueStateListeners !== undefined){
-            valueStateListeners.forEach((listener) => listener())
-        }
-    }
-
-    setValue(value: T) {
-        this.handleEnter(value);
-        this._value = value;
-        this.handleExit(value);
-    }
-
-}
 
 /**
  * Designed based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
@@ -209,32 +145,18 @@ class Engine {
                             return;
                         }
                         // Not sure but the mouse position passed to this system might be out of date
-                        self._applicationState.registerListener(runCondition.state, runCondition.trigger, () => system(self._world, { mousePosition, p }))
+                        self._applicationState.registerListener(
+                            runCondition.state,
+                            runCondition.trigger,
+                            () => system(self._world, { mousePosition, p }, { appState: self._applicationState })
+                        );
                     });
                 }
 
 
                 const startSystems = self._systems.get('start') ?? [];
 
-                startSystems.forEach(({ system }) => system(self._world, { mousePosition, p }));
-
-                let button = p.createButton('start game');
-                button.position(0, 250, 'absolute');
-
-                button.mousePressed(() => {
-                    const appState = self._applicationState.value;
-                    console.log(appState);
-
-                    if (appState === 'in-game') {
-                        self._applicationState.setValue('main-menu');
-                        return;
-                    };
-
-                    if (appState === 'main-menu') {
-                        self._applicationState.setValue('in-game');
-                        return;
-                    };
-                })
+                startSystems.forEach(({ system }) => system(self._world, { mousePosition, p }, { appState: self._applicationState }));
             }
 
             p.draw = function draw() {
@@ -252,7 +174,7 @@ class Engine {
                         runCondition.state === self._applicationState.value 
                         && runCondition.trigger === undefined
                     )) {
-                        system(self._world, { mousePosition, p });
+                        system(self._world, { mousePosition, p }, { appState: self._applicationState });
                     }
                 });
                 
