@@ -260,8 +260,6 @@ function renderSystem(world: World, { p }: { p: p5 }) {
 function showMainMenu(_world: World, { p }: { p: p5 }, { appState }: { appState: State<ApplicationState>}) {
     const mainMenu = p.createDiv();
     mainMenu.position(0, 0, 'absolute');
-    mainMenu.width('500px')
-    mainMenu.height('250px')
     mainMenu.id('main-menu');
 
     const button = p.createButton('start game');
