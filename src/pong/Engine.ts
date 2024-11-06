@@ -77,6 +77,8 @@ class Engine {
   // Need to generalise this to support any states created by the user of the Engine class
   private _applicationState = new State<ApplicationState>("main-menu");
 
+  private _renderTrajectory = new State<boolean>(false);
+
   private _element: HTMLElement;
 
   constructor(element: HTMLElement) {
@@ -116,7 +118,7 @@ class Engine {
       const p = sketch as unknown as p5;
       const playBounds = Bounds.create(
         Vector.create(0, 0),
-        Vector.create(500, 250),
+        Vector.create(500, 250)
       );
 
       p.setup = function setup() {
@@ -150,8 +152,11 @@ class Engine {
                 system(
                   self._world,
                   { mousePosition, p },
-                  { appState: self._applicationState },
-                ),
+                  {
+                    appState: self._applicationState,
+                    renderTrajectory: self._renderTrajectory,
+                  }
+                )
             );
           });
         }
@@ -162,8 +167,11 @@ class Engine {
           system(
             self._world,
             { mousePosition, p },
-            { appState: self._applicationState },
-          ),
+            {
+              appState: self._applicationState,
+              renderTrajectory: self._renderTrajectory,
+            }
+          )
         );
       };
 
@@ -186,7 +194,10 @@ class Engine {
             system(
               self._world,
               { mousePosition, p },
-              { appState: self._applicationState },
+              {
+                appState: self._applicationState,
+                renderTrajectory: self._renderTrajectory,
+              }
             );
           }
         });

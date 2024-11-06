@@ -27,6 +27,7 @@ import setupPaddles from "./setup-paddles";
 import setupScoreboard from "./setup-scoreboard";
 import { ApplicationState, MousePosition } from "../ecs/System/System";
 import State from "../ecs/State/State";
+import Component from "../ecs/Component/Component";
 
 const ballHitAudio = new Audio(minionBongUrl);
 
@@ -44,12 +45,12 @@ function ballCollisionHandlingSystem(world: World) {
       const paddlePosition = collidee.getComponent("position") as Position;
 
       const yDistanceFromPaddleCenter = paddlePosition.position.minus(
-        position.position,
+        position.position
       ).y;
 
       velocity.velocity = Vector.create(
         velocity.velocity.x,
-        -yDistanceFromPaddleCenter / 25,
+        -yDistanceFromPaddleCenter / 25
       );
     }
   }
@@ -138,8 +139,8 @@ function aiPaddleSystem(world: World) {
     position.position = position.position.plus(
       Vector.create(
         0,
-        (targetPosition.position.y - position.position.y) * speed.value,
-      ),
+        (targetPosition.position.y - position.position.y) * speed.value
+      )
     );
 
     if (position.position.y < 20) {
@@ -156,7 +157,7 @@ function aiPaddleSystem(world: World) {
 
 function playerPaddleSystem(
   world: World,
-  { mousePosition }: { mousePosition: MousePosition },
+  { mousePosition }: { mousePosition: MousePosition }
 ) {
   for (const [position] of world.query<[Position]>([
     "position",
@@ -165,7 +166,7 @@ function playerPaddleSystem(
   ])) {
     const positionChange = mousePosition.y - position.position.y;
     position.position = position.position.plus(
-      Vector.create(0, positionChange),
+      Vector.create(0, positionChange)
     );
 
     if (position.position.y < 20) {
@@ -184,11 +185,15 @@ function ballMovementSystem(world: World) {
   >(["velocity", "position", "speed", "ball"])[0];
 
   position.position = position.position.plus(
-    velocity.velocity.times(speed.value),
+    velocity.velocity.times(speed.value)
   );
 }
 
-function ballTrajectorySystem(world: World) {
+function ballTrajectorySystem(
+  world: World,
+  {},
+  { renderTrajectory }: { renderTrajectory: State<boolean> }
+) {
   const [targetPosition] = world.query<[Position]>([
     "position",
     "ai-paddle-target",
@@ -211,7 +216,7 @@ function ballTrajectorySystem(world: World) {
 
   // Start the ray a little back from the start of the center of the ball to mitigate issues with tunneling
   let start = ballPosition.position.minus(
-    ballVelocity.velocity.normalised().times(10),
+    ballVelocity.velocity.normalised().times(10)
   );
   let direction = ballVelocity.velocity;
 
@@ -224,7 +229,7 @@ function ballTrajectorySystem(world: World) {
         direction,
         length: 1000,
       },
-      { layer: "wall" },
+      { layer: "wall" }
     )[0];
 
     if (!hit) {
@@ -233,28 +238,31 @@ function ballTrajectorySystem(world: World) {
 
     const end = hit.position;
 
-    world.addBundle(
-      createBundle([
-        "trajectory-line",
-        {
-          name: "position",
-          position: start,
-        },
-        // {
-        //     name: 'primitive',
-        //     stroke: [(111 + 50 * linesAdded) % 255, 100, 100],
-        //     strokeWeight: 2,
-        //     type: 'line',
-        //     start: Vector.create(0, 0),
-        //     end: end.minus(start),
-        // }
-      ]),
-    );
+    const trajectoryLineComponents: (string | Component)[] = [
+      "trajectory-line",
+      {
+        name: "position",
+        position: start,
+      } as Position,
+    ];
+
+    if (renderTrajectory.value) {
+      trajectoryLineComponents.push({
+        name: "primitive",
+        stroke: [(111 + 50 * linesAdded) % 255, 100, 100],
+        strokeWeight: 2,
+        type: "line",
+        start: Vector.create(0, 0),
+        end: end.minus(start),
+      } as PrimitiveShape);
+    }
+
+    world.addBundle(createBundle(trajectoryLineComponents));
 
     const hitEntity = world.entity(hit.entityId);
 
     const backBoardComponent = hitEntity.components.find(
-      (comp) => comp.name === "backboard",
+      (comp) => comp.name === "backboard"
     ) as BackboardComponent | undefined;
 
     if (backBoardComponent && backBoardComponent.owner === "ai") {
@@ -301,7 +309,7 @@ function renderSystem(world: World, { p }: { p: p5 }) {
         primitive.start.x + position.position.x,
         primitive.start.y + position.position.y,
         primitive.end.x + position.position.x,
-        primitive.end.y + position.position.y,
+        primitive.end.y + position.position.y
       );
     }
 
@@ -310,7 +318,7 @@ function renderSystem(world: World, { p }: { p: p5 }) {
         position.position.x,
         position.position.y,
         primitive.width,
-        primitive.height,
+        primitive.height
       );
     }
 
@@ -339,7 +347,10 @@ function renderSystem(world: World, { p }: { p: p5 }) {
 function showGameMenu(
   _world: World,
   { p }: { p: p5 },
-  { appState }: { appState: State<ApplicationState> },
+  {
+    appState,
+    renderTrajectory,
+  }: { appState: State<ApplicationState>; renderTrajectory: State<boolean> }
 ) {
   const gameMenu = p.createDiv();
   gameMenu.position(0, 250, "absolute");
@@ -349,8 +360,6 @@ function showGameMenu(
   pauseButton.parent(gameMenu);
 
   pauseButton.mousePressed(() => {
-    console.log(appState);
-
     if (appState.value === "in-game") {
       appState.setValue("paused");
       return;
@@ -360,6 +369,13 @@ function showGameMenu(
       appState.setValue("in-game");
       return;
     }
+  });
+
+  const trajectoryButton = p.createButton("trajectory");
+  trajectoryButton.parent(gameMenu);
+
+  trajectoryButton.mousePressed(() => {
+    renderTrajectory.setValue(!renderTrajectory.value);
   });
 }
 
@@ -371,7 +387,7 @@ function hideGameMenu(_world: World, { p }: { p: p5 }) {
 function showMainMenu(
   _world: World,
   { p }: { p: p5 },
-  { appState }: { appState: State<ApplicationState> },
+  { appState }: { appState: State<ApplicationState> }
 ) {
   const mainMenu = p.createDiv();
   mainMenu.position(0, 0, "absolute");
