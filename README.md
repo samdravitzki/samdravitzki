@@ -24,8 +24,6 @@ I want to understand what it takes to publish a working interactive experiment, 
 
 The implementation of snake doesn't have to be anything special but there has to be some kind of original twist
 
-### TODO
-
 - [ ] Implement basic snake game
   - [x] Snack self collisions
   - [x] Track score
@@ -57,8 +55,6 @@ great structured way to start developing these skills
 ### Scope
 
 Complete "The Challenge" defined in https://20_games_challenge.gitlab.io/challenge/
-
-### TODO
 
     - [ ] Implement pong (Game #1)
         - [x] Create an arena with two walls and a divider.
@@ -121,12 +117,11 @@ At the moment I am thinking I want this project to include...
 
 All the things that need to be done to support building and maintain these projects
 
-### TODO
-
 - [x] Add unit test runner
 - [x] Automate unit tests in the CI
 - [ ] Add linter
 - [ ] Automate linting in the CI
+- [x] Add formatter
 - [ ] Look into introducing a dependency updating bot into the repository
 - [ ] Integrate GitHub code spaces to make development on this more portable
 - [ ] Implement more extensible approach to adding new games to the site
