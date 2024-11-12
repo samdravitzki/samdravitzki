@@ -7,13 +7,6 @@ of skills to make unique fun interactive things
 
 # Projects
 
-The status of the project is indicated by the following a traffic light system where...
-
-- ⚪ = not started
-- 🔴 = abandoned
-- 🟡 = in progress
-- 🟢 = complete
-
 ## Simple snake 🟢
 
 ### Brief
@@ -56,21 +49,21 @@ great structured way to start developing these skills
 
 Complete "The Challenge" defined in https://20_games_challenge.gitlab.io/challenge/
 
-    - [ ] Implement pong (Game #1)
-        - [x] Create an arena with two walls and a divider.
-        - [x] Add a paddle on either end of the play field. Use player inputs to move the paddles up and down.
-        - [x] Add a ball that moves around the playfield and bounces off of the paddles and walls.
-        - [x] Detect when the ball leaves the playfield. Assign a point to the player who scored.
-        - [x] Track and display the score for each player.
-        - [ ] Change ball trajectory on contact with paddle (so trajectory doesn't stay the same the entire time)
-        - [ ] Add a menu
-        - [ ] Add an end state
-        - [ ] Add sound effects
-        - [ ] Implement an AI
-        - [ ] Increase difficulty as game goes on
-        - [ ] Add ability to pause
-    - [ ] Implement breakout (Game #2)
-    - [ ] Implement the rest of the 10 games
+- [ ] Implement pong (Game #1)
+  - [x] Create an arena with two walls and a divider.
+  - [x] Add a paddle on either end of the play field. Use player inputs to move the paddles up and down.
+  - [x] Add a ball that moves around the playfield and bounces off of the paddles and walls.
+  - [x] Detect when the ball leaves the playfield. Assign a point to the player who scored.
+  - [x] Track and display the score for each player.
+  - [ ] Change ball trajectory on contact with paddle (so trajectory doesn't stay the same the entire time)
+  - [ ] Add a menu
+  - [ ] Add an end state
+  - [ ] Add sound effects
+  - [ ] Implement an AI
+  - [ ] Increase difficulty as game goes on
+  - [ ] Add ability to pause
+- [ ] Implement breakout (Game #2)
+- [ ] Implement the rest of the 10 games
 
 ### Resources
 
@@ -128,6 +121,11 @@ All the things that need to be done to support building and maintain these proje
   - that also don't require the use of dynamic module imports
   - and have a better method for toggling the visibility of the games
 
-# Technical debt
+# Appendix
 
-- [x] base option required in Vite config to get it to work with GitHub pages
+The status of the project is indicated by the following a colour system where...
+
+- ⚪ = not started
+- 🔴 = abandoned
+- 🟡 = in progress
+- 🟢 = complete

@@ -40,7 +40,7 @@ export type ApplicationState = "paused" | "main-menu" | "in-game";
 type System = (
   world: World,
   resources: { mousePosition: MousePosition; p: p5 },
-  state: { appState: State<ApplicationState>; renderTrajectory: State<boolean> }
+  states: Map<string, State<unknown>>
 ) => void;
 
 export default System;

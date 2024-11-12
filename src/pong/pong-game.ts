@@ -25,7 +25,7 @@ import setupBoundaries from "./setup-boundaries";
 import setupBall from "./setup-ball";
 import setupPaddles from "./setup-paddles";
 import setupScoreboard from "./setup-scoreboard";
-import { ApplicationState, MousePosition } from "../ecs/System/System";
+import { MousePosition } from "../ecs/System/System";
 import State from "../ecs/State/State";
 import Component from "../ecs/Component/Component";
 
@@ -192,8 +192,9 @@ function ballMovementSystem(world: World) {
 function ballTrajectorySystem(
   world: World,
   {},
-  { renderTrajectory }: { renderTrajectory: State<boolean> }
+  state: Map<string, State<unknown>>
 ) {
+  const renderTrajectory = state.get("render-trajectory")!;
   const [targetPosition] = world.query<[Position]>([
     "position",
     "ai-paddle-target",
@@ -344,72 +345,107 @@ function renderSystem(world: World, { p }: { p: p5 }) {
 //     }
 // }
 
-function showGameMenu(
-  _world: World,
-  { p }: { p: p5 },
+const engine = new Engine(document.getElementById("pong-sketch")!);
+
+engine.state<boolean>("render-trajectory", false);
+engine.state<"paused" | "main-menu" | "in-game">("app-state", "main-menu");
+
+// showGameMenu -- Need a way to label systems if I want to write them this way
+engine.system(
   {
-    appState,
-    renderTrajectory,
-  }: { appState: State<ApplicationState>; renderTrajectory: State<boolean> }
-) {
-  const gameMenu = p.createDiv();
-  gameMenu.position(0, 250, "absolute");
-  gameMenu.id("game-menu");
+    event: "update",
+    state: "app-state",
+    value: "in-game",
+    trigger: "on-enter",
+  },
+  (_world, { p }, state) => {
+    // Need to figure out how to remove having to request state from a map like this
+    const appState = state.get("app-state")!;
+    const renderTrajectory = state.get("render-trajectory")!;
 
-  const pauseButton = p.createButton("pause");
-  pauseButton.parent(gameMenu);
+    const gameMenu = p.createDiv();
+    gameMenu.position(0, 250, "absolute");
+    gameMenu.id("game-menu");
 
-  pauseButton.mousePressed(() => {
-    if (appState.value === "in-game") {
-      appState.setValue("paused");
-      return;
-    }
+    const pauseButton = p.createButton("pause");
+    pauseButton.parent(gameMenu);
 
-    if (appState.value === "paused") {
+    pauseButton.mousePressed(() => {
+      if (appState.value === "in-game") {
+        appState.setValue("paused");
+        return;
+      }
+
+      if (appState.value === "paused") {
+        appState.setValue("in-game");
+        return;
+      }
+    });
+
+    const trajectoryButton = p.createButton("trajectory");
+    trajectoryButton.parent(gameMenu);
+
+    trajectoryButton.mousePressed(() => {
+      renderTrajectory.setValue(!renderTrajectory.value);
+    });
+  }
+);
+
+// hideGameMenu
+engine.system(
+  {
+    event: "update",
+    state: "app-state",
+    value: "main-menu",
+    trigger: "on-enter",
+  },
+  (_world, { p }) => {
+    const mainMenu = p.select("#game-menu");
+    mainMenu?.hide();
+  }
+);
+
+// showMainMenu
+engine.system(
+  {
+    event: "update",
+    state: "app-state",
+    value: "main-menu",
+    trigger: "on-enter",
+  },
+  (_world, { p }, state) => {
+    const appState = state.get("app-state")!;
+    const mainMenu = p.createDiv();
+    mainMenu.position(0, 0, "absolute");
+    mainMenu.size(500, 250);
+    mainMenu.style("display", "flex");
+    mainMenu.style("place-content", "center");
+    mainMenu.style("align-items", "center");
+    mainMenu.id("main-menu");
+
+    const startGameButton = p.createButton("start game");
+    startGameButton.parent(mainMenu);
+    startGameButton.mousePressed(() => {
       appState.setValue("in-game");
-      return;
-    }
-  });
+    });
+  }
+);
 
-  const trajectoryButton = p.createButton("trajectory");
-  trajectoryButton.parent(gameMenu);
+// hideMainMenu
+engine.system(
+  {
+    event: "update",
+    state: "app-state",
+    value: "in-game",
+    trigger: "on-enter",
+  },
+  (_world, { p }) => {
+    const mainMenu = p.select("#main-menu");
+    mainMenu?.hide();
+  }
+);
 
-  trajectoryButton.mousePressed(() => {
-    renderTrajectory.setValue(!renderTrajectory.value);
-  });
-}
-
-function hideGameMenu(_world: World, { p }: { p: p5 }) {
-  const mainMenu = p.select("#game-menu");
-  mainMenu?.hide();
-}
-
-function showMainMenu(
-  _world: World,
-  { p }: { p: p5 },
-  { appState }: { appState: State<ApplicationState> }
-) {
-  const mainMenu = p.createDiv();
-  mainMenu.position(0, 0, "absolute");
-  mainMenu.size(500, 250);
-  mainMenu.style("display", "flex");
-  mainMenu.style("place-content", "center");
-  mainMenu.style("align-items", "center");
-  mainMenu.id("main-menu");
-
-  const startGameButton = p.createButton("start game");
-  startGameButton.parent(mainMenu);
-  startGameButton.mousePressed(() => {
-    appState.setValue("in-game");
-  });
-}
-
-function hideMainMenu(_world: World, { p }: { p: p5 }) {
-  const mainMenu = p.select("#main-menu");
-  mainMenu?.hide();
-}
-
-new Engine(document.getElementById("pong-sketch")!)
+engine
   .addSystems({ event: "start" }, [
     setupBall,
     setupPaddles,
@@ -418,7 +454,7 @@ new Engine(document.getElementById("pong-sketch")!)
   ])
   .addSystem({ event: "update" }, renderSystem)
   // .addSystem({ event: 'update'}, collisionRenderSystem)
-  .addSystems({ event: "update", state: "in-game" }, [
+  .addSystems({ event: "update", state: "app-state", value: "in-game" }, [
     collisionSystem,
     collisionLoggingSystem,
     ballCollisionHandlingSystem,
@@ -429,13 +465,6 @@ new Engine(document.getElementById("pong-sketch")!)
     ballMovementSystem,
     ballTrajectorySystem,
     collisionCleanupSystem,
-  ])
-  .addSystems({ event: "update", state: "in-game", trigger: "on-enter" }, [
-    hideMainMenu,
-    showGameMenu,
-  ])
-  .addSystems({ event: "update", state: "main-menu", trigger: "on-enter" }, [
-    showMainMenu,
-    hideGameMenu,
-  ])
-  .run();
+  ]);
+
+engine.run();

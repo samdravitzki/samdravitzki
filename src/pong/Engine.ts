@@ -63,7 +63,8 @@ type SystemRegistration = {
 
 type RunCondition = {
   event: EngineLifecycleEvent;
-  state?: ApplicationState;
+  state?: string;
+  value?: ApplicationState; // This should not be tied to any particular state
   trigger?: "on-enter" | "on-exit"; // When triggers is excluded its run every frame
 };
 
@@ -74,15 +75,31 @@ class Engine {
   private _world = new World();
   private _systems = new Map<EngineLifecycleEvent, SystemRegistration[]>();
 
-  // Need to generalise this to support any states created by the user of the Engine class
-  private _applicationState = new State<ApplicationState>("main-menu");
-
-  private _renderTrajectory = new State<boolean>(false);
-
   private _element: HTMLElement;
+
+  private _states = new Map<string, State<unknown>>();
 
   constructor(element: HTMLElement) {
     this._element = element;
+  }
+
+  state<T>(name: string, value: T) {
+    this._states.set(name, new State<T>(value));
+  }
+
+  system(condition: RunCondition, system: System) {
+    const eventSystems = this._systems.get(condition.event);
+
+    const systemRegistration = {
+      system,
+      runCondition: condition,
+    };
+
+    if (!eventSystems) {
+      this._systems.set(condition.event, [systemRegistration]);
+    } else {
+      eventSystems.push(systemRegistration);
+    }
   }
 
   addSystem(condition: RunCondition, system: System): Engine {
@@ -140,23 +157,18 @@ class Engine {
           eventTriggeredSystems?.forEach(({ system, runCondition }) => {
             if (
               runCondition?.trigger === undefined ||
-              runCondition.state === undefined
+              runCondition.state === undefined ||
+              runCondition.value === undefined
             ) {
               return;
             }
+
+            const state = self._states.get(runCondition.state)!;
             // Not sure but the mouse position passed to this system might be out of date
-            self._applicationState.registerListener(
-              runCondition.state,
+            state.registerListener(
+              runCondition.value,
               runCondition.trigger,
-              () =>
-                system(
-                  self._world,
-                  { mousePosition, p },
-                  {
-                    appState: self._applicationState,
-                    renderTrajectory: self._renderTrajectory,
-                  }
-                )
+              () => system(self._world, { mousePosition, p }, self._states)
             );
           });
         }
@@ -164,14 +176,7 @@ class Engine {
         const startSystems = self._systems.get("start") ?? [];
 
         startSystems.forEach(({ system }) =>
-          system(
-            self._world,
-            { mousePosition, p },
-            {
-              appState: self._applicationState,
-              renderTrajectory: self._renderTrajectory,
-            }
-          )
+          system(self._world, { mousePosition, p }, self._states)
         );
       };
 
@@ -186,19 +191,21 @@ class Engine {
         };
 
         updateSystems.forEach(({ system, runCondition }) => {
+          if (runCondition.value === undefined) {
+            system(self._world, { mousePosition, p }, self._states);
+          }
+
+          if (!runCondition.state) {
+            return;
+          }
+
+          const state = self._states.get(runCondition.state);
+
           if (
-            runCondition.state === undefined ||
-            (runCondition.state === self._applicationState.value &&
-              runCondition.trigger === undefined)
+            runCondition.value === state?.value &&
+            runCondition.trigger === undefined
           ) {
-            system(
-              self._world,
-              { mousePosition, p },
-              {
-                appState: self._applicationState,
-                renderTrajectory: self._renderTrajectory,
-              }
-            );
+            system(self._world, { mousePosition, p }, self._states);
           }
         });
       };
