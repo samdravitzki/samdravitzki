@@ -1,5 +1,5 @@
 import p5 from "p5";
-import System, { ApplicationState, MousePosition } from "../ecs/System/System";
+import System, { MousePosition } from "../ecs/System/System";
 import World from "../ecs/World/World";
 import Bounds from "../Bounds/Bounds";
 import Vector from "../Vector/Vector";
@@ -55,12 +55,15 @@ import State from "../ecs/State/State";
 
 type EngineLifecycleEvent = "start" | "update";
 
-type SystemRegistration = {
-  system: System;
-  // run system depending on the application state, if non specified run always
-  runCondition: RunCondition;
-};
+type SystemRegistration<StateSet extends Record<string, State<unknown>> = {}> =
+  {
+    system: System<StateSet>;
+    // run system depending on the application state, if non specified run always
+    runCondition: RunCondition;
+  };
 
+// TODO:  Run condition should be able to support any state, this needs to be genera
+type ApplicationState = "paused" | "main-menu" | "in-game";
 type RunCondition = {
   event: EngineLifecycleEvent;
   state?: string;
@@ -69,25 +72,71 @@ type RunCondition = {
 };
 
 /**
+ * Testing out this way of implementing the builder pattern in typescript
+ * so that as you run each build command it also incrementally builds the
+ * types.
+ *
+ * Motivation: Currently there is an issue where when each state is added to
+ * the engine there is no way for the systems to access the types of state
+ * avaible and so each of them has to run their own checks to see if the
+ * state they are accessing exists
+ *
+ * got this trick from https://medium.hexlabs.io/the-builder-pattern-with-typescript-using-advanced-types-e05a03ffc36e
+ *
+ * TODO: I want to see if this can be combined with the engine class so that the consumer can directly use something called "Engine"
+ */
+class EngineBuilder<StateSet extends Record<string, State<unknown>> = {}> {
+  private constructor(private readonly stateSet: StateSet) {}
+
+  /**
+   *
+   * NOTE: The resulting object is pretty verbose due to all of the "&"
+   * causes by the intersection done on each call to state. This issue
+   * can be resolved using "Expand" types as described in the article
+   * above. I have chosen to leave this out for now to keep things simple
+   *
+   * @param name
+   * @param value
+   * @returns
+   */
+  state<const K extends string, T>(name: K, value: T) {
+    const newState = { [name]: new State<T>(value) };
+
+    return new EngineBuilder<StateSet & { [k in K]: State<T> }>({
+      ...this.stateSet,
+      ...newState,
+    });
+  }
+
+  build(element: HTMLElement) {
+    return new Engine(element, this.stateSet);
+  }
+
+  static create(): EngineBuilder {
+    return new EngineBuilder({});
+  }
+}
+
+/**
  * Designed based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
  */
-class Engine {
+class Engine<StateSet extends Record<string, State<unknown>> = {}> {
   private _world = new World();
-  private _systems = new Map<EngineLifecycleEvent, SystemRegistration[]>();
+  private _systems = new Map<
+    EngineLifecycleEvent,
+    SystemRegistration<StateSet>[]
+  >();
 
   private _element: HTMLElement;
 
-  private _states = new Map<string, State<unknown>>();
+  private _stateSet: StateSet;
 
-  constructor(element: HTMLElement) {
+  constructor(element: HTMLElement, stateSet: StateSet) {
     this._element = element;
+    this._stateSet = stateSet;
   }
 
-  state<T>(name: string, value: T) {
-    this._states.set(name, new State<T>(value));
-  }
-
-  system(condition: RunCondition, system: System) {
+  system(condition: RunCondition, system: System<StateSet>) {
     const eventSystems = this._systems.get(condition.event);
 
     const systemRegistration = {
@@ -102,7 +151,11 @@ class Engine {
     }
   }
 
-  addSystem(condition: RunCondition, system: System): Engine {
+  // TODO: Remove this system and replace uses with the above method
+  addSystem(
+    condition: RunCondition,
+    system: System<StateSet>
+  ): Engine<StateSet> {
     const eventSystems = this._systems.get(condition.event);
 
     const systemRegistration = {
@@ -119,7 +172,10 @@ class Engine {
     return this;
   }
 
-  addSystems(condition: RunCondition, systems: System[]) {
+  addSystems(
+    condition: RunCondition,
+    systems: System<StateSet>[]
+  ): Engine<StateSet> {
     systems.forEach((system) => {
       this.addSystem(condition, system);
     });
@@ -163,12 +219,12 @@ class Engine {
               return;
             }
 
-            const state = self._states.get(runCondition.state)!;
+            const state = self._stateSet[runCondition.state];
             // Not sure but the mouse position passed to this system might be out of date
             state.registerListener(
               runCondition.value,
               runCondition.trigger,
-              () => system(self._world, { mousePosition, p }, self._states)
+              () => system(self._world, { mousePosition, p }, self._stateSet)
             );
           });
         }
@@ -176,7 +232,7 @@ class Engine {
         const startSystems = self._systems.get("start") ?? [];
 
         startSystems.forEach(({ system }) =>
-          system(self._world, { mousePosition, p }, self._states)
+          system(self._world, { mousePosition, p }, self._stateSet)
         );
       };
 
@@ -192,20 +248,20 @@ class Engine {
 
         updateSystems.forEach(({ system, runCondition }) => {
           if (runCondition.value === undefined) {
-            system(self._world, { mousePosition, p }, self._states);
+            system(self._world, { mousePosition, p }, self._stateSet);
           }
 
           if (!runCondition.state) {
             return;
           }
 
-          const state = self._states.get(runCondition.state);
+          const state = self._stateSet[runCondition.state];
 
           if (
             runCondition.value === state?.value &&
             runCondition.trigger === undefined
           ) {
-            system(self._world, { mousePosition, p }, self._states);
+            system(self._world, { mousePosition, p }, self._stateSet);
           }
         });
       };
@@ -214,3 +270,4 @@ class Engine {
 }
 
 export default Engine;
+export { EngineBuilder };

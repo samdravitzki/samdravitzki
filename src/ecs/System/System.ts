@@ -1,6 +1,5 @@
 import p5 from "p5";
 import World from "../World/World";
-import State from "../State/State";
 
 /**
  * resource containing the position of the mouse on screen
@@ -16,16 +15,6 @@ export type MousePosition = {
 };
 
 /**
- * The main states of the applicaton
- *
- * NOTE: Similar to resources states should be defined by the consumer of the
- * Engine and so they should be configurable and customised by the user.
- * ApplicationState likely only makes sense in the scenario of this pong
- * example
- */
-export type ApplicationState = "paused" | "main-menu" | "in-game";
-
-/**
  * An ECS system, create systems to implement behaviour on the ECS world
  *
  * NOTE: I don't intend p5 to be available as a resource because I dont want this tool to be
@@ -37,10 +26,10 @@ export type ApplicationState = "paused" | "main-menu" | "in-game";
  * GOAL: pull this back to a simple interface not dependent on any third party depedencies and make
  * resources and state customisable by user with some default resources
  */
-type System = (
+type System<StateSet extends Record<string, unknown>> = (
   world: World,
   resources: { mousePosition: MousePosition; p: p5 },
-  states: Map<string, State<unknown>>
+  state: StateSet
 ) => void;
 
 export default System;

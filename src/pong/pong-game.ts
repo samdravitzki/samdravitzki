@@ -12,13 +12,14 @@ import {
   Speed,
   PaddleComponent,
   TrajectoryLineSegmentComponent,
+  Collider,
 } from "./components";
 import collisionSystem, {
   collisionCleanupSystem,
   collisionLoggingSystem,
 } from "./collision/collision-system";
 import castRay from "./collision/cast-ray";
-import Engine from "./Engine";
+import { EngineBuilder } from "./Engine";
 import createBundle from "../ecs/Bundle/createBundle";
 import minionBongUrl from "./sounds/minion-bong.mp3";
 import setupBoundaries from "./setup-boundaries";
@@ -192,9 +193,9 @@ function ballMovementSystem(world: World) {
 function ballTrajectorySystem(
   world: World,
   {},
-  state: Map<string, State<unknown>>
+  state: Record<string, State<unknown>>
 ) {
-  const renderTrajectory = state.get("render-trajectory")!;
+  const renderTrajectory = state["render-trajectory"];
   const [targetPosition] = world.query<[Position]>([
     "position",
     "ai-paddle-target",
@@ -334,21 +335,29 @@ function renderSystem(world: World, { p }: { p: p5 }) {
   }
 }
 
-// function collisionRenderSystem(world: World, { p }: { p: p5 }) {
-//     for (const [col, pos] of world.query(['collider', 'position']) as [Collider, Position][]) {
-//         if (col.type === 'aabb') {
-//             p.stroke(111, 100, 100);
-//             p.strokeWeight(0.5)
-//             p.noFill()
-//             p.rect(pos.position.x, pos.position.y, col.width, col.height);
-//         }
-//     }
-// }
+function collisionRenderSystem(world: World, { p }: { p: p5 }) {
+  for (const [col, pos] of world.query(["collider", "position"]) as [
+    Collider,
+    Position,
+  ][]) {
+    if (col.type === "aabb") {
+      p.stroke(111, 100, 100);
+      p.strokeWeight(0.5);
+      p.noFill();
+      p.rect(pos.position.x, pos.position.y, col.width, col.height);
+    }
+  }
+}
 
-const engine = new Engine(document.getElementById("pong-sketch")!);
+/**
+ * The main states of the applicaton
+ */
+export type ApplicationState = "paused" | "main-menu" | "in-game";
 
-engine.state<boolean>("render-trajectory", false);
-engine.state<"paused" | "main-menu" | "in-game">("app-state", "main-menu");
+const engine = EngineBuilder.create()
+  .state("render-trajectory", false)
+  .state<"app-state", ApplicationState>("app-state", "main-menu")
+  .build(document.getElementById("pong-sketch")!);
 
 // showGameMenu -- Need a way to label systems if I want to write them this way
 engine.system(
@@ -360,8 +369,8 @@ engine.system(
   },
   (_world, { p }, state) => {
     // Need to figure out how to remove having to request state from a map like this
-    const appState = state.get("app-state")!;
-    const renderTrajectory = state.get("render-trajectory")!;
+    const appState = state["app-state"];
+    const renderTrajectory = state["render-trajectory"];
 
     const gameMenu = p.createDiv();
     gameMenu.position(0, 250, "absolute");
@@ -414,7 +423,7 @@ engine.system(
     trigger: "on-enter",
   },
   (_world, { p }, state) => {
-    const appState = state.get("app-state")!;
+    const appState = state["app-state"];
     const mainMenu = p.createDiv();
     mainMenu.position(0, 0, "absolute");
     mainMenu.size(500, 250);
