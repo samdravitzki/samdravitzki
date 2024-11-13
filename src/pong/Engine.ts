@@ -57,12 +57,13 @@ type EngineLifecycleEvent = "start" | "update";
 
 type SystemRegistration<StateSet extends Record<string, State<unknown>> = {}> =
   {
+    name: string,
     system: System<StateSet>;
     // run system depending on the application state, if non specified run always
     runCondition: RunCondition;
   };
 
-// TODO:  Run condition should be able to support any state, this needs to be genera
+// TODO:  Run condition should be able to support any state, this needs to be generalised
 type ApplicationState = "paused" | "main-menu" | "in-game";
 type RunCondition = {
   event: EngineLifecycleEvent;
@@ -136,10 +137,11 @@ class Engine<StateSet extends Record<string, State<unknown>> = {}> {
     this._stateSet = stateSet;
   }
 
-  system(condition: RunCondition, system: System<StateSet>) {
+  system(name: string, condition: RunCondition, system: System<StateSet>) {
     const eventSystems = this._systems.get(condition.event);
 
     const systemRegistration = {
+      name,
       system,
       runCondition: condition,
     };
@@ -149,38 +151,6 @@ class Engine<StateSet extends Record<string, State<unknown>> = {}> {
     } else {
       eventSystems.push(systemRegistration);
     }
-  }
-
-  // TODO: Remove this system and replace uses with the above method
-  addSystem(
-    condition: RunCondition,
-    system: System<StateSet>
-  ): Engine<StateSet> {
-    const eventSystems = this._systems.get(condition.event);
-
-    const systemRegistration = {
-      system,
-      runCondition: condition,
-    };
-
-    if (!eventSystems) {
-      this._systems.set(condition.event, [systemRegistration]);
-    } else {
-      eventSystems.push(systemRegistration);
-    }
-
-    return this;
-  }
-
-  addSystems(
-    condition: RunCondition,
-    systems: System<StateSet>[]
-  ): Engine<StateSet> {
-    systems.forEach((system) => {
-      this.addSystem(condition, system);
-    });
-
-    return this;
   }
 
   run() {

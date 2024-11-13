@@ -359,8 +359,8 @@ const engine = EngineBuilder.create()
   .state<"app-state", ApplicationState>("app-state", "main-menu")
   .build(document.getElementById("pong-sketch")!);
 
-// showGameMenu -- Need a way to label systems if I want to write them this way
 engine.system(
+  "showGameMenu",
   {
     event: "update",
     state: "app-state",
@@ -400,8 +400,8 @@ engine.system(
   }
 );
 
-// hideGameMenu
 engine.system(
+  "hideGameMenu",
   {
     event: "update",
     state: "app-state",
@@ -414,8 +414,8 @@ engine.system(
   }
 );
 
-// showMainMenu
 engine.system(
+  "showMainMenu",
   {
     event: "update",
     state: "app-state",
@@ -440,8 +440,8 @@ engine.system(
   }
 );
 
-// hideMainMenu
 engine.system(
+  "hideMainMenu",
   {
     event: "update",
     state: "app-state",
@@ -454,26 +454,61 @@ engine.system(
   }
 );
 
-engine
-  .addSystems({ event: "start" }, [
-    setupBall,
-    setupPaddles,
-    setupBoundaries,
-    setupScoreboard,
-  ])
-  .addSystem({ event: "update" }, renderSystem)
-  // .addSystem({ event: 'update'}, collisionRenderSystem)
-  .addSystems({ event: "update", state: "app-state", value: "in-game" }, [
-    collisionSystem,
-    collisionLoggingSystem,
-    ballCollisionHandlingSystem,
-    backboardCollisionHandlingSystem,
-    paddleCollisionHandlingSystem,
-    playerPaddleSystem,
-    aiPaddleSystem,
-    ballMovementSystem,
-    ballTrajectorySystem,
-    collisionCleanupSystem,
-  ]);
+// Need a way to factor out and organise these systems and state as they're already getting hard to manage
 
-engine.run();
+engine.system("setupBall", { event: "start" }, setupBall);
+engine.system("setupPaddles", { event: "start" }, setupPaddles);
+engine.system("setupBoundaries", { event: "start" }, setupBoundaries);
+engine.system("setupScoreboard", { event: "start" }, setupScoreboard);
+engine.system("renderSystem", { event: "update" }, renderSystem);
+engine.system(
+  "collisionSystem",
+  { event: "update", state: "app-state", value: "in-game" },
+  collisionSystem
+);
+engine.system(
+  "collisionLoggingSystem",
+  { event: "update", state: "app-state", value: "in-game" },
+  collisionLoggingSystem
+);
+engine.system(
+  "ballCollisionHandlingSystem",
+  { event: "update", state: "app-state", value: "in-game" },
+  ballCollisionHandlingSystem
+);
+engine.system(
+  "backboardCollisionHandlingSystem",
+  { event: "update", state: "app-state", value: "in-game" },
+  backboardCollisionHandlingSystem
+);
+engine.system(
+  "paddleCollisionHandlingSystem",
+  { event: "update", state: "app-state", value: "in-game" },
+  paddleCollisionHandlingSystem
+);
+engine.system(
+  "playerPaddleSystem",
+  { event: "update", state: "app-state", value: "in-game" },
+  playerPaddleSystem
+);
+engine.system(
+  "aiPaddleSystem",
+  { event: "update", state: "app-state", value: "in-game" },
+  aiPaddleSystem
+);
+engine.system(
+  "ballMovementSystem",
+  { event: "update", state: "app-state", value: "in-game" },
+  ballMovementSystem
+);
+engine.system(
+  "ballTrajectorySystem",
+  { event: "update", state: "app-state", value: "in-game" },
+  ballTrajectorySystem
+);
+engine.system(
+  "collisionCleanupSystem",
+  { event: "update", state: "app-state", value: "in-game" },
+  collisionCleanupSystem
+),
+  engine.run();
