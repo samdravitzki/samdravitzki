@@ -1,5 +1,6 @@
 import p5 from "p5";
 import World from "../World/World";
+import State from "../State/State";
 
 /**
  * resource containing the position of the mouse on screen
@@ -26,7 +27,7 @@ export type MousePosition = {
  * GOAL: pull this back to a simple interface not dependent on any third party depedencies and make
  * resources and state customisable by user with some default resources
  */
-type System<StateSet extends Record<string, unknown>> = (
+type System<StateSet extends Record<string, State<unknown>>> = (
   world: World,
   resources: { mousePosition: MousePosition; p: p5 },
   state: StateSet
