@@ -144,12 +144,12 @@ function aiPaddleSystem(world: World) {
       )
     );
 
-    if (position.position.y < 20) {
-      position.position = Vector.create(position.position.x, 20);
+    if (position.position.y < 40) {
+      position.position = Vector.create(position.position.x, 40);
     }
 
-    if (position.position.y > 230) {
-      position.position = Vector.create(position.position.x, 230);
+    if (position.position.y > 210) {
+      position.position = Vector.create(position.position.x, 210);
     }
   }
 }
@@ -170,12 +170,12 @@ function playerPaddleSystem(
       Vector.create(0, positionChange)
     );
 
-    if (position.position.y < 20) {
-      position.position = Vector.create(position.position.x, 20);
+    if (position.position.y < 40) {
+      position.position = Vector.create(position.position.x, 40);
     }
 
-    if (position.position.y > 230) {
-      position.position = Vector.create(position.position.x, 230);
+    if (position.position.y > 210) {
+      position.position = Vector.create(position.position.x, 210);
     }
   }
 }
