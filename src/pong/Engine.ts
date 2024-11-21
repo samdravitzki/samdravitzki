@@ -153,6 +153,20 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
 
   system<K extends keyof StateSet>(
     name: string,
+    condition: {
+      state: K;
+      value: StateSet[K];
+      trigger?: "on-enter" | "on-exit";
+    },
+    system: System<States<StateSet>>
+  ): void;
+  system(
+    name: string,
+    condition: { event: EngineLifecycleEvent },
+    system: System<States<StateSet>>
+  ): void;
+  system<K extends keyof StateSet>(
+    name: string,
     condition:
       | { event: EngineLifecycleEvent }
       | {
