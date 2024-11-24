@@ -197,95 +197,6 @@ function ballMovementSystem(world: World) {
   );
 }
 
-function ballTrajectorySystem(
-  world: World,
-  {},
-  state: Record<string, State<unknown>>
-) {
-  const renderTrajectory = state["render-trajectory"];
-  const [targetPosition] = world.query<[Position]>([
-    "position",
-    "ai-paddle-target",
-  ])[0];
-
-  const [ballPosition, ballVelocity] = world.query<
-    [Position, Velocity, BallComponent]
-  >(["position", "velocity", "ball"])[0];
-
-  for (const [entityId] of world.query<
-    [string, TrajectoryLineSegmentComponent]
-  >(["entity-id", "trajectory-line"])) {
-    world.removeEntity(entityId);
-  }
-
-  const bounces = 20;
-  let linesAdded = 0;
-
-  // Issue: when the ball is moving really slow the ball dissapears
-
-  // Start the ray a little back from the start of the center of the ball to mitigate issues with tunneling
-  let start = ballPosition.position.minus(
-    ballVelocity.velocity.normalised().times(10)
-  );
-  let direction = ballVelocity.velocity;
-
-  // render trajectory line of each collision
-  while (linesAdded < bounces) {
-    const hit = castRay(
-      world,
-      {
-        position: start,
-        direction,
-        length: 1000,
-      },
-      { layer: "wall" }
-    )[0];
-
-    if (!hit) {
-      break;
-    }
-
-    const end = hit.position;
-
-    const trajectoryLineComponents: (string | Component)[] = [
-      "trajectory-line",
-      {
-        name: "position",
-        position: start,
-      } as Position,
-    ];
-
-    if (renderTrajectory.value) {
-      trajectoryLineComponents.push({
-        name: "primitive",
-        stroke: [(111 + 50 * linesAdded) % 255, 100, 100],
-        strokeWeight: 2,
-        type: "line",
-        start: Vector.create(0, 0),
-        end: end.minus(start),
-      } as PrimitiveShape);
-    }
-
-    world.addBundle(createBundle(trajectoryLineComponents));
-
-    const hitEntity = world.entity(hit.entityId);
-
-    const backBoardComponent = hitEntity.components.find(
-      (comp) => comp.name === "backboard"
-    ) as BackboardComponent | undefined;
-
-    if (backBoardComponent && backBoardComponent.owner === "ai") {
-      targetPosition.position = hit.position;
-      break;
-    }
-
-    start = end;
-    direction = direction.reflect(hit.normal).normalised();
-
-    linesAdded += 1;
-  }
-}
-
 function renderSystem(world: World, { p }: { p: p5 }) {
   for (const [position, primitive] of world.query<[Position, PrimitiveShape]>([
     "position",
@@ -647,10 +558,94 @@ engine.system(
   { state: "app-state", value: "in-game" },
   ballMovementSystem
 );
+
 engine.system(
   "ballTrajectorySystem",
   { state: "app-state", value: "in-game" },
-  ballTrajectorySystem
+  (world: World, {}, state: Record<string, State<unknown>>) => {
+    const renderTrajectory = state["render-trajectory"];
+    const [targetPosition] = world.query<[Position]>([
+      "position",
+      "ai-paddle-target",
+    ])[0];
+
+    const [ballPosition, ballVelocity] = world.query<
+      [Position, Velocity, BallComponent]
+    >(["position", "velocity", "ball"])[0];
+
+    for (const [entityId] of world.query<
+      [string, TrajectoryLineSegmentComponent]
+    >(["entity-id", "trajectory-line"])) {
+      world.removeEntity(entityId);
+    }
+
+    const bounces = 20;
+    let linesAdded = 0;
+
+    // Issue: when the ball is moving really slow the ball dissapears
+
+    // Start the ray a little back from the start of the center of the ball to mitigate issues with tunneling
+    let start = ballPosition.position.minus(
+      ballVelocity.velocity.normalised().times(10)
+    );
+    let direction = ballVelocity.velocity;
+
+    // render trajectory line of each collision
+    while (linesAdded < bounces) {
+      const hit = castRay(
+        world,
+        {
+          position: start,
+          direction,
+          length: 1000,
+        },
+        { layer: "wall" }
+      )[0];
+
+      if (!hit) {
+        break;
+      }
+
+      const end = hit.position;
+
+      const trajectoryLineComponents: (string | Component)[] = [
+        "trajectory-line",
+        {
+          name: "position",
+          position: start,
+        } as Position,
+      ];
+
+      if (renderTrajectory.value) {
+        trajectoryLineComponents.push({
+          name: "primitive",
+          stroke: [(111 + 50 * linesAdded) % 255, 100, 100],
+          strokeWeight: 2,
+          type: "line",
+          start: Vector.create(0, 0),
+          end: end.minus(start),
+        } as PrimitiveShape);
+      }
+
+      world.addBundle(createBundle(trajectoryLineComponents));
+
+      const hitEntity = world.entity(hit.entityId);
+
+      const backBoardComponent = hitEntity.components.find(
+        (comp) => comp.name === "backboard"
+      ) as BackboardComponent | undefined;
+
+      if (backBoardComponent && backBoardComponent.owner === "ai") {
+        targetPosition.position = hit.position;
+        break;
+      }
+
+      start = end;
+      direction = direction.reflect(hit.normal).normalised();
+
+      linesAdded += 1;
+    }
+  }
 );
 engine.system(
   "collisionCleanupSystem",
