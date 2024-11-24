@@ -225,12 +225,28 @@ function renderSystem(world: World, { p }: { p: p5 }) {
     }
 
     if (primitive.type === "line") {
+      if (primitive.dash) {
+        p.drawingContext.setLineDash(primitive.dash);
+      }
+
+      if (primitive.dashOffset) {
+        p.drawingContext.lineDashOffset = primitive.dashOffset;
+      }
+
       p.line(
         primitive.start.x + position.position.x,
         primitive.start.y + position.position.y,
         primitive.end.x + position.position.x,
         primitive.end.y + position.position.y
       );
+
+      if (primitive.dash) {
+        p.drawingContext.setLineDash([]);
+      }
+
+      if (primitive.dashOffset) {
+        p.drawingContext.lineDashOffset = 0.0;
+      }
     }
 
     if (primitive.type === "square") {
@@ -582,8 +598,6 @@ engine.system(
     const bounces = 20;
     let linesAdded = 0;
 
-    // Issue: when the ball is moving really slow the ball dissapears
-
     // Start the ray a little back from the start of the center of the ball to mitigate issues with tunneling
     let start = ballPosition.position.minus(
       ballVelocity.velocity.normalised().times(10)
@@ -619,7 +633,8 @@ engine.system(
       if (renderTrajectory.value) {
         trajectoryLineComponents.push({
           name: "primitive",
-          stroke: [(111 + 50 * linesAdded) % 255, 100, 100],
+          stroke: [240, 60, 100],
+          dash: linesAdded === 0 ? 0 : [5, 5],
           strokeWeight: 2,
           type: "line",
           start: Vector.create(0, 0),

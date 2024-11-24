@@ -17,6 +17,7 @@ export type PrimitiveShape = Component & {
   strokeWeight?: number;
   fill: false | number[]; // Fill doesn't make sense for line
   dash?: number[];
+  dashOffset?: number;
 } & (
     | {
         type: "circle";
