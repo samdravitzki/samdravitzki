@@ -2,7 +2,6 @@ import p5 from "p5";
 import Vector from "../Vector/Vector";
 import World from "../ecs/World/World";
 import {
-  ScoreComponent,
   PrimitiveShape,
   Position,
   Velocity,
@@ -29,6 +28,17 @@ import setupScoreboard from "./setup-scoreboard";
 import { MousePosition } from "../ecs/System/System";
 import State from "../ecs/State/State";
 import Component from "../ecs/Component/Component";
+
+/**
+ * The main states of the applicaton
+ */
+export type ApplicationState = "paused" | "main-menu" | "in-game";
+
+const engine = EngineBuilder.create()
+  .state("render-trajectory", false)
+  .state<"score", [number, number]>("score", [0, 0]) // Next step: Move scoring from entity to state and add end condition
+  .state<"app-state", ApplicationState>("app-state", "main-menu")
+  .build(document.getElementById("pong-sketch")!);
 
 const ballHitAudio = new Audio(minionBongUrl);
 
@@ -81,49 +91,48 @@ function paddleCollisionHandlingSystem(world: World) {
     }
   }
 }
+// function backboardCollisionHandlingSystem(world: World) {
+//   for (const [backboard] of world.query<[BackboardComponent, Collision]>([
+//     "backboard",
+//     "collision",
+//   ])) {
+//     const [ballPosition, ballVelocity, ballSpeed] = world.query<
+//       [Position, Velocity, Speed, BallComponent]
+//     >(["position", "velocity", "speed", "ball"])[0];
 
-function backboardCollisionHandlingSystem(world: World) {
-  for (const [backboard] of world.query<[BackboardComponent, Collision]>([
-    "backboard",
-    "collision",
-  ])) {
-    const [ballPosition, ballVelocity, ballSpeed] = world.query<
-      [Position, Velocity, Speed, BallComponent]
-    >(["position", "velocity", "speed", "ball"])[0];
+//     ballPosition.position = Vector.create(200, 40);
 
-    ballPosition.position = Vector.create(200, 40);
+//     if (backboard.owner == "player") {
+//       const [score, primitive] = world.query<[ScoreComponent, PrimitiveShape]>([
+//         "score",
+//         "primitive",
+//         "player-score",
+//       ])[0];
+//       score.value += 1;
+//       if (primitive.type === "text") {
+//         primitive.text = String(score.value);
+//       }
 
-    if (backboard.owner == "player") {
-      const [score, primitive] = world.query<[ScoreComponent, PrimitiveShape]>([
-        "score",
-        "primitive",
-        "player-score",
-      ])[0];
-      score.value += 1;
-      if (primitive.type === "text") {
-        primitive.text = String(score.value);
-      }
+//       ballVelocity.velocity = new Vector(-0.5, -0.5);
+//     }
 
-      ballVelocity.velocity = new Vector(-0.5, -0.5);
-    }
+//     if (backboard.owner == "ai") {
+//       const [score, primitive] = world.query<[ScoreComponent, PrimitiveShape]>([
+//         "score",
+//         "primitive",
+//         "ai-score",
+//       ])[0];
+//       score.value += 1;
+//       if (primitive.type === "text") {
+//         primitive.text = String(score.value);
+//       }
 
-    if (backboard.owner == "ai") {
-      const [score, primitive] = world.query<[ScoreComponent, PrimitiveShape]>([
-        "score",
-        "primitive",
-        "ai-score",
-      ])[0];
-      score.value += 1;
-      if (primitive.type === "text") {
-        primitive.text = String(score.value);
-      }
+//       ballVelocity.velocity = new Vector(0.5, -0.5);
+//     }
 
-      ballVelocity.velocity = new Vector(0.5, -0.5);
-    }
-
-    ballSpeed.value = 3;
-  }
-}
+//     ballSpeed.value = 3;
+//   }
+// }
 
 function aiPaddleSystem(world: World) {
   const [targetPosition] = world.query<[Position]>([
@@ -153,8 +162,6 @@ function aiPaddleSystem(world: World) {
     }
   }
 }
-
-// type System = (world: World, )
 
 function playerPaddleSystem(
   world: World,
@@ -349,16 +356,6 @@ function collisionRenderSystem(world: World, { p }: { p: p5 }) {
   }
 }
 
-/**
- * The main states of the applicaton
- */
-export type ApplicationState = "paused" | "main-menu" | "in-game";
-
-const engine = EngineBuilder.create()
-  .state("render-trajectory", false)
-  .state<"app-state", ApplicationState>("app-state", "main-menu")
-  .build(document.getElementById("pong-sketch")!);
-
 engine.system(
   "showGameMenu",
   {
@@ -472,11 +469,65 @@ engine.system(
   { state: "app-state", value: "in-game" },
   ballCollisionHandlingSystem
 );
+// engine.system(
+//   "backboardCollisionHandlingSystem",
+//   { state: "app-state", value: "in-game" },
+//   backboardCollisionHandlingSystem
+// );
+
 engine.system(
   "backboardCollisionHandlingSystem",
   { state: "app-state", value: "in-game" },
-  backboardCollisionHandlingSystem
+  (world: World, {}, state) => {
+    for (const [backboard] of world.query<[BackboardComponent, Collision]>([
+      "backboard",
+      "collision",
+    ])) {
+      const [ballPosition, ballVelocity, ballSpeed] = world.query<
+        [Position, Velocity, Speed, BallComponent]
+      >(["position", "velocity", "speed", "ball"])[0];
+
+      // Reset ball position
+      ballPosition.position = Vector.create(200, 40);
+
+      const [playerScore, aiScore] = state.score.value;
+
+      if (backboard.owner == "player") {
+        const [primitive] = world.query<[PrimitiveShape]>([
+          "primitive",
+          "player-score",
+        ])[0];
+        state.score.setValue([playerScore + 1, aiScore]);
+
+        if (primitive.type === "text") {
+          primitive.text = String(state.score.value[0]);
+        }
+
+        // Reset ball directed towards player
+        ballVelocity.velocity = new Vector(-0.5, -0.5);
+      }
+
+      if (backboard.owner == "ai") {
+        const [primitive] = world.query<[PrimitiveShape]>([
+          "primitive",
+          "ai-score",
+        ])[0];
+        state.score.setValue([playerScore, aiScore + 1]);
+
+        if (primitive.type === "text") {
+          primitive.text = String(state.score.value[1]);
+        }
+
+        // Reset ball directed towards ai
+        ballVelocity.velocity = new Vector(0.5, -0.5);
+      }
+
+      // Reset ball speed
+      ballSpeed.value = 3;
+    }
+  }
 );
+
 engine.system(
   "paddleCollisionHandlingSystem",
   { state: "app-state", value: "in-game" },

@@ -75,11 +75,6 @@ export type BackboardComponent = Component & {
   owner: "player" | "ai";
 };
 
-export type ScoreComponent = Component & {
-  name: "score";
-  value: number;
-};
-
 export type TrajectoryLineSegmentComponent = Component & {
   name: "trajectory-line-segment";
 };

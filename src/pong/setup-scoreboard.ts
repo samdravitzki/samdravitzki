@@ -6,10 +6,6 @@ function setupScoreboard(world: World) {
   const playerScoreBundle = createBundle([
     "player-score",
     {
-      name: "score",
-      value: 0,
-    },
-    {
       name: "position",
       position: new Vector(245, 35),
     },
@@ -27,10 +23,6 @@ function setupScoreboard(world: World) {
 
   const aiScoreBundle = createBundle([
     "ai-score",
-    {
-      name: "score",
-      value: 0,
-    },
     {
       name: "position",
       position: new Vector(255, 35),
