@@ -32,11 +32,11 @@ import Component from "../ecs/Component/Component";
 /**
  * The main states of the applicaton
  */
-export type ApplicationState = "paused" | "main-menu" | "in-game";
+type ApplicationState = "paused" | "main-menu" | "in-game" | "end";
 
 const engine = EngineBuilder.create()
   .state("render-trajectory", false)
-  .state<"score", [number, number]>("score", [0, 0]) // Next step: Move scoring from entity to state and add end condition
+  .state<"score", [number, number]>("score", [0, 0])
   .state<"app-state", ApplicationState>("app-state", "main-menu")
   .build(document.getElementById("pong-sketch")!);
 
@@ -357,11 +357,9 @@ function collisionRenderSystem(world: World, { p }: { p: p5 }) {
 }
 
 engine.system(
-  "showGameMenu",
+  "createGameMenu",
   {
-    state: "app-state",
-    value: "in-game",
-    trigger: "on-enter",
+    event: "start",
   },
   (_world, { p }, state) => {
     // Need to figure out how to remove having to request state from a map like this
@@ -393,6 +391,21 @@ engine.system(
     trajectoryButton.mousePressed(() => {
       renderTrajectory.setValue(!renderTrajectory.value);
     });
+
+    gameMenu.hide();
+  }
+);
+
+engine.system(
+  "showGameMenu",
+  {
+    state: "app-state",
+    value: "in-game",
+    trigger: "on-enter",
+  },
+  (_world, { p }, state) => {
+    const gameMenu = p.select("#game-menu");
+    gameMenu?.show();
   }
 );
 
@@ -404,10 +417,102 @@ engine.system(
     trigger: "on-enter",
   },
   (_world, { p }) => {
-    const mainMenu = p.select("#game-menu");
-    mainMenu?.hide();
+    const gameMenu = p.select("#game-menu");
+    gameMenu?.hide();
   }
 );
+
+engine.system(
+  "endConditionSystem",
+  {
+    state: "app-state",
+    value: "in-game",
+  },
+  (_world, { p }, state) => {
+    const [playerScore, aiScore] = state.score.value;
+
+    if (playerScore >= 3 || aiScore >= 3) {
+      state["app-state"].setValue("end");
+    }
+  }
+);
+
+engine.system("createEndMenu", { event: "start" }, (world, { p }, state) => {
+  const appState = state["app-state"];
+  const [playerScore, aiScore] = state.score.value;
+
+  const winningMessage = "You won, Nice! 🔥";
+  const loosingMessage = "You lost, to an ai 😔";
+
+  const endMenu = p.createDiv(`
+    <p>${playerScore > aiScore ? winningMessage : loosingMessage}</p>
+  `);
+  endMenu.position(0, 0, "absolute");
+  endMenu.size(500, 250);
+  endMenu.style("display", "flex");
+  endMenu.style("flex-direction", "column");
+  endMenu.style("place-content", "center");
+  endMenu.style("align-items", "center");
+  endMenu.style("color", "white");
+  endMenu.id("end-menu");
+
+  const resetButton = p.createButton("Okay, thanks for the game I guess...");
+  resetButton.parent(endMenu);
+  resetButton.mousePressed(() => {
+    appState.setValue("main-menu");
+    state.score.setValue([0, 0]);
+  });
+
+  // Hide menu by default and show when needed so it can be treated like a resueable component
+  endMenu.hide();
+});
+
+engine.system(
+  "showEndMenu",
+  {
+    state: "app-state",
+    value: "end",
+    trigger: "on-enter",
+  },
+  (_world, { p }, state) => {
+    const endMenu = p.select("#end-menu");
+    endMenu?.show();
+  }
+);
+
+engine.system(
+  "hideEndMenu",
+  {
+    state: "app-state",
+    value: "end",
+    trigger: "on-exit",
+  },
+  (_world, { p }) => {
+    const endMenu = p.select("#end-menu");
+    endMenu?.hide();
+  }
+);
+
+engine.system("createMainMenu", { event: "start" }, (_world, { p }, state) => {
+  const appState = state["app-state"];
+
+  const mainMenu = p.createDiv();
+  mainMenu.position(0, 0, "absolute");
+  mainMenu.size(500, 250);
+  mainMenu.style("display", "flex");
+  mainMenu.style("place-content", "center");
+  mainMenu.style("align-items", "center");
+  mainMenu.id("main-menu");
+
+  const startGameButton = p.createButton("Start a game!");
+  startGameButton.parent(mainMenu);
+  startGameButton.mousePressed(() => {
+    appState.setValue("in-game");
+  });
+
+  // Hide menu by default and show when needed so it can be treated like a resueable component
+  mainMenu.hide();
+});
 
 engine.system(
   "showMainMenu",
@@ -416,21 +521,9 @@ engine.system(
     value: "main-menu",
     trigger: "on-enter",
   },
-  (_world, { p }, state) => {
-    const appState = state["app-state"];
-    const mainMenu = p.createDiv();
-    mainMenu.position(0, 0, "absolute");
-    mainMenu.size(500, 250);
-    mainMenu.style("display", "flex");
-    mainMenu.style("place-content", "center");
-    mainMenu.style("align-items", "center");
-    mainMenu.id("main-menu");
-
-    const startGameButton = p.createButton("start game");
-    startGameButton.parent(mainMenu);
-    startGameButton.mousePressed(() => {
-      appState.setValue("in-game");
-    });
+  (_world, { p }) => {
+    const mainMenu = p.select("#main-menu");
+    mainMenu?.show();
   }
 );
 
@@ -469,11 +562,6 @@ engine.system(
   { state: "app-state", value: "in-game" },
   ballCollisionHandlingSystem
 );
-// engine.system(
-//   "backboardCollisionHandlingSystem",
-//   { state: "app-state", value: "in-game" },
-//   backboardCollisionHandlingSystem
-// );
 
 engine.system(
   "backboardCollisionHandlingSystem",
@@ -493,30 +581,13 @@ engine.system(
       const [playerScore, aiScore] = state.score.value;
 
       if (backboard.owner == "player") {
-        const [primitive] = world.query<[PrimitiveShape]>([
-          "primitive",
-          "player-score",
-        ])[0];
         state.score.setValue([playerScore + 1, aiScore]);
-
-        if (primitive.type === "text") {
-          primitive.text = String(state.score.value[0]);
-        }
-
         // Reset ball directed towards player
         ballVelocity.velocity = new Vector(-0.5, -0.5);
       }
 
       if (backboard.owner == "ai") {
-        const [primitive] = world.query<[PrimitiveShape]>([
-          "primitive",
-          "ai-score",
-        ])[0];
         state.score.setValue([playerScore, aiScore + 1]);
-
-        if (primitive.type === "text") {
-          primitive.text = String(state.score.value[1]);
-        }
 
         // Reset ball directed towards ai
         ballVelocity.velocity = new Vector(0.5, -0.5);
@@ -524,6 +595,34 @@ engine.system(
 
       // Reset ball speed
       ballSpeed.value = 3;
+    }
+  }
+);
+
+engine.system(
+  "updateScoreBoard",
+  { event: "update" },
+  (world: World, {}, state) => {
+    const [playerScore, aiScore] = state.score.value;
+
+    const [playerScoreText] = world.query<[PrimitiveShape]>([
+      "primitive",
+      "player-score",
+    ])[0];
+
+    // Its pretty weird the type has to be narrowed after you receive it from a query
+    // Seems like the query should be responsible for this
+    if (playerScoreText.type === "text") {
+      playerScoreText.text = playerScore.toString();
+    }
+
+    const [aiScoreText] = world.query<[PrimitiveShape]>([
+      "primitive",
+      "ai-score",
+    ])[0];
+
+    if (aiScoreText.type === "text") {
+      aiScoreText.text = aiScore.toString();
     }
   }
 );

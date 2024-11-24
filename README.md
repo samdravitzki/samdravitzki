@@ -55,13 +55,13 @@ Complete "The Challenge" defined in https://20_games_challenge.gitlab.io/challen
   - [x] Add a ball that moves around the playfield and bounces off of the paddles and walls.
   - [x] Detect when the ball leaves the playfield. Assign a point to the player who scored.
   - [x] Track and display the score for each player.
-  - [ ] Change ball trajectory on contact with paddle (so trajectory doesn't stay the same the entire time)
-  - [ ] Add a menu
-  - [ ] Add an end state
+  - [x] Change ball trajectory on contact with paddle (so trajectory doesn't stay the same the entire time)
+  - [x] Add a menu
+  - [x] Add an end state
   - [ ] Add sound effects
-  - [ ] Implement an AI
-  - [ ] Increase difficulty as game goes on
-  - [ ] Add ability to pause
+  - [x] Implement an AI
+  - [x] Increase difficulty as game goes on
+  - [x] Add ability to pause
 - [ ] Implement breakout (Game #2)
 - [ ] Implement the rest of the 10 games
 
