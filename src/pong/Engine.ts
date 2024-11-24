@@ -225,6 +225,12 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
           y: 0,
         };
 
+        const startSystems = self._systems.get("start") ?? [];
+        startSystems.forEach(({ name, system }) => {
+          console.debug(`[start] ${name}`);
+          system(self._world, { mousePosition, p }, self._states);
+        });
+
         const eventTriggeredSystems = self._systems.get("update");
 
         if (eventTriggeredSystems !== undefined) {
@@ -235,19 +241,15 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
                 runCondition.value,
                 runCondition.trigger,
                 () => {
-                  console.info(`[event] ${runCondition.trigger} ${name}`);
+                  console.info(
+                    `[event] ${runCondition.trigger} ${runCondition.state.toString()} ${name}`
+                  );
                   system(self._world, { mousePosition, p }, self._states);
                 }
               );
             }
           });
         }
-
-        const startSystems = self._systems.get("start") ?? [];
-        startSystems.forEach(({ name, system }) => {
-          console.debug(`[start] ${name}`);
-          system(self._world, { mousePosition, p }, self._states);
-        });
       };
 
       p.draw = function draw() {
