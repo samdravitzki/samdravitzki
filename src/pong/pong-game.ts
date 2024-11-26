@@ -44,245 +44,6 @@ const ballHitAudio = new Audio(minionBongUrl);
 
 const sound = false;
 
-function ballCollisionHandlingSystem(world: World) {
-  for (const [velocity, collision, position] of world.query<
-    [Velocity, Collision, Position, BallComponent]
-  >(["velocity", "collision", "position", "ball"])) {
-    const collidee = world.entity(collision.entityId);
-
-    velocity.velocity = velocity.velocity.reflect(collision.normal);
-
-    if (collidee.components.find((c) => c.name === "paddle")) {
-      const paddlePosition = collidee.getComponent("position") as Position;
-
-      const yDistanceFromPaddleCenter = paddlePosition.position.minus(
-        position.position
-      ).y;
-
-      velocity.velocity = Vector.create(
-        velocity.velocity.x,
-        -yDistanceFromPaddleCenter / 25
-      );
-    }
-  }
-}
-
-// Describes bow the collision handling worked in the orginial pong game
-// https://www.vbforums.com/showthread.php?634246-RESOLVED-How-did-collision-in-the-original-Pong-happen
-function paddleCollisionHandlingSystem(world: World) {
-  const [, ballSpeed] = world.query<[Velocity, Speed, BallComponent]>([
-    "velocity",
-    "speed",
-    "ball",
-  ])[0];
-
-  for (const [collision] of world.query<[Collision, PaddleComponent]>([
-    "collision",
-    "paddle",
-  ])) {
-    if (
-      world.entity(collision.entityId).components.find((c) => c.name === "ball")
-    ) {
-      ballSpeed.value += ballSpeed.value * 0.1;
-    }
-
-    if (sound) {
-      ballHitAudio.play();
-    }
-  }
-}
-// function backboardCollisionHandlingSystem(world: World) {
-//   for (const [backboard] of world.query<[BackboardComponent, Collision]>([
-//     "backboard",
-//     "collision",
-//   ])) {
-//     const [ballPosition, ballVelocity, ballSpeed] = world.query<
-//       [Position, Velocity, Speed, BallComponent]
-//     >(["position", "velocity", "speed", "ball"])[0];
-
-//     ballPosition.position = Vector.create(200, 40);
-
-//     if (backboard.owner == "player") {
-//       const [score, primitive] = world.query<[ScoreComponent, PrimitiveShape]>([
-//         "score",
-//         "primitive",
-//         "player-score",
-//       ])[0];
-//       score.value += 1;
-//       if (primitive.type === "text") {
-//         primitive.text = String(score.value);
-//       }
-
-//       ballVelocity.velocity = new Vector(-0.5, -0.5);
-//     }
-
-//     if (backboard.owner == "ai") {
-//       const [score, primitive] = world.query<[ScoreComponent, PrimitiveShape]>([
-//         "score",
-//         "primitive",
-//         "ai-score",
-//       ])[0];
-//       score.value += 1;
-//       if (primitive.type === "text") {
-//         primitive.text = String(score.value);
-//       }
-
-//       ballVelocity.velocity = new Vector(0.5, -0.5);
-//     }
-
-//     ballSpeed.value = 3;
-//   }
-// }
-
-function aiPaddleSystem(world: World) {
-  const [targetPosition] = world.query<[Position]>([
-    "position",
-    "ai-paddle-target",
-  ])[0];
-  for (const [position, speed] of world.query<[Position, Speed]>([
-    "position",
-    "speed",
-    "paddle",
-    "ai",
-  ])) {
-    // Cant just move it to where the ball is, need to move it to where the ball is going to be when it hits on the ai side
-    position.position = position.position.plus(
-      Vector.create(
-        0,
-        (targetPosition.position.y - position.position.y) * speed.value
-      )
-    );
-
-    if (position.position.y < 40) {
-      position.position = Vector.create(position.position.x, 40);
-    }
-
-    if (position.position.y > 210) {
-      position.position = Vector.create(position.position.x, 210);
-    }
-  }
-}
-
-function playerPaddleSystem(
-  world: World,
-  { mousePosition }: { mousePosition: MousePosition }
-) {
-  for (const [position] of world.query<[Position]>([
-    "position",
-    "paddle",
-    "player",
-  ])) {
-    const positionChange = mousePosition.y - position.position.y;
-    position.position = position.position.plus(
-      Vector.create(0, positionChange)
-    );
-
-    if (position.position.y < 40) {
-      position.position = Vector.create(position.position.x, 40);
-    }
-
-    if (position.position.y > 210) {
-      position.position = Vector.create(position.position.x, 210);
-    }
-  }
-}
-
-function ballMovementSystem(world: World) {
-  const [velocity, position, speed] = world.query<
-    [Velocity, Position, Speed, BallComponent]
-  >(["velocity", "position", "speed", "ball"])[0];
-
-  position.position = position.position.plus(
-    velocity.velocity.times(speed.value)
-  );
-}
-
-function renderSystem(world: World, { p }: { p: p5 }) {
-  for (const [position, primitive] of world.query<[Position, PrimitiveShape]>([
-    "position",
-    "primitive",
-  ])) {
-    if (!primitive.strokeWeight) {
-      p.strokeWeight(0);
-    } else {
-      p.strokeWeight(primitive.strokeWeight);
-    }
-
-    if (!primitive.stroke) {
-      p.noStroke();
-    } else {
-      p.stroke(primitive.stroke);
-    }
-
-    if (!primitive.fill) {
-      p.noFill();
-    } else {
-      p.fill(primitive.fill);
-    }
-
-    if (primitive.type === "circle") {
-      p.circle(position.position.x, position.position.y, primitive.radius * 2);
-    }
-
-    if (primitive.type === "line") {
-      if (primitive.dash) {
-        p.drawingContext.setLineDash(primitive.dash);
-      }
-
-      if (primitive.dashOffset) {
-        p.drawingContext.lineDashOffset = primitive.dashOffset;
-      }
-
-      p.line(
-        primitive.start.x + position.position.x,
-        primitive.start.y + position.position.y,
-        primitive.end.x + position.position.x,
-        primitive.end.y + position.position.y
-      );
-
-      if (primitive.dash) {
-        p.drawingContext.setLineDash([]);
-      }
-
-      if (primitive.dashOffset) {
-        p.drawingContext.lineDashOffset = 0.0;
-      }
-    }
-
-    if (primitive.type === "square") {
-      p.rect(
-        position.position.x,
-        position.position.y,
-        primitive.width,
-        primitive.height
-      );
-    }
-
-    if (primitive.type === "text") {
-      p.textSize(primitive.size);
-
-      if (primitive.align === "left") p.textAlign(p.LEFT);
-      if (primitive.align === "right") p.textAlign(p.RIGHT);
-
-      p.text(primitive.text, position.position.x, position.position.y);
-    }
-  }
-}
-
-function collisionRenderSystem(world: World, { p }: { p: p5 }) {
-  for (const [col, pos] of world.query(["collider", "position"]) as [
-    Collider,
-    Position,
-  ][]) {
-    if (col.type === "aabb") {
-      p.stroke(111, 100, 100);
-      p.strokeWeight(0.5);
-      p.noFill();
-      p.rect(pos.position.x, pos.position.y, col.width, col.height);
-    }
-  }
-}
-
 engine.system(
   "createGameMenu",
   {
@@ -473,7 +234,102 @@ engine.system("setupBall", { event: "start" }, setupBall);
 engine.system("setupPaddles", { event: "start" }, setupPaddles);
 engine.system("setupBoundaries", { event: "start" }, setupBoundaries);
 engine.system("setupScoreboard", { event: "start" }, setupScoreboard);
-engine.system("renderSystem", { event: "update" }, renderSystem);
+// engine.system(
+//   "collisionRender",
+//   { event: "update" },
+
+//   function collisionRenderSystem(world: World, { p }: { p: p5 }) {
+//     for (const [col, pos] of world.query(["collider", "position"]) as [
+//       Collider,
+//       Position,
+//     ][]) {
+//       if (col.type === "aabb") {
+//         p.stroke(111, 100, 100);
+//         p.strokeWeight(0.5);
+//         p.noFill();
+//         p.rect(pos.position.x, pos.position.y, col.width, col.height);
+//       }
+//     }
+//   }
+// );
+engine.system(
+  "renderSystem",
+  { event: "update" },
+  function renderSystem(world: World, { p }: { p: p5 }) {
+    for (const [position, primitive] of world.query<[Position, PrimitiveShape]>(
+      ["position", "primitive"]
+    )) {
+      if (!primitive.strokeWeight) {
+        p.strokeWeight(0);
+      } else {
+        p.strokeWeight(primitive.strokeWeight);
+      }
+
+      if (!primitive.stroke) {
+        p.noStroke();
+      } else {
+        p.stroke(primitive.stroke);
+      }
+
+      if (!primitive.fill) {
+        p.noFill();
+      } else {
+        p.fill(primitive.fill);
+      }
+
+      if (primitive.type === "circle") {
+        p.circle(
+          position.position.x,
+          position.position.y,
+          primitive.radius * 2
+        );
+      }
+
+      if (primitive.type === "line") {
+        if (primitive.dash) {
+          p.drawingContext.setLineDash(primitive.dash);
+        }
+
+        if (primitive.dashOffset) {
+          p.drawingContext.lineDashOffset = primitive.dashOffset;
+        }
+
+        p.line(
+          primitive.start.x + position.position.x,
+          primitive.start.y + position.position.y,
+          primitive.end.x + position.position.x,
+          primitive.end.y + position.position.y
+        );
+
+        if (primitive.dash) {
+          p.drawingContext.setLineDash([]);
+        }
+
+        if (primitive.dashOffset) {
+          p.drawingContext.lineDashOffset = 0.0;
+        }
+      }
+
+      if (primitive.type === "square") {
+        p.rect(
+          position.position.x,
+          position.position.y,
+          primitive.width,
+          primitive.height
+        );
+      }
+
+      if (primitive.type === "text") {
+        p.textSize(primitive.size);
+
+        if (primitive.align === "left") p.textAlign(p.LEFT);
+        if (primitive.align === "right") p.textAlign(p.RIGHT);
+
+        p.text(primitive.text, position.position.x, position.position.y);
+      }
+    }
+  }
+);
 engine.system(
   "collisionSystem",
   { state: "app-state", value: "in-game" },
@@ -487,7 +343,28 @@ engine.system(
 engine.system(
   "ballCollisionHandlingSystem",
   { state: "app-state", value: "in-game" },
-  ballCollisionHandlingSystem
+  function ballCollisionHandlingSystem(world: World) {
+    for (const [velocity, collision, position] of world.query<
+      [Velocity, Collision, Position, BallComponent]
+    >(["velocity", "collision", "position", "ball"])) {
+      const collidee = world.entity(collision.entityId);
+
+      velocity.velocity = velocity.velocity.reflect(collision.normal);
+
+      if (collidee.components.find((c) => c.name === "paddle")) {
+        const paddlePosition = collidee.getComponent("position") as Position;
+
+        const yDistanceFromPaddleCenter = paddlePosition.position.minus(
+          position.position
+        ).y;
+
+        velocity.velocity = Vector.create(
+          velocity.velocity.x,
+          -yDistanceFromPaddleCenter / 25
+        );
+      }
+    }
+  }
 );
 
 engine.system(
@@ -554,25 +431,109 @@ engine.system(
   }
 );
 
+// Describes bow the collision handling worked in the orginial pong game
+// https://www.vbforums.com/showthread.php?634246-RESOLVED-How-did-collision-in-the-original-Pong-happen
 engine.system(
   "paddleCollisionHandlingSystem",
   { state: "app-state", value: "in-game" },
-  paddleCollisionHandlingSystem
+  function paddleCollisionHandlingSystem(world: World) {
+    const [, ballSpeed] = world.query<[Velocity, Speed, BallComponent]>([
+      "velocity",
+      "speed",
+      "ball",
+    ])[0];
+
+    for (const [collision] of world.query<[Collision, PaddleComponent]>([
+      "collision",
+      "paddle",
+    ])) {
+      if (
+        world
+          .entity(collision.entityId)
+          .components.find((c) => c.name === "ball")
+      ) {
+        ballSpeed.value += ballSpeed.value * 0.1;
+      }
+
+      if (sound) {
+        ballHitAudio.play();
+      }
+    }
+  }
 );
 engine.system(
   "playerPaddleSystem",
   { state: "app-state", value: "in-game" },
-  playerPaddleSystem
+
+  function playerPaddleSystem(
+    world: World,
+    { mousePosition }: { mousePosition: MousePosition }
+  ) {
+    for (const [position] of world.query<[Position]>([
+      "position",
+      "paddle",
+      "player",
+    ])) {
+      const positionChange = mousePosition.y - position.position.y;
+      position.position = position.position.plus(
+        Vector.create(0, positionChange)
+      );
+
+      if (position.position.y < 40) {
+        position.position = Vector.create(position.position.x, 40);
+      }
+
+      if (position.position.y > 210) {
+        position.position = Vector.create(position.position.x, 210);
+      }
+    }
+  }
 );
 engine.system(
   "aiPaddleSystem",
   { state: "app-state", value: "in-game" },
-  aiPaddleSystem
+
+  function aiPaddleSystem(world: World) {
+    const [targetPosition] = world.query<[Position]>([
+      "position",
+      "ai-paddle-target",
+    ])[0];
+    for (const [position, speed] of world.query<[Position, Speed]>([
+      "position",
+      "speed",
+      "paddle",
+      "ai",
+    ])) {
+      // Cant just move it to where the ball is, need to move it to where the ball is going to be when it hits on the ai side
+      position.position = position.position.plus(
+        Vector.create(
+          0,
+          (targetPosition.position.y - position.position.y) * speed.value
+        )
+      );
+
+      if (position.position.y < 40) {
+        position.position = Vector.create(position.position.x, 40);
+      }
+
+      if (position.position.y > 210) {
+        position.position = Vector.create(position.position.x, 210);
+      }
+    }
+  }
 );
 engine.system(
   "ballMovementSystem",
   { state: "app-state", value: "in-game" },
-  ballMovementSystem
+  function ballMovementSystem(world: World) {
+    const [velocity, position, speed] = world.query<
+      [Velocity, Position, Speed, BallComponent]
+    >(["velocity", "position", "speed", "ball"])[0];
+
+    position.position = position.position.plus(
+      velocity.velocity.times(speed.value)
+    );
+  }
 );
 
 engine.system(
