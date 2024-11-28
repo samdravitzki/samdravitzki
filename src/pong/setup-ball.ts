@@ -1,8 +1,8 @@
 import createBundle from "../ecs/Bundle/createBundle";
-import World from "../ecs/World/World";
 import Vector from "../Vector/Vector";
+import engine from "./pong-engine";
 
-function setupBall(world: World) {
+engine.system("setupBall", { event: "start" }, (world) => {
   const ballBundle = createBundle([
     "ball",
     {
@@ -34,6 +34,4 @@ function setupBall(world: World) {
   ]);
 
   world.addBundle(ballBundle);
-}
-
-export default setupBall;
+});

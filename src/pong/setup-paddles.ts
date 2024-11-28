@@ -1,8 +1,8 @@
 import createBundle from "../ecs/Bundle/createBundle";
-import World from "../ecs/World/World";
 import Vector from "../Vector/Vector";
+import engine from "./pong-engine";
 
-function setupPaddles(world: World) {
+engine.system("setupPaddles", { event: "start" }, (world) => {
   const paddleSize = 40;
 
   const playerPaddleBundle = createBundle([
@@ -66,6 +66,4 @@ function setupPaddles(world: World) {
   world.addBundle(aiPaddleTarget);
   world.addBundle(playerPaddleBundle);
   world.addBundle(aiPaddleBundle);
-}
-
-export default setupPaddles;
+});

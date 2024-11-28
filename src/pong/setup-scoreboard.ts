@@ -1,8 +1,8 @@
 import createBundle from "../ecs/Bundle/createBundle";
-import World from "../ecs/World/World";
 import Vector from "../Vector/Vector";
+import engine from "./pong-engine";
 
-function setupScoreboard(world: World) {
+engine.system("setupScoreboard", { event: "start" }, (world) => {
   const playerScoreBundle = createBundle([
     "player-score",
     {
@@ -41,6 +41,4 @@ function setupScoreboard(world: World) {
 
   world.addBundle(playerScoreBundle);
   world.addBundle(aiScoreBundle);
-}
-
-export default setupScoreboard;
+});

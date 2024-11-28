@@ -11,78 +11,25 @@ import {
   Speed,
   PaddleComponent,
   TrajectoryLineSegmentComponent,
-  Collider,
 } from "./components";
-import collisionSystem, {
-  collisionCleanupSystem,
-  collisionLoggingSystem,
-} from "./collision/collision-system";
 import castRay from "./collision/cast-ray";
-import { EngineBuilder } from "./Engine";
 import createBundle from "../ecs/Bundle/createBundle";
 import minionBongUrl from "./sounds/minion-bong.mp3";
-import setupBoundaries from "./setup-boundaries";
-import setupBall from "./setup-ball";
-import setupPaddles from "./setup-paddles";
-import setupScoreboard from "./setup-scoreboard";
 import { MousePosition } from "../ecs/System/System";
 import State from "../ecs/State/State";
 import Component from "../ecs/Component/Component";
-
-/**
- * The main states of the applicaton
- */
-type ApplicationState = "paused" | "main-menu" | "in-game" | "end";
-
-const engine = EngineBuilder.create()
-  .state("render-trajectory", false)
-  .state<"score", [number, number]>("score", [0, 0])
-  .state<"app-state", ApplicationState>("app-state", "main-menu")
-  .build(document.getElementById("pong-sketch")!);
+import engine from "./pong-engine";
+import "./setup-ui";
+import "./setup-boundaries";
+import "./setup-ball";
+import "./setup-paddles";
+import "./setup-scoreboard";
+import "./collision-handling";
+import "./rendering";
 
 const ballHitAudio = new Audio(minionBongUrl);
 
 const sound = false;
-
-engine.system(
-  "createGameMenu",
-  {
-    event: "start",
-  },
-  (_world, { p }, state) => {
-    // Need to figure out how to remove having to request state from a map like this
-    const appState = state["app-state"];
-    const renderTrajectory = state["render-trajectory"];
-
-    const gameMenu = p.createDiv();
-    gameMenu.position(0, 250, "absolute");
-    gameMenu.id("game-menu");
-
-    const pauseButton = p.createButton("pause");
-    pauseButton.parent(gameMenu);
-
-    pauseButton.mousePressed(() => {
-      if (appState.value === "in-game") {
-        appState.setValue("paused");
-        return;
-      }
-
-      if (appState.value === "paused") {
-        appState.setValue("in-game");
-        return;
-      }
-    });
-
-    const trajectoryButton = p.createButton("trajectory");
-    trajectoryButton.parent(gameMenu);
-
-    trajectoryButton.mousePressed(() => {
-      renderTrajectory.setValue(!renderTrajectory.value);
-    });
-
-    gameMenu.hide();
-  }
-);
 
 engine.system(
   "showGameMenu",
@@ -124,36 +71,6 @@ engine.system(
     }
   }
 );
-
-engine.system("createEndMenu", { event: "start" }, (world, { p }, state) => {
-  const appState = state["app-state"];
-
-  const endMenu = p.createDiv();
-  endMenu.position(0, 0, "absolute");
-  endMenu.size(500, 250);
-  endMenu.style("display", "flex");
-  endMenu.style("flex-direction", "column");
-  endMenu.style("place-content", "center");
-  endMenu.style("align-items", "center");
-  endMenu.style("color", "white");
-  endMenu.id("end-menu");
-
-  const messageDiv = p.createDiv();
-  messageDiv.class("message");
-  messageDiv.parent(endMenu);
-
-  const resetButton = p.createButton("Okay, thanks for the game I guess...");
-  resetButton.parent(endMenu);
-
-  resetButton.mousePressed(() => {
-    appState.setValue("main-menu");
-    state.score.setValue([0, 0]);
-  });
-
-  // Hide menu by default and show when needed so it can be treated like a resueable component
-  endMenu.hide();
-});
-
 engine.system(
   "showEndMenu",
   {
@@ -194,40 +111,6 @@ engine.system(
   }
 );
 
-engine.system("createMainMenu", { event: "start" }, (_world, { p }, state) => {
-  const appState = state["app-state"];
-
-  const mainMenu = p.createDiv();
-  mainMenu.position(0, 0, "absolute");
-  mainMenu.size(500, 250);
-  mainMenu.style("display", "flex");
-  mainMenu.style("place-content", "center");
-  mainMenu.style("align-items", "center");
-  mainMenu.id("main-menu");
-
-  const startGameButton = p.createButton("Start a game!");
-  startGameButton.parent(mainMenu);
-  startGameButton.mousePressed(() => {
-    appState.setValue("in-game");
-  });
-
-  // Hide menu by default and show when needed so it can be treated like a resueable component
-  mainMenu.hide();
-});
-
-engine.system(
-  "showMainMenu",
-  {
-    state: "app-state",
-    value: "main-menu",
-    trigger: "on-enter",
-  },
-  (_world, { p }) => {
-    const mainMenu = p.select("#main-menu");
-    mainMenu?.show();
-  }
-);
-
 engine.system(
   "hideMainMenu",
   {
@@ -243,116 +126,6 @@ engine.system(
 
 // Need a way to factor out and organise these systems and state as they're already getting hard to manage
 
-engine.system("setupBall", { event: "start" }, setupBall);
-engine.system("setupPaddles", { event: "start" }, setupPaddles);
-engine.system("setupBoundaries", { event: "start" }, setupBoundaries);
-engine.system("setupScoreboard", { event: "start" }, setupScoreboard);
-// engine.system(
-//   "collisionRender",
-//   { event: "update" },
-
-//   function collisionRenderSystem(world: World, { p }: { p: p5 }) {
-//     for (const [col, pos] of world.query(["collider", "position"]) as [
-//       Collider,
-//       Position,
-//     ][]) {
-//       if (col.type === "aabb") {
-//         p.stroke(111, 100, 100);
-//         p.strokeWeight(0.5);
-//         p.noFill();
-//         p.rect(pos.position.x, pos.position.y, col.width, col.height);
-//       }
-//     }
-//   }
-// );
-engine.system(
-  "renderSystem",
-  { event: "update" },
-  function renderSystem(world: World, { p }: { p: p5 }) {
-    for (const [position, primitive] of world.query<[Position, PrimitiveShape]>(
-      ["position", "primitive"]
-    )) {
-      if (!primitive.strokeWeight) {
-        p.strokeWeight(0);
-      } else {
-        p.strokeWeight(primitive.strokeWeight);
-      }
-
-      if (!primitive.stroke) {
-        p.noStroke();
-      } else {
-        p.stroke(primitive.stroke);
-      }
-
-      if (!primitive.fill) {
-        p.noFill();
-      } else {
-        p.fill(primitive.fill);
-      }
-
-      if (primitive.type === "circle") {
-        p.circle(
-          position.position.x,
-          position.position.y,
-          primitive.radius * 2
-        );
-      }
-
-      if (primitive.type === "line") {
-        if (primitive.dash) {
-          p.drawingContext.setLineDash(primitive.dash);
-        }
-
-        if (primitive.dashOffset) {
-          p.drawingContext.lineDashOffset = primitive.dashOffset;
-        }
-
-        p.line(
-          primitive.start.x + position.position.x,
-          primitive.start.y + position.position.y,
-          primitive.end.x + position.position.x,
-          primitive.end.y + position.position.y
-        );
-
-        if (primitive.dash) {
-          p.drawingContext.setLineDash([]);
-        }
-
-        if (primitive.dashOffset) {
-          p.drawingContext.lineDashOffset = 0.0;
-        }
-      }
-
-      if (primitive.type === "square") {
-        p.rect(
-          position.position.x,
-          position.position.y,
-          primitive.width,
-          primitive.height
-        );
-      }
-
-      if (primitive.type === "text") {
-        p.textSize(primitive.size);
-
-        if (primitive.align === "left") p.textAlign(p.LEFT);
-        if (primitive.align === "right") p.textAlign(p.RIGHT);
-
-        p.text(primitive.text, position.position.x, position.position.y);
-      }
-    }
-  }
-);
-engine.system(
-  "collisionSystem",
-  { state: "app-state", value: "in-game" },
-  collisionSystem
-);
-engine.system(
-  "collisionLoggingSystem",
-  { state: "app-state", value: "in-game" },
-  collisionLoggingSystem
-);
 engine.system(
   "ballCollisionHandlingSystem",
   { state: "app-state", value: "in-game" },
@@ -643,10 +416,4 @@ engine.system(
     }
   }
 );
-engine.system(
-  "collisionCleanupSystem",
-  { state: "app-state", value: "in-game" },
-  collisionCleanupSystem
-);
-
 engine.run();

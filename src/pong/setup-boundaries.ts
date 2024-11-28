@@ -1,12 +1,12 @@
 import Bounds from "../Bounds/Bounds";
 import createBundle from "../ecs/Bundle/createBundle";
-import World from "../ecs/World/World";
 import Vector from "../Vector/Vector";
+import engine from "./pong-engine";
 
-function setupBoundaries(world: World) {
+engine.system("setupBoundaries", { event: "start" }, (world) => {
   const playBounds = Bounds.create(
     Vector.create(0, 0),
-    Vector.create(500, 250),
+    Vector.create(500, 250)
   );
 
   const walllThickness = 10;
@@ -25,7 +25,7 @@ function setupBoundaries(world: World) {
       name: "position",
       position: new Vector(
         playBounds.center.x,
-        playBounds.min.y + walllThickness / 2,
+        playBounds.min.y + walllThickness / 2
       ),
     },
     {
@@ -49,7 +49,7 @@ function setupBoundaries(world: World) {
       name: "position",
       position: new Vector(
         playBounds.center.x,
-        playBounds.max.y - walllThickness / 2,
+        playBounds.max.y - walllThickness / 2
       ),
     },
     {
@@ -89,7 +89,7 @@ function setupBoundaries(world: World) {
       name: "position",
       position: new Vector(
         playBounds.min.x + backboardThickness / 2,
-        playBounds.center.y,
+        playBounds.center.y
       ),
     },
     {
@@ -117,7 +117,7 @@ function setupBoundaries(world: World) {
       name: "position",
       position: new Vector(
         playBounds.max.x - backboardThickness / 2,
-        playBounds.center.y,
+        playBounds.center.y
       ),
     },
     {
@@ -138,6 +138,4 @@ function setupBoundaries(world: World) {
   world.addBundle(centerLineBundle);
   world.addBundle(leftBackboardBundle);
   world.addBundle(rightBackboardBundle);
-}
-
-export default setupBoundaries;
+});
