@@ -116,7 +116,7 @@ engine.system(
     state: "app-state",
     value: "in-game",
   },
-  (_world, { p }, state) => {
+  (_world, {}, state) => {
     const [playerScore, aiScore] = state.score.value;
 
     if (playerScore >= 3 || aiScore >= 3) {
@@ -127,14 +127,8 @@ engine.system(
 
 engine.system("createEndMenu", { event: "start" }, (world, { p }, state) => {
   const appState = state["app-state"];
-  const [playerScore, aiScore] = state.score.value;
 
-  const winningMessage = "You won, Nice! 🔥";
-  const loosingMessage = "You lost, to an ai 😔";
-
-  const endMenu = p.createDiv(`
-    <p>${playerScore > aiScore ? winningMessage : loosingMessage}</p>
-  `);
+  const endMenu = p.createDiv();
   endMenu.position(0, 0, "absolute");
   endMenu.size(500, 250);
   endMenu.style("display", "flex");
@@ -144,8 +138,13 @@ engine.system("createEndMenu", { event: "start" }, (world, { p }, state) => {
   endMenu.style("color", "white");
   endMenu.id("end-menu");
 
+  const messageDiv = p.createDiv();
+  messageDiv.class("message");
+  messageDiv.parent(endMenu);
+
   const resetButton = p.createButton("Okay, thanks for the game I guess...");
   resetButton.parent(endMenu);
+
   resetButton.mousePressed(() => {
     appState.setValue("main-menu");
     state.score.setValue([0, 0]);
@@ -163,6 +162,20 @@ engine.system(
     trigger: "on-enter",
   },
   (_world, { p }, state) => {
+    const [playerScore, aiScore] = state.score.value;
+
+    console.log(`final score: player ${playerScore}, ai ${aiScore}`);
+
+    const endMessageDiv = p.select("#end-menu > .message");
+
+    if (endMessageDiv) {
+      const winningMessage = "You won, Nice! 🔥";
+      const loosingMessage = "You lost, to an ai 😔";
+      endMessageDiv.html(`
+        <p>${playerScore > aiScore ? winningMessage : loosingMessage}</p>
+      `);
+    }
+
     const endMenu = p.select("#end-menu");
     endMenu?.show();
   }
@@ -371,6 +384,8 @@ engine.system(
   "backboardCollisionHandlingSystem",
   { state: "app-state", value: "in-game" },
   (world: World, {}, state) => {
+    const [playerScore, aiScore] = state.score.value;
+
     for (const [backboard] of world.query<[BackboardComponent, Collision]>([
       "backboard",
       "collision",
@@ -385,16 +400,21 @@ engine.system(
       const [playerScore, aiScore] = state.score.value;
 
       if (backboard.owner == "player") {
-        state.score.setValue([playerScore + 1, aiScore]);
+        state.score.setValue([playerScore, aiScore + 1]);
         // Reset ball directed towards player
-        ballVelocity.velocity = new Vector(-0.5, -0.5);
+        ballVelocity.velocity = ballVelocity.velocity = new Vector(
+          -0.5,
+          -0.5
+        ).plus(new Vector(-0.1, -0.1).times(playerScore + aiScore));
       }
 
       if (backboard.owner == "ai") {
-        state.score.setValue([playerScore, aiScore + 1]);
+        state.score.setValue([playerScore + 1, aiScore]);
 
         // Reset ball directed towards ai
-        ballVelocity.velocity = new Vector(0.5, -0.5);
+        ballVelocity.velocity = new Vector(0.5, -0.5).plus(
+          new Vector(0.1, -0.1).times(playerScore + aiScore)
+        );
       }
 
       // Reset ball speed
