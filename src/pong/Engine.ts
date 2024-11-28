@@ -74,6 +74,8 @@ type SystemRegistration<
   system: System<States<StateSet>>;
   // run system depending on the application state, if non specified run always
   runCondition: RunCondition<StateSet, K>;
+  // if its a teardown system run it last
+  teardown: boolean;
 };
 
 /**
@@ -158,12 +160,14 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
       value: StateSet[K];
       trigger?: "on-enter" | "on-exit";
     },
-    system: System<States<StateSet>>
+    system: System<States<StateSet>>,
+    teardown?: boolean
   ): void;
   system(
     name: string,
     condition: { event: EngineLifecycleEvent },
-    system: System<States<StateSet>>
+    system: System<States<StateSet>>,
+    teardown?: boolean
   ): void;
   system<K extends keyof StateSet>(
     name: string,
@@ -174,12 +178,14 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
           value: StateSet[K];
           trigger?: "on-enter" | "on-exit";
         },
-    system: System<States<StateSet>>
+    system: System<States<StateSet>>,
+    teardown?: boolean
   ): void {
     const systemRegistration = {
       name,
       system,
       runCondition: condition,
+      teardown: teardown ?? false,
     };
 
     if ("event" in condition) {
@@ -256,6 +262,8 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
         p.background(240, 90, 60);
 
         const updateSystems = self._systems.get("update") ?? [];
+
+        updateSystems.sort((system) => (system.teardown ? -1 : 1));
 
         const mousePosition: MousePosition = {
           x: p.mouseX,

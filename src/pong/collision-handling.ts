@@ -40,5 +40,6 @@ engine.system(
 engine.system(
   "collisionCleanupSystem",
   { state: "app-state", value: "in-game" },
-  collisionCleanupSystem
+  collisionCleanupSystem,
+  true
 );
