@@ -26,20 +26,20 @@ import collisionSystem, {
 
 engine.system(
   "collisionSystem",
-  { state: "app-state", value: "in-game" },
+  { event: "update", condition: { state: "app-state", value: "in-game" } },
   collisionSystem
 );
 
 engine.system(
   "collisionLoggingSystem",
-  { state: "app-state", value: "in-game" },
+  { event: "update", condition: { state: "app-state", value: "in-game" } },
   collisionLoggingSystem
 );
 
 // Collisions dont work because they need to be cleaned up at the end of the update
 engine.system(
   "collisionCleanupSystem",
-  { state: "app-state", value: "in-game" },
+  { event: "update", condition: { state: "app-state", value: "in-game" } },
   collisionCleanupSystem,
   true
 );

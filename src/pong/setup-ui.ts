@@ -93,9 +93,12 @@ engine.system("createMainMenu", { event: "start" }, (_world, { p }, state) => {
 engine.system(
   "showMainMenu",
   {
-    state: "app-state",
-    value: "main-menu",
-    trigger: "on-enter",
+    event: "update",
+    condition: {
+      state: "app-state",
+      value: "main-menu",
+      only: "on-enter",
+    },
   },
   (_world, { p }) => {
     const mainMenu = p.select("#main-menu");

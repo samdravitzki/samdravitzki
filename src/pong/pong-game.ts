@@ -34,9 +34,12 @@ const sound = false;
 engine.system(
   "showGameMenu",
   {
-    state: "app-state",
-    value: "in-game",
-    trigger: "on-enter",
+    event: "update",
+    condition: {
+      state: "app-state",
+      value: "in-game",
+      only: "on-enter",
+    },
   },
   (_world, { p }, state) => {
     const gameMenu = p.select("#game-menu");
@@ -47,9 +50,12 @@ engine.system(
 engine.system(
   "hideGameMenu",
   {
-    state: "app-state",
-    value: "main-menu",
-    trigger: "on-enter",
+    event: "update",
+    condition: {
+      state: "app-state",
+      value: "main-menu",
+      only: "on-enter",
+    },
   },
   (_world, { p }) => {
     const gameMenu = p.select("#game-menu");
@@ -60,8 +66,11 @@ engine.system(
 engine.system(
   "endConditionSystem",
   {
-    state: "app-state",
-    value: "in-game",
+    event: "update",
+    condition: {
+      state: "app-state",
+      value: "in-game",
+    },
   },
   (_world, {}, state) => {
     const [playerScore, aiScore] = state.score.value;
@@ -74,9 +83,12 @@ engine.system(
 engine.system(
   "showEndMenu",
   {
-    state: "app-state",
-    value: "end",
-    trigger: "on-enter",
+    event: "update",
+    condition: {
+      state: "app-state",
+      value: "end",
+      only: "on-enter",
+    },
   },
   (_world, { p }, state) => {
     const [playerScore, aiScore] = state.score.value;
@@ -101,9 +113,12 @@ engine.system(
 engine.system(
   "hideEndMenu",
   {
-    state: "app-state",
-    value: "end",
-    trigger: "on-exit",
+    event: "update",
+    condition: {
+      state: "app-state",
+      value: "end",
+      only: "on-exit",
+    },
   },
   (_world, { p }) => {
     const endMenu = p.select("#end-menu");
@@ -114,9 +129,12 @@ engine.system(
 engine.system(
   "hideMainMenu",
   {
-    state: "app-state",
-    value: "in-game",
-    trigger: "on-enter",
+    event: "update",
+    condition: {
+      state: "app-state",
+      value: "in-game",
+      only: "on-enter",
+    },
   },
   (_world, { p }) => {
     const mainMenu = p.select("#main-menu");
@@ -128,7 +146,7 @@ engine.system(
 
 engine.system(
   "ballCollisionHandlingSystem",
-  { state: "app-state", value: "in-game" },
+  { event: "update", condition: { state: "app-state", value: "in-game" } },
   function ballCollisionHandlingSystem(world: World) {
     for (const [velocity, collision, position] of world.query<
       [Velocity, Collision, Position, BallComponent]
@@ -155,7 +173,7 @@ engine.system(
 
 engine.system(
   "backboardCollisionHandlingSystem",
-  { state: "app-state", value: "in-game" },
+  { event: "update", condition: { state: "app-state", value: "in-game" } },
   (world: World, {}, state) => {
     const [playerScore, aiScore] = state.score.value;
 
@@ -228,7 +246,7 @@ engine.system(
 // https://www.vbforums.com/showthread.php?634246-RESOLVED-How-did-collision-in-the-original-Pong-happen
 engine.system(
   "paddleCollisionHandlingSystem",
-  { state: "app-state", value: "in-game" },
+  { event: "update", condition: { state: "app-state", value: "in-game" } },
   function paddleCollisionHandlingSystem(world: World) {
     const [, ballSpeed] = world.query<[Velocity, Speed, BallComponent]>([
       "velocity",
@@ -256,7 +274,7 @@ engine.system(
 );
 engine.system(
   "playerPaddleSystem",
-  { state: "app-state", value: "in-game" },
+  { event: "update", condition: { state: "app-state", value: "in-game" } },
 
   function playerPaddleSystem(
     world: World,
@@ -284,7 +302,7 @@ engine.system(
 );
 engine.system(
   "aiPaddleSystem",
-  { state: "app-state", value: "in-game" },
+  { event: "update", condition: { state: "app-state", value: "in-game" } },
 
   function aiPaddleSystem(world: World) {
     const [targetPosition] = world.query<[Position]>([
@@ -317,7 +335,7 @@ engine.system(
 );
 engine.system(
   "ballMovementSystem",
-  { state: "app-state", value: "in-game" },
+  { event: "update", condition: { state: "app-state", value: "in-game" } },
   function ballMovementSystem(world: World) {
     const [velocity, position, speed] = world.query<
       [Velocity, Position, Speed, BallComponent]
@@ -331,7 +349,7 @@ engine.system(
 
 engine.system(
   "ballTrajectorySystem",
-  { state: "app-state", value: "in-game" },
+  { event: "update", condition: { state: "app-state", value: "in-game" } },
   (world: World, {}, state: Record<string, State<unknown>>) => {
     const renderTrajectory = state["render-trajectory"];
     const [targetPosition] = world.query<[Position]>([

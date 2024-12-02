@@ -53,31 +53,6 @@ import State from "../ecs/State/State";
  * the game is paused or not meaning its just seems less flexible
  */
 
-type EngineLifecycleEvent = "start" | "update";
-
-type RunCondition<
-  StateSet extends Record<string, unknown>,
-  K extends keyof StateSet,
-> =
-  | { event: EngineLifecycleEvent }
-  | {
-      state: K;
-      value: StateSet[K];
-      trigger?: "on-enter" | "on-exit";
-    };
-
-type SystemRegistration<
-  StateSet extends Record<string, unknown>,
-  K extends keyof StateSet,
-> = {
-  name: string;
-  system: System<States<StateSet>>;
-  // run system depending on the application state, if non specified run always
-  runCondition: RunCondition<StateSet, K>;
-  // if its a teardown system run it last
-  teardown: boolean;
-};
-
 /**
  * Testing out this way of implementing the builder pattern in typescript
  * so that as you run each build command it also incrementally builds the
@@ -124,6 +99,33 @@ class EngineBuilder<StateSet extends Record<string, unknown> = {}> {
   }
 }
 
+type SystemTrigger<
+  StateSet extends Record<string, unknown>,
+  K extends keyof StateSet,
+> =
+  | { event: "start" }
+  | {
+      event: "update";
+      readonly condition?: {
+        state: K;
+        value: StateSet[K];
+        // only trigger system on change to state (either on-enter or on-exit)
+        only?: "on-enter" | "on-exit";
+      };
+    };
+
+type SystemRegistration<
+  StateSet extends Record<string, unknown>,
+  K extends keyof StateSet,
+> = {
+  name: string;
+  system: System<States<StateSet>>;
+  // run system depending on the application state, if non specified run always
+  trigger: SystemTrigger<StateSet, K>;
+  // if its a teardown system run it last
+  teardown: boolean;
+};
+
 type States<StateSet extends Record<string, unknown> = {}> = {
   [Key in keyof StateSet]: State<StateSet[Key]>;
 };
@@ -134,7 +136,7 @@ type States<StateSet extends Record<string, unknown> = {}> = {
 class Engine<StateSet extends Record<string, unknown> = {}> {
   private _world = new World();
   private _systems = new Map<
-    EngineLifecycleEvent,
+    "start" | "update",
     SystemRegistration<StateSet, keyof StateSet>[]
   >();
 
@@ -155,48 +157,28 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
 
   system<K extends keyof StateSet>(
     name: string,
-    condition: {
-      state: K;
-      value: StateSet[K];
-      trigger?: "on-enter" | "on-exit";
-    },
-    system: System<States<StateSet>>,
-    teardown?: boolean
-  ): void;
-  system(
-    name: string,
-    condition: { event: EngineLifecycleEvent },
-    system: System<States<StateSet>>,
-    teardown?: boolean
-  ): void;
-  system<K extends keyof StateSet>(
-    name: string,
-    condition:
-      | { event: EngineLifecycleEvent }
-      | {
-          state: K;
-          value: StateSet[K];
-          trigger?: "on-enter" | "on-exit";
-        },
+    trigger: SystemTrigger<StateSet, K>,
     system: System<States<StateSet>>,
     teardown?: boolean
   ): void {
     const systemRegistration = {
       name,
       system,
-      runCondition: condition,
+      trigger,
       teardown: teardown ?? false,
     };
 
-    if ("event" in condition) {
-      const eventSystems = this._systems.get(condition.event);
+    if (trigger.event === "start") {
+      const eventSystems = this._systems.get(trigger.event);
 
       if (!eventSystems) {
-        this._systems.set(condition.event, [systemRegistration]);
+        this._systems.set(trigger.event, [systemRegistration]);
       } else {
         eventSystems.push(systemRegistration);
       }
-    } else {
+    }
+
+    if (trigger.event === "update") {
       // All change triggered systems get added to the update systems which prob doesnt make sense
       // Will need to restructure how the systems are stored to better suit this later
       const updateSystems = this._systems.get("update");
@@ -237,18 +219,22 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
           system(self._world, { mousePosition, p }, self._states);
         });
 
-        const eventTriggeredSystems = self._systems.get("update");
+        const stateChangeTriggeredSystems = self._systems.get("update");
 
-        if (eventTriggeredSystems !== undefined) {
-          eventTriggeredSystems.forEach(({ name, system, runCondition }) => {
-            if ("state" in runCondition && runCondition.trigger !== undefined) {
-              const state = self._states[runCondition.state];
+        if (stateChangeTriggeredSystems !== undefined) {
+          stateChangeTriggeredSystems.forEach(({ name, system, trigger }) => {
+            if (
+              trigger.event === "update" &&
+              trigger.condition !== undefined &&
+              trigger.condition.only !== undefined
+            ) {
+              const state = self._states[trigger.condition.state];
               state.registerListener(
-                runCondition.value,
-                runCondition.trigger,
+                trigger.condition.value,
+                trigger.condition.only,
                 () => {
                   console.info(
-                    `[event] ${runCondition.trigger} ${runCondition.state.toString()} ${name}`
+                    `[event] ${trigger.condition!.only} ${trigger.condition!.state.toString()} ${name}`
                   );
                   system(self._world, { mousePosition, p }, self._states);
                 }
@@ -270,16 +256,20 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
           y: p.mouseY,
         };
 
-        updateSystems.forEach(({ name, system, runCondition }) => {
-          if ("event" in runCondition) {
+        updateSystems.forEach(({ name, system, trigger }) => {
+          if (trigger.event === "update" && trigger.condition === undefined) {
             // console.debug(`[update] ${name}`);
             system(self._world, { mousePosition, p }, self._states);
           }
 
-          if ("state" in runCondition && runCondition.trigger === undefined) {
-            const state = self._states[runCondition.state];
+          if (
+            trigger.event === "update" &&
+            trigger.condition !== undefined &&
+            trigger.condition.only === undefined
+          ) {
+            const state = self._states[trigger.condition.state];
 
-            if (runCondition.value === state.value) {
+            if (trigger.condition.value === state.value) {
               // Is there a way to log what is happening each update without spamming too many logs
               // console.debug(
               //   `[when ${runCondition.state.toString()} = ${runCondition.value}] ${name}`
