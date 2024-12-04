@@ -32,6 +32,22 @@ const ballHitAudio = new Audio(minionBongUrl);
 const sound = false;
 
 engine.system(
+  "showMainMenu",
+  {
+    event: "update",
+    condition: {
+      state: "app-state",
+      value: "main-menu",
+      only: "on-enter",
+    },
+  },
+  (_world, { p }) => {
+    const mainMenu = p.select("#main-menu");
+    mainMenu?.show();
+  }
+);
+
+engine.system(
   "showGameMenu",
   {
     event: "update",

@@ -24,24 +24,17 @@ import collisionSystem, {
 //   }
 // );
 
-engine.system(
-  "collisionSystem",
-  { event: "update", condition: { state: "app-state", value: "in-game" } },
-  collisionSystem
-);
+engine.system("collisionSystem", { event: "update" }, collisionSystem);
 
 engine.system(
   "collisionLoggingSystem",
-  { event: "update", condition: { state: "app-state", value: "in-game" } },
+  { event: "update" },
   collisionLoggingSystem
 );
 
 // Collisions dont work because they need to be cleaned up at the end of the update
 engine.system(
   "collisionCleanupSystem",
-  {
-    event: "after-update",
-    condition: { state: "app-state", value: "in-game" },
-  },
+  { event: "after-update" },
   collisionCleanupSystem
 );

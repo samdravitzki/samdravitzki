@@ -89,19 +89,3 @@ engine.system("createMainMenu", { event: "start" }, (_world, { p }, state) => {
   // Hide menu by default and show when needed so it can be treated like a resueable component
   mainMenu.hide();
 });
-
-engine.system(
-  "showMainMenu",
-  {
-    event: "update",
-    condition: {
-      state: "app-state",
-      value: "main-menu",
-      only: "on-enter",
-    },
-  },
-  (_world, { p }) => {
-    const mainMenu = p.select("#main-menu");
-    mainMenu?.show();
-  }
-);
