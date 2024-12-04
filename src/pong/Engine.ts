@@ -99,13 +99,20 @@ class EngineBuilder<StateSet extends Record<string, unknown> = {}> {
   }
 }
 
+const updateEvents = ["before-update", "update", "after-update"] as const;
+type UpdateEvents = (typeof updateEvents)[number];
+
+type StartEvent = "start";
+
+type EngineLifecycleEvents = StartEvent | UpdateEvents;
+
 type SystemTrigger<
   StateSet extends Record<string, unknown>,
   K extends keyof StateSet,
 > =
   | { event: "start" }
   | {
-      event: "update";
+      event: UpdateEvents;
       readonly condition?: {
         state: K;
         value: StateSet[K];
@@ -122,8 +129,6 @@ type SystemRegistration<
   system: System<States<StateSet>>;
   // run system depending on the application state, if non specified run always
   trigger: SystemTrigger<StateSet, K>;
-  // if its a teardown system run it last
-  teardown: boolean;
 };
 
 type States<StateSet extends Record<string, unknown> = {}> = {
@@ -136,7 +141,7 @@ type States<StateSet extends Record<string, unknown> = {}> = {
 class Engine<StateSet extends Record<string, unknown> = {}> {
   private _world = new World();
   private _systems = new Map<
-    "start" | "update",
+    EngineLifecycleEvents,
     SystemRegistration<StateSet, keyof StateSet>[]
   >();
 
@@ -158,36 +163,20 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
   system<K extends keyof StateSet>(
     name: string,
     trigger: SystemTrigger<StateSet, K>,
-    system: System<States<StateSet>>,
-    teardown?: boolean
+    system: System<States<StateSet>>
   ): void {
     const systemRegistration = {
       name,
       system,
       trigger,
-      teardown: teardown ?? false,
     };
 
-    if (trigger.event === "start") {
-      const eventSystems = this._systems.get(trigger.event);
+    const eventSystems = this._systems.get(trigger.event);
 
-      if (!eventSystems) {
-        this._systems.set(trigger.event, [systemRegistration]);
-      } else {
-        eventSystems.push(systemRegistration);
-      }
-    }
-
-    if (trigger.event === "update") {
-      // All change triggered systems get added to the update systems which prob doesnt make sense
-      // Will need to restructure how the systems are stored to better suit this later
-      const updateSystems = this._systems.get("update");
-
-      if (!updateSystems) {
-        this._systems.set("update", [systemRegistration]);
-      } else {
-        updateSystems.push(systemRegistration);
-      }
+    if (!eventSystems) {
+      this._systems.set(trigger.event, [systemRegistration]);
+    } else {
+      eventSystems.push(systemRegistration);
     }
   }
 
@@ -247,34 +236,44 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
       p.draw = function draw() {
         p.background(240, 90, 60);
 
+        const beforeUpdateSystems = self._systems.get("before-update") ?? [];
         const updateSystems = self._systems.get("update") ?? [];
+        const afterUpdateSystems = self._systems.get("after-update") ?? [];
 
-        updateSystems.sort((system) => (system.teardown ? -1 : 1));
+        const systems = [
+          ...beforeUpdateSystems,
+          ...updateSystems,
+          ...afterUpdateSystems,
+        ];
 
         const mousePosition: MousePosition = {
           x: p.mouseX,
           y: p.mouseY,
         };
 
-        updateSystems.forEach(({ name, system, trigger }) => {
-          if (trigger.event === "update" && trigger.condition === undefined) {
-            // console.debug(`[update] ${name}`);
-            system(self._world, { mousePosition, p }, self._states);
-          }
-
+        systems.forEach(({ name, system, trigger }) => {
           if (
-            trigger.event === "update" &&
-            trigger.condition !== undefined &&
-            trigger.condition.only === undefined
+            trigger.event === "update" ||
+            trigger.event === "before-update" ||
+            trigger.event === "after-update"
           ) {
-            const state = self._states[trigger.condition.state];
-
-            if (trigger.condition.value === state.value) {
-              // Is there a way to log what is happening each update without spamming too many logs
-              // console.debug(
-              //   `[when ${runCondition.state.toString()} = ${runCondition.value}] ${name}`
-              // );
+            if (trigger.condition === undefined) {
               system(self._world, { mousePosition, p }, self._states);
+            }
+
+            if (
+              trigger.condition !== undefined &&
+              trigger.condition.only === undefined
+            ) {
+              const state = self._states[trigger.condition.state];
+
+              if (trigger.condition.value === state.value) {
+                // Is there a way to log what is happening each update without spamming too many logs
+                console.debug(
+                  `[when ${trigger.condition.state.toString()} = ${trigger.condition.value}] ${name}`
+                );
+                system(self._world, { mousePosition, p }, self._states);
+              }
             }
           }
         });

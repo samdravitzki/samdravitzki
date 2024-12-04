@@ -39,7 +39,9 @@ engine.system(
 // Collisions dont work because they need to be cleaned up at the end of the update
 engine.system(
   "collisionCleanupSystem",
-  { event: "update", condition: { state: "app-state", value: "in-game" } },
-  collisionCleanupSystem,
-  true
+  {
+    event: "after-update",
+    condition: { state: "app-state", value: "in-game" },
+  },
+  collisionCleanupSystem
 );
