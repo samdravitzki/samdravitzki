@@ -1,5 +1,5 @@
 import { EngineBuilder } from "../ecs/core/Engine/Engine";
-import collisionEnginePart from "./collision/collision-handling-part";
+import collisionEnginePart from "../ecs/parts/collision/collision";
 import primitiveRendererPart from "./primitive-renderer";
 import setupBallPart from "./setup/setup-ball";
 import setupBoundariesPart from "./setup/setup-boundaries";

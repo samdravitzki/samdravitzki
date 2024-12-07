@@ -1,4 +1,4 @@
-import Vector from "../../../Vector/Vector";
+import Vector from "../../../../Vector/Vector";
 import { Aabb } from "./intersection-shapes";
 
 type AabbAabbIntersection = {
@@ -15,7 +15,7 @@ type AabbAabbIntersection = {
  */
 function aabbAabbIntersection(
   aabb1: Aabb,
-  aabb2: Aabb,
+  aabb2: Aabb
 ): AabbAabbIntersection | null {
   const deltaPosition = aabb1.position.minus(aabb2.position);
   const combinedWidth = (aabb1.width + aabb2.width) / 2;
@@ -34,22 +34,22 @@ function aabbAabbIntersection(
 
     const colliderAMaximumPoint = new Vector(
       aabb1.position.x + aabb1.width / 2,
-      aabb1.position.y + aabb1.height / 2,
+      aabb1.position.y + aabb1.height / 2
     );
 
     const colliderAMinimumPoint = new Vector(
       aabb1.position.x - aabb1.width / 2,
-      aabb1.position.y - aabb1.height / 2,
+      aabb1.position.y - aabb1.height / 2
     );
 
     const colliderBMaximumPoint = new Vector(
       aabb2.position.x + aabb2.width / 2,
-      aabb2.position.y + aabb2.height / 2,
+      aabb2.position.y + aabb2.height / 2
     );
 
     const colliderBMinimumPoint = new Vector(
       aabb2.position.x - aabb2.width / 2,
-      aabb2.position.y - aabb2.height / 2,
+      aabb2.position.y - aabb2.height / 2
     );
 
     const distances = [

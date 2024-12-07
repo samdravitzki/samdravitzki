@@ -1,4 +1,4 @@
-import Vector from "../../../Vector/Vector";
+import Vector from "../../../../Vector/Vector";
 import { Line, Aabb } from "./intersection-shapes";
 import lineLineIntersection from "./line-line-intersection";
 
@@ -31,25 +31,25 @@ function lineAabbIntersection(line: Line, aabb: Aabb): LineAabbIntersection[] {
   // top-left point of aabb
   const topLeft = Vector.create(
     aabb.position.x - aabb.width / 2,
-    aabb.position.y - aabb.height / 2,
+    aabb.position.y - aabb.height / 2
   );
 
   // top-right point of aabb
   const topRight = Vector.create(
     aabb.position.x + aabb.width / 2,
-    aabb.position.y - aabb.height / 2,
+    aabb.position.y - aabb.height / 2
   );
 
   // bottom-right point of aabb
   const bottomRight = Vector.create(
     aabb.position.x + aabb.width / 2,
-    aabb.position.y + aabb.height / 2,
+    aabb.position.y + aabb.height / 2
   );
 
   // bottom-left point of aabb
   const bottomLeft = Vector.create(
     aabb.position.x - aabb.width / 2,
-    aabb.position.y + aabb.height / 2,
+    aabb.position.y + aabb.height / 2
   );
 
   // Line from top-left to bottom-left of aabb
@@ -109,7 +109,7 @@ function lineAabbIntersection(line: Line, aabb: Aabb): LineAabbIntersection[] {
   ];
 
   return intersectionPoints.filter(
-    (point) => point.contactPoint !== null,
+    (point) => point.contactPoint !== null
   ) as LineAabbIntersection[];
 }
 

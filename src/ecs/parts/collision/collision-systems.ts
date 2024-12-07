@@ -1,5 +1,5 @@
-import World from "../../ecs/core/World/World";
-import { Position, Collider, Collision } from "../components";
+import World from "../../core/World/World";
+import { Position, Collider, Collision } from "../../../pong/components";
 import aabbAabbIntersection from "./intersection/aabb-aabb-intersection";
 import { Aabb } from "./intersection/intersection-shapes";
 

@@ -1,4 +1,4 @@
-import Vector from "../../../Vector/Vector";
+import Vector from "../../../../Vector/Vector";
 import { Line } from "./intersection-shapes";
 
 /**

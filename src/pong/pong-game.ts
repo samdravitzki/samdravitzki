@@ -12,7 +12,7 @@ import {
   PaddleComponent,
   TrajectoryLineSegmentComponent,
 } from "./components";
-import castRay from "./collision/cast-ray";
+import castRay from "../ecs/parts/collision/cast-ray";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import minionBongUrl from "./sounds/minion-bong.mp3";
 import { MousePosition } from "../ecs/core/System/System";
