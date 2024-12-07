@@ -28,19 +28,3 @@ An alternative approach to conditional systems is to have multiple worlds and co
 which world is available to the user. The issue for me with this tho is it is almost exactly the same
 as doing conditional systems except for if you can't have the same systems that run no matter whether
 the game is paused or not meaning its just seems less flexible
-
-## Resources
-
-Global state shared between systems that is not associated with any
-entity in particular
-
-Resources add the flexibility to break out of the ecs pattern adding
-the ability to implement solutions in different ways that may be more
-appropiate to solve the problem at hand
-
-Examples of this type of state could be score or the current key pressed
-
-_Reference_
-
-- https://bevy-cheatbook.github.io/programming/res.html
-- https://www.gamedev.net/forums/topic/710271-where-should-shared-resources-live-in-an-ecs-engine/
