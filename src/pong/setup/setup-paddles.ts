@@ -1,6 +1,6 @@
-import createBundle from "../ecs/Bundle/createBundle";
-import Vector from "../Vector/Vector";
-import engine from "./pong-engine";
+import createBundle from "../../ecs/Bundle/createBundle";
+import Vector from "../../Vector/Vector";
+import engine from "../pong-engine";
 
 engine.system("setupPaddles", { event: "start" }, (world) => {
   const paddleSize = 40;

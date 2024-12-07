@@ -19,10 +19,10 @@ import { MousePosition } from "../ecs/System/System";
 import State from "../ecs/State/State";
 import Component from "../ecs/Component/Component";
 import engine from "./pong-engine";
-import "./setup-boundaries";
-import "./setup-ball";
-import "./setup-paddles";
-import "./setup-scoreboard";
+import "./setup/setup-boundaries";
+import "./setup/setup-ball";
+import "./setup/setup-paddles";
+import "./setup/setup-scoreboard";
 import "./rendering";
 
 const ballHitAudio = new Audio(minionBongUrl);

@@ -1,7 +1,7 @@
-import Bounds from "../Bounds/Bounds";
-import createBundle from "../ecs/Bundle/createBundle";
-import Vector from "../Vector/Vector";
-import engine from "./pong-engine";
+import Bounds from "../../Bounds/Bounds";
+import createBundle from "../../ecs/Bundle/createBundle";
+import Vector from "../../Vector/Vector";
+import engine from "../pong-engine";
 
 engine.system("setupBoundaries", { event: "start" }, (world) => {
   const playBounds = Bounds.create(

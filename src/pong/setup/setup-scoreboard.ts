@@ -1,6 +1,6 @@
-import createBundle from "../ecs/Bundle/createBundle";
-import Vector from "../Vector/Vector";
-import engine from "./pong-engine";
+import createBundle from "../../ecs/Bundle/createBundle";
+import Vector from "../../Vector/Vector";
+import engine from "../pong-engine";
 
 engine.system("setupScoreboard", { event: "start" }, (world) => {
   const playerScoreBundle = createBundle([
