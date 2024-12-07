@@ -180,6 +180,10 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
     }
   }
 
+  part(part: (engine: Engine<StateSet>) => void) {
+    part(this);
+  }
+
   run() {
     // Have to rescope this because the p5 callback hs its own this
     const self = this;
