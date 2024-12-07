@@ -23,7 +23,7 @@ import "./setup/setup-boundaries";
 import "./setup/setup-ball";
 import "./setup/setup-paddles";
 import "./setup/setup-scoreboard";
-import "./rendering";
+import "./canvas-renderer";
 
 const ballHitAudio = new Audio(minionBongUrl);
 

@@ -1,8 +1,10 @@
 import { Position, PrimitiveShape } from "./components";
 import Engine from "../ecs/core/Engine/Engine";
 
-function renderingPart<T extends Record<string, unknown>>(engine: Engine<T>) {
-  engine.system("renderSystem", { event: "update" }, (world, { p }) => {
+function canvasRendererPart<T extends Record<string, unknown>>(
+  engine: Engine<T>
+) {
+  engine.system("canvasRenderer", { event: "update" }, (world, { p }) => {
     for (const [position, primitive] of world.query<[Position, PrimitiveShape]>(
       ["position", "primitive"]
     )) {
@@ -78,4 +80,4 @@ function renderingPart<T extends Record<string, unknown>>(engine: Engine<T>) {
   });
 }
 
-export default renderingPart;
+export default canvasRendererPart;
