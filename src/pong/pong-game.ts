@@ -19,11 +19,6 @@ import { MousePosition } from "../ecs/core/System/System";
 import State from "../ecs/core/State/State";
 import Component from "../ecs/core/Component/Component";
 import engine from "./pong-engine";
-import "./setup/setup-boundaries";
-import "./setup/setup-ball";
-import "./setup/setup-paddles";
-import "./setup/setup-scoreboard";
-import "./primitive-renderer";
 
 const ballHitAudio = new Audio(minionBongUrl);
 
