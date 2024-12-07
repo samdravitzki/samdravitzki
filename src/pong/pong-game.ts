@@ -3,11 +3,9 @@ import Vector from "../Vector/Vector";
 import World from "../ecs/core/World/World";
 import {
   PrimitiveShape,
-  Position,
   Velocity,
   BallComponent,
   BackboardComponent,
-  Collision,
   Speed,
   PaddleComponent,
   TrajectoryLineSegmentComponent,
@@ -19,6 +17,8 @@ import { MousePosition } from "../ecs/core/System/System";
 import State from "../ecs/core/State/State";
 import Component from "../ecs/core/Component/Component";
 import engine from "./pong-engine";
+import { Collision } from "../ecs/parts/collision/components/Collision";
+import { Position } from "../ecs/components/Position";
 
 const ballHitAudio = new Audio(minionBongUrl);
 

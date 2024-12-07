@@ -1,8 +1,9 @@
 import World from "../../core/World/World";
 import Vector from "../../../Vector/Vector";
-import { Collider, Position } from "../../../pong/components";
 import { Aabb, Line } from "./intersection/intersection-shapes";
 import lineAabbIntersection from "./intersection/line-aabb-intersection";
+import { Position } from "../../components/Position";
+import { Collider } from "./components/Collider";
 
 type Ray = {
   position: Vector;

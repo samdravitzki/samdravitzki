@@ -1,11 +1,6 @@
 import Component from "../ecs/core/Component/Component";
 import Vector from "../Vector/Vector";
 
-export type Position = Component & {
-  name: "position";
-  position: Vector;
-};
-
 export type Velocity = Component & {
   name: "velocity";
   velocity: Vector;
@@ -46,15 +41,6 @@ export type Speed = {
   value: number;
 };
 
-export type Collider = Component & {
-  name: "collider";
-  layer?: string;
-} & {
-  type: "aabb"; // Axis-aligned bounding box (Just a rectangle that doesnt rotate)
-  width: number;
-  height: number;
-};
-
 export type BallComponent = Component & {
   name: "ball";
 };
@@ -78,16 +64,4 @@ export type BackboardComponent = Component & {
 
 export type TrajectoryLineSegmentComponent = Component & {
   name: "trajectory-line-segment";
-};
-
-export type Collision = Component & {
-  name: "collision";
-  // The collision point of the entity in local space
-  contactPoint: Vector;
-  // The normal of the point collided with
-  normal: Vector;
-  // The depth in which the collision occured
-  penetration: number;
-  // The id of the entity colided with
-  entityId: string;
 };

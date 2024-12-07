@@ -1,4 +1,5 @@
-import { Position, PrimitiveShape } from "./components";
+import { Position } from "../ecs/components/Position";
+import { PrimitiveShape } from "./components";
 import Engine from "../ecs/core/Engine/Engine";
 
 function primitiveRendererPart<T extends Record<string, unknown>>(

@@ -1,11 +1,12 @@
 import p5 from "p5";
 import World from "../../core/World/World";
 import Engine from "../../core/Engine/Engine";
+import { Collider } from "./components/Collider";
+import { Position } from "../../components/Position";
 import collisionSystem, {
   collisionCleanupSystem,
   collisionLoggingSystem,
 } from "./collision-systems";
-import { Collider, Position } from "../../../pong/components";
 
 /**
  * A part is a grouping of systems and other things that can be added onto a system enabling

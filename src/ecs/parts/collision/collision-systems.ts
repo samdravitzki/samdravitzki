@@ -1,5 +1,7 @@
 import World from "../../core/World/World";
-import { Position, Collider, Collision } from "../../../pong/components";
+import { Position } from "../../components/Position";
+import { Collider } from "./components/Collider";
+import { Collision } from "./components/Collision";
 import aabbAabbIntersection from "./intersection/aabb-aabb-intersection";
 import { Aabb } from "./intersection/intersection-shapes";
 
