@@ -6,7 +6,7 @@ import Engine from "../Engine";
  * that has the state described below, if an engine does not include this state it will
  * not be type safe
  */
-function menuUiPart<
+function setupMenuUiPart<
   T extends {
     "app-state": "paused" | "main-menu" | "in-game" | "end";
     "render-trajectory": boolean;
@@ -108,4 +108,4 @@ function menuUiPart<
   );
 }
 
-export default menuUiPart;
+export default setupMenuUiPart;

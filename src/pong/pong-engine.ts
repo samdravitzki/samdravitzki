@@ -1,6 +1,10 @@
 import { EngineBuilder } from "./Engine";
 import collisionEnginePart from "./collision/collision-handling-part";
-import menuUiPart from "./setup/setup-ui";
+import setupBallPart from "./setup/setup-ball";
+import setupBoundariesPart from "./setup/setup-boundaries";
+import setupPaddlesPart from "./setup/setup-paddles";
+import setupScoreboardPart from "./setup/setup-scoreboard";
+import setupMenuUiPart from "./setup/setup-ui";
 
 /**
  * The main states of the applicaton
@@ -14,7 +18,11 @@ const engine = EngineBuilder.create()
   .build(document.getElementById("pong-sketch")!);
 
 engine.part(collisionEnginePart());
-engine.part(menuUiPart);
+engine.part(setupMenuUiPart);
+engine.part(setupBallPart);
+engine.part(setupScoreboardPart);
+engine.part(setupBoundariesPart);
+engine.part(setupPaddlesPart);
 
 export default engine;
 export type { ApplicationState };
