@@ -1,4 +1,4 @@
-import World from "../../ecs/World/World";
+import World from "../../ecs/core/World/World";
 import Vector from "../../Vector/Vector";
 import { Collider, Position } from "../components";
 import { Aabb, Line } from "./intersection/intersection-shapes";
@@ -62,7 +62,7 @@ function castRay(world: World, ray: Ray, options?: CastRayOptions): Hit[] {
       intersections.sort(
         (intersectionA, intersectionB) =>
           intersectionA.contactPoint.distance(ray.position) -
-          intersectionB.contactPoint.distance(ray.position),
+          intersectionB.contactPoint.distance(ray.position)
       );
 
       const closestIntersection = intersections[0];

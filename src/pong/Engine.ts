@@ -1,9 +1,9 @@
 import p5 from "p5";
-import System, { MousePosition } from "../ecs/System/System";
-import World from "../ecs/World/World";
+import System, { MousePosition } from "../ecs/core/System/System";
+import World from "../ecs/core/World/World";
 import Bounds from "../Bounds/Bounds";
 import Vector from "../Vector/Vector";
-import State from "../ecs/State/State";
+import State from "../ecs/core/State/State";
 
 /**
  * Resources:

@@ -1,6 +1,6 @@
 import p5 from "p5";
 import Vector from "../Vector/Vector";
-import World from "../ecs/World/World";
+import World from "../ecs/core/World/World";
 import {
   PrimitiveShape,
   Position,
@@ -13,11 +13,11 @@ import {
   TrajectoryLineSegmentComponent,
 } from "./components";
 import castRay from "./collision/cast-ray";
-import createBundle from "../ecs/Bundle/createBundle";
+import createBundle from "../ecs/core/Bundle/createBundle";
 import minionBongUrl from "./sounds/minion-bong.mp3";
-import { MousePosition } from "../ecs/System/System";
-import State from "../ecs/State/State";
-import Component from "../ecs/Component/Component";
+import { MousePosition } from "../ecs/core/System/System";
+import State from "../ecs/core/State/State";
+import Component from "../ecs/core/Component/Component";
 import engine from "./pong-engine";
 import "./setup/setup-boundaries";
 import "./setup/setup-ball";

@@ -1,5 +1,5 @@
 import p5 from "p5";
-import World from "../../ecs/World/World";
+import World from "../../ecs/core/World/World";
 import Engine from "../Engine";
 import collisionSystem, {
   collisionCleanupSystem,

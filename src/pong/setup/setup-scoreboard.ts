@@ -1,4 +1,4 @@
-import createBundle from "../../ecs/Bundle/createBundle";
+import createBundle from "../../ecs/core/Bundle/createBundle";
 import Vector from "../../Vector/Vector";
 import Engine from "../Engine";
 

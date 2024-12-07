@@ -1,4 +1,4 @@
-import Component from "../ecs/Component/Component";
+import Component from "../ecs/core/Component/Component";
 import Vector from "../Vector/Vector";
 
 export type Position = Component & {

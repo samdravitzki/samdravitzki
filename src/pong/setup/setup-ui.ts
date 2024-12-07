@@ -1,4 +1,4 @@
-import State from "../../ecs/State/State";
+import State from "../../ecs/core/State/State";
 import Engine from "../Engine";
 
 /**
