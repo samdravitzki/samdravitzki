@@ -1,5 +1,5 @@
 import State from "../../ecs/core/State/State";
-import Engine from "../Engine";
+import Engine from "../../ecs/core/Engine/Engine";
 
 /**
  * This EnginePart has a complicated generic because it is only compatible with an engine

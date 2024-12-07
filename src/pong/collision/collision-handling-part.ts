@@ -1,6 +1,6 @@
 import p5 from "p5";
 import World from "../../ecs/core/World/World";
-import Engine from "../Engine";
+import Engine from "../../ecs/core/Engine/Engine";
 import collisionSystem, {
   collisionCleanupSystem,
   collisionLoggingSystem,

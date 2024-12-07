@@ -1,4 +1,4 @@
-import { EngineBuilder } from "./Engine";
+import { EngineBuilder } from "../ecs/core/Engine/Engine";
 import collisionEnginePart from "./collision/collision-handling-part";
 import renderingPart from "./rendering";
 import setupBallPart from "./setup/setup-ball";

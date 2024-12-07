@@ -1,5 +1,5 @@
 import { Position, PrimitiveShape } from "./components";
-import Engine from "./Engine";
+import Engine from "../ecs/core/Engine/Engine";
 
 function renderingPart<T extends Record<string, unknown>>(engine: Engine<T>) {
   engine.system("renderSystem", { event: "update" }, (world, { p }) => {
