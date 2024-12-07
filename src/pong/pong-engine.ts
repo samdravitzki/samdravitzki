@@ -1,5 +1,6 @@
 import { EngineBuilder } from "./Engine";
 import collisionEnginePart from "./collision/collision-handling-part";
+import renderingPart from "./rendering";
 import setupBallPart from "./setup/setup-ball";
 import setupBoundariesPart from "./setup/setup-boundaries";
 import setupPaddlesPart from "./setup/setup-paddles";
@@ -17,6 +18,7 @@ const engine = EngineBuilder.create()
   .state<"app-state", ApplicationState>("app-state", "main-menu")
   .build(document.getElementById("pong-sketch")!);
 
+engine.part(renderingPart);
 engine.part(collisionEnginePart());
 engine.part(setupMenuUiPart);
 engine.part(setupBallPart);
