@@ -11,7 +11,7 @@ import { Collider, Position } from "../../../pong/components";
  * A part is a grouping of systems and other things that can be added onto a system enabling
  * the functionality to be easily broken up and to share functionality between games
  */
-function collisionEnginePart(visualiseColliders: boolean = false) {
+function collisions(visualiseColliders: boolean = false) {
   return <T extends Record<string, unknown>>(engine: Engine<T>) => {
     engine.system(
       "collisionLoggingSystem",
@@ -51,4 +51,4 @@ function collisionEnginePart(visualiseColliders: boolean = false) {
   };
 }
 
-export default collisionEnginePart;
+export default collisions;
