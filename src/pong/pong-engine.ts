@@ -1,6 +1,6 @@
 import { EngineBuilder } from "../ecs/core/Engine/Engine";
 import collisions from "../ecs/parts/collision/collision";
-import primitiveRendererPart from "./primitive-renderer";
+import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
 import setupBallPart from "./setup/setup-ball";
 import setupBoundariesPart from "./setup/setup-boundaries";
 import setupPaddlesPart from "./setup/setup-paddles";
@@ -18,7 +18,7 @@ const engine = EngineBuilder.create()
   .state<"app-state", ApplicationState>("app-state", "main-menu")
   .build(document.getElementById("pong-sketch")!);
 
-engine.part(primitiveRendererPart);
+engine.part(primitiveRenderer);
 engine.part(collisions());
 engine.part(setupMenuUiPart);
 engine.part(setupBallPart);

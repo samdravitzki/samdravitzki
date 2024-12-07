@@ -2,7 +2,6 @@ import p5 from "p5";
 import Vector from "../Vector/Vector";
 import World from "../ecs/core/World/World";
 import {
-  PrimitiveShape,
   Velocity,
   BallComponent,
   BackboardComponent,
@@ -10,15 +9,16 @@ import {
   PaddleComponent,
   TrajectoryLineSegmentComponent,
 } from "./components";
+import { Collision } from "../ecs/parts/collision/components/Collision";
+import { Position } from "../ecs/components/Position";
+import { PrimitiveShape } from "../ecs/parts/primitive-renderer/components/Primitive";
+import { MousePosition } from "../ecs/core/System/System";
 import castRay from "../ecs/parts/collision/cast-ray";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import minionBongUrl from "./sounds/minion-bong.mp3";
-import { MousePosition } from "../ecs/core/System/System";
 import State from "../ecs/core/State/State";
 import Component from "../ecs/core/Component/Component";
 import engine from "./pong-engine";
-import { Collision } from "../ecs/parts/collision/components/Collision";
-import { Position } from "../ecs/components/Position";
 
 const ballHitAudio = new Audio(minionBongUrl);
 

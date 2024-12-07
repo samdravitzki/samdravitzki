@@ -1,8 +1,8 @@
-import { Position } from "../ecs/components/Position";
-import { PrimitiveShape } from "./components";
-import Engine from "../ecs/core/Engine/Engine";
+import { Position } from "../../components/Position";
+import { PrimitiveShape } from "./components/Primitive";
+import Engine from "../../core/Engine/Engine";
 
-function primitiveRendererPart<T extends Record<string, unknown>>(
+function primitiveRenderer<T extends Record<string, unknown>>(
   engine: Engine<T>
 ) {
   engine.system("primitiveRenderer", { event: "update" }, (world, { p }) => {
@@ -81,4 +81,4 @@ function primitiveRendererPart<T extends Record<string, unknown>>(
   });
 }
 
-export default primitiveRendererPart;
+export default primitiveRenderer;
