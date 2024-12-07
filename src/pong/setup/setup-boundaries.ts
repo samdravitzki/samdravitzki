@@ -1,4 +1,4 @@
-import Bounds from "../../Bounds/Bounds";
+import Bounds from "../../ecs/core/Bounds/Bounds";
 import createBundle from "../../ecs/core/Bundle/createBundle";
 import Vector from "../../Vector/Vector";
 import Engine from "../../ecs/core/Engine/Engine";

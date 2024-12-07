@@ -1,7 +1,7 @@
 import p5 from "p5";
 import Direction from "../Direction/Direction";
 import Snake from "./Snake";
-import Bounds from "../Bounds/Bounds";
+import Bounds from "../ecs/core/Bounds/Bounds";
 import Vector from "../Vector/Vector";
 
 function generateSnackPosition(bounds: Bounds) {
@@ -13,7 +13,7 @@ new p5((sketch) => {
 
   const playBounds = Bounds.create(
     Vector.create(0, 0),
-    Vector.create(500, 500),
+    Vector.create(500, 500)
   );
   const snakeChunkSize = 10;
 
@@ -21,7 +21,7 @@ new p5((sketch) => {
   let snake = Snake.create(
     snakeStartingSize,
     Vector.create(120, 120),
-    snakeChunkSize,
+    snakeChunkSize
   );
   let slitheringDirection = new Direction("south");
 
@@ -43,7 +43,7 @@ new p5((sketch) => {
       playBounds.min.x,
       playBounds.min.y,
       playBounds.max.x,
-      playBounds.max.y,
+      playBounds.max.y
     );
 
     gradient.addColorStop(0, p.color(310, 100, 100, 100));
@@ -56,7 +56,7 @@ new p5((sketch) => {
       playBounds.min.x,
       playBounds.min.y,
       playBounds.max.x,
-      playBounds.max.y,
+      playBounds.max.y
     );
 
     p.fill(205);
@@ -78,7 +78,7 @@ new p5((sketch) => {
     snake = Snake.create(
       snakeStartingSize,
       playBounds.randomPosition(snakeChunkSize),
-      snakeChunkSize,
+      snakeChunkSize
     );
     slitheringDirection = new Direction("south");
     score = 0;

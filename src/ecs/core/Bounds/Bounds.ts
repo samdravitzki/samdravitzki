@@ -1,6 +1,6 @@
-import Vector from "../Vector/Vector";
-import boundedMod from "../lib/boundedMod/boundedMod";
-import randomInt from "../lib/randomInt/randomInt";
+import Vector from "../../../Vector/Vector";
+import boundedMod from "../../../lib/boundedMod/boundedMod";
+import randomInt from "../../../lib/randomInt/randomInt";
 
 /**
  * Describes a square boudary in two-dimentional space
@@ -53,7 +53,7 @@ export default class Bounds {
   boundedMod(position: Vector): Vector {
     return Vector.create(
       boundedMod(position.x, this.max.x, this.min.x),
-      boundedMod(position.y, this.max.y, this.min.y),
+      boundedMod(position.y, this.max.y, this.min.y)
     );
   }
 }
