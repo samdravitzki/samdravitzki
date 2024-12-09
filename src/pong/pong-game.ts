@@ -359,7 +359,7 @@ engine.system(
 engine.system(
   "ballTrajectorySystem",
   { event: "update", condition: { state: "app-state", value: "in-game" } },
-  (world: World, {}, state: Record<string, State<unknown>>) => {
+  (world: World, { canvasBounds }, state: Record<string, State<unknown>>) => {
     const renderTrajectory = state["render-trajectory"];
     const [targetPosition] = world.query<[Position]>([
       "position",
@@ -392,7 +392,7 @@ engine.system(
         {
           position: start,
           direction,
-          length: 1000,
+          length: canvasBounds.size[0] * 2,
         },
         { layer: "wall" }
       )[0];
