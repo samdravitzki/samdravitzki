@@ -3,7 +3,7 @@ import Vector from "../../Vector/Vector";
 import Engine from "../../ecs/core/Engine/Engine";
 
 function setupBallPart<T extends Record<string, unknown>>(engine: Engine<T>) {
-  engine.system("setupBall", { event: "start" }, (world) => {
+  engine.system("setupBall", { event: "start" }, (world, { canvasBounds }) => {
     const ballBundle = createBundle([
       "ball",
       {
@@ -16,7 +16,7 @@ function setupBallPart<T extends Record<string, unknown>>(engine: Engine<T>) {
       },
       {
         name: "position",
-        position: new Vector(300, 200),
+        position: new Vector(canvasBounds.max.x / 2, canvasBounds.max.y / 2),
       },
       {
         name: "velocity",

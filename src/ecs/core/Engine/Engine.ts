@@ -142,13 +142,13 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
 
     new p5((sketch) => {
       const p = sketch as unknown as p5;
-      const playBounds = Bounds.create(
+      const canvasBounds = Bounds.create(
         Vector.create(0, 0),
-        Vector.create(500, 250)
+        Vector.create(700, 250)
       );
 
       p.setup = function setup() {
-        p.createCanvas(...playBounds.size);
+        p.createCanvas(...canvasBounds.size);
         p.colorMode(p.HSB, 360, 100, 100, 100);
         p.noStroke();
         p.rectMode(p.CENTER);
@@ -161,7 +161,7 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
         const startSystems = self._systems.get("start") ?? [];
         startSystems.forEach(({ name, system }) => {
           console.debug(`[start] ${name}`);
-          system(self._world, { mousePosition, p }, self._states);
+          system(self._world, { mousePosition, p, canvasBounds }, self._states);
         });
 
         const stateChangeTriggeredSystems = self._systems.get("update");
@@ -181,7 +181,11 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
                   console.info(
                     `[event] ${trigger.condition!.only} ${trigger.condition!.state.toString()} ${name}`
                   );
-                  system(self._world, { mousePosition, p }, self._states);
+                  system(
+                    self._world,
+                    { mousePosition, p, canvasBounds },
+                    self._states
+                  );
                 }
               );
             }
@@ -214,7 +218,11 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
             trigger.event === "after-update"
           ) {
             if (trigger.condition === undefined) {
-              system(self._world, { mousePosition, p }, self._states);
+              system(
+                self._world,
+                { mousePosition, p, canvasBounds },
+                self._states
+              );
             }
 
             if (
@@ -228,7 +236,11 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
                 console.debug(
                   `[when ${trigger.condition.state.toString()} = ${trigger.condition.value}] ${name}`
                 );
-                system(self._world, { mousePosition, p }, self._states);
+                system(
+                  self._world,
+                  { mousePosition, p, canvasBounds },
+                  self._states
+                );
               }
             }
           }

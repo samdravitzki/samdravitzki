@@ -52,44 +52,50 @@ function setupMenuUiPart<
     }
   );
 
-  engine.system("createEndMenu", { event: "start" }, (world, { p }, state) => {
-    const appState = state["app-state"];
+  engine.system(
+    "createEndMenu",
+    { event: "start" },
+    (world, { canvasBounds, p }, state) => {
+      const appState = state["app-state"];
 
-    const endMenu = p.createDiv();
-    endMenu.position(0, 0, "absolute");
-    endMenu.size(500, 250);
-    endMenu.style("display", "flex");
-    endMenu.style("flex-direction", "column");
-    endMenu.style("place-content", "center");
-    endMenu.style("align-items", "center");
-    endMenu.style("color", "white");
-    endMenu.id("end-menu");
+      const endMenu = p.createDiv();
+      endMenu.position(0, 0, "absolute");
+      endMenu.size(...canvasBounds.size);
+      endMenu.style("display", "flex");
+      endMenu.style("flex-direction", "column");
+      endMenu.style("place-content", "center");
+      endMenu.style("align-items", "center");
+      endMenu.style("color", "white");
+      endMenu.id("end-menu");
 
-    const messageDiv = p.createDiv();
-    messageDiv.class("message");
-    messageDiv.parent(endMenu);
+      const messageDiv = p.createDiv();
+      messageDiv.class("message");
+      messageDiv.parent(endMenu);
 
-    const resetButton = p.createButton("Okay, thanks for the game I guess...");
-    resetButton.parent(endMenu);
+      const resetButton = p.createButton(
+        "Okay, thanks for the game I guess..."
+      );
+      resetButton.parent(endMenu);
 
-    resetButton.mousePressed(() => {
-      appState.setValue("main-menu");
-      state.score.setValue([0, 0]);
-    });
+      resetButton.mousePressed(() => {
+        appState.setValue("main-menu");
+        state.score.setValue([0, 0]);
+      });
 
-    // Hide menu by default and show when needed so it can be treated like a resueable component
-    endMenu.hide();
-  });
+      // Hide menu by default and show when needed so it can be treated like a resueable component
+      endMenu.hide();
+    }
+  );
 
   engine.system(
     "createMainMenu",
     { event: "start" },
-    (_world, { p }, state) => {
+    (_world, { canvasBounds, p }, state) => {
       const appState = state["app-state"];
 
       const mainMenu = p.createDiv();
       mainMenu.position(0, 0, "absolute");
-      mainMenu.size(500, 250);
+      mainMenu.size(...canvasBounds.size);
       mainMenu.style("display", "flex");
       mainMenu.style("place-content", "center");
       mainMenu.style("align-items", "center");

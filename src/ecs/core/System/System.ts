@@ -1,6 +1,7 @@
 import p5 from "p5";
 import World from "../World/World";
 import State from "../State/State";
+import Bounds from "../Bounds/Bounds";
 
 /**
  * Resource describing the position of the mouse on screen
@@ -42,8 +43,9 @@ export type MousePosition = {
  * - https://www.gamedev.net/forums/topic/710271-where-should-shared-resources-live-in-an-ecs-engine/
  */
 type Resources = {
-  mousePosition: MousePosition;
   p: p5;
+  mousePosition: MousePosition;
+  canvasBounds: Bounds;
 };
 
 /**
