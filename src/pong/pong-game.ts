@@ -285,10 +285,7 @@ engine.system(
   "playerPaddleSystem",
   { event: "update", condition: { state: "app-state", value: "in-game" } },
 
-  function playerPaddleSystem(
-    world: World,
-    { mousePosition }: { mousePosition: MousePosition }
-  ) {
+  function playerPaddleSystem(world: World, { mousePosition, canvasBounds }) {
     for (const [position] of world.query<[Position]>([
       "position",
       "paddle",
@@ -299,12 +296,18 @@ engine.system(
         Vector.create(0, positionChange)
       );
 
-      if (position.position.y < 40) {
-        position.position = Vector.create(position.position.x, 40);
+      if (position.position.y < canvasBounds.min.y + 35) {
+        position.position = Vector.create(
+          position.position.x,
+          canvasBounds.min.y + 35
+        );
       }
 
-      if (position.position.y > 210) {
-        position.position = Vector.create(position.position.x, 210);
+      if (position.position.y > canvasBounds.max.y - 35) {
+        position.position = Vector.create(
+          position.position.x,
+          canvasBounds.max.y - 35
+        );
       }
     }
   }
@@ -313,7 +316,7 @@ engine.system(
   "aiPaddleSystem",
   { event: "update", condition: { state: "app-state", value: "in-game" } },
 
-  function aiPaddleSystem(world: World) {
+  function aiPaddleSystem(world: World, { canvasBounds }) {
     const [targetPosition] = world.query<[Position]>([
       "position",
       "ai-paddle-target",
@@ -332,12 +335,18 @@ engine.system(
         )
       );
 
-      if (position.position.y < 40) {
-        position.position = Vector.create(position.position.x, 40);
+      if (position.position.y < canvasBounds.min.y + 35) {
+        position.position = Vector.create(
+          position.position.x,
+          canvasBounds.min.y + 35
+        );
       }
 
-      if (position.position.y > 210) {
-        position.position = Vector.create(position.position.x, 210);
+      if (position.position.y > canvasBounds.max.y - 35) {
+        position.position = Vector.create(
+          position.position.x,
+          canvasBounds.max.y - 35
+        );
       }
     }
   }

@@ -100,7 +100,7 @@ function setupBoundariesPart<T extends Record<string, unknown>>(
           type: "aabb",
           layer: "wall",
           width: backboardThickness,
-          height: 230,
+          height: playBounds.max.y - 25,
         },
         {
           name: "backboard",
@@ -128,7 +128,7 @@ function setupBoundariesPart<T extends Record<string, unknown>>(
           type: "aabb",
           layer: "wall",
           width: backboardThickness,
-          height: 230,
+          height: playBounds.max.y - 25,
         },
         {
           name: "backboard",

@@ -42,14 +42,18 @@ class EngineBuilder<StateSet extends Record<string, unknown> = {}> {
     });
   }
 
-  build(element: HTMLElement) {
-    return new Engine(element, this.stateSet);
+  build(element: HTMLElement, options: EngineOptions = {}) {
+    return new Engine(element, this.stateSet, options);
   }
 
   static create(): EngineBuilder {
     return new EngineBuilder({});
   }
 }
+
+type EngineOptions = Partial<{
+  canvasBounds: Bounds;
+}>;
 
 const updateEvents = ["before-update", "update", "after-update"] as const;
 type UpdateEvents = (typeof updateEvents)[number];
@@ -101,7 +105,13 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
 
   private _states: States<StateSet>;
 
-  constructor(element: HTMLElement, stateSet: StateSet) {
+  private _canvasBounds: Bounds;
+
+  constructor(
+    element: HTMLElement,
+    stateSet: StateSet,
+    options: EngineOptions = {}
+  ) {
     this._element = element;
 
     this._states = Object.keys(stateSet).reduce((prev, next) => {
@@ -110,6 +120,10 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
         [next]: new State(stateSet[next]),
       };
     }, {}) as States<StateSet>;
+
+    this._canvasBounds =
+      options.canvasBounds ??
+      Bounds.create(Vector.create(0, 0), Vector.create(500, 500));
   }
 
   system<K extends keyof StateSet>(
@@ -142,13 +156,8 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
 
     new p5((sketch) => {
       const p = sketch as unknown as p5;
-      const canvasBounds = Bounds.create(
-        Vector.create(0, 0),
-        Vector.create(700, 250)
-      );
-
-      p.setup = function setup() {
-        p.createCanvas(...canvasBounds.size);
+      const canvasBounds = (p.setup = function setup() {
+        p.createCanvas(...self._canvasBounds.size);
         p.colorMode(p.HSB, 360, 100, 100, 100);
         p.noStroke();
         p.rectMode(p.CENTER);
@@ -161,7 +170,11 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
         const startSystems = self._systems.get("start") ?? [];
         startSystems.forEach(({ name, system }) => {
           console.debug(`[start] ${name}`);
-          system(self._world, { mousePosition, p, canvasBounds }, self._states);
+          system(
+            self._world,
+            { mousePosition, p, canvasBounds: self._canvasBounds },
+            self._states
+          );
         });
 
         const stateChangeTriggeredSystems = self._systems.get("update");
@@ -183,7 +196,7 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
                   );
                   system(
                     self._world,
-                    { mousePosition, p, canvasBounds },
+                    { mousePosition, p, canvasBounds: self._canvasBounds },
                     self._states
                   );
                 }
@@ -191,7 +204,7 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
             }
           });
         }
-      };
+      });
 
       p.draw = function draw() {
         p.background(240, 90, 60);
@@ -220,7 +233,7 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
             if (trigger.condition === undefined) {
               system(
                 self._world,
-                { mousePosition, p, canvasBounds },
+                { mousePosition, p, canvasBounds: self._canvasBounds },
                 self._states
               );
             }
@@ -238,7 +251,7 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
                 );
                 system(
                   self._world,
-                  { mousePosition, p, canvasBounds },
+                  { mousePosition, p, canvasBounds: self._canvasBounds },
                   self._states
                 );
               }

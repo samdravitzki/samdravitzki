@@ -17,13 +17,13 @@ function setupMenuUiPart<
     {
       event: "start",
     },
-    (_world, { p }, state) => {
+    (_world, { p, canvasBounds }, state) => {
       // Need to figure out how to remove having to request state from a map like this
       const appState = state["app-state"];
       const renderTrajectory = state["render-trajectory"];
 
       const gameMenu = p.createDiv();
-      gameMenu.position(0, 250, "absolute");
+      gameMenu.position(0, canvasBounds.max.y, "absolute");
       gameMenu.id("game-menu");
 
       const pauseButton = p.createButton("pause");
