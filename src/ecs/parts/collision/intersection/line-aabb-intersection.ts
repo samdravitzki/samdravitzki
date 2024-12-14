@@ -1,4 +1,4 @@
-import Vector from "../../../../Vector/Vector";
+import Vector from "../../../core/Vector/Vector";
 import { Line, Aabb } from "./intersection-shapes";
 import lineLineIntersection from "./line-line-intersection";
 

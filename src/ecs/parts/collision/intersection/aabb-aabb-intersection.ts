@@ -1,4 +1,4 @@
-import Vector from "../../../../Vector/Vector";
+import Vector from "../../../core/Vector/Vector";
 import { Aabb } from "./intersection-shapes";
 
 type AabbAabbIntersection = {

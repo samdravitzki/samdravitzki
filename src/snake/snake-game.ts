@@ -2,7 +2,7 @@ import p5 from "p5";
 import Direction from "../Direction/Direction";
 import Snake from "./Snake";
 import Bounds from "../ecs/core/Bounds/Bounds";
-import Vector from "../Vector/Vector";
+import Vector from "../ecs/core/Vector/Vector";
 
 function generateSnackPosition(bounds: Bounds) {
   return bounds.randomPosition(10).minus(Vector.create(10, 10));

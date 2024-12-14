@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import Vector from "../../../Vector/Vector";
+import Vector from "../Vector/Vector";
 import Bounds from "./Bounds";
 
 describe("factory method", () => {

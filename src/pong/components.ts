@@ -1,5 +1,5 @@
 import Component from "../ecs/core/Component/Component";
-import Vector from "../Vector/Vector";
+import Vector from "../ecs/core/Vector/Vector";
 
 export type Velocity = Component & {
   name: "velocity";

@@ -1,5 +1,5 @@
 import World from "../../core/World/World";
-import Vector from "../../../Vector/Vector";
+import Vector from "../../core/Vector/Vector";
 import { Aabb, Line } from "./intersection/intersection-shapes";
 import lineAabbIntersection from "./intersection/line-aabb-intersection";
 import { Position } from "../../components/Position";

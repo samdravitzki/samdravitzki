@@ -1,6 +1,6 @@
 import Bounds from "../../ecs/core/Bounds/Bounds";
 import createBundle from "../../ecs/core/Bundle/createBundle";
-import Vector from "../../Vector/Vector";
+import Vector from "../../ecs/core/Vector/Vector";
 import Engine from "../../ecs/core/Engine/Engine";
 
 function setupBoundariesPart<T extends Record<string, unknown>>(

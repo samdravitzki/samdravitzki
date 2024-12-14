@@ -1,5 +1,5 @@
 import createBundle from "../../ecs/core/Bundle/createBundle";
-import Vector from "../../Vector/Vector";
+import Vector from "../../ecs/core/Vector/Vector";
 import Engine from "../../ecs/core/Engine/Engine";
 
 function setupBallPart<T extends Record<string, unknown>>(engine: Engine<T>) {
