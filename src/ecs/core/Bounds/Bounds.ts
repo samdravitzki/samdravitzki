@@ -12,8 +12,11 @@ export default class Bounds {
   readonly min: Vector;
   readonly max: Vector;
 
+  /**
+   * Return a vector at the center of the bounds
+   */
   get center() {
-    return this.max.minus(this.min).times(0.5);
+    return this.max.minus(this.min).times(0.5).plus(this.min);
   }
 
   constructor(min: Vector, max: Vector) {
