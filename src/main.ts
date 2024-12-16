@@ -1,86 +1,94 @@
 import "./style.css";
 
-type Game = {
+type App = {
   name: string;
   symbol: string;
-  gameId: string;
+  appId: string;
 };
 
-const pong: Game = {
+const pong: App = {
   name: "pong",
   symbol: "🎾",
-  gameId: "pong-sketch",
+  appId: "pong-sketch",
 };
 
-const snake: Game = {
+const snake: App = {
   name: "snake",
   symbol: "🐍",
-  gameId: "snake-sketch",
+  appId: "snake-sketch",
 };
 
-const games = [snake, pong];
+const poissonDiscSampling: App = {
+  name: "poisson-disc-sampling",
+  symbol: "⋆.˚",
+  appId: "poisson-disc-sampling-sketch",
+};
+
+const apps: App[] = [snake, pong, poissonDiscSampling];
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
     <div id="main-content">
       <h1>dravitzki.com</h1>
-      ${games
+      ${apps
         .map(
-          (game) => `
-        <button id="${game.name}-button">${game.symbol}</button>
-      `,
+          (app) => `
+        <button id="${app.name}-button">${app.symbol}</button>
+      `
         )
         .join("")}
     </div>
-    ${games
+    ${apps
       .map(
-        (game) => `
-      <div id="${game.name}-game" style="display:none;">
-        <button id="exit-${game.name}-button">❌</button>
-        <div style="position: relative;" id="${game.gameId}"></div>
+        (app) => `
+      <div id="${app.name}-app" style="display:none;">
+        <button id="exit-${app.name}-button">❌</button>
+        <div style="position: relative;" id="${app.appId}"></div>
       </div>
-    `,
+    `
       )
       .join("")}
   </div>
 `;
 
+// TODO: Need a more modular way to import games as this is really easy miss (should be as simple as importing something and adding it to a list)
 import("./snake/snake-game");
 import("./pong/pong-game");
+import("./poisson-disk-sampling/poisson-disc-sampling");
 
 // Load persisted state from localStorage
-const savedGameState = localStorage.getItem("activeGame");
+const savedAppState = localStorage.getItem("activeApp");
 
-// Restore game displayed based on saved state
-if (savedGameState) {
+// Restore app displayed based on saved state
+if (savedAppState) {
   const mainContent = document.getElementById("main-content")!;
   mainContent.style.display = "none";
 
-  const activeGame = document.getElementById(`${savedGameState}-game`)!;
-  activeGame.style.display = "block";
+  const activeApp = document.getElementById(`${savedAppState}-app`)!;
+  activeApp.style.display = "block";
 }
 
-games.forEach((game) => {
-  const pongGame = document.getElementById(`${game.name}-game`)!;
+apps.forEach((app) => {
+  const appElement = document.getElementById(`${app.name}-app`)!;
   const mainContent = document.getElementById("main-content")!;
 
   document
-    .getElementById(`${game.name}-button`)
+    .getElementById(`${app.name}-button`)
     ?.addEventListener("click", () => {
-      pongGame.style.display = "block";
+      appElement.style.display = "block";
       mainContent.style.display = "none";
 
-      // Save the current active game to localStorage
-      localStorage.setItem("activeGame", game.name);
+      // Save the current active app to localStorage
+      localStorage.setItem("activeApp", app.name);
     });
 
   document
-    .getElementById(`exit-${game.name}-button`)
+    .getElementById(`exit-${app.name}-button`)
     ?.addEventListener("click", () => {
-      pongGame.style.display = "none";
+      appElement.style.display = "none";
       mainContent.style.display = "block";
 
-      // Clear the saved game state
-      localStorage.removeItem("activeGame");
+      // Clear the saved app state
+      localStorage.removeItem("activeApp");
     });
 });
