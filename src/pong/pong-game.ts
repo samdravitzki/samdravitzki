@@ -12,13 +12,41 @@ import {
 import { Collision } from "../ecs/parts/collision/components/Collision";
 import { Position } from "../ecs/components/Position";
 import { PrimitiveShape } from "../ecs/parts/primitive-renderer/components/Primitive";
-import { MousePosition } from "../ecs/core/System/System";
 import castRay from "../ecs/parts/collision/cast-ray";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import minionBongUrl from "./sounds/minion-bong.mp3";
 import State from "../ecs/core/State/State";
 import Component from "../ecs/core/Component/Component";
-import engine from "./pong-engine";
+import { EngineBuilder } from "../ecs/core/Engine/Engine";
+import collisions from "../ecs/parts/collision/collision";
+import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
+import setupBallPart from "./setup/setup-ball";
+import setupBoundariesPart from "./setup/setup-boundaries";
+import setupPaddlesPart from "./setup/setup-paddles";
+import setupScoreboardPart from "./setup/setup-scoreboard";
+import setupMenuUiPart from "./setup/setup-ui";
+
+/**
+ * The main states of the applicaton
+ */
+type ApplicationState = "paused" | "main-menu" | "in-game" | "end";
+
+const engine = EngineBuilder.create()
+  .state("render-trajectory", false)
+  .state<"score", [number, number]>("score", [0, 0])
+  .state<"app-state", ApplicationState>("app-state", "main-menu")
+  .build(document.getElementById("pong-sketch")!);
+
+engine.part(primitiveRenderer);
+engine.part(collisions());
+engine.part(setupMenuUiPart);
+engine.part(setupBallPart);
+engine.part(setupScoreboardPart);
+engine.part(setupBoundariesPart);
+engine.part(setupPaddlesPart);
+
+export default engine;
+export type { ApplicationState };
 
 const ballHitAudio = new Audio(minionBongUrl);
 
@@ -452,4 +480,5 @@ engine.system(
     }
   }
 );
+
 engine.run();
