@@ -59,4 +59,13 @@ export default class Bounds {
       boundedMod(position.y, this.max.y, this.min.y)
     );
   }
+
+  inBounds(vector: Vector): boolean {
+    return (
+      vector.x >= this.min.x &&
+      vector.x <= this.max.x &&
+      vector.y >= this.min.y &&
+      vector.y <= this.max.y
+    );
+  }
 }

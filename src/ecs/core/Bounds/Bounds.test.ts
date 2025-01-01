@@ -69,3 +69,41 @@ describe("boundedMod method", () => {
     expect(result.y).toEqual(8);
   });
 });
+
+describe("inBounds method", () => {
+  test("should return true if supplied vector is inside the bounds", () => {
+    const vector = Vector.create(4, 5);
+    const bounds = Bounds.create(Vector.create(2, 3), Vector.create(6, 7));
+
+    const result = bounds.inBounds(vector);
+
+    expect(result).toEqual(true);
+  });
+
+  test("should return false if supplied vector is outside the bounds", () => {
+    const vector = Vector.create(1, 1);
+    const bounds = Bounds.create(Vector.create(4, 8), Vector.create(5, 7));
+
+    const result = bounds.inBounds(vector);
+
+    expect(result).toEqual(false);
+  });
+
+  test("should return true if supplied vector at max bounds", () => {
+    const vector = Vector.create(6, 7);
+    const bounds = Bounds.create(Vector.create(2, 3), Vector.create(6, 7));
+
+    const result = bounds.inBounds(vector);
+
+    expect(result).toEqual(true);
+  });
+
+  test("should return true if supplied vector at min bounds", () => {
+    const vector = Vector.create(2, 3);
+    const bounds = Bounds.create(Vector.create(2, 3), Vector.create(6, 7));
+
+    const result = bounds.inBounds(vector);
+
+    expect(result).toEqual(true);
+  });
+});
