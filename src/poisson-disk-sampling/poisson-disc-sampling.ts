@@ -43,18 +43,14 @@ engine.system(
   "place-poisson-dots",
   { event: "start" },
   (world, { canvasBounds }, { dotCount }) => {
-    const border = 0;
-
     const bounds = Bounds.create(
-      Vector.create(canvasBounds.min.x + border, canvasBounds.min.y + border),
-      Vector.create(canvasBounds.max.x - border, canvasBounds.max.y - border)
+      Vector.create(canvasBounds.min.x, canvasBounds.min.y),
+      Vector.create(canvasBounds.max.x, canvasBounds.max.y)
     );
 
     console.log(bounds);
 
     const dots = poissonDisc(bounds);
-
-    console.log(dots);
 
     const dotWidth = 5;
 
