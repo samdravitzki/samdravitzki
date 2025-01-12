@@ -4,14 +4,14 @@ import Vector from "../../ecs/core/Vector/Vector";
 import randomDots from "./randomDots";
 
 test("should return dot in random position within bounds", () => {
-  const bounds = Bounds.create(Vector.create(1, 1), Vector.create(3, 3));
+  const bounds = Bounds.create(Vector.create(0, 0), Vector.create(3, 3));
 
   const result = randomDots(1, bounds);
 
   const dot = result[0];
   expect(dot.x).greaterThanOrEqual(bounds.min.x);
   expect(dot.x).lessThanOrEqual(bounds.max.x);
-  expect(dot.y).lessThanOrEqual(bounds.min.y);
+  expect(dot.y).greaterThanOrEqual(bounds.min.y);
   expect(dot.y).lessThanOrEqual(bounds.max.y);
 });
 
