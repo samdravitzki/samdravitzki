@@ -81,6 +81,9 @@ Complete "The Challenge" defined in https://20_games_challenge.gitlab.io/challen
 Since I have to create so many different games I saw this as an opportunity to look into learn about game engine design. This lead to introducing a bit of
 abstraction creating a simple and basic structural implementation of ecs and a collision system
 
+## Poisson Disc Sampling 🟡
+I want to learn to different algorithms useful for procgen, poisson disc sampling is an interesting algorithm because of how it generates data that seems random but also looks good due to how uniform it is. I also want to develop my skills at implementing and using unique algorithms like this, pds felt like a great place to start because it is relativly simple but still have a few hidden challenges
+
 ## Wave function collapse ⚪
 
 I have always wanted to build an implementation of wave function collapse and I have tried to do it a few different times before but could never figure it all out
@@ -120,6 +123,7 @@ All the things that need to be done to support building and maintain these proje
 - [ ] Implement more extensible approach to adding new games to the site
   - that also don't require the use of dynamic module imports
   - and have a better method for toggling the visibility of the games
+- [ ] Google analytics
 
 # Appendix
 
