@@ -123,3 +123,13 @@ describe("reflect method", () => {
     expect(result.y).toEqual(-138);
   });
 });
+
+describe("toString method", () => {
+  test("should return string in the format '(x, y)' ", () => {
+    const vector = new Vector(1, 2);
+
+    const result = vector.toString();
+
+    expect(result).toEqual("(1, 2)");
+  });
+});

@@ -72,4 +72,8 @@ export default class Vector {
   reflect(normal: Vector): Vector {
     return this.minus(normal.times(this.dot(normal) * 2));
   }
+
+  toString() {
+    return `(${this.x}, ${this.y})`;
+  }
 }
