@@ -48,11 +48,9 @@ engine.system(
       Vector.create(canvasBounds.max.x, canvasBounds.max.y)
     );
 
-    console.log(bounds);
-
     const dots = poissonDisc(bounds);
 
-    const dotWidth = 5;
+    const dotWidth = 2;
 
     for (const dot of dots) {
       world.addBundle(
@@ -61,7 +59,7 @@ engine.system(
             name: "primitive",
             stroke: [345, 80, 100],
             strokeWeight: 2,
-            fill: false,
+            fill: [345, 80, 100],
             type: "circle",
             radius: dotWidth,
           },

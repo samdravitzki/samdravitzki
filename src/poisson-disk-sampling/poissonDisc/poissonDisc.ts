@@ -48,8 +48,8 @@ export const indiciesSurroundingIndex = (
 
   for (let rowDiff = -radius; rowDiff <= radius; rowDiff += 1) {
     for (let colDiff = -radius; colDiff <= radius; colDiff += 1) {
-      const neighbourX = x + rowDiff;
-      const neighbourY = y + colDiff;
+      const neighbourX = x + colDiff;
+      const neighbourY = y + rowDiff;
 
       // Only add neighbour if its in the grid bounds
       if (
@@ -58,7 +58,7 @@ export const indiciesSurroundingIndex = (
         neighbourY >= 0 &&
         neighbourY < height
       ) {
-        const neighbour = neighbourX * width + neighbourY;
+        const neighbour = neighbourY * width + neighbourX;
         neighbours.push(neighbour);
       }
     }
@@ -85,7 +85,9 @@ function poissonDisc(bounds: Bounds): Vector[] {
   const width = Math.ceil((bounds.max.x - bounds.min.x) / cellSize);
   const height = Math.ceil((bounds.max.y - bounds.min.y) / cellSize);
 
-  const backgroundGrid = range(height * width).map(() => -1);
+  const backgroundGrid: (Vector | null)[] = range(height * width).map(
+    () => null
+  );
 
   // Convert a vector to an index in the background grid
   const vectorToGridIndex = (vector: Vector) => {
@@ -94,11 +96,38 @@ function poissonDisc(bounds: Bounds): Vector[] {
 
     return y * width + x;
   };
-
-  // Check if given vector has any neighbours within distance r using the background grid
-  const isNearbyOtherDots = (point: Vector): boolean => {
+  /**
+   * Check if given vector has any neighbours within distance r using the background grid
+   *
+   * If there is a point within the distance of supplied point return true
+   *
+   * @param point to compare
+   * @param minDistance size of the neighbourhood
+   * @returns true if there is a point in neighbourhood of given point
+   */
+  const inNeighbourhoodOfAnotherDot = (
+    point: Vector,
+    minDistance: number
+  ): boolean => {
     const pointCellIndex = vectorToGridIndex(point);
-    const cellsAroundPoint = indiciesSurroundingIndex(0, 1);
+    const cellsAroundPoint = indiciesSurroundingIndex(
+      pointCellIndex,
+      width,
+      height,
+      2
+    );
+
+    for (const cellIndex of cellsAroundPoint) {
+      const neighbouringCell = backgroundGrid[cellIndex];
+
+      if (neighbouringCell !== null) {
+        const neighbourDistance = neighbouringCell.distance(point);
+
+        if (neighbourDistance < minDistance) {
+          return true;
+        }
+      }
+    }
 
     return false;
   };
@@ -110,7 +139,7 @@ function poissonDisc(bounds: Bounds): Vector[] {
 
   const startingPointCellIndex = vectorToGridIndex(startingPoint);
 
-  backgroundGrid[startingPointCellIndex] = 1;
+  backgroundGrid[startingPointCellIndex] = startingPoint;
 
   const active: Vector[] = [startingPoint];
   const output: Vector[] = [startingPoint];
@@ -118,47 +147,30 @@ function poissonDisc(bounds: Bounds): Vector[] {
   while (active.length > 0) {
     const randomActiveIndex = randomInt(active.length - 1);
     const activePoint = active[randomActiveIndex];
+    active.splice(randomActiveIndex, 1);
 
-    const activeCountBefore = active.length;
+    const samples = range(sampleLimit);
 
-    for (const i of range(sampleLimit)) {
+    for (const _sample of samples) {
       const newPoint = createRandomVectorNearby(
         activePoint,
         2 * minDistance,
         minDistance
       );
 
-      if (bounds.inBounds(newPoint) && isNearbyOtherDots(newPoint)) {
+      if (
+        bounds.inBounds(newPoint) &&
+        !inNeighbourhoodOfAnotherDot(newPoint, cellSize)
+      ) {
         output.push(newPoint);
         active.push(newPoint);
 
-        backgroundGrid[vectorToGridIndex(newPoint)] = 1;
+        backgroundGrid[vectorToGridIndex(newPoint)] = newPoint;
       }
-    }
-
-    const activeCountAfter = active.length;
-
-    // If no new points are added to the active list remove this as an active point
-    if (activeCountBefore === activeCountAfter) {
-      // remove item from active array after reading
-      active.splice(randomActiveIndex, 1);
     }
   }
 
   return output;
-
-  // return backgroundGrid.reduce((acc, value, i) => {
-  //   if (value <= 0) {
-  //     return acc;
-  //   }
-
-  //   const dot = Vector.create(
-  //     (i % width) * cellSize + bounds.min.x,
-  //     Math.floor(i / width) * cellSize + bounds.min.y
-  //   );
-
-  //   return [...acc, dot];
-  // }, [] as Vector[]);
 }
 
 export default poissonDisc;
