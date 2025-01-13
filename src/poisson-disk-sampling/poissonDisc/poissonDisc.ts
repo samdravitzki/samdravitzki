@@ -123,7 +123,7 @@ function poissonDisc(bounds: Bounds): Vector[] {
       if (neighbouringCell !== null) {
         const neighbourDistance = neighbouringCell.distance(point);
 
-        if (neighbourDistance < minDistance) {
+        if (neighbourDistance <= minDistance) {
           return true;
         }
       }
@@ -160,11 +160,13 @@ function poissonDisc(bounds: Bounds): Vector[] {
 
       if (
         bounds.inBounds(newPoint) &&
-        !inNeighbourhoodOfAnotherDot(newPoint, cellSize)
+        !inNeighbourhoodOfAnotherDot(newPoint, minDistance)
       ) {
         output.push(newPoint);
         active.push(newPoint);
-
+        console.log(
+          `${newPoint} replacing ${backgroundGrid[vectorToGridIndex(newPoint)]}`
+        );
         backgroundGrid[vectorToGridIndex(newPoint)] = newPoint;
       }
     }
