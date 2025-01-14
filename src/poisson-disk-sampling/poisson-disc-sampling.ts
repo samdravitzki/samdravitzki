@@ -4,7 +4,7 @@ import { EngineBuilder } from "../ecs/core/Engine/Engine";
 import Vector from "../ecs/core/Vector/Vector";
 import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
 import poissonDisc from "./poisson-disc/poisson-disc";
-import randomDots from "./randomDots/randomDots";
+import randomDots from "./random-dots/random-dots";
 
 const engine = EngineBuilder.create()
   .state("dotCount", 100)

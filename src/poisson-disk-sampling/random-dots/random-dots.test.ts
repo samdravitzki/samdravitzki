@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import Bounds from "../../ecs/core/Bounds/Bounds";
 import Vector from "../../ecs/core/Vector/Vector";
-import randomDots from "./randomDots";
+import randomDots from "./random-dots";
 
 test("should return dot in random position within bounds", () => {
   const bounds = Bounds.create(Vector.create(0, 0), Vector.create(3, 3));

@@ -3,7 +3,6 @@ import Bounds from "../../ecs/core/Bounds/Bounds";
 import Vector from "../../ecs/core/Vector/Vector";
 import randomInt from "../../lib/randomInt/randomInt";
 import range from "../../lib/range/range";
-import randomDots from "../randomDots/randomDots";
 
 /**
  * Generate a dot within a radius of a supplied dot
