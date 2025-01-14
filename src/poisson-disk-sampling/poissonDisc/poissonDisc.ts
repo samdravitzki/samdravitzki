@@ -56,6 +56,77 @@ export const indiciesSurroundingIndex = (
 };
 
 /**
+ * Creates a grid over a given bounds where each cell is of
+ * the supplied size
+ *
+ * Contains all of the grid operations required for this implementation of poisson disc sampling
+ */
+class BackgroundGrid {
+  private bounds: Bounds;
+  private cellSize: number;
+  // Width of grid in number of cells
+  private gridWidth: number;
+  // Height of grid in number of cells
+  private gridHeight: number;
+  grid: (Vector | null)[];
+
+  constructor(bounds: Bounds, cellSize: number) {
+    this.bounds = bounds;
+    this.cellSize = cellSize;
+
+    this.gridWidth = Math.ceil((bounds.max.x - bounds.min.x) / cellSize);
+    this.gridHeight = Math.ceil((bounds.max.y - bounds.min.y) / cellSize);
+
+    this.grid = range(this.gridWidth * this.gridHeight).map(() => null);
+  }
+
+  /**
+   * Calculate the index of the cell in the grid that
+   * contains the position of the supplied vector
+   * @param vector a vector in the bounds
+   */
+  vectorToIndex(vector: Vector): number {
+    const x = Math.floor(vector.x / this.cellSize);
+    const y = Math.floor(vector.y / this.cellSize);
+
+    return y * this.gridWidth + x;
+  }
+
+  indiciesSurroundingIndex(index: number, radius: number) {
+    return indiciesSurroundingIndex(index, this.gridWidth, this.gridHeight, 2);
+  }
+
+  /**
+   * Check if given vector has any neighbours within distance r using the background grid to
+   * reduce the number of points to search over
+   *
+   * If there is a point within the distance of supplied point return true
+   *
+   * @param point to compare
+   * @param distance the distance at which a point is considered nearby
+   * @returns true if there is a point in neighbourhood of given point
+   */
+  pointHasPointsNearby(point: Vector, distance: number): boolean {
+    const pointCellIndex = this.vectorToIndex(point);
+    const cellsAroundPoint = this.indiciesSurroundingIndex(pointCellIndex, 2);
+
+    for (const cellIndex of cellsAroundPoint) {
+      const neighbouringCell = this.grid[cellIndex];
+
+      if (neighbouringCell !== null) {
+        const neighbourDistance = neighbouringCell.distance(point);
+
+        if (neighbourDistance < distance) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+}
+
+/**
  * Generate a bunch of positions following poisson disc-sampling within a given bounds
  *
  * Implemented following the algorithm described in https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
@@ -70,64 +141,16 @@ function poissonDisc(
 ): Vector[] {
   const cellSize = minDistance / Math.sqrt(2);
 
-  const width = Math.ceil((bounds.max.x - bounds.min.x) / cellSize);
-  const height = Math.ceil((bounds.max.y - bounds.min.y) / cellSize);
-
-  const backgroundGrid: (Vector | null)[] = range(height * width).map(
-    () => null
-  );
-
-  // Convert a vector to an index in the background grid
-  const vectorToGridIndex = (vector: Vector) => {
-    const x = Math.floor(vector.x / cellSize);
-    const y = Math.floor(vector.y / cellSize);
-
-    return y * width + x;
-  };
-  /**
-   * Check if given vector has any neighbours within distance r using the background grid
-   *
-   * If there is a point within the distance of supplied point return true
-   *
-   * @param point to compare
-   * @param minDistance size of the neighbourhood
-   * @returns true if there is a point in neighbourhood of given point
-   */
-  const inNeighbourhoodOfAnotherDot = (
-    point: Vector,
-    minDistance: number
-  ): boolean => {
-    const pointCellIndex = vectorToGridIndex(point);
-    const cellsAroundPoint = indiciesSurroundingIndex(
-      pointCellIndex,
-      width,
-      height,
-      2
-    );
-
-    for (const cellIndex of cellsAroundPoint) {
-      const neighbouringCell = backgroundGrid[cellIndex];
-
-      if (neighbouringCell !== null) {
-        const neighbourDistance = neighbouringCell.distance(point);
-
-        if (neighbourDistance <= minDistance) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  };
+  const backgroundGrid = new BackgroundGrid(bounds, cellSize);
 
   const startingPoint = Vector.create(
     Math.random() * bounds.size[0],
     Math.random() * bounds.size[1]
   );
 
-  const startingPointCellIndex = vectorToGridIndex(startingPoint);
+  const startingPointCellIndex = backgroundGrid.vectorToIndex(startingPoint);
 
-  backgroundGrid[startingPointCellIndex] = startingPoint;
+  backgroundGrid.grid[startingPointCellIndex] = startingPoint;
 
   const active: Vector[] = [startingPoint];
   const output: Vector[] = [startingPoint];
@@ -148,11 +171,11 @@ function poissonDisc(
 
       if (
         bounds.inBounds(newPoint) &&
-        !inNeighbourhoodOfAnotherDot(newPoint, minDistance)
+        !backgroundGrid.pointHasPointsNearby(newPoint, minDistance)
       ) {
         output.push(newPoint);
         active.push(newPoint);
-        backgroundGrid[vectorToGridIndex(newPoint)] = newPoint;
+        backgroundGrid.grid[backgroundGrid.vectorToIndex(newPoint)] = newPoint;
       }
     }
   }
