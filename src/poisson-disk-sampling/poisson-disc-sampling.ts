@@ -3,7 +3,7 @@ import createBundle from "../ecs/core/Bundle/createBundle";
 import { EngineBuilder } from "../ecs/core/Engine/Engine";
 import Vector from "../ecs/core/Vector/Vector";
 import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
-import poissonDisc from "./poissonDisc/poissonDisc";
+import poissonDisc from "./poisson-disc/poisson-disc";
 import randomDots from "./randomDots/randomDots";
 
 const engine = EngineBuilder.create()

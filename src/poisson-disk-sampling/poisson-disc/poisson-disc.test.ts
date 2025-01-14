@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import Bounds from "../../ecs/core/Bounds/Bounds";
 import Vector from "../../ecs/core/Vector/Vector";
-import poissonDisc, { indiciesSurroundingIndex } from "./poissonDisc";
+import poissonDisc, { indiciesSurroundingIndex } from "./poisson-disc";
 
 test("should return dot in random position within bounds", () => {
   const bounds = Bounds.create(Vector.create(0, 0), Vector.create(3, 3));
