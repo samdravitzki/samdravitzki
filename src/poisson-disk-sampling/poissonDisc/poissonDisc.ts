@@ -92,8 +92,18 @@ class BackgroundGrid {
     return y * this.gridWidth + x;
   }
 
+  addPoint(point: Vector) {
+    const pointCellIndex = this.vectorToIndex(point);
+    this.grid[pointCellIndex] = point;
+  }
+
   indiciesSurroundingIndex(index: number, radius: number) {
-    return indiciesSurroundingIndex(index, this.gridWidth, this.gridHeight, 2);
+    return indiciesSurroundingIndex(
+      index,
+      this.gridWidth,
+      this.gridHeight,
+      radius
+    );
   }
 
   /**
@@ -148,9 +158,7 @@ function poissonDisc(
     Math.random() * bounds.size[1]
   );
 
-  const startingPointCellIndex = backgroundGrid.vectorToIndex(startingPoint);
-
-  backgroundGrid.grid[startingPointCellIndex] = startingPoint;
+  backgroundGrid.addPoint(startingPoint);
 
   const active: Vector[] = [startingPoint];
   const output: Vector[] = [startingPoint];
@@ -175,7 +183,7 @@ function poissonDisc(
       ) {
         output.push(newPoint);
         active.push(newPoint);
-        backgroundGrid.grid[backgroundGrid.vectorToIndex(newPoint)] = newPoint;
+        backgroundGrid.addPoint(newPoint);
       }
     }
   }
