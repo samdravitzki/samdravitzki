@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import range from "../../../lib/range/range";
+import range from "../../range/range";
 import Vector from "../../../ecs/core/Vector/Vector";
 import createRandomVectorNearby from "./createRandomVectorNearby";
 

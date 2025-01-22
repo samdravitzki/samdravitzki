@@ -1,13 +1,16 @@
 import { m } from "vitest/dist/reporters-yx5ZTtEV.js";
 import Bounds from "../../ecs/core/Bounds/Bounds";
 import Vector from "../../ecs/core/Vector/Vector";
-import randomInt from "../../lib/randomInt/randomInt";
-import range from "../../lib/range/range";
+import randomInt from "../randomInt/randomInt";
+import range from "../range/range";
 import createRandomVectorNearby from "./createRandomVectorNearby/createRandomVectorNearby";
 import { BackgroundGrid } from "./BackgroundGrid/BackgroundGrid";
 
 /**
  * Generate a bunch of positions following poisson disc-sampling within a given bounds
+ *
+ * The result is a more structured random distribution of vectors than purely random points generated within
+ * a given bounds
  *
  * Implemented following the algorithm described in https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf
  * Also based alot on http://devmag.org.za/2009/05/03/poisson-disk-sampling/

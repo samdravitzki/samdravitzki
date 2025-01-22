@@ -1,6 +1,6 @@
 import Bounds from "../../../ecs/core/Bounds/Bounds";
 import Vector from "../../../ecs/core/Vector/Vector";
-import range from "../../../lib/range/range";
+import range from "../../range/range";
 import { indiciesSurroundingIndex } from "../indiciesSurroundingIndex/indiciesSurroundingIndex";
 
 /**
