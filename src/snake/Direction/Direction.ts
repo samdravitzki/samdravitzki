@@ -1,4 +1,4 @@
-import Vector from "../ecs/core/Vector/Vector";
+import Vector from "../../ecs/core/Vector/Vector";
 
 type DirectionValue = "north" | "east" | "south" | "west";
 
