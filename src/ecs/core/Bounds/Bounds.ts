@@ -1,5 +1,5 @@
 import Vector from "../Vector/Vector";
-import boundedMod from "../../../lib/boundedMod/boundedMod";
+import boundedMod from "../../../lib/bounded-mod/bounded-mod";
 import randomInt from "../../../lib/randomInt/randomInt";
 
 /**

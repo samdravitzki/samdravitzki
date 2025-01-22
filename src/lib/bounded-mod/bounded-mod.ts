@@ -9,7 +9,7 @@
 export default function boundedMod(
   x: number,
   max: number,
-  min: number = 0,
+  min: number = 0
 ): number {
   return ((((x - min) % (max - min)) + (max - min)) % (max - min)) + min;
 }

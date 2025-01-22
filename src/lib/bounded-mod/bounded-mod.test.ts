@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import boundedMod from "./boundedMod";
+import boundedMod from "./bounded-mod";
 
 test("should not modify x when x falls between max and min", () => {
   const min = 10;
