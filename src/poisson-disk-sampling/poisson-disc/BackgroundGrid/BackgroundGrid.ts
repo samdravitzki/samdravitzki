@@ -34,18 +34,22 @@ export class BackgroundGrid {
    * @param vector a vector in the bounds
    */
   vectorToIndex(vector: Vector): number {
+    if (!this.bounds.inBounds(vector)) {
+      throw new Error("Vector not in bounds");
+    }
+
     const x = Math.floor(vector.x / this.cellSize);
     const y = Math.floor(vector.y / this.cellSize);
 
     return y * this.gridWidth + x;
   }
 
-  addPoint(point: Vector) {
+  addVector(point: Vector) {
     const pointCellIndex = this.vectorToIndex(point);
     this.grid[pointCellIndex] = point;
   }
 
-  indiciesSurroundingIndex(index: number, radius: number) {
+  private indiciesSurroundingIndex(index: number, radius: number) {
     return indiciesSurroundingIndex(
       index,
       this.gridWidth,
@@ -60,20 +64,19 @@ export class BackgroundGrid {
    *
    * If there is a point within the distance of supplied point return true
    *
-   * @param point to compare
+   * @param vector to compare
    * @param distance the distance at which a point is considered nearby
    * @returns true if there is a point in neighbourhood of given point
    */
-  pointHasPointsNearby(point: Vector, distance: number): boolean {
-    const pointCellIndex = this.vectorToIndex(point);
+  vectorHasVectorsNearby(vector: Vector, distance: number): boolean {
+    const pointCellIndex = this.vectorToIndex(vector);
     const cellsAroundPoint = this.indiciesSurroundingIndex(pointCellIndex, 2);
 
     for (const cellIndex of cellsAroundPoint) {
       const neighbouringCell = this.grid[cellIndex];
 
       if (neighbouringCell !== null) {
-        const neighbourDistance = neighbouringCell.distance(point);
-
+        const neighbourDistance = neighbouringCell.distance(vector);
         if (neighbourDistance < distance) {
           return true;
         }

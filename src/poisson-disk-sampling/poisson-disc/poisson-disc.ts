@@ -28,7 +28,7 @@ function poissonDisc(
     Math.random() * bounds.size[1]
   );
 
-  backgroundGrid.addPoint(startingPoint);
+  backgroundGrid.addVector(startingPoint);
 
   const active: Vector[] = [startingPoint];
   const output: Vector[] = [startingPoint];
@@ -49,11 +49,11 @@ function poissonDisc(
 
       if (
         bounds.inBounds(newPoint) &&
-        !backgroundGrid.pointHasPointsNearby(newPoint, minDistance)
+        !backgroundGrid.vectorHasVectorsNearby(newPoint, minDistance)
       ) {
         output.push(newPoint);
         active.push(newPoint);
-        backgroundGrid.addPoint(newPoint);
+        backgroundGrid.addVector(newPoint);
       }
     }
   }
