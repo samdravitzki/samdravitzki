@@ -4,24 +4,28 @@ type App = {
   name: string;
   symbol: string;
   appId: string;
+  path: string;
 };
 
 const pong: App = {
   name: "pong",
   symbol: "🎾",
   appId: "pong-sketch",
+  path: "./pong/pong-game",
 };
 
 const snake: App = {
   name: "snake",
   symbol: "🐍",
   appId: "snake-sketch",
+  path: "./snake/snake-game",
 };
 
 const poissonDiscSampling: App = {
   name: "poisson-disc-sampling",
   symbol: "⋆.˚",
   appId: "poisson-disc-sampling-sketch",
+  path: "./poisson-disk-sampling/poisson-disc-sampling",
 };
 
 const apps: App[] = [snake, pong, poissonDiscSampling];
@@ -51,10 +55,9 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   </div>
 `;
 
-// TODO: Need a more modular way to import games as this is really easy miss (should be as simple as importing something and adding it to a list)
-import("./snake/snake-game");
-import("./pong/pong-game");
-import("./poisson-disk-sampling/poisson-disc-sampling");
+apps.forEach((app) => {
+  import(app.path);
+});
 
 // Load persisted state from localStorage
 const savedAppState = localStorage.getItem("activeApp");
