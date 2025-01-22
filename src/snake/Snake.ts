@@ -1,5 +1,5 @@
 import Bounds from "../ecs/core/Bounds/Bounds";
-import Direction from "../Direction/Direction";
+import Direction from "./Direction/Direction";
 import Vector from "../ecs/core/Vector/Vector";
 import range from "../lib/range/range";
 

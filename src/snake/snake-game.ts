@@ -1,5 +1,5 @@
 import p5 from "p5";
-import Direction from "../Direction/Direction";
+import Direction from "./Direction/Direction";
 import Snake from "./Snake";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import Vector from "../ecs/core/Vector/Vector";
