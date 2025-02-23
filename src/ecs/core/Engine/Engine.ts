@@ -156,7 +156,7 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
 
     new p5((sketch) => {
       const p = sketch as unknown as p5;
-      const canvasBounds = (p.setup = function setup() {
+      p.setup = function setup() {
         p.createCanvas(...self._canvasBounds.size);
         p.colorMode(p.HSB, 360, 100, 100, 100);
         p.noStroke();
@@ -204,7 +204,7 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
             }
           });
         }
-      });
+      };
 
       p.draw = function draw() {
         p.background(240, 90, 60);
