@@ -95,6 +95,8 @@ type States<StateSet extends Record<string, unknown> = {}> = {
  * Designed based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
  */
 class Engine<StateSet extends Record<string, unknown> = {}> {
+  private p5Instance?: p5;
+
   private _world = new World();
   private _systems = new Map<
     EngineLifecycleEvents,
@@ -150,11 +152,17 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
     part(this);
   }
 
-  run() {
+  /**
+   * Renders and runs the game within a HTML canvas element
+   * @param parent optionally supply the parent element to render the canvas element within
+   */
+  run(parent?: HTMLElement) {
+    console.debug("Starting...");
     // Have to rescope this because the p5 callback hs its own this
     const self = this;
 
-    new p5((sketch) => {
+    // This is a p5 instance https://p5js.org/reference/p5/p5/
+    this.p5Instance = new p5((sketch) => {
       const p = sketch as unknown as p5;
       p.setup = function setup() {
         p.createCanvas(...self._canvasBounds.size);
@@ -259,7 +267,14 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
           }
         });
       };
-    }, this._element);
+    }, parent);
+  }
+
+  stop() {
+    console.debug("Stopped");
+    if (this.p5Instance !== undefined) {
+      this.p5Instance.remove();
+    }
   }
 }
 

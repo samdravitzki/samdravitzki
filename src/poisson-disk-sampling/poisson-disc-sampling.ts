@@ -6,13 +6,17 @@ import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-rendere
 import poissonDisc from "../lib/poisson-disc/poisson-disc";
 import randomDots from "./random-dots/random-dots";
 
-const engine = EngineBuilder.create()
+const canvasParent = document.getElementById("poisson-disc-sampling-sketch")!;
+
+console.log(canvasParent);
+
+const poissonDiscSamplingDemo = EngineBuilder.create()
   .state("dotCount", 100)
-  .build(document.getElementById("poisson-disc-sampling-sketch")!);
+  .build(canvasParent);
 
-engine.part(primitiveRenderer);
+poissonDiscSamplingDemo.part(primitiveRenderer);
 
-engine.system(
+poissonDiscSamplingDemo.system(
   "place-random-dots",
   { event: "start" },
   (world, { canvasBounds }, { dotCount }) => {
@@ -39,7 +43,7 @@ engine.system(
   }
 );
 
-engine.system(
+poissonDiscSamplingDemo.system(
   "place-poisson-dots",
   { event: "start" },
   (world, { canvasBounds }, { dotCount }) => {
@@ -73,4 +77,4 @@ engine.system(
   }
 );
 
-engine.run();
+export default poissonDiscSamplingDemo;

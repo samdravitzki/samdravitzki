@@ -1,40 +1,43 @@
+import poissonDiscSamplingDemo from "./poisson-disk-sampling/poisson-disc-sampling";
+import pongGame from "./pong/pong-game";
+import snakeGame from "./snake/snake-game";
 import "./style.css";
 
-type App = {
+type AppInfo = {
   name: string;
   symbol: string;
   appId: string;
-  path: string;
+  app: any;
 };
 
-const pong: App = {
+const pong: AppInfo = {
   name: "pong",
   symbol: "🎾",
   appId: "pong-sketch",
-  path: "./pong/pong-game",
+  app: pongGame,
 };
 
-const snake: App = {
+const snake: AppInfo = {
   name: "snake",
   symbol: "🐍",
   appId: "snake-sketch",
-  path: "./snake/snake-game",
+  app: snakeGame,
 };
 
-const poissonDiscSampling: App = {
+const poissonDiscSampling: AppInfo = {
   name: "poisson-disc-sampling",
   symbol: "⋆.˚",
   appId: "poisson-disc-sampling-sketch",
-  path: "./poisson-disk-sampling/poisson-disc-sampling",
+  app: poissonDiscSamplingDemo,
 };
 
-const apps: App[] = [snake, pong, poissonDiscSampling];
+const appInfos: AppInfo[] = [snake, pong, poissonDiscSampling];
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
     <div id="main-content">
       <h1>dravitzki.com</h1>
-      ${apps
+      ${appInfos
         .map(
           (app) => `
         <button id="${app.name}-button">${app.symbol}</button>
@@ -42,7 +45,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
         )
         .join("")}
     </div>
-    ${apps
+    ${appInfos
       .map(
         (app) => `
       <div id="${app.name}-app" style="display:none;">
@@ -55,10 +58,6 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   </div>
 `;
 
-apps.forEach((app) => {
-  import(app.path);
-});
-
 // Load persisted state from localStorage
 const savedAppState = localStorage.getItem("activeApp");
 
@@ -69,27 +68,39 @@ if (savedAppState) {
 
   const activeApp = document.getElementById(`${savedAppState}-app`)!;
   activeApp.style.display = "block";
+
+  const appInfo = appInfos.find((info) => info.name === savedAppState);
+
+  if (appInfo) {
+    const canvasParent = document.getElementById(`${appInfo.name}-sketch`);
+    appInfo.app.run(canvasParent);
+  }
 }
 
-apps.forEach((app) => {
-  const appElement = document.getElementById(`${app.name}-app`)!;
+appInfos.forEach((appInfo) => {
+  const appElement = document.getElementById(`${appInfo.name}-app`)!;
   const mainContent = document.getElementById("main-content")!;
 
+  const canvasParent = document.getElementById(`${appInfo.name}-sketch`);
+
   document
-    .getElementById(`${app.name}-button`)
+    .getElementById(`${appInfo.name}-button`)
     ?.addEventListener("click", () => {
       appElement.style.display = "block";
       mainContent.style.display = "none";
+      appInfo.app.run(canvasParent);
 
       // Save the current active app to localStorage
-      localStorage.setItem("activeApp", app.name);
+      localStorage.setItem("activeApp", appInfo.name);
     });
 
   document
-    .getElementById(`exit-${app.name}-button`)
+    .getElementById(`exit-${appInfo.name}-button`)
     ?.addEventListener("click", () => {
       appElement.style.display = "none";
       mainContent.style.display = "block";
+
+      appInfo.app.stop();
 
       // Clear the saved app state
       localStorage.removeItem("activeApp");

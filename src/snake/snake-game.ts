@@ -8,120 +8,138 @@ function generateSnackPosition(bounds: Bounds) {
   return bounds.randomPosition(10).minus(Vector.create(10, 10));
 }
 
-new p5((sketch) => {
-  const p = sketch as unknown as p5;
+class SnakeEngine {
+  private instance?: p5;
 
-  const playBounds = Bounds.create(
-    Vector.create(0, 0),
-    Vector.create(500, 500)
-  );
-  const snakeChunkSize = 10;
+  run() {
+    console.debug("Starting...");
+    this.instance = new p5((sketch) => {
+      const p = sketch as unknown as p5;
 
-  const snakeStartingSize = 3;
-  let snake = Snake.create(
-    snakeStartingSize,
-    Vector.create(120, 120),
-    snakeChunkSize
-  );
-  let slitheringDirection = new Direction("south");
+      const playBounds = Bounds.create(
+        Vector.create(0, 0),
+        Vector.create(500, 500)
+      );
+      const snakeChunkSize = 10;
 
-  let snackPosition = generateSnackPosition(playBounds); // To not generate 500, 500 snack position which is out of bounds
+      const snakeStartingSize = 3;
+      let snake = Snake.create(
+        snakeStartingSize,
+        Vector.create(120, 120),
+        snakeChunkSize
+      );
+      let slitheringDirection = new Direction("south");
 
-  let score = 0;
+      let snackPosition = generateSnackPosition(playBounds); // To not generate 500, 500 snack position which is out of bounds
 
-  p.setup = function setup() {
-    p.createCanvas(...playBounds.size);
-    p.colorMode(p.HSB, 360, 100, 100, 100);
-    p.noStroke();
+      let score = 0;
 
-    // move snake every second
-    setInterval(onSlitherInterval, 100);
-  };
+      p.setup = function setup() {
+        p.createCanvas(...playBounds.size);
+        p.colorMode(p.HSB, 360, 100, 100, 100);
+        p.noStroke();
 
-  p.draw = function draw() {
-    const gradient = p.drawingContext.createLinearGradient(
-      playBounds.min.x,
-      playBounds.min.y,
-      playBounds.max.x,
-      playBounds.max.y
-    );
+        // move snake every second
+        setInterval(onSlitherInterval, 100);
+      };
 
-    gradient.addColorStop(0, p.color(310, 100, 100, 100));
-    gradient.addColorStop(1, p.color(250, 100, 100, 100));
+      p.draw = function draw() {
+        const gradient = p.drawingContext.createLinearGradient(
+          playBounds.min.x,
+          playBounds.min.y,
+          playBounds.max.x,
+          playBounds.max.y
+        );
 
-    p.drawingContext.fillStyle = gradient;
+        gradient.addColorStop(0, p.color(310, 100, 100, 100));
+        gradient.addColorStop(1, p.color(250, 100, 100, 100));
 
-    p.background(0);
-    p.rect(
-      playBounds.min.x,
-      playBounds.min.y,
-      playBounds.max.x,
-      playBounds.max.y
-    );
+        p.drawingContext.fillStyle = gradient;
 
-    p.fill(205);
+        p.background(0);
+        p.rect(
+          playBounds.min.x,
+          playBounds.min.y,
+          playBounds.max.x,
+          playBounds.max.y
+        );
 
-    for (const chunk of snake.chunks) {
-      p.rect(chunk.position.x, chunk.position.y, 10, 10);
-    }
+        p.fill(205);
 
-    p.fill(100, 200, 100);
-    p.rect(snackPosition.x, snackPosition.y, 10, 10);
+        for (const chunk of snake.chunks) {
+          p.rect(chunk.position.x, chunk.position.y, 10, 10);
+        }
 
-    p.fill(255);
-    p.textSize(32);
-    p.text(score, 15, 35);
-  };
+        p.fill(100, 200, 100);
+        p.rect(snackPosition.x, snackPosition.y, 10, 10);
 
-  function reset() {
-    snackPosition = generateSnackPosition(playBounds);
-    snake = Snake.create(
-      snakeStartingSize,
-      playBounds.randomPosition(snakeChunkSize),
-      snakeChunkSize
-    );
-    slitheringDirection = new Direction("south");
-    score = 0;
+        p.fill(255);
+        p.textSize(32);
+        p.text(score, 15, 35);
+      };
+
+      function reset() {
+        snackPosition = generateSnackPosition(playBounds);
+        snake = Snake.create(
+          snakeStartingSize,
+          playBounds.randomPosition(snakeChunkSize),
+          snakeChunkSize
+        );
+        slitheringDirection = new Direction("south");
+        score = 0;
+      }
+
+      function onSlitherInterval() {
+        if (snackPosition.equals(snake.position)) {
+          snake.grow(slitheringDirection, playBounds);
+          snackPosition = generateSnackPosition(playBounds); // To not generate 500, 500 snack position which is out of bounds
+          score += 1;
+        } else {
+          snake.move(slitheringDirection, playBounds);
+        }
+
+        if (snake.isSelfColliding()) {
+          // reset
+          reset();
+        }
+      }
+
+      p.keyPressed = function keyPressed() {
+        switch (p.key) {
+          case "w":
+            // Only allow a change in direction if its not the oppisite of the current direction
+            if (slitheringDirection.value !== "south") {
+              slitheringDirection = new Direction("north");
+            }
+            break;
+          case "d":
+            if (slitheringDirection.value !== "west") {
+              slitheringDirection = new Direction("east");
+            }
+            break;
+          case "s":
+            if (slitheringDirection.value !== "north") {
+              slitheringDirection = new Direction("south");
+            }
+            break;
+          case "a":
+            if (slitheringDirection.value !== "east") {
+              slitheringDirection = new Direction("west");
+            }
+            break;
+        }
+      };
+    }, document.getElementById("snake-sketch")!);
   }
 
-  function onSlitherInterval() {
-    if (snackPosition.equals(snake.position)) {
-      snake.grow(slitheringDirection, playBounds);
-      snackPosition = generateSnackPosition(playBounds); // To not generate 500, 500 snack position which is out of bounds
-      score += 1;
-    } else {
-      snake.move(slitheringDirection, playBounds);
-    }
-
-    if (snake.isSelfColliding()) {
-      // reset
-      reset();
+  stop() {
+    console.debug("Stopped");
+    if (this.instance) {
+      this.instance.remove();
     }
   }
+}
 
-  p.keyPressed = function keyPressed() {
-    switch (p.key) {
-      case "w":
-        // Only allow a change in direction if its not the oppisite of the current direction
-        if (slitheringDirection.value !== "south") {
-          slitheringDirection = new Direction("north");
-        }
-        break;
-      case "d":
-        if (slitheringDirection.value !== "west") {
-          slitheringDirection = new Direction("east");
-        }
-        break;
-      case "s":
-        if (slitheringDirection.value !== "north") {
-          slitheringDirection = new Direction("south");
-        }
-        break;
-      case "a":
-        if (slitheringDirection.value !== "east") {
-          slitheringDirection = new Direction("west");
-        }
-        break;
-    }
-  };
-}, document.getElementById("snake-sketch")!);
+const snake = new SnakeEngine();
+
+export default snake;

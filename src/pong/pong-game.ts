@@ -31,28 +31,27 @@ import setupMenuUiPart from "./setup/setup-ui";
  */
 type ApplicationState = "paused" | "main-menu" | "in-game" | "end";
 
-const engine = EngineBuilder.create()
+const pong = EngineBuilder.create()
   .state("render-trajectory", false)
   .state<"score", [number, number]>("score", [0, 0])
   .state<"app-state", ApplicationState>("app-state", "main-menu")
   .build(document.getElementById("pong-sketch")!);
 
-engine.part(primitiveRenderer);
-engine.part(collisions());
-engine.part(setupMenuUiPart);
-engine.part(setupBallPart);
-engine.part(setupScoreboardPart);
-engine.part(setupBoundariesPart);
-engine.part(setupPaddlesPart);
+pong.part(primitiveRenderer);
+pong.part(collisions());
+pong.part(setupMenuUiPart);
+pong.part(setupBallPart);
+pong.part(setupScoreboardPart);
+pong.part(setupBoundariesPart);
+pong.part(setupPaddlesPart);
 
-export default engine;
 export type { ApplicationState };
 
 const ballHitAudio = new Audio(minionBongUrl);
 
 const sound = false;
 
-engine.system(
+pong.system(
   "showMainMenu",
   {
     event: "update",
@@ -68,7 +67,7 @@ engine.system(
   }
 );
 
-engine.system(
+pong.system(
   "showGameMenu",
   {
     event: "update",
@@ -84,7 +83,7 @@ engine.system(
   }
 );
 
-engine.system(
+pong.system(
   "hideGameMenu",
   {
     event: "update",
@@ -100,7 +99,7 @@ engine.system(
   }
 );
 
-engine.system(
+pong.system(
   "endConditionSystem",
   {
     event: "update",
@@ -117,7 +116,7 @@ engine.system(
     }
   }
 );
-engine.system(
+pong.system(
   "showEndMenu",
   {
     event: "update",
@@ -147,7 +146,7 @@ engine.system(
   }
 );
 
-engine.system(
+pong.system(
   "hideEndMenu",
   {
     event: "update",
@@ -163,7 +162,7 @@ engine.system(
   }
 );
 
-engine.system(
+pong.system(
   "hideMainMenu",
   {
     event: "update",
@@ -181,7 +180,7 @@ engine.system(
 
 // Need a way to factor out and organise these systems and state as they're already getting hard to manage
 
-engine.system(
+pong.system(
   "ballCollisionHandlingSystem",
   { event: "update", condition: { state: "app-state", value: "in-game" } },
   function ballCollisionHandlingSystem(world: World) {
@@ -208,7 +207,7 @@ engine.system(
   }
 );
 
-engine.system(
+pong.system(
   "backboardCollisionHandlingSystem",
   { event: "update", condition: { state: "app-state", value: "in-game" } },
   (world: World, {}, state) => {
@@ -251,7 +250,7 @@ engine.system(
   }
 );
 
-engine.system(
+pong.system(
   "updateScoreBoard",
   { event: "update" },
   (world: World, {}, state) => {
@@ -281,7 +280,7 @@ engine.system(
 
 // Describes bow the collision handling worked in the orginial pong game
 // https://www.vbforums.com/showthread.php?634246-RESOLVED-How-did-collision-in-the-original-Pong-happen
-engine.system(
+pong.system(
   "paddleCollisionHandlingSystem",
   { event: "update", condition: { state: "app-state", value: "in-game" } },
   function paddleCollisionHandlingSystem(world: World) {
@@ -309,7 +308,7 @@ engine.system(
     }
   }
 );
-engine.system(
+pong.system(
   "playerPaddleSystem",
   { event: "update", condition: { state: "app-state", value: "in-game" } },
 
@@ -340,7 +339,7 @@ engine.system(
     }
   }
 );
-engine.system(
+pong.system(
   "aiPaddleSystem",
   { event: "update", condition: { state: "app-state", value: "in-game" } },
 
@@ -379,7 +378,7 @@ engine.system(
     }
   }
 );
-engine.system(
+pong.system(
   "ballMovementSystem",
   { event: "update", condition: { state: "app-state", value: "in-game" } },
   function ballMovementSystem(world: World) {
@@ -393,7 +392,7 @@ engine.system(
   }
 );
 
-engine.system(
+pong.system(
   "ballTrajectorySystem",
   { event: "update", condition: { state: "app-state", value: "in-game" } },
   (world: World, { canvasBounds }, state: Record<string, State<unknown>>) => {
@@ -481,4 +480,4 @@ engine.system(
   }
 );
 
-engine.run();
+export default pong;
