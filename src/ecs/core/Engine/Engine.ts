@@ -42,8 +42,8 @@ class EngineBuilder<StateSet extends Record<string, unknown> = {}> {
     });
   }
 
-  build(element: HTMLElement, options: EngineOptions = {}) {
-    return new Engine(element, this.stateSet, options);
+  build(options: EngineOptions = {}) {
+    return new Engine(this.stateSet, options);
   }
 
   static create(): EngineBuilder {
@@ -103,19 +103,11 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
     SystemRegistration<StateSet, keyof StateSet>[]
   >();
 
-  private _element: HTMLElement;
-
   private _states: States<StateSet>;
 
   private _canvasBounds: Bounds;
 
-  constructor(
-    element: HTMLElement,
-    stateSet: StateSet,
-    options: EngineOptions = {}
-  ) {
-    this._element = element;
-
+  constructor(stateSet: StateSet, options: EngineOptions = {}) {
     this._states = Object.keys(stateSet).reduce((prev, next) => {
       return {
         ...prev,

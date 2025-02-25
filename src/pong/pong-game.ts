@@ -35,7 +35,7 @@ const pong = EngineBuilder.create()
   .state("render-trajectory", false)
   .state<"score", [number, number]>("score", [0, 0])
   .state<"app-state", ApplicationState>("app-state", "main-menu")
-  .build(document.getElementById("pong-sketch")!);
+  .build();
 
 pong.part(primitiveRenderer);
 pong.part(collisions());

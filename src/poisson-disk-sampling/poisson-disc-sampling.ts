@@ -6,13 +6,9 @@ import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-rendere
 import poissonDisc from "../lib/poisson-disc/poisson-disc";
 import randomDots from "./random-dots/random-dots";
 
-const canvasParent = document.getElementById("poisson-disc-sampling-sketch")!;
-
-console.log(canvasParent);
-
 const poissonDiscSamplingDemo = EngineBuilder.create()
   .state("dotCount", 100)
-  .build(canvasParent);
+  .build();
 
 poissonDiscSamplingDemo.part(primitiveRenderer);
 
