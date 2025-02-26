@@ -96,8 +96,6 @@ type States<StateSet extends Record<string, unknown> = {}> = {
  */
 class Engine<StateSet extends Record<string, unknown> = {}> {
   private p5Instance?: p5;
-
-  private _world = new World();
   private _systems = new Map<
     EngineLifecycleEvents,
     SystemRegistration<StateSet, keyof StateSet>[]
@@ -153,6 +151,8 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
     // Have to rescope this because the p5 callback hs its own this
     const self = this;
 
+    const world = new World();
+
     // This is a p5 instance https://p5js.org/reference/p5/p5/
     this.p5Instance = new p5((sketch) => {
       const p = sketch as unknown as p5;
@@ -171,7 +171,7 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
         startSystems.forEach(({ name, system }) => {
           console.debug(`[start] ${name}`);
           system(
-            self._world,
+            world,
             { mousePosition, p, canvasBounds: self._canvasBounds },
             self._states
           );
@@ -195,7 +195,7 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
                     `[event] ${trigger.condition!.only} ${trigger.condition!.state.toString()} ${name}`
                   );
                   system(
-                    self._world,
+                    world,
                     { mousePosition, p, canvasBounds: self._canvasBounds },
                     self._states
                   );
@@ -232,7 +232,7 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
           ) {
             if (trigger.condition === undefined) {
               system(
-                self._world,
+                world,
                 { mousePosition, p, canvasBounds: self._canvasBounds },
                 self._states
               );
@@ -250,7 +250,7 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
                   `[when ${trigger.condition.state.toString()} = ${trigger.condition.value}] ${name}`
                 );
                 system(
-                  self._world,
+                  world,
                   { mousePosition, p, canvasBounds: self._canvasBounds },
                   self._states
                 );
