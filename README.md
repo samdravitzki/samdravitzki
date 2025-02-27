@@ -125,6 +125,7 @@ All the things that need to be done to support building and maintain these proje
   - that also don't require the use of dynamic module imports
   - and have a better method for toggling the visibility of the games
 - [ ] Google analytics
+- [ ] Reset state of engine when it is stopped
 
 # Appendix
 

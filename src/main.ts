@@ -1,13 +1,19 @@
+import drumsGame from "./drums/drums";
 import poissonDiscSamplingDemo from "./poisson-disk-sampling/poisson-disc-sampling";
 import pongGame from "./pong/pong-game";
 import snakeGame from "./snake/snake-game";
 import "./style.css";
 
+type App = {
+  run: (parent?: HTMLElement) => void;
+  stop: () => void;
+};
+
 type AppInfo = {
   name: string;
   symbol: string;
   appId: string;
-  app: any;
+  app: App;
 };
 
 const pong: AppInfo = {
@@ -31,7 +37,14 @@ const poissonDiscSampling: AppInfo = {
   app: poissonDiscSamplingDemo,
 };
 
-const appInfos: AppInfo[] = [snake, pong, poissonDiscSampling];
+const drums: AppInfo = {
+  name: "drums",
+  symbol: "🥁",
+  appId: "drum-sketch",
+  app: drumsGame,
+};
+
+const appInfos: AppInfo[] = [snake, pong, poissonDiscSampling, drums];
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
@@ -39,18 +52,18 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
       <h1>dravitzki.com</h1>
       ${appInfos
         .map(
-          (app) => `
-        <button id="${app.name}-button">${app.symbol}</button>
+          (appInfo) => `
+        <button id="${appInfo.name}-button">${appInfo.symbol}</button>
       `
         )
         .join("")}
     </div>
     ${appInfos
       .map(
-        (app) => `
-      <div id="${app.name}-app" style="display:none;">
-        <button id="exit-${app.name}-button">❌</button>
-        <div style="position: relative;" id="${app.appId}"></div>
+        (appInfo) => `
+      <div id="${appInfo.name}-app" style="display:none;">
+        <button id="exit-${appInfo.name}-button">❌</button>
+        <div style="position: relative;" id="${appInfo.name}-sketch"></div>
       </div>
     `
       )
@@ -72,7 +85,7 @@ if (savedAppState) {
   const appInfo = appInfos.find((info) => info.name === savedAppState);
 
   if (appInfo) {
-    const canvasParent = document.getElementById(`${appInfo.name}-sketch`);
+    const canvasParent = document.getElementById(`${appInfo.name}-sketch`)!;
     appInfo.app.run(canvasParent);
   }
 }
@@ -81,7 +94,7 @@ appInfos.forEach((appInfo) => {
   const appElement = document.getElementById(`${appInfo.name}-app`)!;
   const mainContent = document.getElementById("main-content")!;
 
-  const canvasParent = document.getElementById(`${appInfo.name}-sketch`);
+  const canvasParent = document.getElementById(`${appInfo.name}-sketch`)!;
 
   document
     .getElementById(`${appInfo.name}-button`)
