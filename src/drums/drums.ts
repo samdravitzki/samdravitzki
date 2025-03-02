@@ -1,49 +1,58 @@
 import * as Tone from "tone";
-import { Midi } from "@tonejs/midi";
+import { EngineBuilder } from "../ecs/core/Engine/Engine";
+import createBundle from "../ecs/core/Bundle/createBundle";
+import Vector from "../ecs/core/Vector/Vector";
+import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
+import Bounds from "../ecs/core/Bounds/Bounds";
+import poissonDisc from "../lib/poisson-disc/poisson-disc";
+import randomInt from "../lib/randomInt/randomInt";
 
-class DrumsEngine {
-  private synths: any[] = [];
+const drums = EngineBuilder.create().build();
 
-  run() {
-    console.debug("Starting...");
+drums.part(primitiveRenderer);
 
-    // Code from tonejs midi example https://github.com/Tonejs/Midi/blob/master/examples/load.html
-    Midi.fromUrl("public/mario.mid").then((midi) => {
-      const now = Tone.now();
-      midi.tracks.forEach((track) => {
-        const synth = new Tone.PolySynth(Tone.Synth, {
-          envelope: {
-            attack: 0.02,
-            decay: 0.1,
-            sustain: 0.3,
-            release: 1,
-          },
-        }).toDestination();
+const sampler = new Tone.Sampler({
+  urls: {
+    ["C2"]: "public/hs_clap.wav",
+  },
+}).toDestination();
 
-        this.synths.push(synth);
+drums.system("drum", { event: "keypress" }, (_world, { p }) => {
+  sampler.triggerAttackRelease("C2", "1n");
+});
 
-        track.notes.forEach((note) => {
-          synth.triggerAttackRelease(
-            note.name,
-            note.duration,
-            note.time + now,
-            note.velocity
-          );
-        });
-      });
-    });
+const bounds = Bounds.create(Vector.create(0, 0), Vector.create(500, 500));
+
+const dots = poissonDisc(bounds);
+
+drums.system(
+  "visulisation",
+  { event: "keypress" },
+  (world, { canvasBounds }) => {
+    const position = Vector.create(
+      randomInt(canvasBounds.max.x - canvasBounds.min.x),
+      randomInt(canvasBounds.max.y - canvasBounds.min.y)
+    );
+
+    const clapEmoji = createBundle([
+      {
+        name: "position",
+        position,
+      },
+      {
+        name: "primitive",
+        stroke: [240, 60, 100],
+        strokeWeight: 2,
+        fill: [240, 60, 100],
+        type: "text",
+        text: "👏",
+        align: "left",
+        size: 25,
+      },
+    ]);
+
+    world.addBundle(clapEmoji);
   }
-
-  stop() {
-    while (this.synths.length) {
-      const synth = this.synths.shift();
-      synth.dispose();
-    }
-
-    console.debug("Stopped");
-  }
-}
-
-const drums = new DrumsEngine();
+);
 
 export default drums;

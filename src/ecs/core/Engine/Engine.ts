@@ -59,14 +59,16 @@ const updateEvents = ["before-update", "update", "after-update"] as const;
 type UpdateEvents = (typeof updateEvents)[number];
 
 type StartEvent = "start";
+type KeyPressEvent = "keypress";
 
-type EngineLifecycleEvents = StartEvent | UpdateEvents;
+type EngineLifecycleEvents = StartEvent | KeyPressEvent | UpdateEvents;
 
 type SystemTrigger<
   StateSet extends Record<string, unknown>,
   K extends keyof StateSet,
 > =
-  | { event: "start" }
+  | { event: StartEvent }
+  | { event: KeyPressEvent }
   | {
       event: UpdateEvents;
       readonly condition?: {
@@ -257,6 +259,24 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
               }
             }
           }
+        });
+      };
+
+      p.keyPressed = function keyPressed() {
+        const keypressSystems = self._systems.get("keypress") ?? [];
+
+        const mousePosition: MousePosition = {
+          x: p.mouseX,
+          y: p.mouseY,
+        };
+
+        keypressSystems.forEach(({ name, system }) => {
+          console.debug(`[keypress] ${name}`);
+          system(
+            world,
+            { mousePosition, p, canvasBounds: self._canvasBounds },
+            self._states
+          );
         });
       };
     }, parent);
