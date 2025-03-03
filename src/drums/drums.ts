@@ -13,17 +13,13 @@ drums.part(primitiveRenderer);
 
 const sampler = new Tone.Sampler({
   urls: {
-    ["C2"]: "public/hs_clap.wav",
+    ["C2"]: "./hs_clap.wav",
   },
 }).toDestination();
 
 drums.system("drum", { event: "keypress" }, (_world, { p }) => {
   sampler.triggerAttackRelease("C2", "1n");
 });
-
-const bounds = Bounds.create(Vector.create(0, 0), Vector.create(500, 500));
-
-const dots = poissonDisc(bounds);
 
 drums.system(
   "visulisation",
