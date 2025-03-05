@@ -3,26 +3,31 @@ import { EngineBuilder } from "../ecs/core/Engine/Engine";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import Vector from "../ecs/core/Vector/Vector";
 import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
-import Bounds from "../ecs/core/Bounds/Bounds";
-import poissonDisc from "../lib/poisson-disc/poisson-disc";
 import randomInt from "../lib/randomInt/randomInt";
+import { PrimitiveShape } from "../ecs/parts/primitive-renderer/components/Primitive";
+import Component from "../ecs/core/Component/Component";
 
 const drums = EngineBuilder.create().build();
 
+/**
+ * Used Drumhaus (https://github.com/mxfng/drumhaus/tree/main) an in browser
+ * drum machine based on tonejs alot as a reference for this
+ */
+
 drums.part(primitiveRenderer);
 
-const sampler = new Tone.Sampler({
+const clap = new Tone.Sampler({
   urls: {
-    ["C2"]: "./hs_clap.wav",
+    ["C2"]: "./samples/drumhaus-paris/paris_clap.wav",
   },
 }).toDestination();
 
 drums.system("drum", { event: "keypress" }, (_world, { p }) => {
-  sampler.triggerAttackRelease("C2", "1n");
+  clap.triggerAttackRelease("C2", "1n");
 });
 
 drums.system(
-  "visulisation",
+  "emoji-spawner",
   { event: "keypress" },
   (world, { canvasBounds }) => {
     const position = Vector.create(
@@ -31,15 +36,14 @@ drums.system(
     );
 
     const clapEmoji = createBundle([
+      "emoji",
       {
         name: "position",
         position,
       },
       {
         name: "primitive",
-        stroke: [240, 60, 100],
-        strokeWeight: 2,
-        fill: [240, 60, 100],
+        fill: [240, 60, 100, 255],
         type: "text",
         text: "👏",
         align: "left",
@@ -50,5 +54,32 @@ drums.system(
     world.addBundle(clapEmoji);
   }
 );
+
+export type EmojiComponent = Component & {
+  name: "emoji";
+};
+
+/**
+ * Fade out any emoji entities over time and when they are no
+ * longer visible remove them
+ */
+drums.system("emoji-fade", { event: "update" }, (world, { p }) => {
+  for (const [primitive, entityId] of world.query<
+    [PrimitiveShape, string, EmojiComponent]
+  >(["primitive", "entity-id", "emoji"])) {
+    if (primitive.fill) {
+      const [r, g, b, alpha] = primitive.fill;
+
+      const fadeSpeed = 0.4;
+      const newAlpha = alpha - p.deltaTime * fadeSpeed;
+
+      if (newAlpha <= 0) {
+        world.removeEntity(entityId);
+      }
+
+      primitive.fill = [r, g, b, newAlpha];
+    }
+  }
+});
 
 export default drums;
