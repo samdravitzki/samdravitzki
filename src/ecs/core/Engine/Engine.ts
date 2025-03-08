@@ -155,6 +155,18 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
 
     const world = new World();
 
+    // log systems
+    console.debug("Systems registered...");
+    this._systems.entries();
+    for (const [
+      lifecycleEvent,
+      systemRegistrations,
+    ] of this._systems.entries()) {
+      systemRegistrations.forEach((system) => {
+        console.debug(`[${lifecycleEvent}] ${system.name}`);
+      });
+    }
+
     // This is a p5 instance https://p5js.org/reference/p5/p5/
     this.p5Instance = new p5((sketch) => {
       const p = sketch as unknown as p5;
@@ -171,7 +183,6 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
 
         const startSystems = self._systems.get("start") ?? [];
         startSystems.forEach(({ name, system }) => {
-          console.debug(`[start] ${name}`);
           system(
             world,
             { mousePosition, p, canvasBounds: self._canvasBounds },
@@ -249,7 +260,7 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
               if (trigger.condition.value === state.value) {
                 // Is there a way to log what is happening each update without spamming too many logs
                 console.debug(
-                  `[when ${trigger.condition.state.toString()} = ${trigger.condition.value}] ${name}`
+                  `[when ${trigger.condition.state.toString()} = ${trigger.condition.value}] ${name} (triggered)`
                 );
                 system(
                   world,
@@ -271,7 +282,7 @@ class Engine<StateSet extends Record<string, unknown> = {}> {
         };
 
         keypressSystems.forEach(({ name, system }) => {
-          console.debug(`[keypress] ${name}`);
+          console.debug(`[keypress] ${name} (triggered)`);
           system(
             world,
             { mousePosition, p, canvasBounds: self._canvasBounds },
