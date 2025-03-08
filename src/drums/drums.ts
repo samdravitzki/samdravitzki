@@ -69,8 +69,8 @@ Tone.getTransport().start();
 
 function randomlyPositionedTextBundle(emoji: string, canvasBounds: Bounds) {
   const position = Vector.create(
-    randomInt(canvasBounds.max.x - canvasBounds.min.x),
-    randomInt(canvasBounds.max.y - canvasBounds.min.y)
+    randomInt(canvasBounds.max.x - canvasBounds.min.x) + canvasBounds.min.x,
+    randomInt(canvasBounds.max.y - canvasBounds.min.y) + canvasBounds.min.y
   );
 
   const emojiBundle = createBundle([
@@ -112,30 +112,32 @@ drums.system(
      * Had to write this comment as this really the easiest to understand from the code
      */
 
+    const emojiBounds = canvasBounds.shrink(100);
+
     const currentPress = keyPresses[keyPresses.length - 1];
     const lastPress = keyPresses[keyPresses.length - 2];
 
     if (keyPresses.length <= 2 || currentPress === lastPress) {
       kick.triggerAttackRelease("C2", "1n", time);
-      const kickEmoji = randomlyPositionedTextBundle("kick", canvasBounds);
+      const kickEmoji = randomlyPositionedTextBundle("kick", emojiBounds);
       world.addBundle(kickEmoji);
       state["sequence-index"].setValue(0);
     } else if (currentPress !== lastPress) {
       if (clapSequence[sequenceIndex] === 1) {
         clap.triggerAttackRelease("C2", "1n", time);
-        const clapEmoji = randomlyPositionedTextBundle("clap", canvasBounds);
+        const clapEmoji = randomlyPositionedTextBundle("clap", emojiBounds);
         world.addBundle(clapEmoji);
       }
 
       if (kickSequence[sequenceIndex] === 1) {
         kick.triggerAttackRelease("C2", "1n", time);
-        const kickEmoji = randomlyPositionedTextBundle("kick", canvasBounds);
+        const kickEmoji = randomlyPositionedTextBundle("kick", emojiBounds);
         world.addBundle(kickEmoji);
       }
 
       if (hatSequence[sequenceIndex] === 1) {
         hat.triggerAttackRelease("C2", "1n", time);
-        const hatEmoji = randomlyPositionedTextBundle("hat", canvasBounds);
+        const hatEmoji = randomlyPositionedTextBundle("hat", emojiBounds);
         world.addBundle(hatEmoji);
       }
 
@@ -143,7 +145,7 @@ drums.system(
         openHat.triggerAttackRelease("C2", "1n", time);
         const openHatEmoji = randomlyPositionedTextBundle(
           "open hat",
-          canvasBounds
+          emojiBounds
         );
         world.addBundle(openHatEmoji);
       }

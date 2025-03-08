@@ -68,4 +68,16 @@ export default class Bounds {
       vector.y <= this.max.y
     );
   }
+
+  /**
+   * Return a new bounds object shrunken by the amount supplied
+   * @param amount
+   * @returns new bounds object
+   */
+  shrink(amount: number) {
+    return Bounds.create(
+      Vector.create(this.min.x + amount, this.min.y + amount),
+      Vector.create(this.max.x - amount, this.max.y - amount)
+    );
+  }
 }

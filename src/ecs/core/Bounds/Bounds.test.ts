@@ -107,3 +107,18 @@ describe("inBounds method", () => {
     expect(result).toEqual(true);
   });
 });
+
+describe("shrink method", () => {
+  test("should return new bounds object with inside of original bounds", () => {
+    const min = Vector.create(0, 0);
+    const max = Vector.create(10, 10);
+    const bounds = Bounds.create(min, max);
+
+    const result = bounds.shrink(2);
+
+    expect(result.min.x).toEqual(2);
+    expect(result.min.y).toEqual(2);
+    expect(result.max.x).toEqual(8);
+    expect(result.max.y).toEqual(8);
+  });
+});
