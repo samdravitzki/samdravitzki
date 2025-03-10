@@ -27,25 +27,28 @@ const kick = new Tone.Sampler({
 }).toDestination();
 
 // prettier-ignore
-// const sequences = [ // raw
-//   [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
-//   [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-//   [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
-//   [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0]
+// const houseSequences = [ // house
+//   [1, 0, 1, 0, 1, 0, 1, 0], // kick
+//   [0, 0, 1, 0, 0, 0, 1, 0], // clap
+//   [1, 0, 1, 0, 1, 0, 1, 0], // hat
+//   [0, 1, 0, 1, 0, 1, 0, 1], // open hat
+//   [0, 0, 0, 0, 0, 0, 0, 0], // snare
 // ];
 
 // prettier-ignore
-const houseSequences = [ // edited
-  [1, 0, 1, 0, 1, 0, 1, 0], // kick
-  [0, 0, 1, 0, 0, 0, 1, 0], // clap
-  [1, 0, 1, 0, 1, 0, 1, 0], // hat
-  [0, 1, 0, 1, 0, 1, 0, 1], // open hat
+const houseSequences = [ // hiphop
+  [1, 0, 0, 0, 0, 1, 0, 0], // kick
+  [0, 0, 0, 0, 0, 0, 0, 0], // clap
+  [1, 1, 1, 1, 1, 1, 1, 1], // hat
+  [0, 0, 0, 0, 0, 0, 0, 0], // open hat
+  [0, 0, 1, 1, 0, 0, 1, 0], // snare
 ];
 
 const kickSequence = houseSequences[0];
 const clapSequence = houseSequences[1];
 const hatSequence = houseSequences[2];
 const openHatSequence = houseSequences[3];
+const snareSequence = houseSequences[4];
 
 const clap = new Tone.Sampler({
   urls: {
@@ -65,16 +68,22 @@ const openHat = new Tone.Sampler({
   },
 }).toDestination();
 
+const snare = new Tone.Sampler({
+  urls: {
+    ["C2"]: "./samples/drumhaus-paris/paris_snare.wav",
+  },
+}).toDestination();
+
 Tone.getTransport().start();
 
-function randomlyPositionedTextBundle(emoji: string, canvasBounds: Bounds) {
+function randomlyPositionedTextBundle(text: string, canvasBounds: Bounds) {
   const position = Vector.create(
     randomInt(canvasBounds.max.x - canvasBounds.min.x) + canvasBounds.min.x,
     randomInt(canvasBounds.max.y - canvasBounds.min.y) + canvasBounds.min.y
   );
 
-  const emojiBundle = createBundle([
-    "emoji",
+  const textBundle = createBundle([
+    "text",
     {
       name: "position",
       position,
@@ -83,13 +92,13 @@ function randomlyPositionedTextBundle(emoji: string, canvasBounds: Bounds) {
       name: "primitive",
       fill: [240, 60, 100, 255],
       type: "text",
-      text: emoji,
+      text: text,
       align: "left",
       size: 25,
     },
   ]);
 
-  return emojiBundle;
+  return textBundle;
 }
 
 drums.system(
@@ -112,42 +121,63 @@ drums.system(
      * Had to write this comment as this really the easiest to understand from the code
      */
 
-    const emojiBounds = canvasBounds.shrink(100);
+    const textEffectBounds = canvasBounds.shrink(100);
 
     const currentPress = keyPresses[keyPresses.length - 1];
     const lastPress = keyPresses[keyPresses.length - 2];
 
     if (keyPresses.length <= 2 || currentPress === lastPress) {
       kick.triggerAttackRelease("C2", "1n", time);
-      const kickEmoji = randomlyPositionedTextBundle("kick", emojiBounds);
-      world.addBundle(kickEmoji);
+      const kickTextEffect = randomlyPositionedTextBundle(
+        "kick",
+        textEffectBounds
+      );
+      world.addBundle(kickTextEffect);
       state["sequence-index"].setValue(0);
     } else if (currentPress !== lastPress) {
       if (clapSequence[sequenceIndex] === 1) {
         clap.triggerAttackRelease("C2", "1n", time);
-        const clapEmoji = randomlyPositionedTextBundle("clap", emojiBounds);
-        world.addBundle(clapEmoji);
+        const clapTextEffect = randomlyPositionedTextBundle(
+          "clap",
+          textEffectBounds
+        );
+        world.addBundle(clapTextEffect);
       }
 
       if (kickSequence[sequenceIndex] === 1) {
         kick.triggerAttackRelease("C2", "1n", time);
-        const kickEmoji = randomlyPositionedTextBundle("kick", emojiBounds);
-        world.addBundle(kickEmoji);
+        const kickTextEffect = randomlyPositionedTextBundle(
+          "kick",
+          textEffectBounds
+        );
+        world.addBundle(kickTextEffect);
       }
 
       if (hatSequence[sequenceIndex] === 1) {
         hat.triggerAttackRelease("C2", "1n", time);
-        const hatEmoji = randomlyPositionedTextBundle("hat", emojiBounds);
-        world.addBundle(hatEmoji);
+        const hatTextEffect = randomlyPositionedTextBundle(
+          "hat",
+          textEffectBounds
+        );
+        world.addBundle(hatTextEffect);
       }
 
       if (openHatSequence[sequenceIndex] === 1) {
         openHat.triggerAttackRelease("C2", "1n", time);
-        const openHatEmoji = randomlyPositionedTextBundle(
+        const openHatTextEffect = randomlyPositionedTextBundle(
           "open hat",
-          emojiBounds
+          textEffectBounds
         );
-        world.addBundle(openHatEmoji);
+        world.addBundle(openHatTextEffect);
+      }
+
+      if (snareSequence[sequenceIndex] === 1) {
+        snare.triggerAttackRelease("C2", "1n", time);
+        const snareTextEffect = randomlyPositionedTextBundle(
+          "snare",
+          textEffectBounds
+        );
+        world.addBundle(snareTextEffect);
       }
 
       const nextIndex = (sequenceIndex + 1) % 8;
@@ -159,18 +189,18 @@ drums.system(
   }
 );
 
-export type EmojiComponent = Component & {
-  name: "emoji";
+export type TextEffectComponent = Component & {
+  name: "text";
 };
 
 /**
- * Fade out any emoji entities over time and when they are no
+ * Fade out any text effect entities over time and when they are no
  * longer visible remove them
  */
-drums.system("emoji-fade", { event: "update" }, (world, { p }) => {
+drums.system("text-fade", { event: "update" }, (world, { p }) => {
   for (const [primitive, entityId] of world.query<
-    [PrimitiveShape, string, EmojiComponent]
-  >(["primitive", "entity-id", "emoji"])) {
+    [PrimitiveShape, string, TextEffectComponent]
+  >(["primitive", "entity-id", "text"])) {
     if (primitive.fill) {
       const [r, g, b, alpha] = primitive.fill;
 
