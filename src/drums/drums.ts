@@ -11,6 +11,7 @@ import Bounds from "../ecs/core/Bounds/Bounds";
 const drums = EngineBuilder.create()
   .state("sequence-index", 0)
   .state<"key-presses", string[]>("key-presses", [])
+  .state<"active-sequence", string | null>("active-sequence", null)
   .build();
 
 /**
@@ -27,28 +28,22 @@ const kick = new Tone.Sampler({
 }).toDestination();
 
 // prettier-ignore
-// const houseSequences = [ // house
-//   [1, 0, 1, 0, 1, 0, 1, 0], // kick
-//   [0, 0, 1, 0, 0, 0, 1, 0], // clap
-//   [1, 0, 1, 0, 1, 0, 1, 0], // hat
-//   [0, 1, 0, 1, 0, 1, 0, 1], // open hat
-//   [0, 0, 0, 0, 0, 0, 0, 0], // snare
-// ];
+const houseSequences = [
+  [1, 0, 1, 0, 1, 0, 1, 0], // kick
+  [0, 0, 1, 0, 0, 0, 1, 0], // clap
+  [1, 0, 1, 0, 1, 0, 1, 0], // hat
+  [0, 1, 0, 1, 0, 1, 0, 1], // open hat
+  [0, 0, 0, 0, 0, 0, 0, 0], // snare
+];
 
 // prettier-ignore
-const houseSequences = [ // hiphop
-  [1, 0, 0, 0, 0, 1, 0, 0], // kick
+const hiphopSequences = [
+  [0, 1, 0, 0, 0, 1, 0, 0], // kick
   [0, 0, 0, 0, 0, 0, 0, 0], // clap
   [1, 1, 1, 1, 1, 1, 1, 1], // hat
   [0, 0, 0, 0, 0, 0, 0, 0], // open hat
-  [0, 0, 1, 1, 0, 0, 1, 0], // snare
+  [0, 0, 1, 0, 0, 0, 1, 0], // snare
 ];
-
-const kickSequence = houseSequences[0];
-const clapSequence = houseSequences[1];
-const hatSequence = houseSequences[2];
-const openHatSequence = houseSequences[3];
-const snareSequence = houseSequences[4];
 
 const clap = new Tone.Sampler({
   urls: {
@@ -69,12 +64,120 @@ const openHat = new Tone.Sampler({
 }).toDestination();
 
 const snare = new Tone.Sampler({
+  // This snare is very quiet
   urls: {
     ["C2"]: "./samples/drumhaus-paris/paris_snare.wav",
   },
-}).toDestination();
+}).chain(
+  new Tone.Filter(15000, "lowpass"),
+  new Tone.Filter(0, "highpass"),
+  new Tone.Compressor({
+    threshold: 0,
+    ratio: 1,
+    attack: 0.5,
+    release: 1,
+  }),
+  Tone.getDestination()
+);
 
 Tone.getTransport().start();
+/**
+ * Based on the pattern of keypresses entered by the user
+ * determine the sequence that should start playing
+ */
+drums.system(
+  "pattern-detector",
+  { event: "keypress" },
+  (_world, { p }, state) => {
+    const keyPresses = state["key-presses"].value;
+    const activeSequence = state["active-sequence"];
+    const sequenceIndex = state["sequence-index"];
+
+    keyPresses.push(p.key);
+
+    if (keyPresses.length >= 4) {
+      const [d, c, b, a] = keyPresses.slice(-4);
+
+      let patternDectected: string | null = null;
+
+      // AABB pattern
+      if (
+        (a === b && b !== c && c === d && d !== a) ||
+        (a !== b && b === c && c !== d && d === a)
+      ) {
+        patternDectected = "hiphop";
+      }
+
+      // ABAB pattern
+      if (a !== b && a === c && b === d && b !== c && d !== a) {
+        patternDectected = "house";
+      }
+
+      // when pattern changes or is null
+      if (
+        activeSequence.value !== patternDectected ||
+        patternDectected === null
+      ) {
+        sequenceIndex.setValue(0);
+        console.debug("reset sequence");
+      }
+
+      console.debug(`${patternDectected} pattern detected`);
+      activeSequence.setValue(patternDectected);
+    }
+
+    // only keep sliding window of 4 most recent key presses
+    const recentPresses = keyPresses.slice(-4);
+    console.debug(recentPresses);
+    state["key-presses"].setValue(recentPresses);
+  }
+);
+
+/**
+ * Play drum sounds based on engine state
+ */
+drums.system("drum", { event: "keypress" }, (_world, { p }, state) => {
+  const sequenceIndex = state["sequence-index"];
+  const activeSequence = state["active-sequence"];
+  // TODO: need a way to gaurantee the order of systems executed so that we can assume the keypress state defined by the "pattern-detector" system is set before this runs so that there isn't stuff delayed to the next keypress
+  const time = Tone.now();
+
+  const sequencesToPlay =
+    activeSequence.value === "house" ? houseSequences : hiphopSequences;
+
+  const kickSequence = sequencesToPlay[0];
+  const clapSequence = sequencesToPlay[1];
+  const hatSequence = sequencesToPlay[2];
+  const openHatSequence = sequencesToPlay[3];
+  const snareSequence = sequencesToPlay[4];
+
+  if (activeSequence.value === null) {
+    kick.triggerAttackRelease("C2", "1n", time);
+  } else {
+    if (clapSequence[sequenceIndex.value] === 1) {
+      clap.triggerAttackRelease("C2", "1n", time);
+    }
+
+    if (kickSequence[sequenceIndex.value] === 1) {
+      kick.triggerAttackRelease("C2", "1n", time);
+    }
+
+    if (hatSequence[sequenceIndex.value] === 1) {
+      hat.triggerAttackRelease("C2", "1n", time);
+    }
+
+    if (openHatSequence[sequenceIndex.value] === 1) {
+      openHat.triggerAttackRelease("C2", "1n", time);
+    }
+
+    if (snareSequence[sequenceIndex.value] === 1) {
+      snare.triggerAttackRelease("C2", "1n", time);
+    }
+
+    const nextIndex = (sequenceIndex.value + 1) % 8;
+    sequenceIndex.setValue(nextIndex);
+  }
+});
 
 function randomlyPositionedTextBundle(text: string, canvasBounds: Bounds) {
   const position = Vector.create(
@@ -101,91 +204,21 @@ function randomlyPositionedTextBundle(text: string, canvasBounds: Bounds) {
   return textBundle;
 }
 
+/**
+ * Display text effect relating to the instrument played when it
+ * is played
+ */
 drums.system(
-  "drum",
+  "hit-text",
   { event: "keypress" },
-  (world, { canvasBounds, p }, state) => {
-    const sequenceIndex = state["sequence-index"].value;
-    const keyPresses = state["key-presses"].value;
-    keyPresses.push(p.key);
-
-    const time = Tone.now();
-
-    /**
-     * Play through a house beat sequence when the user is tapping alternating keys otherwise
-     * play a kick sound
-     *
-     * Want to extend this so that based on repeating pattern of keys pressed a different beats to
-     * see if it is any fun
-     *
-     * Had to write this comment as this really the easiest to understand from the code
-     */
-
+  (world, { canvasBounds }, state) => {
     const textEffectBounds = canvasBounds.shrink(100);
 
-    const currentPress = keyPresses[keyPresses.length - 1];
-    const lastPress = keyPresses[keyPresses.length - 2];
-
-    if (keyPresses.length <= 2 || currentPress === lastPress) {
-      kick.triggerAttackRelease("C2", "1n", time);
-      const kickTextEffect = randomlyPositionedTextBundle(
-        "kick",
-        textEffectBounds
-      );
-      world.addBundle(kickTextEffect);
-      state["sequence-index"].setValue(0);
-    } else if (currentPress !== lastPress) {
-      if (clapSequence[sequenceIndex] === 1) {
-        clap.triggerAttackRelease("C2", "1n", time);
-        const clapTextEffect = randomlyPositionedTextBundle(
-          "clap",
-          textEffectBounds
-        );
-        world.addBundle(clapTextEffect);
-      }
-
-      if (kickSequence[sequenceIndex] === 1) {
-        kick.triggerAttackRelease("C2", "1n", time);
-        const kickTextEffect = randomlyPositionedTextBundle(
-          "kick",
-          textEffectBounds
-        );
-        world.addBundle(kickTextEffect);
-      }
-
-      if (hatSequence[sequenceIndex] === 1) {
-        hat.triggerAttackRelease("C2", "1n", time);
-        const hatTextEffect = randomlyPositionedTextBundle(
-          "hat",
-          textEffectBounds
-        );
-        world.addBundle(hatTextEffect);
-      }
-
-      if (openHatSequence[sequenceIndex] === 1) {
-        openHat.triggerAttackRelease("C2", "1n", time);
-        const openHatTextEffect = randomlyPositionedTextBundle(
-          "open hat",
-          textEffectBounds
-        );
-        world.addBundle(openHatTextEffect);
-      }
-
-      if (snareSequence[sequenceIndex] === 1) {
-        snare.triggerAttackRelease("C2", "1n", time);
-        const snareTextEffect = randomlyPositionedTextBundle(
-          "snare",
-          textEffectBounds
-        );
-        world.addBundle(snareTextEffect);
-      }
-
-      const nextIndex = (sequenceIndex + 1) % 8;
-      state["sequence-index"].setValue(nextIndex);
-    }
-
-    const recentPresses = keyPresses.slice(Math.max(keyPresses.length - 3, 0));
-    state["key-presses"].setValue(recentPresses);
+    const clapTextEffect = randomlyPositionedTextBundle(
+      "sound",
+      textEffectBounds
+    );
+    world.addBundle(clapTextEffect);
   }
 );
 
