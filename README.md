@@ -119,6 +119,8 @@ All the things that need to be done to support building and maintain these proje
 - [ ] Add linter
 - [ ] Automate linting in the CI
 - [x] Add formatter
+- [ ] Mobile friendly
+- [ ] Contact form to give feedback on each app
 - [ ] Look into introducing a dependency updating bot into the repository
 - [ ] Integrate GitHub code spaces to make development on this more portable
 - [ ] Implement more extensible approach to adding new games to the site
@@ -126,6 +128,7 @@ All the things that need to be done to support building and maintain these proje
   - and have a better method for toggling the visibility of the games
 - [ ] Google analytics
 - [ ] Reset state of engine when it is stopped
+- [ ] Canvases dont look good as just squares in the middle of your screen
 
 # Appendix
 
