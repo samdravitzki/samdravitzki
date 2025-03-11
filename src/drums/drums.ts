@@ -133,52 +133,6 @@ drums.system(
   }
 );
 
-/**
- * Play drum sounds based on engine state
- */
-drums.system("drum", { event: "keypress" }, (_world, { p }, state) => {
-  const sequenceIndex = state["sequence-index"];
-  const activeSequence = state["active-sequence"];
-  // TODO: need a way to gaurantee the order of systems executed so that we can assume the keypress state defined by the "pattern-detector" system is set before this runs so that there isn't stuff delayed to the next keypress
-  const time = Tone.now();
-
-  const sequencesToPlay =
-    activeSequence.value === "house" ? houseSequences : hiphopSequences;
-
-  const kickSequence = sequencesToPlay[0];
-  const clapSequence = sequencesToPlay[1];
-  const hatSequence = sequencesToPlay[2];
-  const openHatSequence = sequencesToPlay[3];
-  const snareSequence = sequencesToPlay[4];
-
-  if (activeSequence.value === null) {
-    kick.triggerAttackRelease("C2", "1n", time);
-  } else {
-    if (clapSequence[sequenceIndex.value] === 1) {
-      clap.triggerAttackRelease("C2", "1n", time);
-    }
-
-    if (kickSequence[sequenceIndex.value] === 1) {
-      kick.triggerAttackRelease("C2", "1n", time);
-    }
-
-    if (hatSequence[sequenceIndex.value] === 1) {
-      hat.triggerAttackRelease("C2", "1n", time);
-    }
-
-    if (openHatSequence[sequenceIndex.value] === 1) {
-      openHat.triggerAttackRelease("C2", "1n", time);
-    }
-
-    if (snareSequence[sequenceIndex.value] === 1) {
-      snare.triggerAttackRelease("C2", "1n", time);
-    }
-
-    const nextIndex = (sequenceIndex.value + 1) % 8;
-    sequenceIndex.setValue(nextIndex);
-  }
-});
-
 function randomlyPositionedTextBundle(text: string, canvasBounds: Bounds) {
   const position = Vector.create(
     randomInt(canvasBounds.max.x - canvasBounds.min.x) + canvasBounds.min.x,
@@ -205,20 +159,64 @@ function randomlyPositionedTextBundle(text: string, canvasBounds: Bounds) {
 }
 
 /**
- * Display text effect relating to the instrument played when it
- * is played
+ * Play drum sounds based on engine state
  */
 drums.system(
-  "hit-text",
+  "drum",
   { event: "keypress" },
-  (world, { canvasBounds }, state) => {
+  (world, { canvasBounds, p }, state) => {
+    const sequenceIndex = state["sequence-index"];
+    const activeSequence = state["active-sequence"];
+    // TODO: need a way to gaurantee the order of systems executed so that we can assume the keypress state defined by the "pattern-detector" system is set before this runs so that there isn't stuff delayed to the next keypress
+    const time = Tone.now();
+
+    const sequencesToPlay =
+      activeSequence.value === "house" ? houseSequences : hiphopSequences;
+
+    const kickSequence = sequencesToPlay[0];
+    const clapSequence = sequencesToPlay[1];
+    const hatSequence = sequencesToPlay[2];
+    const openHatSequence = sequencesToPlay[3];
+    const snareSequence = sequencesToPlay[4];
+
     const textEffectBounds = canvasBounds.shrink(100);
 
-    const clapTextEffect = randomlyPositionedTextBundle(
-      "sound",
-      textEffectBounds
-    );
-    world.addBundle(clapTextEffect);
+    if (activeSequence.value === null) {
+      kick.triggerAttackRelease("C2", "1n", time);
+      world.addBundle(randomlyPositionedTextBundle("kick", textEffectBounds));
+    } else {
+      if (clapSequence[sequenceIndex.value] === 1) {
+        clap.triggerAttackRelease("C2", "1n", time);
+        world.addBundle(randomlyPositionedTextBundle("clap", textEffectBounds));
+      }
+
+      if (kickSequence[sequenceIndex.value] === 1) {
+        kick.triggerAttackRelease("C2", "1n", time);
+        world.addBundle(randomlyPositionedTextBundle("kick", textEffectBounds));
+      }
+
+      if (hatSequence[sequenceIndex.value] === 1) {
+        hat.triggerAttackRelease("C2", "1n", time);
+        world.addBundle(randomlyPositionedTextBundle("hat", textEffectBounds));
+      }
+
+      if (openHatSequence[sequenceIndex.value] === 1) {
+        openHat.triggerAttackRelease("C2", "1n", time);
+        world.addBundle(
+          randomlyPositionedTextBundle("open hat", textEffectBounds)
+        );
+      }
+
+      if (snareSequence[sequenceIndex.value] === 1) {
+        snare.triggerAttackRelease("C2", "1n", time);
+        world.addBundle(
+          randomlyPositionedTextBundle("snare", textEffectBounds)
+        );
+      }
+
+      const nextIndex = (sequenceIndex.value + 1) % 8;
+      sequenceIndex.setValue(nextIndex);
+    }
   }
 );
 
