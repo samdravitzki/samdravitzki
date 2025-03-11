@@ -133,6 +133,19 @@ drums.system(
   }
 );
 
+/**
+ * On keypress increment through 8 note sequence
+ */
+drums.system(
+  "sequence-incrementer",
+  { event: "keypress" },
+  (_world, {}, state) => {
+    const sequenceIndex = state["sequence-index"];
+    const nextIndex = (sequenceIndex.value + 1) % 8;
+    sequenceIndex.setValue(nextIndex);
+  }
+);
+
 function randomlyPositionedTextBundle(text: string, canvasBounds: Bounds) {
   const position = Vector.create(
     randomInt(canvasBounds.max.x - canvasBounds.min.x) + canvasBounds.min.x,
@@ -164,7 +177,7 @@ function randomlyPositionedTextBundle(text: string, canvasBounds: Bounds) {
 drums.system(
   "drum",
   { event: "keypress" },
-  (world, { canvasBounds, p }, state) => {
+  (world, { canvasBounds }, state) => {
     const sequenceIndex = state["sequence-index"];
     const activeSequence = state["active-sequence"];
     // TODO: need a way to gaurantee the order of systems executed so that we can assume the keypress state defined by the "pattern-detector" system is set before this runs so that there isn't stuff delayed to the next keypress
@@ -213,9 +226,6 @@ drums.system(
           randomlyPositionedTextBundle("snare", textEffectBounds)
         );
       }
-
-      const nextIndex = (sequenceIndex.value + 1) % 8;
-      sequenceIndex.setValue(nextIndex);
     }
   }
 );
