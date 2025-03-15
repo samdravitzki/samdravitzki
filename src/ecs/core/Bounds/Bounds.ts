@@ -13,10 +13,38 @@ export default class Bounds {
   readonly max: Vector;
 
   /**
-   * Return a vector at the center of the bounds
+   * Shorthand to get the vectors at the top-left
+   * and top-right of bounds
    */
+  get top() {
+    return {
+      left: this.min,
+      right: Vector.create(this.max.x, this.min.y),
+    };
+  }
+
+  /**
+   * Shorthand to get the vectors at the bottom-left
+   * and bottom-right of bounds
+   */
+  get bottom() {
+    return {
+      left: Vector.create(this.min.x, this.max.y),
+      right: this.max,
+    };
+  }
+
   get center() {
-    return this.max.minus(this.min).times(0.5).plus(this.min);
+    const centerX = (this.max.x - this.min.x) / 2 + this.min.x;
+    const centerY = (this.max.y - this.min.y) / 2 + this.min.y;
+
+    return {
+      left: Vector.create(this.min.y, centerY),
+      top: Vector.create(centerX, this.min.y),
+      right: Vector.create(this.max.x, centerY),
+      bottom: Vector.create(centerX, this.max.y),
+      center: this.max.minus(this.min).times(0.5).plus(this.min),
+    };
   }
 
   constructor(min: Vector, max: Vector) {

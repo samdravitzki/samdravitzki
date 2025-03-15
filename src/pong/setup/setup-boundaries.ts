@@ -27,7 +27,7 @@ function setupBoundariesPart<T extends Record<string, unknown>>(
         {
           name: "position",
           position: new Vector(
-            playBounds.center.x,
+            playBounds.center.center.x,
             playBounds.min.y + walllThickness / 2
           ),
         },
@@ -51,7 +51,7 @@ function setupBoundariesPart<T extends Record<string, unknown>>(
         {
           name: "position",
           position: new Vector(
-            playBounds.center.x,
+            playBounds.center.center.x,
             playBounds.max.y - walllThickness / 2
           ),
         },
@@ -71,12 +71,12 @@ function setupBoundariesPart<T extends Record<string, unknown>>(
           strokeWeight: 2,
           fill: [240, 60, 100],
           type: "line",
-          start: new Vector(0, -playBounds.center.y),
-          end: new Vector(0, playBounds.center.y),
+          start: new Vector(0, -playBounds.center.center.y),
+          end: new Vector(0, playBounds.center.center.y),
         },
         {
           name: "position",
-          position: playBounds.center,
+          position: playBounds.center.center,
         },
       ]);
 
@@ -92,7 +92,7 @@ function setupBoundariesPart<T extends Record<string, unknown>>(
           name: "position",
           position: new Vector(
             playBounds.min.x + backboardThickness / 2,
-            playBounds.center.y
+            playBounds.center.center.y
           ),
         },
         {
@@ -120,7 +120,7 @@ function setupBoundariesPart<T extends Record<string, unknown>>(
           name: "position",
           position: new Vector(
             playBounds.max.x - backboardThickness / 2,
-            playBounds.center.y
+            playBounds.center.center.y
           ),
         },
         {

@@ -16,18 +16,6 @@ describe("factory method", () => {
   });
 });
 
-describe("center property", () => {
-  test("should return the vector at the center of both supplied vectors", () => {
-    const v1 = Vector.create(1, 1);
-    const v2 = Vector.create(2, 4);
-
-    const result = Bounds.create(v1, v2);
-
-    expect(result.center.x).toEqual(1.5);
-    expect(result.center.y).toEqual(2.5);
-  });
-});
-
 describe("size method", () => {
   test("should tuple containing size of each bound vector", () => {
     const v1 = Vector.create(1, 1);
@@ -120,5 +108,90 @@ describe("shrink method", () => {
     expect(result.min.y).toEqual(2);
     expect(result.max.x).toEqual(8);
     expect(result.max.y).toEqual(8);
+  });
+});
+
+describe("center property", () => {
+  const min = Vector.create(10, 10);
+  const max = Vector.create(20, 20);
+  const bounds = Bounds.create(min, max);
+
+  test("should be vector between top-left and bottom-left points of bounds", () => {
+    const result = bounds.center.left;
+
+    expect(result.x).toEqual(10);
+    expect(result.y).toEqual(15);
+  });
+
+  test("should be vector between top-left and top-right points of bounds", () => {
+    const result = bounds.center.top;
+
+    expect(result.x).toEqual(15);
+    expect(result.y).toEqual(10);
+  });
+
+  test("should be vector between top-right and bottom-right points of bounds", () => {
+    const result = bounds.center.right;
+
+    expect(result.x).toEqual(20);
+    expect(result.y).toEqual(15);
+  });
+
+  test("should be vector between bottom-left and bottom-right points of bounds", () => {
+    const result = bounds.center.bottom;
+
+    expect(result.x).toEqual(15);
+    expect(result.y).toEqual(20);
+  });
+
+  test("should return the vector at the center of both supplied vectors", () => {
+    const v1 = Vector.create(1, 1);
+    const v2 = Vector.create(2, 4);
+    const bounds = Bounds.create(v1, v2);
+
+    const result = Bounds.create(v1, v2);
+
+    expect(result.center.center.x).toEqual(1.5);
+    expect(result.center.center.y).toEqual(2.5);
+  });
+});
+
+describe("top property", () => {
+  const min = Vector.create(10, 10);
+  const max = Vector.create(30, 30);
+  const bounds = Bounds.create(min, max);
+
+  test("should be vector at top-left of bounds", () => {
+    const result = bounds.top.left;
+
+    expect(result.x).toEqual(10);
+    expect(result.y).toEqual(10);
+  });
+
+  test("should be vector at top-right of bounds", () => {
+    const result = bounds.top.right;
+
+    expect(result.x).toEqual(30);
+    expect(result.y).toEqual(10);
+  });
+});
+
+describe("bottom property", () => {
+  const min = Vector.create(10, 10);
+  const max = Vector.create(30, 30);
+  const bounds = Bounds.create(min, max);
+
+  test("should be vector at bottom-left of bounds", () => {
+    const result = bounds.bottom.left;
+
+    expect(result.x).toEqual(10);
+    expect(result.y).toEqual(30);
+  });
+
+  test("should be vector at bottom-right of bounds", () => {
+    const result = bounds.bottom.right;
+
+    expect(result.x).toEqual(30);
+    expect(result.y).toEqual(30);
   });
 });
