@@ -15,11 +15,56 @@ const drums = EngineBuilder.create()
   .build();
 
 /**
+ * The idea is to make a game that makes the user feel like they're playing
+ * the drums.
+ *
+ * How do we do this?:
+ * The approach I want to take is by the user entering a repeated pattern of
+ * key presses different beats will play and if every pattern has an assoicated
+ * beat they will very easily be able to play something that sounds good. I like
+ * this approach because it adds an element of discovery where the player can
+ * find different beats by trying patterns. Gaining skill with the tool is done
+ * by mastering these patterns to play the sounds you want to hear on demand.
+ *
+ * The element of discovery:
+ * I think we can also develop the element of discovery further by adding other instruments
+ * into the background if the beat is played at a consistent tempo and could change
+ * other variables depending on where the pattern is played on the keyboard or what
+ * keys are in the pattern.
+ *
+ * Visualisation:
+ * Not sure yet how to go about this but I want the visuals to reinforce to the user
+ * that when they are playing a pattern that they should keep repeating it and to communicate
+ * to the user when they have changed the pattern. I also like the idea of it mimicing the
+ * design of a drum machine. I also think its important to communicate to the user what
+ * loop they are playing, this should have the name of the loop but more importantly something
+ * visual to represent the loop
+ *
  * Used Drumhaus (https://github.com/mxfng/drumhaus/tree/main) an in browser
  * drum machine based on tonejs alot as a reference for this
  */
 
 drums.part(primitiveRenderer);
+
+drums.system(
+  "setup-volume-slider",
+  { event: "start" },
+  (_world, { p, canvasBounds }) => {
+    const menuArea = p.createDiv();
+    menuArea.position(canvasBounds.bottom.left.x, canvasBounds.bottom.left.y);
+    menuArea.style("display", "flex");
+
+    const icon = p.createSpan("🔊");
+    icon.parent(menuArea);
+
+    const volumeSlider = p.createSlider(-46, 4);
+    volumeSlider.parent(menuArea);
+
+    (volumeSlider as any).input(() => {
+      Tone.getDestination().volume.value = Number(volumeSlider.value());
+    });
+  }
+);
 
 const kick = new Tone.Sampler({
   urls: {
