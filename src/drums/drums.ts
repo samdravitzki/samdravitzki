@@ -9,6 +9,8 @@ import Component from "../ecs/core/Component/Component";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import { clap, hat, kick, openHat, snare } from "./drumkits/paris-house";
 import bpmPart, { Keypress } from "./bpm";
+import hiphopTab from "./tabs/hiphop";
+import houseTab from "./tabs/house";
 
 const drums = EngineBuilder.create()
   .state("sequence-index", 0)
@@ -69,24 +71,7 @@ drums.system(
   }
 );
 
-// prettier-ignore
-const houseSequences = [
-  [1, 0, 1, 0, 1, 0, 1, 0], // kick
-  [0, 0, 1, 0, 0, 0, 1, 0], // clap
-  [1, 0, 1, 0, 1, 0, 1, 0], // hat
-  [0, 1, 0, 1, 0, 1, 0, 1], // open hat
-  [0, 0, 0, 0, 0, 0, 0, 0], // snare
-];
-
-// prettier-ignore
-const hiphopSequences = [
-  [0, 1, 0, 0, 0, 1, 0, 0], // kick
-  [0, 0, 0, 0, 0, 0, 0, 0], // clap
-  [1, 1, 1, 1, 1, 1, 1, 1], // hat
-  [0, 0, 0, 0, 0, 0, 0, 0], // open hat
-  [0, 0, 1, 0, 0, 0, 1, 0], // snare
-];
-
+const tabs = [houseTab, hiphopTab];
 /**
  * Based on the pattern of keypresses entered by the user
  * determine the sequence that should start playing
@@ -192,44 +177,39 @@ drums.system(
     // TODO: need a way to gaurantee the order of systems executed so that we can assume the keypress state defined by the "pattern-detector" system is set before this runs so that there isn't stuff delayed to the next keypress
     const time = Tone.now();
 
-    const sequencesToPlay =
-      activeSequence.value === "house" ? houseSequences : hiphopSequences;
-
-    const kickSequence = sequencesToPlay[0];
-    const clapSequence = sequencesToPlay[1];
-    const hatSequence = sequencesToPlay[2];
-    const openHatSequence = sequencesToPlay[3];
-    const snareSequence = sequencesToPlay[4];
+    const sequencesToPlay = tabs.find(
+      (tab) => tab.name === activeSequence.value
+    );
 
     const textEffectBounds = canvasBounds.shrink(100);
 
-    if (activeSequence.value === null) {
+    if (!sequencesToPlay) {
       kick.triggerAttackRelease("C2", "1n", time);
       world.addBundle(randomlyPositionedTextBundle("kick", textEffectBounds));
     } else {
-      if (clapSequence[sequenceIndex.value] === 1) {
+      if (sequencesToPlay.pattern["C"][sequenceIndex.value] === 1) {
         clap.triggerAttackRelease("C2", "1n", time);
         world.addBundle(randomlyPositionedTextBundle("clap", textEffectBounds));
       }
 
-      if (kickSequence[sequenceIndex.value] === 1) {
+      if (sequencesToPlay.pattern["K"][sequenceIndex.value] === 1) {
         kick.triggerAttackRelease("C2", "1n", time);
         world.addBundle(randomlyPositionedTextBundle("kick", textEffectBounds));
       }
 
-      if (hatSequence[sequenceIndex.value] === 1) {
+      if (sequencesToPlay.pattern["HH"][sequenceIndex.value] === 1) {
         hat.triggerAttackRelease("C2", "1n", time);
         world.addBundle(randomlyPositionedTextBundle("hat", textEffectBounds));
       }
 
-      if (openHatSequence[sequenceIndex.value] === 1) {
+      if (sequencesToPlay.pattern["OH"][sequenceIndex.value] === 1) {
         openHat.triggerAttackRelease("C2", "1n", time);
         world.addBundle(
           randomlyPositionedTextBundle("open hat", textEffectBounds)
         );
       }
 
-      if (snareSequence[sequenceIndex.value] === 1) {
+      if (sequencesToPlay.pattern["S"][sequenceIndex.value] === 1) {
         snare.triggerAttackRelease("C2", "1n", time);
         world.addBundle(
           randomlyPositionedTextBundle("snare", textEffectBounds)
