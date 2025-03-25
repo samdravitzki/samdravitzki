@@ -1,16 +1,13 @@
 import * as Tone from "tone";
 import { EngineBuilder } from "../ecs/core/Engine/Engine";
-import createBundle from "../ecs/core/Bundle/createBundle";
-import Vector from "../ecs/core/Vector/Vector";
 import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
-import randomInt from "../lib/randomInt/randomInt";
 import { PrimitiveShape } from "../ecs/parts/primitive-renderer/components/Primitive";
 import Component from "../ecs/core/Component/Component";
-import Bounds from "../ecs/core/Bounds/Bounds";
 import { clap, hat, kick, openHat, snare } from "./drumkits/paris-house";
 import bpmPart, { Keypress } from "./bpm";
 import hiphopTab from "./tabs/hiphop";
 import houseTab from "./tabs/house";
+import { createRandomlyPositionedTextBundle } from "./createRandomlyPositionedTextBundle";
 
 const drums = EngineBuilder.create()
   .state("sequence-index", 0)
@@ -140,31 +137,6 @@ drums.system(
   }
 );
 
-function randomlyPositionedTextBundle(text: string, canvasBounds: Bounds) {
-  const position = Vector.create(
-    randomInt(canvasBounds.max.x - canvasBounds.min.x) + canvasBounds.min.x,
-    randomInt(canvasBounds.max.y - canvasBounds.min.y) + canvasBounds.min.y
-  );
-
-  const textBundle = createBundle([
-    "faded",
-    {
-      name: "position",
-      position,
-    },
-    {
-      name: "primitive",
-      fill: [240, 60, 100, 255],
-      type: "text",
-      text: text,
-      align: "left",
-      size: 25,
-    },
-  ]);
-
-  return textBundle;
-}
-
 /**
  * Play drum sounds based on engine state
  */
@@ -185,34 +157,42 @@ drums.system(
 
     if (!sequencesToPlay) {
       kick.triggerAttackRelease("C2", "1n", time);
-      world.addBundle(randomlyPositionedTextBundle("kick", textEffectBounds));
+      world.addBundle(
+        createRandomlyPositionedTextBundle("kick", textEffectBounds)
+      );
     } else {
       if (sequencesToPlay.pattern["C"][sequenceIndex.value] === 1) {
         clap.triggerAttackRelease("C2", "1n", time);
-        world.addBundle(randomlyPositionedTextBundle("clap", textEffectBounds));
+        world.addBundle(
+          createRandomlyPositionedTextBundle("clap", textEffectBounds)
+        );
       }
 
       if (sequencesToPlay.pattern["K"][sequenceIndex.value] === 1) {
         kick.triggerAttackRelease("C2", "1n", time);
-        world.addBundle(randomlyPositionedTextBundle("kick", textEffectBounds));
+        world.addBundle(
+          createRandomlyPositionedTextBundle("kick", textEffectBounds)
+        );
       }
 
       if (sequencesToPlay.pattern["HH"][sequenceIndex.value] === 1) {
         hat.triggerAttackRelease("C2", "1n", time);
-        world.addBundle(randomlyPositionedTextBundle("hat", textEffectBounds));
+        world.addBundle(
+          createRandomlyPositionedTextBundle("hat", textEffectBounds)
+        );
       }
 
       if (sequencesToPlay.pattern["OH"][sequenceIndex.value] === 1) {
         openHat.triggerAttackRelease("C2", "1n", time);
         world.addBundle(
-          randomlyPositionedTextBundle("open hat", textEffectBounds)
+          createRandomlyPositionedTextBundle("open hat", textEffectBounds)
         );
       }
 
       if (sequencesToPlay.pattern["S"][sequenceIndex.value] === 1) {
         snare.triggerAttackRelease("C2", "1n", time);
         world.addBundle(
-          randomlyPositionedTextBundle("snare", textEffectBounds)
+          createRandomlyPositionedTextBundle("snare", textEffectBounds)
         );
       }
     }
