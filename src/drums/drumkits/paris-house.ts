@@ -1,4 +1,5 @@
 import * as Tone from "tone";
+import { Drumkit } from "./Drumkit";
 
 export const kick = new Tone.Sampler({
   urls: {
@@ -40,3 +41,14 @@ export const snare = new Tone.Sampler({
   }),
   Tone.getDestination()
 );
+
+export const parisHouseDrumkit: Drumkit = {
+  name: "house", // should be called
+  instruments: {
+    kick,
+    clap,
+    hat,
+    openHat,
+    snare,
+  },
+};

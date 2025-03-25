@@ -3,16 +3,18 @@ import { EngineBuilder } from "../ecs/core/Engine/Engine";
 import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
 import { PrimitiveShape } from "../ecs/parts/primitive-renderer/components/Primitive";
 import Component from "../ecs/core/Component/Component";
-import { clap, hat, kick, openHat, snare } from "./drumkits/paris-house";
 import bpmPart, { Keypress } from "./bpm";
 import hiphopTab from "./tabs/hiphop";
 import houseTab from "./tabs/house";
+import { lofiHipHopDrumkit } from "./drumkits/lofi-hiphop";
+import { parisHouseDrumkit } from "./drumkits/paris-house";
 import { createRandomlyPositionedTextBundle } from "./createRandomlyPositionedTextBundle";
+import { deriveBpm } from "./deriveBpm";
 
 const drums = EngineBuilder.create()
   .state("sequence-index", 0)
   .state<"key-presses", Keypress[]>("key-presses", [])
-  .state<"active-sequence", string | null>("active-sequence", null)
+  .state("bpm", 0)
   .build();
 
 /**
@@ -46,6 +48,15 @@ const drums = EngineBuilder.create()
  */
 
 drums.part(primitiveRenderer);
+
+drums.system("calculate-bpm", { event: "keypress" }, (_world, {}, state) => {
+  const keyPresses = state["key-presses"];
+  // The difference between each consecutive time
+  const bpm = deriveBpm(keyPresses.value.map((press) => press.time));
+  // I remove every odd beat in a tab to remove any rests and so have doubled the bpm to account for this
+  state["bpm"].setValue(bpm / 2);
+});
+
 drums.part(bpmPart);
 
 drums.system(
@@ -69,56 +80,24 @@ drums.system(
 );
 
 const tabs = [houseTab, hiphopTab];
+const drumkits = [parisHouseDrumkit, lofiHipHopDrumkit];
 /**
  * Based on the pattern of keypresses entered by the user
  * determine the sequence that should start playing
  */
 drums.system(
-  "pattern-detector",
+  "track-keypresses",
   { event: "keypress" },
   (_world, { p }, state) => {
     const keyPresses = state["key-presses"].value;
-    const activeSequence = state["active-sequence"];
-    const sequenceIndex = state["sequence-index"];
 
     keyPresses.push({
       key: p.key,
       time: Date.now(),
     });
 
-    if (keyPresses.length >= 4) {
-      const [d, c, b, a] = keyPresses.map((press) => press.key).slice(-4);
-
-      let patternDectected: string | null = null;
-
-      // AABB pattern
-      if (
-        (a === b && b !== c && c === d && d !== a) ||
-        (a !== b && b === c && c !== d && d === a)
-      ) {
-        patternDectected = "house";
-      }
-
-      // ABAB pattern
-      if (a !== b && a === c && b === d && b !== c && d !== a) {
-        patternDectected = "hiphop";
-      }
-
-      // when pattern changes or is null
-      if (
-        activeSequence.value !== patternDectected ||
-        patternDectected === null
-      ) {
-        sequenceIndex.setValue(0);
-        console.debug("reset sequence");
-      }
-
-      console.debug(`${patternDectected} pattern detected`);
-      activeSequence.setValue(patternDectected);
-    }
-
-    // only keep sliding window of 4 most recent key presses
-    const recentPresses = keyPresses.slice(-4);
+    // only keep sliding window of x most recent key presses
+    const recentPresses = keyPresses.slice(-8);
     console.debug(recentPresses.map((press) => press.key));
     state["key-presses"].setValue(recentPresses);
   }
@@ -145,54 +124,78 @@ drums.system(
   { event: "keypress" },
   (world, { canvasBounds }, state) => {
     const sequenceIndex = state["sequence-index"];
-    const activeSequence = state["active-sequence"];
+
     // TODO: need a way to gaurantee the order of systems executed so that we can assume the keypress state defined by the "pattern-detector" system is set before this runs so that there isn't stuff delayed to the next keypress
     const time = Tone.now();
 
-    const sequencesToPlay = tabs.find(
-      (tab) => tab.name === activeSequence.value
+    let genereToPlay: string | null = null;
+
+    const bpm = state["bpm"].value;
+
+    // Ranges based on the following with a little wiggle room https://www.izotope.com/en/learn/using-different-tempos-to-make-beats-for-different-genres.html
+    // It is good to limit these to only certain bpm ranges because it doesnt sound like a hiphop beat when its played over 100 bpm
+    // Needs to find ways to make it not so difficult as its hard to keep a consistent bpm when you dont know what you're doing
+    if (bpm <= 95) {
+      genereToPlay = "hiphop";
+    }
+
+    if (bpm >= 100) {
+      genereToPlay = "house";
+    }
+
+    const sequencesToPlay = tabs.find((tab) => tab.name === genereToPlay);
+    const drumkitToPlay = drumkits.find(
+      (drumkit) => drumkit.name === genereToPlay
     );
 
     const textEffectBounds = canvasBounds.shrink(100);
 
-    if (!sequencesToPlay) {
-      kick.triggerAttackRelease("C2", "1n", time);
+    if (!sequencesToPlay || !drumkitToPlay) {
+      parisHouseDrumkit.instruments.kick?.triggerAttackRelease(
+        "C2",
+        "1n",
+        time
+      );
       world.addBundle(
         createRandomlyPositionedTextBundle("kick", textEffectBounds)
       );
     } else {
       if (sequencesToPlay.pattern["C"][sequenceIndex.value] === 1) {
-        clap.triggerAttackRelease("C2", "1n", time);
+        drumkitToPlay.instruments.clap?.triggerAttackRelease("C2", "1n", time);
         world.addBundle(
           createRandomlyPositionedTextBundle("clap", textEffectBounds)
         );
       }
 
       if (sequencesToPlay.pattern["K"][sequenceIndex.value] === 1) {
-        kick.triggerAttackRelease("C2", "1n", time);
+        drumkitToPlay.instruments.kick?.triggerAttackRelease("C2", "1n", time);
         world.addBundle(
           createRandomlyPositionedTextBundle("kick", textEffectBounds)
         );
       }
 
       if (sequencesToPlay.pattern["HH"][sequenceIndex.value] === 1) {
-        hat.triggerAttackRelease("C2", "1n", time);
+        drumkitToPlay.instruments.hat?.triggerAttackRelease("C2", "1n", time);
         world.addBundle(
           createRandomlyPositionedTextBundle("hat", textEffectBounds)
         );
       }
 
-      if (sequencesToPlay.pattern["OH"][sequenceIndex.value] === 1) {
-        openHat.triggerAttackRelease("C2", "1n", time);
+      if (sequencesToPlay.pattern["S"][sequenceIndex.value] === 1) {
+        drumkitToPlay.instruments.snare?.triggerAttackRelease("C2", "1n", time);
         world.addBundle(
-          createRandomlyPositionedTextBundle("open hat", textEffectBounds)
+          createRandomlyPositionedTextBundle("snare", textEffectBounds)
         );
       }
 
-      if (sequencesToPlay.pattern["S"][sequenceIndex.value] === 1) {
-        snare.triggerAttackRelease("C2", "1n", time);
+      if (sequencesToPlay.pattern["OH"][sequenceIndex.value] === 1) {
+        drumkitToPlay.instruments.openHat?.triggerAttackRelease(
+          "C2",
+          "1n",
+          time
+        );
         world.addBundle(
-          createRandomlyPositionedTextBundle("snare", textEffectBounds)
+          createRandomlyPositionedTextBundle("open hat", textEffectBounds)
         );
       }
     }
