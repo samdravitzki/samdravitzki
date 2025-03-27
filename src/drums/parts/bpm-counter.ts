@@ -1,14 +1,16 @@
-import createBundle from "../ecs/core/Bundle/createBundle";
-import Engine from "../ecs/core/Engine/Engine";
-import Vector from "../ecs/core/Vector/Vector";
-import { PrimitiveShape } from "../ecs/parts/primitive-renderer/components/Primitive";
+import createBundle from "../../ecs/core/Bundle/createBundle";
+import Engine from "../../ecs/core/Engine/Engine";
+import Vector from "../../ecs/core/Vector/Vector";
+import { PrimitiveShape } from "../../ecs/parts/primitive-renderer/components/Primitive";
 
 export type Keypress = {
   key: string;
   time: number;
 };
 
-function bpmCounterPart<T extends { bpm: number }>(engine: Engine<T>) {
+export default function bpmCounterPart<T extends { bpm: number }>(
+  engine: Engine<T>
+) {
   engine.system("bpm-text", { event: "start" }, (world, { canvasBounds }) => {
     const textBundle = createBundle([
       "bpm-text",
@@ -47,5 +49,3 @@ function bpmCounterPart<T extends { bpm: number }>(engine: Engine<T>) {
     }
   });
 }
-
-export default bpmCounterPart;

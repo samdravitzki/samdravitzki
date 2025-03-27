@@ -3,13 +3,14 @@ import { EngineBuilder } from "../ecs/core/Engine/Engine";
 import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
 import { PrimitiveShape } from "../ecs/parts/primitive-renderer/components/Primitive";
 import Component from "../ecs/core/Component/Component";
-import bpmCounterPart, { Keypress } from "./bpm-counter";
+import bpmCounterPart, { Keypress } from "./parts/bpm-counter";
 import hiphopTab from "./tabs/hiphop";
 import houseTab from "./tabs/house";
 import { lofiHipHopDrumkit } from "./drumkits/lofi-hiphop";
 import { parisHouseDrumkit } from "./drumkits/paris-house";
 import { createRandomlyPositionedTextBundle } from "./createRandomlyPositionedTextBundle";
 import { deriveBpm } from "./deriveBpm";
+import volumeSliderPart from "./parts/volume-slider";
 
 const drums = EngineBuilder.create()
   .state("sequence-index", 0)
@@ -58,26 +59,7 @@ drums.system("calculate-bpm", { event: "keypress" }, (_world, {}, state) => {
 });
 
 drums.part(bpmCounterPart);
-
-drums.system(
-  "setup-volume-slider",
-  { event: "start" },
-  (_world, { p, canvasBounds }) => {
-    const menuArea = p.createDiv();
-    menuArea.position(canvasBounds.bottom.left.x, canvasBounds.bottom.left.y);
-    menuArea.style("display", "flex");
-
-    const icon = p.createSpan("🔊");
-    icon.parent(menuArea);
-
-    const volumeSlider = p.createSlider(-46, 4);
-    volumeSlider.parent(menuArea);
-
-    (volumeSlider as any).input(() => {
-      Tone.getDestination().volume.value = Number(volumeSlider.value());
-    });
-  }
-);
+drums.part(volumeSliderPart);
 
 const tabs = [houseTab, hiphopTab];
 const drumkits = [parisHouseDrumkit, lofiHipHopDrumkit];
