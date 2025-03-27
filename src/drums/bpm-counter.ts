@@ -8,9 +8,7 @@ export type Keypress = {
   time: number;
 };
 
-function bpmPart<T extends { "key-presses": Keypress[]; bpm: number }>(
-  engine: Engine<T>
-) {
+function bpmCounterPart<T extends { bpm: number }>(engine: Engine<T>) {
   engine.system("bpm-text", { event: "start" }, (world, { canvasBounds }) => {
     const textBundle = createBundle([
       "bpm-text",
@@ -50,4 +48,4 @@ function bpmPart<T extends { "key-presses": Keypress[]; bpm: number }>(
   });
 }
 
-export default bpmPart;
+export default bpmCounterPart;

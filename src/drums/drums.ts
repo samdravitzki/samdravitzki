@@ -3,7 +3,7 @@ import { EngineBuilder } from "../ecs/core/Engine/Engine";
 import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
 import { PrimitiveShape } from "../ecs/parts/primitive-renderer/components/Primitive";
 import Component from "../ecs/core/Component/Component";
-import bpmPart, { Keypress } from "./bpm";
+import bpmCounterPart, { Keypress } from "./bpm-counter";
 import hiphopTab from "./tabs/hiphop";
 import houseTab from "./tabs/house";
 import { lofiHipHopDrumkit } from "./drumkits/lofi-hiphop";
@@ -57,7 +57,7 @@ drums.system("calculate-bpm", { event: "keypress" }, (_world, {}, state) => {
   state["bpm"].setValue(bpm / 2);
 });
 
-drums.part(bpmPart);
+drums.part(bpmCounterPart);
 
 drums.system(
   "setup-volume-slider",
@@ -97,7 +97,7 @@ drums.system(
     });
 
     // only keep sliding window of x most recent key presses
-    const recentPresses = keyPresses.slice(-8);
+    const recentPresses = keyPresses.slice(-4);
     console.debug(recentPresses.map((press) => press.key));
     state["key-presses"].setValue(recentPresses);
   }
