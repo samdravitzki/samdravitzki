@@ -17,7 +17,7 @@ import createBundle from "../ecs/core/Bundle/createBundle";
 import minionBongUrl from "./sounds/minion-bong.mp3";
 import State from "../ecs/core/State/State";
 import Component from "../ecs/core/Component/Component";
-import { EngineBuilder } from "../ecs/core/Engine/Engine";
+import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import collisions from "../ecs/parts/collision/collision";
 import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
 import setupBallPart from "./setup/setup-ball";

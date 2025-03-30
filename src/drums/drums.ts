@@ -1,5 +1,5 @@
 import * as Tone from "tone";
-import { EngineBuilder } from "../ecs/core/Engine/Engine";
+import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
 import { PrimitiveShape } from "../ecs/parts/primitive-renderer/components/Primitive";
 import Component from "../ecs/core/Component/Component";
