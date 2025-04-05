@@ -4,34 +4,11 @@ import World from "../World/World";
 import Bounds from "../Bounds/Bounds";
 import Vector from "../Vector/Vector";
 import State from "../State/State";
+import { EngineLifecycleEvents, SystemTrigger } from "./SystemTrigger";
 
 export type EngineOptions = Partial<{
   canvasBounds: Bounds;
 }>;
-
-const updateEvents = ["before-update", "update", "after-update"] as const;
-type UpdateEvents = (typeof updateEvents)[number];
-
-type StartEvent = "start";
-type KeyPressEvent = "keypress";
-
-type EngineLifecycleEvents = StartEvent | KeyPressEvent | UpdateEvents;
-
-type SystemTrigger<
-  StateSet extends Record<string, unknown>,
-  K extends keyof StateSet,
-> =
-  | { event: StartEvent }
-  | { event: KeyPressEvent }
-  | {
-      event: UpdateEvents;
-      readonly condition?: {
-        state: K;
-        value: StateSet[K];
-        // only trigger system on change to state (either on-enter or on-exit)
-        only?: "on-enter" | "on-exit";
-      };
-    };
 
 type SystemRegistration<
   StateSet extends Record<string, unknown>,
@@ -58,7 +35,6 @@ export class Engine<StateSet extends Record<string, unknown> = {}> {
   >();
 
   private _states: States<StateSet>;
-
   private _canvasBounds: Bounds;
 
   constructor(stateSet: StateSet, options: EngineOptions = {}) {
@@ -135,13 +111,16 @@ export class Engine<StateSet extends Record<string, unknown> = {}> {
           y: 0,
         };
 
+        const resources = {
+          mousePosition,
+          p,
+          canvasBounds: self._canvasBounds,
+        };
+
         const startSystems = self._systems.get("start") ?? [];
+
         startSystems.forEach(({ name, system }) => {
-          system(
-            world,
-            { mousePosition, p, canvasBounds: self._canvasBounds },
-            self._states
-          );
+          system(world, resources, self._states);
         });
 
         const stateChangeTriggeredSystems = self._systems.get("update");
@@ -161,11 +140,7 @@ export class Engine<StateSet extends Record<string, unknown> = {}> {
                   console.info(
                     `[event] ${trigger.condition!.only} ${trigger.condition!.state.toString()} ${name}`
                   );
-                  system(
-                    world,
-                    { mousePosition, p, canvasBounds: self._canvasBounds },
-                    self._states
-                  );
+                  system(world, resources, self._states);
                 }
               );
             }
@@ -191,6 +166,12 @@ export class Engine<StateSet extends Record<string, unknown> = {}> {
           y: p.mouseY,
         };
 
+        const resources = {
+          mousePosition,
+          p,
+          canvasBounds: self._canvasBounds,
+        };
+
         systems.forEach(({ name, system, trigger }) => {
           if (
             trigger.event === "update" ||
@@ -198,11 +179,7 @@ export class Engine<StateSet extends Record<string, unknown> = {}> {
             trigger.event === "after-update"
           ) {
             if (trigger.condition === undefined) {
-              system(
-                world,
-                { mousePosition, p, canvasBounds: self._canvasBounds },
-                self._states
-              );
+              system(world, resources, self._states);
             }
 
             if (
@@ -216,11 +193,7 @@ export class Engine<StateSet extends Record<string, unknown> = {}> {
                 console.debug(
                   `[when ${trigger.condition.state.toString()} = ${trigger.condition.value}] ${name} (triggered)`
                 );
-                system(
-                  world,
-                  { mousePosition, p, canvasBounds: self._canvasBounds },
-                  self._states
-                );
+                system(world, resources, self._states);
               }
             }
           }
