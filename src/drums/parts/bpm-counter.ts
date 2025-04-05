@@ -1,6 +1,10 @@
+import Bounds from "../../ecs/core/Bounds/Bounds";
 import createBundle from "../../ecs/core/Bundle/createBundle";
 import Engine from "../../ecs/core/Engine/Engine";
+import { onStart, onUpdate } from "../../ecs/core/Engine/SystemTrigger";
+import State from "../../ecs/core/State/State";
 import Vector from "../../ecs/core/Vector/Vector";
+import World from "../../ecs/core/World/World";
 import { PrimitiveShape } from "../../ecs/parts/primitive-renderer/components/Primitive";
 
 export type Keypress = {
@@ -11,7 +15,10 @@ export type Keypress = {
 export default function bpmCounterPart<T extends { bpm: number }>(
   engine: Engine<T>
 ) {
-  engine.system("bpm-text", { event: "start" }, (world, { canvasBounds }) => {
+  function setupBpmText(
+    world: World,
+    { canvasBounds }: { canvasBounds: Bounds }
+  ) {
     const textBundle = createBundle([
       "bpm-text",
       {
@@ -29,13 +36,9 @@ export default function bpmCounterPart<T extends { bpm: number }>(
     ]);
 
     world.addBundle(textBundle);
-  });
-  /**
-   * Calculate the bpm as the user taps it out
-   *
-   * Based on https://www.all8.com/tools/bpm.htm
-   */
-  engine.system("bpm-counter", { event: "update" }, (world, {}, state) => {
+  }
+
+  function updateBpmText(world: World, {}, state: { bpm: State<number> }) {
     const [bpmText] = world.query<[PrimitiveShape]>([
       "primitive",
       "bpm-text",
@@ -47,5 +50,8 @@ export default function bpmCounterPart<T extends { bpm: number }>(
 
       bpmText.text = `${halfBpm.toString()} bpm`;
     }
-  });
+  }
+
+  engine.system("bpm-text", onStart(), setupBpmText);
+  engine.system("bpm-counter", onUpdate(), updateBpmText);
 }

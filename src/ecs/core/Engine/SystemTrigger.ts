@@ -21,42 +21,39 @@ export type SystemTrigger<
       };
     };
 
-export type ScheduleTrigger<
+export function onStart<
   StateSet extends Record<string, unknown>,
   K extends keyof StateSet,
-> = {
-  schedule: string; // the schedule the system will be run under
-  readonly condition?: {
-    state: K;
-    value: StateSet[K];
-  };
-};
-
-function onStart() {
+>(): SystemTrigger<StateSet, K> {
   return {
-    shedule: "start",
+    event: "start",
   };
 }
 
-function onUpdate() {
+type OnUpdateTrigger<
+  StateSet extends Record<string, unknown>,
+  K extends keyof StateSet,
+> =
+  | SystemTrigger<StateSet, K>
+  | {
+      if: (state: K, value: StateSet[K]) => SystemTrigger<StateSet, K>;
+    };
+
+export function onUpdate<
+  StateSet extends Record<string, unknown>,
+  K extends keyof StateSet,
+>(): SystemTrigger<StateSet, K> {
   return {
-    shedule: "update",
-    if(state: string, value: string) {
-      return {
-        shedule: "update",
-        condition: {
-          state,
-          value,
-        },
-      };
-    },
+    event: "update",
   };
 }
 
-function onEnter(state: string, value: string) {
+export function onUpdateWhen<
+  StateSet extends Record<string, unknown>,
+  K extends keyof StateSet,
+>(state: K, value: StateSet[K]): SystemTrigger<StateSet, K> {
   return {
-    shedule: "state-change",
-    on: "enter",
+    event: "update",
     condition: {
       state,
       value,
@@ -64,20 +61,39 @@ function onEnter(state: string, value: string) {
   };
 }
 
-function onExit(state: string, value: string) {
+export function onEnter<
+  StateSet extends Record<string, unknown>,
+  K extends keyof StateSet,
+>(state: K, value: StateSet[K]): SystemTrigger<StateSet, K> {
   return {
-    shedule: "state-change",
-    on: "exit",
+    event: "update",
     condition: {
       state,
       value,
+      only: "on-enter",
     },
   };
 }
 
-function onKeydown() {
+export function onExit<
+  StateSet extends Record<string, unknown>,
+  K extends keyof StateSet,
+>(state: K, value: StateSet[K]): SystemTrigger<StateSet, K> {
   return {
-    shedule: "event",
+    event: "update",
+    condition: {
+      state,
+      value,
+      only: "on-exit",
+    },
+  };
+}
+
+export function onKeydown<
+  StateSet extends Record<string, unknown>,
+  K extends keyof StateSet,
+>(): SystemTrigger<StateSet, K> {
+  return {
     event: "keypress",
   };
 }

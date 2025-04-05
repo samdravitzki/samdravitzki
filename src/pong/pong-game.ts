@@ -25,11 +25,367 @@ import setupBoundariesPart from "./setup/setup-boundaries";
 import setupPaddlesPart from "./setup/setup-paddles";
 import setupScoreboardPart from "./setup/setup-scoreboard";
 import setupMenuUiPart from "./setup/setup-ui";
+import Bounds from "../ecs/core/Bounds/Bounds";
+import { MousePosition } from "../ecs/core/System/System";
+import {
+  onEnter,
+  onExit,
+  onUpdate,
+  onUpdateWhen,
+} from "../ecs/core/Engine/SystemTrigger";
+
+const ballHitAudio = new Audio(minionBongUrl);
+
+const sound = false;
+
+type Score = [number, number];
 
 /**
  * The main states of the applicaton
  */
 type ApplicationState = "paused" | "main-menu" | "in-game" | "end";
+
+function showMainMenu(_world: World, { p }: { p: p5 }) {
+  const mainMenu = p.select("#main-menu");
+  mainMenu?.show();
+}
+
+function showGameMenu(_world: World, { p }: { p: p5 }) {
+  const gameMenu = p.select("#game-menu");
+  gameMenu?.show();
+}
+
+function hideGameMenu(_world: World, { p }: { p: p5 }) {
+  const gameMenu = p.select("#game-menu");
+  gameMenu?.hide();
+}
+
+function endConditionSystem(
+  _world: World,
+  {},
+  state: { score: State<Score>; "app-state": State<ApplicationState> }
+) {
+  const [playerScore, aiScore] = state.score.value;
+
+  if (playerScore >= 3 || aiScore >= 3) {
+    state["app-state"].setValue("end");
+  }
+}
+
+function showEndMenu(
+  _world: World,
+  { p }: { p: p5 },
+  state: { score: State<Score> }
+) {
+  const [playerScore, aiScore] = state.score.value;
+
+  console.log(`final score: player ${playerScore}, ai ${aiScore}`);
+
+  const endMessageDiv = p.select("#end-menu > .message");
+
+  if (endMessageDiv) {
+    const winningMessage = "You won, Nice! 🔥";
+    const loosingMessage = "You lost, to an ai 😔";
+    endMessageDiv.html(`
+      <p>${playerScore > aiScore ? winningMessage : loosingMessage}</p>
+    `);
+  }
+
+  const endMenu = p.select("#end-menu");
+  endMenu?.show();
+}
+
+function hideEndMenu(_world: World, { p }: { p: p5 }) {
+  const endMenu = p.select("#end-menu");
+  endMenu?.hide();
+}
+
+function hideMainMenu(_world: World, { p }: { p: p5 }) {
+  const mainMenu = p.select("#main-menu");
+  mainMenu?.hide();
+}
+
+function ballCollisionHandlingSystem(world: World) {
+  for (const [velocity, collision, position] of world.query<
+    [Velocity, Collision, Position, BallComponent]
+  >(["velocity", "collision", "position", "ball"])) {
+    const collidee = world.entity(collision.entityId);
+
+    velocity.velocity = velocity.velocity.reflect(collision.normal);
+
+    if (collidee.components.find((c) => c.name === "paddle")) {
+      const paddlePosition = collidee.getComponent("position") as Position;
+
+      const yDistanceFromPaddleCenter = paddlePosition.position.minus(
+        position.position
+      ).y;
+
+      velocity.velocity = Vector.create(
+        velocity.velocity.x,
+        -yDistanceFromPaddleCenter / 25
+      );
+    }
+  }
+}
+
+function backboardCollisionHandlingSystem(
+  world: World,
+  {},
+  state: { score: State<Score> }
+) {
+  for (const [backboard] of world.query<[BackboardComponent, Collision]>([
+    "backboard",
+    "collision",
+  ])) {
+    const [ballPosition, ballVelocity, ballSpeed] = world.query<
+      [Position, Velocity, Speed, BallComponent]
+    >(["position", "velocity", "speed", "ball"])[0];
+
+    // Reset ball position
+    ballPosition.position = Vector.create(200, 40);
+
+    const [playerScore, aiScore] = state.score.value;
+
+    if (backboard.owner == "player") {
+      state.score.setValue([playerScore, aiScore + 1]);
+      // Reset ball directed towards player
+      ballVelocity.velocity = ballVelocity.velocity = new Vector(
+        -0.5,
+        -0.5
+      ).plus(new Vector(-0.1, -0.1).times(playerScore + aiScore));
+    }
+
+    if (backboard.owner == "ai") {
+      state.score.setValue([playerScore + 1, aiScore]);
+
+      // Reset ball directed towards ai
+      ballVelocity.velocity = new Vector(0.5, -0.5).plus(
+        new Vector(0.1, -0.1).times(playerScore + aiScore)
+      );
+    }
+
+    // Reset ball speed
+    ballSpeed.value = 3;
+  }
+}
+
+function updateScoreBoard(world: World, {}, state: { score: State<Score> }) {
+  const [playerScore, aiScore] = state.score.value;
+
+  const [playerScoreText] = world.query<[PrimitiveShape]>([
+    "primitive",
+    "player-score",
+  ])[0];
+
+  // Its pretty weird the type has to be narrowed after you receive it from a query
+  // Seems like the query should be responsible for this
+  if (playerScoreText.type === "text") {
+    playerScoreText.text = playerScore.toString();
+  }
+
+  const [aiScoreText] = world.query<[PrimitiveShape]>([
+    "primitive",
+    "ai-score",
+  ])[0];
+
+  if (aiScoreText.type === "text") {
+    aiScoreText.text = aiScore.toString();
+  }
+}
+
+// Describes bow the collision handling worked in the orginial pong game
+// https://www.vbforums.com/showthread.php?634246-RESOLVED-How-did-collision-in-the-original-Pong-happen
+function paddleCollisionHandlingSystem(world: World) {
+  const [, ballSpeed] = world.query<[Velocity, Speed, BallComponent]>([
+    "velocity",
+    "speed",
+    "ball",
+  ])[0];
+
+  for (const [collision] of world.query<[Collision, PaddleComponent]>([
+    "collision",
+    "paddle",
+  ])) {
+    if (
+      world.entity(collision.entityId).components.find((c) => c.name === "ball")
+    ) {
+      ballSpeed.value += ballSpeed.value * 0.1;
+    }
+
+    if (sound) {
+      ballHitAudio.play();
+    }
+  }
+}
+
+function playerPaddleSystem(
+  world: World,
+  {
+    mousePosition,
+    canvasBounds,
+  }: { mousePosition: MousePosition; canvasBounds: Bounds }
+) {
+  for (const [position] of world.query<[Position]>([
+    "position",
+    "paddle",
+    "player",
+  ])) {
+    const positionChange = mousePosition.y - position.position.y;
+    position.position = position.position.plus(
+      Vector.create(0, positionChange)
+    );
+
+    if (position.position.y < canvasBounds.min.y + 35) {
+      position.position = Vector.create(
+        position.position.x,
+        canvasBounds.min.y + 35
+      );
+    }
+
+    if (position.position.y > canvasBounds.max.y - 35) {
+      position.position = Vector.create(
+        position.position.x,
+        canvasBounds.max.y - 35
+      );
+    }
+  }
+}
+
+function aiPaddleSystem(
+  world: World,
+  { canvasBounds }: { canvasBounds: Bounds }
+) {
+  const [targetPosition] = world.query<[Position]>([
+    "position",
+    "ai-paddle-target",
+  ])[0];
+  for (const [position, speed] of world.query<[Position, Speed]>([
+    "position",
+    "speed",
+    "paddle",
+    "ai",
+  ])) {
+    // Cant just move it to where the ball is, need to move it to where the ball is going to be when it hits on the ai side
+    position.position = position.position.plus(
+      Vector.create(
+        0,
+        (targetPosition.position.y - position.position.y) * speed.value
+      )
+    );
+
+    if (position.position.y < canvasBounds.min.y + 35) {
+      position.position = Vector.create(
+        position.position.x,
+        canvasBounds.min.y + 35
+      );
+    }
+
+    if (position.position.y > canvasBounds.max.y - 35) {
+      position.position = Vector.create(
+        position.position.x,
+        canvasBounds.max.y - 35
+      );
+    }
+  }
+}
+
+function ballMovementSystem(world: World) {
+  const [velocity, position, speed] = world.query<
+    [Velocity, Position, Speed, BallComponent]
+  >(["velocity", "position", "speed", "ball"])[0];
+
+  position.position = position.position.plus(
+    velocity.velocity.times(speed.value)
+  );
+}
+
+function ballTrajectorySystem(
+  world: World,
+  { canvasBounds }: { canvasBounds: Bounds },
+  state: Record<string, State<unknown>>
+) {
+  const renderTrajectory = state["render-trajectory"];
+  const [targetPosition] = world.query<[Position]>([
+    "position",
+    "ai-paddle-target",
+  ])[0];
+
+  const [ballPosition, ballVelocity] = world.query<
+    [Position, Velocity, BallComponent]
+  >(["position", "velocity", "ball"])[0];
+
+  for (const [entityId] of world.query<
+    [string, TrajectoryLineSegmentComponent]
+  >(["entity-id", "trajectory-line"])) {
+    world.removeEntity(entityId);
+  }
+
+  const bounces = 20;
+  let linesAdded = 0;
+
+  // Start the ray a little back from the start of the center of the ball to mitigate issues with tunneling
+  let start = ballPosition.position.minus(
+    ballVelocity.velocity.normalised().times(10)
+  );
+  let direction = ballVelocity.velocity;
+
+  // render trajectory line of each collision
+  while (linesAdded < bounces) {
+    const hit = castRay(
+      world,
+      {
+        position: start,
+        direction,
+        length: canvasBounds.size[0] * 2,
+      },
+      { layer: "wall" }
+    )[0];
+
+    if (!hit) {
+      break;
+    }
+
+    const end = hit.position;
+
+    const trajectoryLineComponents: (string | Component)[] = [
+      "trajectory-line",
+      {
+        name: "position",
+        position: start,
+      } as Position,
+    ];
+
+    if (renderTrajectory.value) {
+      trajectoryLineComponents.push({
+        name: "primitive",
+        stroke: [240, 60, 100],
+        dash: linesAdded === 0 ? 0 : [5, 5],
+        strokeWeight: 2,
+        type: "line",
+        start: Vector.create(0, 0),
+        end: end.minus(start),
+      } as PrimitiveShape);
+    }
+
+    world.addBundle(createBundle(trajectoryLineComponents));
+
+    const hitEntity = world.entity(hit.entityId);
+
+    const backBoardComponent = hitEntity.components.find(
+      (comp) => comp.name === "backboard"
+    ) as BackboardComponent | undefined;
+
+    if (backBoardComponent && backBoardComponent.owner === "ai") {
+      targetPosition.position = hit.position;
+      break;
+    }
+
+    start = end;
+    direction = direction.reflect(hit.normal).normalised();
+
+    linesAdded += 1;
+  }
+}
 
 const pong = EngineBuilder.create()
   .state("render-trajectory", false)
@@ -47,437 +403,53 @@ pong.part(setupPaddlesPart);
 
 export type { ApplicationState };
 
-const ballHitAudio = new Audio(minionBongUrl);
-
-const sound = false;
-
-pong.system(
-  "showMainMenu",
-  {
-    event: "update",
-    condition: {
-      state: "app-state",
-      value: "main-menu",
-      only: "on-enter",
-    },
-  },
-  (_world, { p }) => {
-    const mainMenu = p.select("#main-menu");
-    mainMenu?.show();
-  }
-);
-
-pong.system(
-  "showGameMenu",
-  {
-    event: "update",
-    condition: {
-      state: "app-state",
-      value: "in-game",
-      only: "on-enter",
-    },
-  },
-  (_world, { p }, state) => {
-    const gameMenu = p.select("#game-menu");
-    gameMenu?.show();
-  }
-);
-
-pong.system(
-  "hideGameMenu",
-  {
-    event: "update",
-    condition: {
-      state: "app-state",
-      value: "main-menu",
-      only: "on-enter",
-    },
-  },
-  (_world, { p }) => {
-    const gameMenu = p.select("#game-menu");
-    gameMenu?.hide();
-  }
-);
+pong.system("showMainMenu", onEnter("app-state", "main-menu"), showMainMenu);
+pong.system("showGameMenu", onEnter("app-state", "in-game"), showGameMenu);
+pong.system("hideGameMenu", onEnter("app-state", "main-menu"), hideGameMenu);
+pong.system("showEndMenu", onEnter("app-state", "end"), showEndMenu);
+pong.system("hideEndMenu", onExit("app-state", "end"), hideEndMenu);
+pong.system("hideMainMenu", onEnter("app-state", "in-game"), hideMainMenu);
 
 pong.system(
   "endConditionSystem",
-  {
-    event: "update",
-    condition: {
-      state: "app-state",
-      value: "in-game",
-    },
-  },
-  (_world, {}, state) => {
-    const [playerScore, aiScore] = state.score.value;
-
-    if (playerScore >= 3 || aiScore >= 3) {
-      state["app-state"].setValue("end");
-    }
-  }
+  onUpdateWhen("app-state", "in-game"),
+  endConditionSystem
 );
-pong.system(
-  "showEndMenu",
-  {
-    event: "update",
-    condition: {
-      state: "app-state",
-      value: "end",
-      only: "on-enter",
-    },
-  },
-  (_world, { p }, state) => {
-    const [playerScore, aiScore] = state.score.value;
-
-    console.log(`final score: player ${playerScore}, ai ${aiScore}`);
-
-    const endMessageDiv = p.select("#end-menu > .message");
-
-    if (endMessageDiv) {
-      const winningMessage = "You won, Nice! 🔥";
-      const loosingMessage = "You lost, to an ai 😔";
-      endMessageDiv.html(`
-        <p>${playerScore > aiScore ? winningMessage : loosingMessage}</p>
-      `);
-    }
-
-    const endMenu = p.select("#end-menu");
-    endMenu?.show();
-  }
-);
-
-pong.system(
-  "hideEndMenu",
-  {
-    event: "update",
-    condition: {
-      state: "app-state",
-      value: "end",
-      only: "on-exit",
-    },
-  },
-  (_world, { p }) => {
-    const endMenu = p.select("#end-menu");
-    endMenu?.hide();
-  }
-);
-
-pong.system(
-  "hideMainMenu",
-  {
-    event: "update",
-    condition: {
-      state: "app-state",
-      value: "in-game",
-      only: "on-enter",
-    },
-  },
-  (_world, { p }) => {
-    const mainMenu = p.select("#main-menu");
-    mainMenu?.hide();
-  }
-);
-
-// Need a way to factor out and organise these systems and state as they're already getting hard to manage
-
 pong.system(
   "ballCollisionHandlingSystem",
-  { event: "update", condition: { state: "app-state", value: "in-game" } },
-  function ballCollisionHandlingSystem(world: World) {
-    for (const [velocity, collision, position] of world.query<
-      [Velocity, Collision, Position, BallComponent]
-    >(["velocity", "collision", "position", "ball"])) {
-      const collidee = world.entity(collision.entityId);
-
-      velocity.velocity = velocity.velocity.reflect(collision.normal);
-
-      if (collidee.components.find((c) => c.name === "paddle")) {
-        const paddlePosition = collidee.getComponent("position") as Position;
-
-        const yDistanceFromPaddleCenter = paddlePosition.position.minus(
-          position.position
-        ).y;
-
-        velocity.velocity = Vector.create(
-          velocity.velocity.x,
-          -yDistanceFromPaddleCenter / 25
-        );
-      }
-    }
-  }
+  onUpdateWhen("app-state", "in-game"),
+  ballCollisionHandlingSystem
 );
-
 pong.system(
   "backboardCollisionHandlingSystem",
-  { event: "update", condition: { state: "app-state", value: "in-game" } },
-  (world: World, {}, state) => {
-    const [playerScore, aiScore] = state.score.value;
-
-    for (const [backboard] of world.query<[BackboardComponent, Collision]>([
-      "backboard",
-      "collision",
-    ])) {
-      const [ballPosition, ballVelocity, ballSpeed] = world.query<
-        [Position, Velocity, Speed, BallComponent]
-      >(["position", "velocity", "speed", "ball"])[0];
-
-      // Reset ball position
-      ballPosition.position = Vector.create(200, 40);
-
-      const [playerScore, aiScore] = state.score.value;
-
-      if (backboard.owner == "player") {
-        state.score.setValue([playerScore, aiScore + 1]);
-        // Reset ball directed towards player
-        ballVelocity.velocity = ballVelocity.velocity = new Vector(
-          -0.5,
-          -0.5
-        ).plus(new Vector(-0.1, -0.1).times(playerScore + aiScore));
-      }
-
-      if (backboard.owner == "ai") {
-        state.score.setValue([playerScore + 1, aiScore]);
-
-        // Reset ball directed towards ai
-        ballVelocity.velocity = new Vector(0.5, -0.5).plus(
-          new Vector(0.1, -0.1).times(playerScore + aiScore)
-        );
-      }
-
-      // Reset ball speed
-      ballSpeed.value = 3;
-    }
-  }
+  onUpdateWhen("app-state", "in-game"),
+  backboardCollisionHandlingSystem
 );
-
-pong.system(
-  "updateScoreBoard",
-  { event: "update" },
-  (world: World, {}, state) => {
-    const [playerScore, aiScore] = state.score.value;
-
-    const [playerScoreText] = world.query<[PrimitiveShape]>([
-      "primitive",
-      "player-score",
-    ])[0];
-
-    // Its pretty weird the type has to be narrowed after you receive it from a query
-    // Seems like the query should be responsible for this
-    if (playerScoreText.type === "text") {
-      playerScoreText.text = playerScore.toString();
-    }
-
-    const [aiScoreText] = world.query<[PrimitiveShape]>([
-      "primitive",
-      "ai-score",
-    ])[0];
-
-    if (aiScoreText.type === "text") {
-      aiScoreText.text = aiScore.toString();
-    }
-  }
-);
-
-// Describes bow the collision handling worked in the orginial pong game
-// https://www.vbforums.com/showthread.php?634246-RESOLVED-How-did-collision-in-the-original-Pong-happen
+pong.system("updateScoreBoard", onUpdate(), updateScoreBoard);
 pong.system(
   "paddleCollisionHandlingSystem",
-  { event: "update", condition: { state: "app-state", value: "in-game" } },
-  function paddleCollisionHandlingSystem(world: World) {
-    const [, ballSpeed] = world.query<[Velocity, Speed, BallComponent]>([
-      "velocity",
-      "speed",
-      "ball",
-    ])[0];
-
-    for (const [collision] of world.query<[Collision, PaddleComponent]>([
-      "collision",
-      "paddle",
-    ])) {
-      if (
-        world
-          .entity(collision.entityId)
-          .components.find((c) => c.name === "ball")
-      ) {
-        ballSpeed.value += ballSpeed.value * 0.1;
-      }
-
-      if (sound) {
-        ballHitAudio.play();
-      }
-    }
-  }
+  onUpdateWhen("app-state", "in-game"),
+  paddleCollisionHandlingSystem
 );
 pong.system(
   "playerPaddleSystem",
-  { event: "update", condition: { state: "app-state", value: "in-game" } },
-
-  function playerPaddleSystem(world: World, { mousePosition, canvasBounds }) {
-    for (const [position] of world.query<[Position]>([
-      "position",
-      "paddle",
-      "player",
-    ])) {
-      const positionChange = mousePosition.y - position.position.y;
-      position.position = position.position.plus(
-        Vector.create(0, positionChange)
-      );
-
-      if (position.position.y < canvasBounds.min.y + 35) {
-        position.position = Vector.create(
-          position.position.x,
-          canvasBounds.min.y + 35
-        );
-      }
-
-      if (position.position.y > canvasBounds.max.y - 35) {
-        position.position = Vector.create(
-          position.position.x,
-          canvasBounds.max.y - 35
-        );
-      }
-    }
-  }
+  onUpdateWhen("app-state", "in-game"),
+  playerPaddleSystem
 );
 pong.system(
   "aiPaddleSystem",
-  { event: "update", condition: { state: "app-state", value: "in-game" } },
-
-  function aiPaddleSystem(world: World, { canvasBounds }) {
-    const [targetPosition] = world.query<[Position]>([
-      "position",
-      "ai-paddle-target",
-    ])[0];
-    for (const [position, speed] of world.query<[Position, Speed]>([
-      "position",
-      "speed",
-      "paddle",
-      "ai",
-    ])) {
-      // Cant just move it to where the ball is, need to move it to where the ball is going to be when it hits on the ai side
-      position.position = position.position.plus(
-        Vector.create(
-          0,
-          (targetPosition.position.y - position.position.y) * speed.value
-        )
-      );
-
-      if (position.position.y < canvasBounds.min.y + 35) {
-        position.position = Vector.create(
-          position.position.x,
-          canvasBounds.min.y + 35
-        );
-      }
-
-      if (position.position.y > canvasBounds.max.y - 35) {
-        position.position = Vector.create(
-          position.position.x,
-          canvasBounds.max.y - 35
-        );
-      }
-    }
-  }
+  onUpdateWhen("app-state", "in-game"),
+  aiPaddleSystem
 );
 pong.system(
   "ballMovementSystem",
-  { event: "update", condition: { state: "app-state", value: "in-game" } },
-  function ballMovementSystem(world: World) {
-    const [velocity, position, speed] = world.query<
-      [Velocity, Position, Speed, BallComponent]
-    >(["velocity", "position", "speed", "ball"])[0];
-
-    position.position = position.position.plus(
-      velocity.velocity.times(speed.value)
-    );
-  }
+  onUpdateWhen("app-state", "in-game"),
+  ballMovementSystem
 );
-
 pong.system(
   "ballTrajectorySystem",
-  { event: "update", condition: { state: "app-state", value: "in-game" } },
-  (world: World, { canvasBounds }, state: Record<string, State<unknown>>) => {
-    const renderTrajectory = state["render-trajectory"];
-    const [targetPosition] = world.query<[Position]>([
-      "position",
-      "ai-paddle-target",
-    ])[0];
-
-    const [ballPosition, ballVelocity] = world.query<
-      [Position, Velocity, BallComponent]
-    >(["position", "velocity", "ball"])[0];
-
-    for (const [entityId] of world.query<
-      [string, TrajectoryLineSegmentComponent]
-    >(["entity-id", "trajectory-line"])) {
-      world.removeEntity(entityId);
-    }
-
-    const bounces = 20;
-    let linesAdded = 0;
-
-    // Start the ray a little back from the start of the center of the ball to mitigate issues with tunneling
-    let start = ballPosition.position.minus(
-      ballVelocity.velocity.normalised().times(10)
-    );
-    let direction = ballVelocity.velocity;
-
-    // render trajectory line of each collision
-    while (linesAdded < bounces) {
-      const hit = castRay(
-        world,
-        {
-          position: start,
-          direction,
-          length: canvasBounds.size[0] * 2,
-        },
-        { layer: "wall" }
-      )[0];
-
-      if (!hit) {
-        break;
-      }
-
-      const end = hit.position;
-
-      const trajectoryLineComponents: (string | Component)[] = [
-        "trajectory-line",
-        {
-          name: "position",
-          position: start,
-        } as Position,
-      ];
-
-      if (renderTrajectory.value) {
-        trajectoryLineComponents.push({
-          name: "primitive",
-          stroke: [240, 60, 100],
-          dash: linesAdded === 0 ? 0 : [5, 5],
-          strokeWeight: 2,
-          type: "line",
-          start: Vector.create(0, 0),
-          end: end.minus(start),
-        } as PrimitiveShape);
-      }
-
-      world.addBundle(createBundle(trajectoryLineComponents));
-
-      const hitEntity = world.entity(hit.entityId);
-
-      const backBoardComponent = hitEntity.components.find(
-        (comp) => comp.name === "backboard"
-      ) as BackboardComponent | undefined;
-
-      if (backBoardComponent && backBoardComponent.owner === "ai") {
-        targetPosition.position = hit.position;
-        break;
-      }
-
-      start = end;
-      direction = direction.reflect(hit.normal).normalised();
-
-      linesAdded += 1;
-    }
-  }
+  onUpdateWhen("app-state", "in-game"),
+  ballTrajectorySystem
 );
 
 export default pong;
