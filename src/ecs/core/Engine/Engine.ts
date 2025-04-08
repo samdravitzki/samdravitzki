@@ -208,13 +208,15 @@ export class Engine<StateSet extends Record<string, unknown> = {}> {
           y: p.mouseY,
         };
 
+        const resources = {
+          mousePosition,
+          p,
+          canvasBounds: self._canvasBounds,
+        };
+
         keypressSystems.forEach(({ name, system }) => {
           console.debug(`[keypress] ${name} (triggered)`);
-          system(
-            world,
-            { mousePosition, p, canvasBounds: self._canvasBounds },
-            self._states
-          );
+          system(world, resources, self._states);
         });
       };
     }, parent);
