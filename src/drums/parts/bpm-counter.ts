@@ -5,7 +5,7 @@ import { onStart, onUpdate } from "../../ecs/core/Engine/SystemTrigger";
 import State from "../../ecs/core/State/State";
 import Vector from "../../ecs/core/Vector/Vector";
 import World from "../../ecs/core/World/World";
-import { PrimitiveShape } from "../../ecs/parts/primitive-renderer/components/Primitive";
+import { PrimitiveShape } from "../../ecs/parts/p5/primitive-renderer/components/Primitive";
 
 export type Keypress = {
   key: string;

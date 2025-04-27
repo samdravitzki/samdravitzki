@@ -1,7 +1,7 @@
 import * as Tone from "tone";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
-import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
-import { PrimitiveShape } from "../ecs/parts/primitive-renderer/components/Primitive";
+import primitiveRendererPart from "../ecs/parts/p5/primitive-renderer/primitive-renderer";
+import { PrimitiveShape } from "../ecs/parts/p5/primitive-renderer/components/Primitive";
 import Component from "../ecs/core/Component/Component";
 import bpmCounterPart, { Keypress } from "./parts/bpm-counter";
 import hiphopTab from "./tabs/hiphop";
@@ -213,7 +213,7 @@ const drums = EngineBuilder.create()
   .state("bpm", 0)
   .build();
 
-drums.part(primitiveRenderer);
+drums.part(primitiveRendererPart);
 
 drums.system("calculate-bpm", onKeydown(), calculateBpm);
 

@@ -1,14 +1,20 @@
-import { Position } from "../../components/Position";
+import { Position } from "../../../components/Position";
 import { PrimitiveShape } from "./components/Primitive";
-import Engine from "../../core/Engine/Engine";
+import Engine from "../../../core/Engine/Engine";
+import World from "../../../core/World/World";
+import p5 from "p5";
+import { onUpdate } from "../../../core/Engine/SystemTrigger";
+import { ResourcePool } from "../../../core/Engine/ResourcePool";
 
-function primitiveRenderer<T extends Record<string, unknown>>(
+function primitiveRendererPart<T extends Record<string, unknown>>(
   engine: Engine<T>
 ) {
-  engine.system("primitiveRenderer", { event: "update" }, (world, { p }) => {
+  function primitiveRenderer(world: World, resources: ResourcePool) {
     for (const [position, primitive] of world.query<[Position, PrimitiveShape]>(
       ["position", "primitive"]
     )) {
+      const p = resources.get<p5>("p5");
+
       if (!primitive.strokeWeight) {
         p.strokeWeight(0);
       } else {
@@ -78,7 +84,9 @@ function primitiveRenderer<T extends Record<string, unknown>>(
         p.text(primitive.text, position.position.x, position.position.y);
       }
     }
-  });
+  }
+
+  engine.system("primitiveRenderer", onUpdate(), primitiveRenderer);
 }
 
-export default primitiveRenderer;
+export default primitiveRendererPart;
