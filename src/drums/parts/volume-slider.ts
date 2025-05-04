@@ -4,14 +4,15 @@ import * as Tone from "tone";
 import Bounds from "../../ecs/core/Bounds/Bounds";
 import World from "../../ecs/core/World/World";
 import { onStart } from "../../ecs/core/Engine/SystemTrigger";
+import { ResourcePool } from "../../ecs/core/Engine/ResourcePool";
 
 export default function volumeSliderPart<T extends Record<string, unknown>>(
   engine: Engine<T>
 ) {
-  function setupVolumeSlider(
-    _world: World,
-    { p, canvasBounds }: { p: p5; canvasBounds: Bounds }
-  ) {
+  function setupVolumeSlider(_world: World, resources: ResourcePool) {
+    const p = resources.get<p5>("p5");
+    const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
     const menuArea = p.createDiv();
     menuArea.position(canvasBounds.bottom.left.x, canvasBounds.bottom.left.y);
     menuArea.style("display", "flex");

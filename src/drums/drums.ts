@@ -16,6 +16,7 @@ import p5 from "p5";
 import State from "../ecs/core/State/State";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import { onKeydown, onUpdate } from "../ecs/core/Engine/SystemTrigger";
+import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 
 /**
  * The idea is to make a game that makes the user feel like they're playing
@@ -54,7 +55,7 @@ import { onKeydown, onUpdate } from "../ecs/core/Engine/SystemTrigger";
  */
 function calculateBpm(
   _world: World,
-  {},
+  _resources: ResourcePool,
   state: { "key-presses": State<Keypress[]>; bpm: State<number> }
 ) {
   const keyPresses = state["key-presses"];
@@ -73,9 +74,10 @@ const drumkits = [parisHouseDrumkit, lofiHipHopDrumkit];
  */
 function keypressTrackingSystem(
   _world: World,
-  { p }: { p: p5 },
+  resources: ResourcePool,
   state: { "key-presses": State<Keypress[]> }
 ) {
+  const p = resources.get<p5>("p5");
   const keyPresses = state["key-presses"].value;
 
   keyPresses.push({
@@ -94,7 +96,7 @@ function keypressTrackingSystem(
  */
 function sequenceIncrementerSystem(
   _world: World,
-  {}: object,
+  _resources: ResourcePool,
   state: { "sequence-index": State<number> }
 ) {
   const sequenceIndex = state["sequence-index"];
@@ -107,9 +109,10 @@ function sequenceIncrementerSystem(
  */
 function drumSystem(
   world: World,
-  { canvasBounds }: { canvasBounds: Bounds },
+  resources: ResourcePool,
   state: { "sequence-index": State<number>; bpm: State<number> }
 ) {
+  const canvasBounds = resources.get<Bounds>("canvas-bounds");
   const sequenceIndex = state["sequence-index"];
 
   // TODO: need a way to gaurantee the order of systems executed so that we can assume the keypress state defined by the "pattern-detector" system is set before this runs so that there isn't stuff delayed to the next keypress
@@ -188,10 +191,11 @@ export type TextEffectComponent = Component & {
  * Fade out any text effect entities over time and when they are no
  * longer visible remove them
  */
-function textFadeSystem(world: World, { p }: { p: p5 }) {
+function textFadeSystem(world: World, resources: ResourcePool) {
   for (const [primitive, entityId] of world.query<
     [PrimitiveShape, string, TextEffectComponent]
   >(["primitive", "entity-id", "faded"])) {
+    const p = resources.get<p5>("p5");
     if (primitive.fill) {
       const [r, g, b, alpha] = primitive.fill;
 

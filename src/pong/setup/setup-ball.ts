@@ -1,9 +1,15 @@
 import createBundle from "../../ecs/core/Bundle/createBundle";
 import Vector from "../../ecs/core/Vector/Vector";
 import Engine from "../../ecs/core/Engine/Engine";
+import { ResourcePool } from "../../ecs/core/Engine/ResourcePool";
+import World from "../../ecs/core/World/World";
+import Bounds from "../../ecs/core/Bounds/Bounds";
+import { onStart } from "../../ecs/core/Engine/SystemTrigger";
 
 function setupBallPart<T extends Record<string, unknown>>(engine: Engine<T>) {
-  engine.system("setupBall", { event: "start" }, (world, { canvasBounds }) => {
+  function setupBall(world: World, resources: ResourcePool) {
+    const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
     const ballBundle = createBundle([
       "ball",
       {
@@ -35,7 +41,8 @@ function setupBallPart<T extends Record<string, unknown>>(engine: Engine<T>) {
     ]);
 
     world.addBundle(ballBundle);
-  });
+  }
+  engine.system("setupBall", onStart(), setupBall);
 }
 
 export default setupBallPart;
