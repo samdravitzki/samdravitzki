@@ -3,7 +3,6 @@ import System from "../System/System";
 import World from "../World/World";
 import Bounds from "../Bounds/Bounds";
 import State from "../State/State";
-import { SystemTrigger } from "./SystemTrigger";
 import { ResourcePool } from "./ResourcePool";
 
 export type EngineOptions = Partial<{
@@ -84,6 +83,8 @@ export class Engine<StateSet extends Record<string, unknown> = {}> {
       console.error("Engine has no runner configured");
       return;
     }
+
+    console.debug(this._systems);
 
     const cleanup = this._runner(
       this._systems,

@@ -30,11 +30,11 @@ function collisions(visualiseColliders: boolean = false) {
       }
     }
 
-    engine.system(
-      "collisionLoggingSystem",
-      { event: "update" },
-      collisionLoggingSystem
-    );
+    // engine.system(
+    //   "collisionLoggingSystem",
+    //   { event: "update" },
+    //   collisionLoggingSystem
+    // );
 
     engine.system("collisionSystem", { event: "update" }, collisionSystem);
 

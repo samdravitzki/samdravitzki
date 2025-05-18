@@ -32,9 +32,33 @@ function p5Part<T extends Record<string, unknown>>(
           systems
             .filter(([trigger]) => trigger.event === "start")
             .forEach(([trigger, system]) => {
-              console.debug(`${system.name} on ${trigger.event}`);
+              // console.debug(`${system.name} on ${trigger.event}`);
               system(world, resources, states);
             });
+
+          // systems
+          //   .filter(([trigger]) => trigger.event === "state-change")
+          //   .forEach(([trigger, system]) => {
+          //     // Rather than having the state handle running the function itself it
+          //     // may be simpler if instead we can ask which states have changed this
+          //     // frame and run the associated systems instead (i.e. move away from the
+          //     // observer pattern)
+
+          //     // this way the runner is still the only thing responsible for defining
+          //     // when the systems run and we can ensure that all systems can receive the
+          //     // same resources
+
+          //     // This would also enable triggers to be implemented as functions that
+          //     // we pass the state of the system and based on what it is they return
+          //     // a boolean and if true we run its associated system
+
+          //     // State changes would then just be treated as events that last a single frame
+          //     // and would make it easy to add this behaviour for different kinds of events
+          //     // such as key input
+          //     const state = states[trigger];
+
+          //     state
+          //   });
         };
 
         p.draw = () => {
@@ -48,7 +72,7 @@ function p5Part<T extends Record<string, unknown>>(
           systems
             .filter(([trigger]) => trigger.event === "update")
             .forEach(([trigger, system]) => {
-              console.debug(`${system.name} on ${trigger.event}`);
+              // console.debug(`${system.name} on ${trigger.event}`);
               system(world, resources, states);
             });
         };
