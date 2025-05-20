@@ -131,6 +131,7 @@ All the things that need to be done to support building and maintain these proje
   - [ ] Apply IaC to provision the swa
 - [ ] Reset state of engine when it is stopped
 - [ ] Canvases dont look good as just squares in the middle of your screen
+- [ ] Dependabot (or anything else for managing updating dependencies)
 
 # Appendix
 
