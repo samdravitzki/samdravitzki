@@ -32,7 +32,7 @@ jobs:
           zip -r personal-site.zip ./dist
 
       - name: Upload build as workflow artifact
-        uses: actions/upload-artifact@4
+        uses: actions/upload-artifact@v4
         with:
           name: personal-site
           path: ./personal-site.zip
