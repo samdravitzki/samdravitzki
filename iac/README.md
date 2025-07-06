@@ -18,10 +18,11 @@ Using the following command create an application registration for the github wo
 az ad app create --display-name 'Github workflow - Sam Dravitzki'
 ```
 
-The application was created with an 
+The application was created with an
+
 - appId of `71072f37-0c2e-42f5-863d-af3264b947eb`
 - and ad objectId of `64de58ca-29bc-4c15-8104-59f8c8b481c3`
-which are used to reference the app registration
+  which are used to reference the app registration
 
 _An application registration is a type of workload identity_
 
@@ -48,7 +49,15 @@ az ad app federated-credential create \
   --parameters ./iac/policy.json
 ```
 
-#### 3. Authorise the workload identity
+#### 3. Create a resource group
+
+So far all of the infrastructure in this repository can be deployed at the resource group scope so we need a resource group to deploy to. To create the resource group run the following command...
+
+```
+az group create --name rg-personal-site --location australiaeast
+```
+
+#### 4. Authorise the workload identity
 
 To be able to modify and create resources in azure the workload identity needs to be authorised to do so in an entire subscription or resouce group.
 
@@ -58,20 +67,19 @@ To authorise the workload identity for the subscription it first needs a service
 az ad sp create --id 71072f37-0c2e-42f5-863d-af3264b947eb
 ```
 
-The bicep used for this project creates a resource group and so the service principal requires the Contributor role over the entire subscription. Which can be done by running the following command...
+To be able to deploy infrastructure to the rg-personal-site resource group we need to assign the workload identity the Contributor role within it. Which can be done by running the following command...
 
 ```bash
 az role assignment create \
   --assignee 71072f37-0c2e-42f5-863d-af3264b947eb \
   --role Contributor \
-  --scope "/subscriptions/35a62e88-1914-49a8-b04c-aaf5e499fdd5" \
-  --description "The deployment workflow for the samdravitzki repo needs to be able to create resources and resource groups within the subscription"
+  --scope "/subscriptions/35a62e88-1914-49a8-b04c-aaf5e499fdd5/resourceGroups/rg-personal-site" \
+  --description "The deployment workflow for the samdravitzki repo needs to be able to create resources within the rg-personal-site resource group"
 ```
 
-_Should change it so the resource group is created manually so the workload identity only needs access over a resource group. Later down the line we could look at automating the resource group creation but currently there is not much benefit as it requires additional complexity and security risk_
+#### 5. Use the workload identity in the github workflow
 
-#### 4. Use the workload identity in the github workflow
-
+Using the `azure/login` action passing it the azure subscription, tenant and application (client) ids enables the workflow to sucessfully authenticate with azure enabling infrastructure to be deployed automatically to the rg-personal-site resource group
 
 ## Resources
 

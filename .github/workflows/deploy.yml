@@ -3,7 +3,7 @@ name: deploy
 on:
   workflow_call:
     inputs:
-      location:
+      resourceGroup:
         required: true
         type: string
     secrets:
@@ -32,8 +32,7 @@ jobs:
         with:
           deploymentName: ${{ github.run_number }}
           template: ./iac/main.bicep
-          region: ${{ inputs.location }}
-          scope: subscription
+          resourceGroupName: ${{ inputs.resourceGroup }}
           deploymentMode: Validate
 
   deploy-infrastructure:
@@ -56,9 +55,8 @@ jobs:
         with:
           failOnStdErr: false # required so github doesn't interpret log data as errors (only required when using custom linter configuration)
           deploymentName: ${{ github.run_number }}
-          region: ${{ inputs.location }}
+          resourceGroupName: ${{ inputs.resourceGroup }}
           template: ./iac/main.bicep
-          scope: subscription
           deploymentMode: Complete
 
   # smoke-test:
