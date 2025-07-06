@@ -11,7 +11,11 @@
   },
   "customizations": {
     "vscode": {
-      "extensions": ["esbenp.prettier-vscode", "ms-azuretools.vscode-bicep"]
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-bicep",
+        "github.vscode-github-actions"
+      ]
     }
   }
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
