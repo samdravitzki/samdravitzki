@@ -1,6 +1,6 @@
 targetScope = 'subscription'
 
-param location string = ''
+param location string = 'australiaeast'
 
 var resourceToken = uniqueString(subscription().subscriptionId, location)
 
