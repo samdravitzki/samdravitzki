@@ -1,4 +1,4 @@
-name: Deployment
+name: intergration and deployment
 
 on:
   push:
@@ -7,19 +7,16 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-env:
-  AZURE_RESOURCEGROUP_NAME: rg-personal-site
-
 jobs:
   build:
     uses: ./.github/workflows/build.yml
 
-  # deploy:
-  #   uses: ./.github/workflows/deploy.yml
-  #   needs: build
-  #   with:
-  #     resourceGroupName: ${{ env.AZURE_RESOURCEGROUP_NAME }}
-  #   secrets:
-  #     AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_TEST }}
-  #     AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-  #     AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  deploy:
+    uses: ./.github/workflows/deploy.yml
+    needs: build
+    with:
+      location: australiaeast
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
