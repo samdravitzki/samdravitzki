@@ -27,13 +27,16 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - uses: azure/arm-deploy@v2
+      - uses: azure/bicep-deploy@v2
         name: Run preflight validation
         with:
-          deploymentName: ${{ github.run_number }}
-          template: ./iac/main.bicep
-          resourceGroupName: ${{ inputs.resourceGroup }}
-          deploymentMode: Validate
+          type: deployment
+          operation: validate
+          scope: resource-group
+          name: ${{ github.run_number }}
+          resource-group-name: ${{ inputs.resourceGroup }}
+          template-file: ./iac/main.bicep
+          action-on-unmanage-resources: delete
 
   deploy-infrastructure:
     runs-on: ubuntu-latest
@@ -49,15 +52,17 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - uses: azure/arm-deploy@v2
+      - uses: azure/bicep-deploy@v2
         name: Deploy infrastructure
         id: deploy
         with:
-          failOnStdErr: false # required so github doesn't interpret log data as errors (only required when using custom linter configuration)
-          deploymentName: ${{ github.run_number }}
-          resourceGroupName: ${{ inputs.resourceGroup }}
-          template: ./iac/main.bicep
-          deploymentMode: Complete
+          type: deployment
+          operation: create
+          scope: resource-group
+          name: ${{ github.run_number }}
+          resource-group-name: ${{ inputs.resourceGroup }}
+          template-file: ./iac/main.bicep
+          action-on-unmanage-resources: delete
 
   # smoke-test:
   #   runs-on: ubuntu-latest
