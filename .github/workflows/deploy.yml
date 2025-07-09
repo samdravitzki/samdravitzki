@@ -32,7 +32,7 @@ jobs:
         with:
           type: deployment
           operation: validate
-          scope: resource-group
+          scope: resourceGroup
           name: ${{ github.run_number }}
           resource-group-name: ${{ inputs.resourceGroup }}
           template-file: ./iac/main.bicep
@@ -58,7 +58,7 @@ jobs:
         with:
           type: deployment
           operation: create
-          scope: resource-group
+          scope: resourceGroup
           name: ${{ github.run_number }}
           resource-group-name: ${{ inputs.resourceGroup }}
           template-file: ./iac/main.bicep
