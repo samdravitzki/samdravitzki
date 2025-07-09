@@ -34,6 +34,7 @@ jobs:
           operation: validate
           scope: resourceGroup
           name: ${{ github.run_number }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resource-group-name: ${{ inputs.resourceGroup }}
           template-file: ./iac/main.bicep
           action-on-unmanage-resources: delete
@@ -60,6 +61,7 @@ jobs:
           operation: create
           scope: resourceGroup
           name: ${{ github.run_number }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resource-group-name: ${{ inputs.resourceGroup }}
           template-file: ./iac/main.bicep
           action-on-unmanage-resources: delete
