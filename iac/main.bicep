@@ -1,10 +1,8 @@
-targetScope = 'subscription'
+var location = resourceGroup().location
+var resourceToken = uniqueString(resourceGroup().id, location)
 
-param location string = 'australiaeast'
-
-var resourceToken = uniqueString(subscription().subscriptionId, location)
-
-resource personalSiteRg 'Microsoft.Resources/resourceGroups@2025-04-01' = {
-  name: 'rg-personal-site-${resourceToken}'
+resource staticSite 'Microsoft.Web/staticSites@2024-11-01' = {
   location: location
+  name: 'swa-personal-site-${resourceToken}'
 }
+
