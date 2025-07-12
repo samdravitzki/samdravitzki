@@ -88,3 +88,7 @@ Main resource used - https://learn.microsoft.com/en-us/azure/azure-resource-mana
 What are workload identities? - https://learn.microsoft.com/en-us/entra/workload-id/workload-identities-overview
 
 Workload identity training module - https://learn.microsoft.com/en-us/training/modules/authenticate-azure-deployment-workflow-workload-identities/2-understand-workload-identities
+
+## The future
+
+I left out learning about [deployment stacks](https://learn.microsoft.com/en-us/training/modules/introduction-to-deployment-stacks/), next time I find myself working on iac I want to take a look into them
