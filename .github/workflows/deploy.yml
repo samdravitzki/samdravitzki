@@ -75,6 +75,9 @@ jobs:
         with:
           name: personal-site
 
+      - name: Display structure of downloaded files
+        run: ls -R
+
       - uses: azure/login@v1
         name: Sign in to Azure
         with:
@@ -89,16 +92,6 @@ jobs:
           deployment_token="$(az staticwebapp secrets list --name '${{ needs.deploy-infrastructure.outputs.personalSiteResourceName }}' --query 'properties.apiKey' --output tsv)"
           echo "::add-mask::$deployment_token"
           echo "deployment-token=$deployment_token" >> "$GITHUB_OUTPUT"
-
-      - id: test-step
-        name: Create test aliased var
-        run: |
-          cheese_var="cheese"
-          echo "::add-mask::$cheese_var"
-          echo "test-var=$cheese_var" >> "$GITHUB_OUTPUT"
-
-      - name: Echo aliased test var
-        run: echo "${{ steps.test-step.outputs.test-var }}"
 
       - uses: Azure/static-web-apps-deploy@v1
         name: Deploy site
