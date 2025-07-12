@@ -105,7 +105,7 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ steps.get-deployment-token.outputs.deployment-token }}
           action: "upload"
-          app_location: "src/dist"
+          app_location: "dist"
           output_location: ""
           skip_app_build: true
 # Static site is being deployed, run smoke tests to validate deployment was successful
