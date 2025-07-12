@@ -94,7 +94,7 @@ jobs:
       - id: test-step
         run: echo "test-var=cheese" >> "$GITHUB_OUTPUT"
 
-      - run: echo "${{ steps.test-step.outputs.test-var }}""
+      - run: echo "${{ steps.test-step.outputs.test-var }}"
 
       - uses: Azure/static-web-apps-deploy@v1
         name: Deploy site
@@ -102,7 +102,7 @@ jobs:
           # Need to dynamically get the deployment token and pass it to this action
           # masking = https://www.aaron-powell.com/posts/2022-07-14-working-with-add-mask-and-github-actions/
           # getting token = https://learn.microsoft.com/en-us/azure/static-web-apps/static-web-apps-cli-deploy
-          azure_static_web_apps_api_token: ${{ steps.get-deployment-token.outputs.deployment-token }}
+          azure_static_web_apps_api_token: "${{ steps.get-deployment-token.outputs.deployment-token }}"
           app_location: "src/dist"
           output_location: ""
           skip_app_build: true
