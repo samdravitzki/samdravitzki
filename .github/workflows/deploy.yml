@@ -105,8 +105,7 @@ jobs:
       - uses: Azure/static-web-apps-deploy@v1
         name: Deploy site
         with:
-          azure_static_web_apps_api_token: ${{ steps.get-deployment-token.outcome.deployment-token }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          azure_static_web_apps_api_token: ${{ steps.test-step.outputs.test-var }}
           action: "upload"
           app_location: "src/dist"
           output_location: ""
