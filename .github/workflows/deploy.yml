@@ -82,9 +82,12 @@ jobs:
         with:
           name: personal-site
 
-      - name: Deompress build
+      - name: Deompress artifact
         run: |
           unzip personal-site.zip
+
+      - name: Display structure artifact
+        run: ls -R
 
       - name: Get deployment token
         id: get-deployment-token
