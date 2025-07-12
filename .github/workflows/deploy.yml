@@ -82,7 +82,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - uses: azure/cli@v2
+      - uses: azure/cli@v2.1.0
         name: Get deployment token
         id: get-deployment-token
         with:
