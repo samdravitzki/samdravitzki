@@ -87,7 +87,8 @@ jobs:
         id: get-deployment-token
         with:
           inlineScript: |
-            deployment_token="::add-mask::$(az staticwebapp secrets list --name ${{ needs.deploy-infrastructure.outputs.personalSiteResourceName }} --query "properties.apiKey")"
+            deployment_token="$(az staticwebapp secrets list --name ${{ needs.deploy-infrastructure.outputs.personalSiteResourceName }} --query "properties.apiKey")"
+            echo "::add-mask::$deployment_token"
             echo "deployment_token=$deployment_token" >> "$GITHUB_OUTPUT"
 
       - uses: Azure/static-web-apps-deploy@v1
