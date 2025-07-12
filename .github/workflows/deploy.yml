@@ -82,15 +82,13 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - uses: azure/cli@v2.1.0
-        name: Get deployment token
+      - name: Get deployment token
         id: get-deployment-token
-        with:
-          inlineScript: |
-            echo "Getting deployment token for ${{ needs.deploy-infrastructure.outputs.personalSiteResourceName }}"
-            deployment_token="$(az staticwebapp secrets list --name '${{ needs.deploy-infrastructure.outputs.personalSiteResourceName }}' --query 'properties.apiKey')"
-            echo "::add-mask::$deployment_token"
-            echo "deployment-token=$deployment_token" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "Getting deployment token for ${{ needs.deploy-infrastructure.outputs.personalSiteResourceName }}"
+          deployment_token="$(az staticwebapp secrets list --name '${{ needs.deploy-infrastructure.outputs.personalSiteResourceName }}' --query 'properties.apiKey')"
+          echo "::add-mask::$deployment_token"
+          echo "deployment-token=$deployment_token" >> "$GITHUB_OUTPUT"
 
       - id: test-step
         name: Create test aliased var
@@ -105,7 +103,7 @@ jobs:
       - uses: Azure/static-web-apps-deploy@v1
         name: Deploy site
         with:
-          azure_static_web_apps_api_token: ${{ steps.test-step.outputs.test-var }}
+          azure_static_web_apps_api_token: ${{ steps.get-deployment-token.outputs.deployment-token }}
           action: "upload"
           app_location: "src/dist"
           output_location: ""
