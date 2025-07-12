@@ -86,7 +86,7 @@ jobs:
         id: get-deployment-token
         run: |
           echo "Getting deployment token for ${{ needs.deploy-infrastructure.outputs.personalSiteResourceName }}"
-          deployment_token="$(az staticwebapp secrets list --name '${{ needs.deploy-infrastructure.outputs.personalSiteResourceName }}' --query 'properties.apiKey')"
+          deployment_token="$(az staticwebapp secrets list --name '${{ needs.deploy-infrastructure.outputs.personalSiteResourceName }}' --query 'properties.apiKey' --output tsv)"
           echo "::add-mask::$deployment_token"
           echo "deployment-token=$deployment_token" >> "$GITHUB_OUTPUT"
 
