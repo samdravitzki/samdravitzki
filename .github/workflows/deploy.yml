@@ -70,20 +70,21 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy-infrastructure
     steps:
-      - uses: actions/download-artifact@v4
-        name: Download site artifact
-        with:
-          name: personal-site
-
-      - name: Display structure of downloaded files
-        run: ls -R
-
       - uses: azure/login@v1
         name: Sign in to Azure
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: actions/download-artifact@v4
+        name: Download site artifact
+        with:
+          name: personal-site
+
+      - name: Deompress build
+        run: |
+          unzip personal-site.zip
 
       - name: Get deployment token
         id: get-deployment-token
@@ -98,7 +99,7 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ steps.get-deployment-token.outputs.deployment-token }}
           action: "upload"
-          app_location: "dist"
+          app_location: "personal-site/dist"
           output_location: ""
           skip_app_build: true
 # Static site is being deployed, run smoke tests to validate deployment was successful
