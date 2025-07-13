@@ -1,6 +1,0 @@
-{
-  "name": "SamdravitzkiFederatedCredential",
-  "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:Brownstone-Inc/samdravitzki:ref:refs/heads/main",
-  "audiences": ["api://AzureADTokenExchange"]
-}
