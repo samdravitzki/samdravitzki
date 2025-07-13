@@ -44,7 +44,6 @@ jobs:
     needs: validate-bicep
     environment:
       name: production
-      url: ${{ steps.deploy.outputs.personalSiteUri }}
     outputs:
       personalSiteResourceName: ${{ steps.deploy.outputs.personalSiteResourceName }}
       personalSiteUrl: ${{ steps.deploy.outputs.personalSiteUri }}
