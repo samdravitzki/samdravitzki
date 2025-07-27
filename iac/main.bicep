@@ -20,13 +20,5 @@ resource wwwDomain 'Microsoft.Web/staticSites/customDomains@2024-11-01' = {
   name: 'www.dravitzki.com'
 }
 
-resource apexDomain 'Microsoft.Web/staticSites/customDomains@2024-11-01' = {
-  parent: site
-  name: 'dravitzki.com'
-  properties: {
-    validationMethod: 'dns-txt-token'
-  }
-}
-
 output personalSiteResourceName string = site.name
 output personalSiteUri string = 'https://${site.properties.defaultHostname}'
