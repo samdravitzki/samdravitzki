@@ -18,9 +18,6 @@ resource site 'Microsoft.Web/staticSites@2024-11-01' = {
 resource wwwSubdomain 'Microsoft.Web/staticSites/customDomains@2024-11-01' = {
   parent: site
   name: 'www.dravitzki.com'
-  properties: {
-    validationMethod: 'cname-delegation'
-  }
 }
 
 output personalSiteResourceName string = site.name
