@@ -88,6 +88,14 @@ az role assignment create \
 
 Using the `azure/login` action passing it the azure subscription, tenant and application (client) ids enables the workflow to sucessfully authenticate with azure enabling infrastructure to be deployed automatically to the rg-personal-site resource group
 
+## Custom domains
+
+The infrastructure as code will configure the www.dravitzki.com custom domain for the static site. The DNS associated with the then has to be configured with a CNAME record pointing to the auto generated domain name. The azure [article](https://learn.microsoft.com/en-us/azure/static-web-apps/custom-domain-external) describes this process in detail
+
+In the future I would like to use Azure DNS because it would be easy to futher automate configuration of the custom domain. I have chosen not to use it currently because it costs money. I would also like to configure the apex domain in the future.
+
+Idea: have sites for each of my family members and associated static sites with each. i.e it could be funny to have a billy.dravitzki.com, luke.dravitzki.com...
+
 ## Resources
 
 Main resource used - https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/learn-bicep
