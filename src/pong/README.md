@@ -18,7 +18,7 @@ Pong is a simple game but is a small step up in complexity from snake the first 
 - [x] Add ability to pause
 
 ### Ideas
-
+- Apply curves to ball movement and other animation techniques like squash and stretch to make the game feel more interesting
 - Make pong paddles rotate with the velocity of the mouse movement so that its not just hitting a flat object (make it a bit more interesting)
   - Could do this only when the player is clicking and if they're not clicking it causes the ball to spin
 - Since I had to create a generic collision system it might be worth creating some demos to be able to test the different types of collisions work as expected
