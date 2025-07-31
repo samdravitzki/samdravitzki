@@ -13,6 +13,7 @@ The `src/` folder contains all of the projects. Each project contains a `README.
 ### The site
 
 - [ ] Analytics
+- [ ] Basic design centered around a cool logo
 - [ ] Some way of communicating what each project is and how to interact with them
 - [ ] Mobile friendly
 - [ ] Implement more extensible approach to adding new games to the site
