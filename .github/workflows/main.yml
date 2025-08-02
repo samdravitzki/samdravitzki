@@ -1,4 +1,4 @@
-name: Deployment
+name: intergration and deployment
 
 on:
   push:
@@ -7,53 +7,20 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/build.yml
 
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.x"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Test
-        run: pnpm run test
-
-      - name: Build
-        run: pnpm run build
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: "dist/"
-
-  # Taken from https://github.com/actions/deploy-pages
   deploy:
+    uses: ./.github/workflows/deploy.yml
     needs: build
-
-    permissions:
-      pages: write # to deploy to Pages
-      id-token: write # to verify the deployment originates from an appropriate source
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy to Github Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+    with:
+      resourceGroup: rg-personal-site
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}

@@ -50,6 +50,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
     <div id="main-content">
       <h1>dravitzki.com</h1>
+      <p><i>projects</i></p>
       ${appInfos
         .map(
           (appInfo) => `

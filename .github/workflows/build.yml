@@ -1,0 +1,46 @@
+name: build
+
+on:
+  workflow_call:
+
+jobs:
+  build-personal-site:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Test
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Compress build
+        run: |
+          zip -r personal-site.zip ./dist
+
+      - name: Upload build as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: personal-site
+          path: ./personal-site.zip
+
+  lint-bicep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Bicep linter
+        run: az bicep build --file iac/main.bicep
