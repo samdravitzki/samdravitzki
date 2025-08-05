@@ -19,21 +19,23 @@ import State from "../ecs/core/State/State";
 import Component from "../ecs/core/Component/Component";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import collisions from "../ecs/parts/collision/collision";
-import setupBallPart from "./setup/setup-ball";
-import setupBoundariesPart from "./setup/setup-boundaries";
-import setupPaddlesPart from "./setup/setup-paddles";
-import setupScoreboardPart from "./setup/setup-scoreboard";
-import setupMenuUiPart from "./setup/setup-ui";
+import { createEndMenu, createGameMenu, createMainMenu } from "./setup-ui";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import {
   onEnter,
   onExit,
+  onStart,
   onUpdate,
   onUpdateWhen,
 } from "../ecs/core/Engine/SystemTrigger";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import p5Part, { MousePosition } from "../ecs/parts/p5/p5-part";
 import Engine from "../ecs/core/Engine/Engine";
+import createBall from "./prefabs/ball";
+import createBackboard from "./prefabs/backboard";
+import createWall from "./prefabs/wall";
+import createPaddle from "./prefabs/paddle";
+import createScore from "./prefabs/score";
 
 const ballHitAudio = new Audio(minionBongUrl);
 
@@ -394,6 +396,127 @@ function ballTrajectorySystem(
   }
 }
 
+function setupSceneSystem(world: World, resources: ResourcePool) {
+  const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+  const ballBundle = createBall(
+    new Vector(canvasBounds.max.x / 2, canvasBounds.max.y / 2)
+  );
+
+  world.addBundle(ballBundle);
+
+  const walllThickness = 10;
+  const backboardThickness = 5;
+
+  const northWallBundle = createWall(
+    new Vector(
+      canvasBounds.center.center.x,
+      canvasBounds.min.y + walllThickness / 2
+    ),
+    canvasBounds.max.x,
+    walllThickness
+  );
+
+  const southWallBundle = createWall(
+    new Vector(
+      canvasBounds.center.center.x,
+      canvasBounds.max.y - walllThickness / 2
+    ),
+    canvasBounds.max.x,
+    walllThickness
+  );
+
+  const centerLineBundle = createBundle([
+    {
+      name: "primitive",
+      stroke: [240, 60, 100],
+      strokeWeight: 2,
+      fill: [240, 60, 100],
+      type: "line",
+      start: new Vector(0, -canvasBounds.center.center.y),
+      end: new Vector(0, canvasBounds.center.center.y),
+    },
+    {
+      name: "position",
+      position: canvasBounds.center.center,
+    },
+  ]);
+
+  const leftBackboardBundle = createBackboard(
+    new Vector(
+      canvasBounds.min.x + backboardThickness / 2,
+      canvasBounds.center.center.y
+    ),
+    backboardThickness,
+    canvasBounds.max.y - 25,
+    "player"
+  );
+
+  const rightBackboardBundle = createBackboard(
+    new Vector(
+      canvasBounds.max.x - backboardThickness / 2,
+      canvasBounds.center.center.y
+    ),
+    backboardThickness,
+    canvasBounds.max.y - 25,
+    "ai"
+  );
+
+  world.addBundle(northWallBundle);
+  world.addBundle(southWallBundle);
+  world.addBundle(centerLineBundle);
+  world.addBundle(leftBackboardBundle);
+  world.addBundle(rightBackboardBundle);
+
+  const paddleWallOffset = 10;
+
+  const playerPaddleBundle = createPaddle(
+    new Vector(canvasBounds.min.x + paddleWallOffset, canvasBounds.max.y / 2),
+    "player"
+  );
+
+  // The position the ai paddle is aiming to end up in
+  const aiPaddleTarget = createBundle([
+    "ai-paddle-target",
+    {
+      name: "position",
+      position: new Vector(0, 0),
+    },
+  ]);
+
+  const aiPaddleBundle = createPaddle(
+    new Vector(canvasBounds.max.x - paddleWallOffset, canvasBounds.max.y / 2),
+    "ai"
+  );
+  world.addBundle(aiPaddleTarget);
+  world.addBundle(playerPaddleBundle);
+  world.addBundle(aiPaddleBundle);
+
+  const scoreXOffset = 5;
+  const scoreYOffset = 35;
+
+  const playerScoreBundle = createScore(
+    new Vector(
+      canvasBounds.max.x / 2 - scoreXOffset,
+      canvasBounds.min.y + scoreYOffset
+    ),
+    "right",
+    "player-score"
+  );
+
+  const aiScoreBundle = createScore(
+    new Vector(
+      canvasBounds.max.x / 2 + scoreXOffset,
+      canvasBounds.min.y + scoreYOffset
+    ),
+    "left",
+    "ai-score"
+  );
+
+  world.addBundle(playerScoreBundle);
+  world.addBundle(aiScoreBundle);
+}
+
 // NOTE for when back: Currently trying to get pong working with changes to how systems work
 // Try improve design by removing parts and introducing self contained systems instead
 class PongGameApp {
@@ -407,11 +530,11 @@ class PongGameApp {
 
     pong.part(p5Part([500, 500], parent));
     pong.part(collisions());
-    pong.part(setupMenuUiPart);
-    pong.part(setupBallPart);
-    pong.part(setupScoreboardPart);
-    pong.part(setupBoundariesPart);
-    pong.part(setupPaddlesPart);
+    pong.system("setup-scene", onStart(), setupSceneSystem);
+
+    pong.system("createGameMenu", onStart(), createGameMenu);
+    pong.system("createEndMenu", onStart(), createEndMenu);
+    pong.system("createMainMenu", onStart(), createMainMenu);
 
     pong.system(
       "showMainMenu",
