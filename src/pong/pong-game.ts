@@ -530,6 +530,7 @@ class PongGameApp {
 
     pong.part(p5Part([500, 500], parent));
     pong.part(collisions());
+
     pong.system("setup-scene", onStart(), setupSceneSystem);
 
     pong.system("createGameMenu", onStart(), createGameMenu);

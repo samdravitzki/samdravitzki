@@ -86,6 +86,8 @@ export class Engine<StateSet extends Record<string, unknown> = {}> {
 
     console.debug(this._systems);
 
+    // The runner should only be responsible for running
+    // the systems and not choosing whether or not they should run
     const cleanup = this._runner(
       this._systems,
       this._world,

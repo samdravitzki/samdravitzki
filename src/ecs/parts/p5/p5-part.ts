@@ -2,7 +2,8 @@ import p5 from "p5";
 import Engine from "../../core/Engine/Engine";
 import Bounds from "../../core/Bounds/Bounds";
 import Vector from "../../core/Vector/Vector";
-import primitiveRendererPart from "./primitive-renderer/primitive-renderer";
+import primitiveRendererSystem from "./primitive-renderer/primitive-renderer";
+import { onUpdate } from "../../core/Engine/SystemTrigger";
 
 export type MousePosition = {
   x: number;
@@ -85,7 +86,7 @@ function p5Part<T extends Record<string, unknown>>(
       };
     });
 
-    engine.part(primitiveRendererPart);
+    engine.system("renderer", onUpdate(), primitiveRendererSystem);
   };
 }
 
