@@ -5,6 +5,8 @@ import Engine from "../../ecs/core/Engine/Engine";
 import World from "../../ecs/core/World/World";
 import { ResourcePool } from "../../ecs/core/Engine/ResourcePool";
 import { onStart } from "../../ecs/core/Engine/SystemTrigger";
+import createWall from "../prefabs/wall";
+import createBackboard from "../prefabs/backboard";
 
 function setupBoundariesPart<T extends Record<string, unknown>>(
   engine: Engine<T>
@@ -13,56 +15,25 @@ function setupBoundariesPart<T extends Record<string, unknown>>(
     const playBounds = resources.get<Bounds>("canvas-bounds");
 
     const walllThickness = 10;
-
     const backboardThickness = 5;
 
-    const northWallBundle = createBundle([
-      {
-        name: "primitive",
-        fill: [240, 60, 100],
-        type: "square",
-        width: playBounds.max.x,
-        height: walllThickness,
-      },
-      {
-        name: "position",
-        position: new Vector(
-          playBounds.center.center.x,
-          playBounds.min.y + walllThickness / 2
-        ),
-      },
-      {
-        name: "collider",
-        layer: "wall",
-        type: "aabb",
-        width: playBounds.max.x,
-        height: walllThickness,
-      },
-    ]);
+    const northWallBundle = createWall(
+      new Vector(
+        playBounds.center.center.x,
+        playBounds.min.y + walllThickness / 2
+      ),
+      playBounds.max.x,
+      walllThickness
+    );
 
-    const southWallBundle = createBundle([
-      {
-        name: "primitive",
-        fill: [240, 60, 100],
-        type: "square",
-        width: playBounds.max.x,
-        height: walllThickness,
-      },
-      {
-        name: "position",
-        position: new Vector(
-          playBounds.center.center.x,
-          playBounds.max.y - walllThickness / 2
-        ),
-      },
-      {
-        name: "collider",
-        type: "aabb",
-        layer: "wall",
-        width: playBounds.max.x,
-        height: walllThickness,
-      },
-    ]);
+    const southWallBundle = createWall(
+      new Vector(
+        playBounds.center.center.x,
+        playBounds.max.y - walllThickness / 2
+      ),
+      playBounds.max.x,
+      walllThickness
+    );
 
     const centerLineBundle = createBundle([
       {
@@ -80,61 +51,25 @@ function setupBoundariesPart<T extends Record<string, unknown>>(
       },
     ]);
 
-    const leftBackboardBundle = createBundle([
-      {
-        name: "primitive",
-        fill: [352, 94, 100],
-        type: "square",
-        width: backboardThickness,
-        height: playBounds.max.y,
-      },
-      {
-        name: "position",
-        position: new Vector(
-          playBounds.min.x + backboardThickness / 2,
-          playBounds.center.center.y
-        ),
-      },
-      {
-        name: "collider",
-        type: "aabb",
-        layer: "wall",
-        width: backboardThickness,
-        height: playBounds.max.y - 25,
-      },
-      {
-        name: "backboard",
-        owner: "player",
-      },
-    ]);
+    const leftBackboardBundle = createBackboard(
+      new Vector(
+        playBounds.min.x + backboardThickness / 2,
+        playBounds.center.center.y
+      ),
+      backboardThickness,
+      playBounds.max.y - 25,
+      "player"
+    );
 
-    const rightBackboardBundle = createBundle([
-      {
-        name: "primitive",
-        fill: [352, 94, 100],
-        type: "square",
-        width: backboardThickness,
-        height: playBounds.max.y,
-      },
-      {
-        name: "position",
-        position: new Vector(
-          playBounds.max.x - backboardThickness / 2,
-          playBounds.center.center.y
-        ),
-      },
-      {
-        name: "collider",
-        type: "aabb",
-        layer: "wall",
-        width: backboardThickness,
-        height: playBounds.max.y - 25,
-      },
-      {
-        name: "backboard",
-        owner: "ai",
-      },
-    ]);
+    const rightBackboardBundle = createBackboard(
+      new Vector(
+        playBounds.max.x - backboardThickness / 2,
+        playBounds.center.center.y
+      ),
+      backboardThickness,
+      playBounds.max.y - 25,
+      "ai"
+    );
 
     world.addBundle(northWallBundle);
     world.addBundle(southWallBundle);

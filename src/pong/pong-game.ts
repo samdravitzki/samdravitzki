@@ -19,7 +19,6 @@ import State from "../ecs/core/State/State";
 import Component from "../ecs/core/Component/Component";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import collisions from "../ecs/parts/collision/collision";
-import primitiveRendererPart from "../ecs/parts/p5/primitive-renderer/primitive-renderer";
 import setupBallPart from "./setup/setup-ball";
 import setupBoundariesPart from "./setup/setup-boundaries";
 import setupPaddlesPart from "./setup/setup-paddles";
@@ -396,6 +395,7 @@ function ballTrajectorySystem(
 }
 
 // NOTE for when back: Currently trying to get pong working with changes to how systems work
+// Try improve design by removing parts and introducing self contained systems instead
 class PongGameApp {
   private _engine?: Engine<any>;
   run(parent?: HTMLElement) {
