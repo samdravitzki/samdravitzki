@@ -14,7 +14,8 @@
       "extensions": [
         "esbenp.prettier-vscode",
         "ms-azuretools.vscode-bicep",
-        "github.vscode-github-actions"
+        "github.vscode-github-actions",
+        "eamodio.gitlens"
       ]
     }
   }
