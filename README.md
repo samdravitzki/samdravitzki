@@ -18,7 +18,7 @@ Things to do that aren't related to any project in specific. Includes work on th
 
 ### The site
 
-- [ ] Basic design centered around a cool logo
+- [ ] Needs a cool logo
   - a character as the logo would be cool. would like if it had the simplicity of a web icon
   - inspo
     - lots of different designs of icons to take inspo from at - https://www.toools.design/free-open-source-icon-libraries
@@ -28,6 +28,15 @@ Things to do that aren't related to any project in specific. Includes work on th
 - [ ] Cool cohesive design
 - [ ] Start publishing updates to twitter
   - Once the site has a cool cohesive design, a cool logo and analytics
+- [ ] Need a layout for the site
+
+  - Each interactable thing should be the first thing someone sees
+  - There should be groups of interactable things such as collision system demos
+  - Each interactable thing should have a write up
+  - Each interactable thing should have a simple description of how to interact with it. Needs to be as simple as possible as the thing itself should afford how to interact with it
+  - Need a way to view all of the interactable things
+  - Something like https://www.redblobgames.com/ but more focused on the thing itself than the writeup
+
 - [ ] Some way of communicating what each project is and how to interact with them
 - [ ] Mobile friendly
 - [ ] Implement more extensible approach to adding new games to the site
