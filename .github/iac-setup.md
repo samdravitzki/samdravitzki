@@ -1,4 +1,4 @@
-## Manual steps
+## Infrastructure as Code setup steps
 
 The bicep template will handle automatically deploying the infrastructure but there are some manual steps required to set it up
 
