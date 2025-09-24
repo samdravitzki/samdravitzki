@@ -13,15 +13,6 @@ type States<StateSet extends Record<string, unknown> = {}> = {
   [Key in keyof StateSet]: State<StateSet[Key]>;
 };
 
-type Cleanup = () => void;
-
-type Runner<StateSet extends Record<string, unknown>> = (
-  systems: [{ event: string }, System<States<StateSet>>][],
-  world: World,
-  resources: ResourcePool,
-  state: States<StateSet>
-) => void | Cleanup;
-
 /**
  * A part is a set of functionality that you can use to
  * encapsualte engine configuration
@@ -34,14 +25,33 @@ type EnginePart<StateSet extends Record<string, unknown>> = (
  * Designed based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
  */
 export class Engine<StateSet extends Record<string, unknown> = {}> {
-  private _states: States<StateSet>;
   private _systems: [{ event: string }, System<States<StateSet>>][] = [];
+  private _states: States<StateSet>;
   private _world = new World();
   private _resources = new ResourcePool();
 
-  private _runner?: Runner<StateSet>;
-
-  private _cleanupSteps: Cleanup[] = [];
+  /**
+   * Add events (assuming event is the right name for what im envisioning here)
+   *
+   * Current ideas around how events should work
+   * - Should be able to define systems that run when events trigger
+   * - Should be able to define systems that trigger events
+   * - Should be able to configure how long an event sticks around for
+   * - Events should only last for the frame they are triggered and the next frame by default
+   * - If an event is triggered in a frame and a system listening to it is yet to
+   *   trigger it should run in the same frame
+   *
+   * - Use events to handle listening to changes in state
+   *  - When the state changes it should add an event which should then
+   *    cause any systems listening to state change events to run
+   *
+   * - Could also use events to trigger systems that run on p5 lifecycle events
+   *   like start and draw. When p5 start function is called it could trigger a "start"
+   *   event that all systems listen to.
+   *
+   * - Opportunity to learn more about datastructures and algorithms as this
+   *   may be a good opportunity to apply some here
+   */
 
   constructor(stateSet: StateSet, options: EngineOptions = {}) {
     this._states = Object.keys(stateSet).reduce((prev, next) => {
@@ -60,16 +70,6 @@ export class Engine<StateSet extends Record<string, unknown> = {}> {
     this._systems.push([{ event: trigger.event }, system]);
   }
 
-  /**
-   * A runner is responsible for taking the set of systems defined in the
-   * engine and executing them based on the triggers associated with each system
-   *
-   * An engine can only have a single runner
-   */
-  runner(runner: Runner<StateSet>) {
-    this._runner = runner;
-  }
-
   part(part: EnginePart<StateSet>) {
     part(this);
   }
@@ -78,30 +78,9 @@ export class Engine<StateSet extends Record<string, unknown> = {}> {
    * Renders and runs the game within a HTML canvas element
    * @param parent optionally supply the parent element to render visuals within
    */
-  run() {
-    if (!this._runner) {
-      console.error("Engine has no runner configured");
-      return;
-    }
-
-    console.debug(this._systems);
-
-    // The runner should only be responsible for running
-    // the systems and not choosing whether or not they should run
-    const cleanup = this._runner(
-      this._systems,
-      this._world,
-      this._resources,
-      this._states
-    );
-
-    if (cleanup) {
-      this._cleanupSteps.push(cleanup);
-    }
-  }
+  run() {}
 
   stop() {
-    this._cleanupSteps.forEach((cleanup) => cleanup());
     console.debug("Stopped");
   }
 }

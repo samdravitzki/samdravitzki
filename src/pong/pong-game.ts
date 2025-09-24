@@ -26,7 +26,7 @@ import {
   onExit,
   onStart,
   onUpdate,
-  onUpdateWhen,
+  when,
 } from "../ecs/core/Engine/SystemTrigger";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import p5Part, { MousePosition } from "../ecs/parts/p5/p5-part";
@@ -554,43 +554,39 @@ class PongGameApp {
 
     pong.system(
       "endConditionSystem",
-      onUpdateWhen("app-state", "in-game"),
+      when("app-state", "in-game"),
       endConditionSystem
     );
     pong.system(
       "ballCollisionHandlingSystem",
-      onUpdateWhen("app-state", "in-game"),
+      when("app-state", "in-game"),
       ballCollisionHandlingSystem
     );
     pong.system(
       "backboardCollisionHandlingSystem",
-      onUpdateWhen("app-state", "in-game"),
+      when("app-state", "in-game"),
       backboardCollisionHandlingSystem
     );
     pong.system("updateScoreBoard", onUpdate(), updateScoreBoard);
     pong.system(
       "paddleCollisionHandlingSystem",
-      onUpdateWhen("app-state", "in-game"),
+      when("app-state", "in-game"),
       paddleCollisionHandlingSystem
     );
     pong.system(
       "playerPaddleSystem",
-      onUpdateWhen("app-state", "in-game"),
+      when("app-state", "in-game"),
       playerPaddleSystem
     );
-    pong.system(
-      "aiPaddleSystem",
-      onUpdateWhen("app-state", "in-game"),
-      aiPaddleSystem
-    );
+    pong.system("aiPaddleSystem", when("app-state", "in-game"), aiPaddleSystem);
     pong.system(
       "ballMovementSystem",
-      onUpdateWhen("app-state", "in-game"),
+      when("app-state", "in-game"),
       ballMovementSystem
     );
     pong.system(
       "ballTrajectorySystem",
-      onUpdateWhen("app-state", "in-game"),
+      when("app-state", "in-game"),
       ballTrajectorySystem
     );
 

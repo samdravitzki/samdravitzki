@@ -40,3 +40,4 @@ Resources discovered that seem relevant to this project but are yet to read
 - https://www.youtube.com/live/9LNgSDP1zrw - Lecture 05 - Intro to ECS
 - https://www.richardlord.net/blog/ecs/finite-state-machines-with-ash
 - https://skypjack.github.io/page5/
+- https://patterns.eecs.berkeley.edu/?page_id=609 - Task Scheduler
