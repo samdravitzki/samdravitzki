@@ -2,17 +2,17 @@
 
 The bicep template will handle automatically deploying the infrastructure but there are some manual steps required to set it up
 
-### Steps used to authenticate the Github workflow
+### Steps used to authenticate the GitHub workflow
 
 A workload identity is a type of identity used to authenticate a software workload.
 
-For the github workflow to be able to deploy and manage infrastructure in azure it needs to authenticate for which it uses a workload identity
+For the GitHub workflow to be able to deploy and manage infrastructure in azure it needs to authenticate for which it uses a workload identity
 
-The following are the steps followed to enable this repos github workflow to authenticate against azure enabling it to deploy and manage infrastructure through bicep
+The following are the steps followed to enable this repos GitHub workflow to authenticate against azure enabling it to deploy and manage infrastructure through bicep
 
 #### 1. Created an App Registration
 
-Using the following command create an application registration for the github workflow
+Using the following command create an application registration for the GitHub workflow
 
 ```bash
 az ad app create --display-name 'Github workflow - Sam Dravitzki'
@@ -28,7 +28,7 @@ _An application registration is a type of workload identity_
 
 #### 2. Create federated credentials
 
-Federated credentials are are a form of credential workflows can use to sign into azure by telling Azure that it can trust Gihub. This trust between two services is what federation is and its cool because it means the workflow can authenciate without any secrets
+Federated credentials are are a form of credential workflows can use to sign into azure by telling Azure that it can trust GitHub. This trust between two services is what federation is and its cool because it means the workflow can authenticate without any secrets
 
 The workload identity needs two federated credentials, the first is used when a job isn't associated with a GitHub environment where the subject references the branch
 
@@ -38,7 +38,7 @@ az ad app federated-credential create \
   --parameters '{
     "name": "samdravitzki-repo-branch",
     "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:Brownstone-Inc/samdravitzki:ref:refs/heads/main",
+    "subject": "repo:samdravitzki/samdravitzki:ref:refs/heads/main",
     "audiences": ["api://AzureADTokenExchange"]
   }'
 ```
@@ -51,7 +51,7 @@ az ad app federated-credential create \
   --parameters '{
     "name": "samdravitzki-repo-production-environment",
     "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:Brownstone-Inc/samdravitzki:environment:production",
+    "subject": "repo:samdravitzki/samdravitzki:environment:production",
     "audiences": ["api://AzureADTokenExchange"]
   }'
 ```
@@ -86,13 +86,13 @@ az role assignment create \
 
 #### 5. Use the workload identity in the github workflow
 
-Using the `azure/login` action passing it the azure subscription, tenant and application (client) ids enables the workflow to sucessfully authenticate with azure enabling infrastructure to be deployed automatically to the rg-personal-site resource group
+Using the `azure/login` action passing it the azure subscription, tenant and application (client) ids enables the workflow to successfully authenticate with azure enabling infrastructure to be deployed automatically to the rg-personal-site resource group
 
 ## Custom domains
 
 The infrastructure as code will configure the www.dravitzki.com custom domain for the static site. The DNS associated with the then has to be configured with a CNAME record pointing to the auto generated domain name. The azure [article](https://learn.microsoft.com/en-us/azure/static-web-apps/custom-domain-external) describes this process in detail
 
-In the future I would like to use Azure DNS because it would be easy to futher automate configuration of the custom domain. I have chosen not to use it currently because it costs money. I would also like to configure the apex domain in the future.
+In the future I would like to use Azure DNS because it would be easy to further automate configuration of the custom domain. I have chosen not to use it currently because it costs money. I would also like to configure the apex domain in the future.
 
 Idea: have sites for each of my family members and associated static sites with each. i.e it could be funny to have a billy.dravitzki.com, luke.dravitzki.com...
 
@@ -102,10 +102,8 @@ Main resource used - https://learn.microsoft.com/en-us/azure/azure-resource-mana
 
 What are workload identities? - https://learn.microsoft.com/en-us/entra/workload-id/workload-identities-overview
 
-Workload identity training module - https://learn.microsoft.com/en-us/training/modules/authenticate-azure-deployment-workflow-workload-identities/2-understand-workload-identities
-
 End-to-end deployment scenario - https://learn.microsoft.com/en-us/training/modules/manage-end-end-deployment-scenarios-using-bicep-github-actions/4-exercise-set-up-environment?pivots=cli
 
 ## The future
 
-I left out learning about [deployment stacks](https://learn.microsoft.com/en-us/training/modules/introduction-to-deployment-stacks/), next time I find myself working on iac I want to take a look into them
+I left out learning about [deployment stacks](https://learn.microsoft.com/en-us/training/modules/introduction-to-deployment-stacks/), next time I find myself working on IaC I want to take a look into them
