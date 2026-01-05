@@ -35,13 +35,15 @@ function primitiveRenderer<T extends Record<string, unknown>>(
         );
       }
 
+      const canvasDrawingContext = p.drawingContext as CanvasRenderingContext2D;
+
       if (primitive.type === "line") {
         if (primitive.dash) {
-          p.drawingContext.setLineDash(primitive.dash);
+          canvasDrawingContext.setLineDash(primitive.dash);
         }
 
         if (primitive.dashOffset) {
-          p.drawingContext.lineDashOffset = primitive.dashOffset;
+          canvasDrawingContext.lineDashOffset = primitive.dashOffset;
         }
 
         p.line(
@@ -52,11 +54,11 @@ function primitiveRenderer<T extends Record<string, unknown>>(
         );
 
         if (primitive.dash) {
-          p.drawingContext.setLineDash([]);
+          canvasDrawingContext.setLineDash([]);
         }
 
         if (primitive.dashOffset) {
-          p.drawingContext.lineDashOffset = 0.0;
+          canvasDrawingContext.lineDashOffset = 0.0;
         }
       }
 
