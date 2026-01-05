@@ -123,7 +123,7 @@ export class Engine<StateSet extends Record<string, unknown> = {}> {
 
     // This is a p5 instance https://p5js.org/reference/p5/p5/
     this.p5Instance = new p5((sketch) => {
-      const p = sketch as unknown as p5;
+      const p = sketch;
       p.setup = function setup() {
         p.createCanvas(...self._canvasBounds.size);
         p.colorMode(p.HSB, 360, 100, 100, 100);
