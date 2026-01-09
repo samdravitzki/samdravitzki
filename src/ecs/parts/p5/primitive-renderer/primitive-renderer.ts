@@ -35,11 +35,14 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
 
     if (primitive.type === "line") {
       if (primitive.dash) {
-        p.drawingContext.setLineDash(primitive.dash);
+        (p.drawingContext as CanvasRenderingContext2D).setLineDash(
+          primitive.dash
+        );
       }
 
       if (primitive.dashOffset) {
-        p.drawingContext.lineDashOffset = primitive.dashOffset;
+        (p.drawingContext as CanvasRenderingContext2D).lineDashOffset =
+          primitive.dashOffset;
       }
 
       p.line(
@@ -50,11 +53,11 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
       );
 
       if (primitive.dash) {
-        p.drawingContext.setLineDash([]);
+        (p.drawingContext as CanvasRenderingContext2D).setLineDash([]);
       }
 
       if (primitive.dashOffset) {
-        p.drawingContext.lineDashOffset = 0.0;
+        (p.drawingContext as CanvasRenderingContext2D).lineDashOffset = 0.0;
       }
     }
 
