@@ -18,7 +18,7 @@ Things to do that aren't related to any project in specific. Includes work on th
 
 ### The site
 
-- [ ] Needs a cool logo
+- [ ] A cool logo
   - a character as the logo would be cool. would like if it had the simplicity of a web icon
   - inspo
     - lots of different designs of icons to take inspo from at - https://www.toools.design/free-open-source-icon-libraries
@@ -26,9 +26,9 @@ Things to do that aren't related to any project in specific. Includes work on th
     - this cat with sunglasses is also pretty cool, I like the roundedness - https://www.streamlinehq.com/icons/flex-remix?search=cat&icon=ico_nIkbkPG7WZL74GtV
     - like the designs in general of the faces in the flex remix icon library - https://www.streamlinehq.com/icons/flex-remix?search=face
 - [ ] Cool cohesive design
-- [ ] Start publishing updates to twitter
+- [ ] Publish updates to social platforms
   - Once the site has a cool cohesive design, a cool logo and analytics
-- [ ] Need a layout for the site
+- [ ] A layout that can support more information
 
   - Each interactable thing should be the first thing someone sees
   - There should be groups of interactable things such as collision system demos

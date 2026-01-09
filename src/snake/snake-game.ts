@@ -44,17 +44,19 @@ class SnakeEngine {
       };
 
       p.draw = function draw() {
-        const gradient = p.drawingContext.createLinearGradient(
+        const gradient = (
+          p.drawingContext as CanvasRenderingContext2D
+        ).createLinearGradient(
           playBounds.min.x,
           playBounds.min.y,
           playBounds.max.x,
           playBounds.max.y
         );
 
-        gradient.addColorStop(0, p.color(310, 100, 100, 100));
-        gradient.addColorStop(1, p.color(250, 100, 100, 100));
+        gradient.addColorStop(0, "#22C1C3");
+        gradient.addColorStop(1, "#FDBB2D");
 
-        p.drawingContext.fillStyle = gradient;
+        (p.drawingContext as CanvasRenderingContext2D).fillStyle = gradient;
 
         p.background(0);
         p.rect(
@@ -64,7 +66,7 @@ class SnakeEngine {
           playBounds.max.y
         );
 
-        p.fill(205);
+        (p.drawingContext as CanvasRenderingContext2D).fillStyle = "#FFFFFF";
 
         for (const chunk of snake.chunks) {
           p.rect(chunk.position.x, chunk.position.y, 10, 10);

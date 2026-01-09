@@ -4,86 +4,82 @@ import pongGame from "./pong/pong-game";
 import snakeGame from "./snake/snake-game";
 import "./style.css";
 
-type App = {
+type MiniApp = {
   run: (parent?: HTMLElement) => void;
   stop: () => void;
 };
 
-type AppInfo = {
+type MiniAppInfo = {
   name: string;
   symbol: string;
   appId: string;
-  app: App;
+  app: MiniApp;
 };
 
-const pong: AppInfo = {
+const pong: MiniAppInfo = {
   name: "pong",
   symbol: "🎾",
   appId: "pong-sketch",
   app: pongGame,
 };
 
-const snake: AppInfo = {
+const snake: MiniAppInfo = {
   name: "snake",
   symbol: "🐍",
   appId: "snake-sketch",
   app: snakeGame,
 };
 
-const poissonDiscSampling: AppInfo = {
+const poissonDiscSampling: MiniAppInfo = {
   name: "poisson-disc-sampling",
   symbol: "⋆.˚",
   appId: "poisson-disc-sampling-sketch",
   app: poissonDiscSamplingDemo,
 };
 
-const drums: AppInfo = {
+const drums: MiniAppInfo = {
   name: "drums",
   symbol: "🥁",
   appId: "drum-sketch",
   app: drumsGame,
 };
 
-const appInfos: AppInfo[] = [snake, pong, poissonDiscSampling, drums];
+const miniApps: MiniAppInfo[] = [snake, pong, poissonDiscSampling, drums];
 
-document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-  <div>
-    <div id="main-content">
-      <h1>dravitzki.com</h1>
-      <p><i>projects</i></p>
-      ${appInfos
-        .map(
-          (appInfo) => `
-        <button id="${appInfo.name}-button">${appInfo.symbol}</button>
-      `
-        )
-        .join("")}
-    </div>
-    ${appInfos
-      .map(
-        (appInfo) => `
-      <div id="${appInfo.name}-app" style="display:none;">
-        <button id="exit-${appInfo.name}-button">❌</button>
-        <div style="position: relative;" id="${appInfo.name}-sketch"></div>
+function createMiniAppButton(name: string, symbol: string) {
+  return `<button id="${name}-button">${symbol}</button>`;
+}
+
+function createMiniAppSection(name: string) {
+  return `
+      <div id="${name}-app" style="display:none;">
+        <button id="exit-${name}-button">❌</button>
+        <div style="position: relative;" id="${name}-sketch"></div>
       </div>
-    `
-      )
-      .join("")}
-  </div>
-`;
+    `;
+}
+
+document.querySelector<HTMLDivElement>(
+  "#mini-app-selector-container"
+)!.innerHTML = miniApps
+  .map((appInfo) => createMiniAppButton(appInfo.name, appInfo.symbol))
+  .join("");
+
+document.querySelector<HTMLDivElement>("#mini-app-container")!.innerHTML =
+  miniApps.map((appInfo) => createMiniAppSection(appInfo.name)).join("");
 
 // Load persisted state from localStorage
 const savedAppState = localStorage.getItem("activeApp");
 
 // Restore app displayed based on saved state
 if (savedAppState) {
-  const mainContent = document.getElementById("main-content")!;
+  const mainContent = document.getElementById("menu")!;
   mainContent.style.display = "none";
 
   const activeApp = document.getElementById(`${savedAppState}-app`)!;
   activeApp.style.display = "block";
 
-  const appInfo = appInfos.find((info) => info.name === savedAppState);
+  const appInfo = miniApps.find((info) => info.name === savedAppState);
 
   if (appInfo) {
     const canvasParent = document.getElementById(`${appInfo.name}-sketch`)!;
@@ -91,9 +87,9 @@ if (savedAppState) {
   }
 }
 
-appInfos.forEach((appInfo) => {
+miniApps.forEach((appInfo) => {
   const appElement = document.getElementById(`${appInfo.name}-app`)!;
-  const mainContent = document.getElementById("main-content")!;
+  const mainContent = document.getElementById("menu")!;
 
   const canvasParent = document.getElementById(`${appInfo.name}-sketch`)!;
 

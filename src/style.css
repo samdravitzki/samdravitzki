@@ -33,13 +33,26 @@ body {
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  margin-bottom: 0;
 }
 
-#app {
+#main-content,
+#menu {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+}
+
+.emoji {
+  background: url("/emoji.svg");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: contain;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align: -3px;
 }
 
 button {

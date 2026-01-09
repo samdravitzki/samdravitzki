@@ -1,4 +1,3 @@
-import p5 from "p5";
 import Vector from "../ecs/core/Vector/Vector";
 import World from "../ecs/core/World/World";
 import {
