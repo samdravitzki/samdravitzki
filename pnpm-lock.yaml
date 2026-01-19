@@ -12,8 +12,8 @@ importers:
         specifier: ^2.0.28
         version: 2.0.28
       p5:
-        specifier: ^2.1.2
-        version: 2.1.2
+        specifier: ^2.2.0
+        version: 2.2.0
       tone:
         specifier: ^15.1.22
         version: 15.1.22
@@ -80,6 +80,10 @@ packages:
 
   '@babel/runtime@7.28.4':
     resolution: {integrity: sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.28.6':
+    resolution: {integrity: sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA==}
     engines: {node: '>=6.9.0'}
 
   '@babel/types@7.25.2':
@@ -946,8 +950,8 @@ packages:
     resolution: {integrity: sha512-/Eaoq+QyLSiXQ4lyYV23f14mZRQcXnxfHrN0vCai+ak9G0pp9iEQukIIZq5NccEvwRB8PUnZT0KsOoDCINS1qQ==}
     engines: {node: '>=18'}
 
-  p5@2.1.2:
-    resolution: {integrity: sha512-M96K3FSwd31Sawsl9TzJ8kBZFuUy06eqRHpWw0DIQAOmYOosVyPr7Eh5GR2LsScba0X2wSnfRBYMz64oVQVOdg==}
+  p5@2.2.0:
+    resolution: {integrity: sha512-PBRN/pwUTcGuditoEGpAo4/9RQYqucXD7Jwddlp2iDX0z+AonLj38eHXVIT7N+AseZvHHoIDpm6hjGxNiLoO0A==}
 
   pako@2.1.0:
     resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
@@ -1388,6 +1392,8 @@ snapshots:
       '@babel/types': 7.25.2
 
   '@babel/runtime@7.28.4': {}
+
+  '@babel/runtime@7.28.6': {}
 
   '@babel/types@7.25.2':
     dependencies:
@@ -1964,11 +1970,11 @@ snapshots:
 
   i18next-browser-languagedetector@4.3.1:
     dependencies:
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.28.6
 
   i18next@19.9.2:
     dependencies:
-      '@babel/runtime': 7.28.4
+      '@babel/runtime': 7.28.6
 
   inflight@1.0.6:
     dependencies:
@@ -2111,7 +2117,7 @@ snapshots:
     dependencies:
       yocto-queue: 1.0.0
 
-  p5@2.1.2:
+  p5@2.2.0:
     dependencies:
       '@davepagurek/bezier-path': 0.0.2
       '@japont/unicode-range': 1.0.0
