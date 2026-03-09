@@ -40,7 +40,7 @@ const poissonDiscSampling: MiniAppInfo = {
 const drums: MiniAppInfo = {
   name: "drums",
   symbol: "🥁",
-  appId: "drum-sketch",
+  appId: "drums-sketch",
   app: drumsGame,
 };
 
@@ -60,7 +60,7 @@ function createMiniAppSection(name: string) {
 }
 
 document.querySelector<HTMLDivElement>(
-  "#mini-app-selector-container"
+  "#mini-app-selector-container",
 )!.innerHTML = miniApps
   .map((appInfo) => createMiniAppButton(appInfo.name, appInfo.symbol))
   .join("");
