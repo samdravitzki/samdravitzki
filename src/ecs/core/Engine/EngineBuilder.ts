@@ -1,4 +1,4 @@
-import { EngineOptions, Engine } from "./Engine";
+import DufusEngine, { EngineOptions, Engine } from "./Engine";
 
 /**
  * Testing out this way of implementing the builder pattern in typescript
@@ -14,10 +14,14 @@ import { EngineOptions, Engine } from "./Engine";
  *
  * TODO: I want to see if this can be combined with the engine class so that the consumer can directly use something called "Engine"
  */
-class EngineBuilder<StateSet extends Record<string, unknown> = {}> {
-  private constructor(private readonly stateSet: StateSet) {}
+class EngineBuilder<
+  EventMap extends Record<string, unknown> = {},
+  StateMap extends Record<string, unknown> = {},
+> {
+  private constructor(private readonly stateSet: StateMap) {}
 
   /**
+   * Register a state
    *
    * NOTE: The resulting object is pretty verbose due to all of the "&"
    * causes by the intersection done on each call to state. This issue
@@ -32,7 +36,8 @@ class EngineBuilder<StateSet extends Record<string, unknown> = {}> {
     const newState = { [name]: value };
 
     return new EngineBuilder<
-      StateSet & {
+      EventMap,
+      StateMap & {
         [k in K]: T;
       }
     >({
@@ -41,12 +46,28 @@ class EngineBuilder<StateSet extends Record<string, unknown> = {}> {
     });
   }
 
-  build(options: EngineOptions = {}) {
-    return new Engine(this.stateSet, options);
+  event<const K extends string>(name: K) {
+    return new EngineBuilder<
+      EventMap & {
+        [k in K]: unknown;
+      },
+      StateMap
+    >(this.stateSet);
   }
 
-  static create(): EngineBuilder {
-    return new EngineBuilder({});
+  build(options: EngineOptions = {}): Engine<
+    {
+      [K in keyof EventMap]: EventMap[K]; // Required to condense intersections into a single object type making inferred types easier to read
+    },
+    {
+      [K in keyof StateMap]: StateMap[K];
+    }
+  > {
+    return new DufusEngine<EventMap, StateMap>(this.stateSet, options);
+  }
+
+  static create(): EngineBuilder<{ init: unknown }> {
+    return new EngineBuilder<{ init: unknown }>({});
   }
 }
 

@@ -1,5 +1,6 @@
 import Vector from "../ecs/core/Vector/Vector";
 import World from "../ecs/core/World/World";
+import p5 from "p5";
 import {
   Velocity,
   BallComponent,
@@ -20,16 +21,9 @@ import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import collisions from "../ecs/parts/collision/collision";
 import { createEndMenu, createGameMenu, createMainMenu } from "./setup-ui";
 import Bounds from "../ecs/core/Bounds/Bounds";
-import {
-  onEnter,
-  onExit,
-  onStart,
-  onUpdate,
-  when,
-} from "../ecs/core/Engine/SystemTrigger";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import p5Part, { MousePosition } from "../ecs/parts/p5/p5-part";
-import Engine from "../ecs/core/Engine/Engine";
+import { Engine } from "../ecs/core/Engine/Engine";
 import createBall from "./prefabs/ball";
 import createBackboard from "./prefabs/backboard";
 import createWall from "./prefabs/wall";
@@ -68,7 +62,7 @@ function hideGameMenu(_world: World, resources: ResourcePool) {
 function endConditionSystem(
   _world: World,
   {},
-  state: { score: State<Score>; "app-state": State<ApplicationState> }
+  state: { score: State<Score>; "app-state": State<ApplicationState> },
 ) {
   const [playerScore, aiScore] = state.score.value;
 
@@ -80,7 +74,7 @@ function endConditionSystem(
 function showEndMenu(
   _world: World,
   resources: ResourcePool,
-  state: { score: State<Score> }
+  state: { score: State<Score> },
 ) {
   const p = resources.get<p5>("p5");
   const [playerScore, aiScore] = state.score.value;
@@ -125,12 +119,12 @@ function ballCollisionHandlingSystem(world: World) {
       const paddlePosition = collidee.getComponent("position") as Position;
 
       const yDistanceFromPaddleCenter = paddlePosition.position.minus(
-        position.position
+        position.position,
       ).y;
 
       velocity.velocity = Vector.create(
         velocity.velocity.x,
-        -yDistanceFromPaddleCenter / 25
+        -yDistanceFromPaddleCenter / 25,
       );
     }
   }
@@ -139,7 +133,7 @@ function ballCollisionHandlingSystem(world: World) {
 function backboardCollisionHandlingSystem(
   world: World,
   resources: ResourcePool,
-  state: { score: State<Score> }
+  state: { score: State<Score> },
 ) {
   for (const [backboard] of world.query<[BackboardComponent, Collision]>([
     "backboard",
@@ -159,7 +153,7 @@ function backboardCollisionHandlingSystem(
       // Reset ball directed towards player
       ballVelocity.velocity = ballVelocity.velocity = new Vector(
         -0.5,
-        -0.5
+        -0.5,
       ).plus(new Vector(-0.1, -0.1).times(playerScore + aiScore));
     }
 
@@ -168,7 +162,7 @@ function backboardCollisionHandlingSystem(
 
       // Reset ball directed towards ai
       ballVelocity.velocity = new Vector(0.5, -0.5).plus(
-        new Vector(0.1, -0.1).times(playerScore + aiScore)
+        new Vector(0.1, -0.1).times(playerScore + aiScore),
       );
     }
 
@@ -180,7 +174,7 @@ function backboardCollisionHandlingSystem(
 function updateScoreBoard(
   world: World,
   resources: ResourcePool,
-  state: { score: State<Score> }
+  state: { score: State<Score> },
 ) {
   const [playerScore, aiScore] = state.score.value;
 
@@ -241,20 +235,20 @@ function playerPaddleSystem(world: World, resources: ResourcePool) {
   ])) {
     const positionChange = mousePosition.y - position.position.y;
     position.position = position.position.plus(
-      Vector.create(0, positionChange)
+      Vector.create(0, positionChange),
     );
 
     if (position.position.y < canvasBounds.min.y + 35) {
       position.position = Vector.create(
         position.position.x,
-        canvasBounds.min.y + 35
+        canvasBounds.min.y + 35,
       );
     }
 
     if (position.position.y > canvasBounds.max.y - 35) {
       position.position = Vector.create(
         position.position.x,
-        canvasBounds.max.y - 35
+        canvasBounds.max.y - 35,
       );
     }
   }
@@ -276,21 +270,21 @@ function aiPaddleSystem(world: World, resources: ResourcePool) {
     position.position = position.position.plus(
       Vector.create(
         0,
-        (targetPosition.position.y - position.position.y) * speed.value
-      )
+        (targetPosition.position.y - position.position.y) * speed.value,
+      ),
     );
 
     if (position.position.y < canvasBounds.min.y + 35) {
       position.position = Vector.create(
         position.position.x,
-        canvasBounds.min.y + 35
+        canvasBounds.min.y + 35,
       );
     }
 
     if (position.position.y > canvasBounds.max.y - 35) {
       position.position = Vector.create(
         position.position.x,
-        canvasBounds.max.y - 35
+        canvasBounds.max.y - 35,
       );
     }
   }
@@ -302,14 +296,14 @@ function ballMovementSystem(world: World) {
   >(["velocity", "position", "speed", "ball"])[0];
 
   position.position = position.position.plus(
-    velocity.velocity.times(speed.value)
+    velocity.velocity.times(speed.value),
   );
 }
 
 function ballTrajectorySystem(
   world: World,
   resources: ResourcePool,
-  state: Record<string, State<unknown>>
+  state: Record<string, State<unknown>>,
 ) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
   const renderTrajectory = state["render-trajectory"];
@@ -333,7 +327,7 @@ function ballTrajectorySystem(
 
   // Start the ray a little back from the start of the center of the ball to mitigate issues with tunneling
   let start = ballPosition.position.minus(
-    ballVelocity.velocity.normalised().times(10)
+    ballVelocity.velocity.normalised().times(10),
   );
   let direction = ballVelocity.velocity;
 
@@ -346,7 +340,7 @@ function ballTrajectorySystem(
         direction,
         length: canvasBounds.size[0] * 2,
       },
-      { layer: "wall" }
+      { layer: "wall" },
     )[0];
 
     if (!hit) {
@@ -380,7 +374,7 @@ function ballTrajectorySystem(
     const hitEntity = world.entity(hit.entityId);
 
     const backBoardComponent = hitEntity.components.find(
-      (comp) => comp.name === "backboard"
+      (comp) => comp.name === "backboard",
     ) as BackboardComponent | undefined;
 
     if (backBoardComponent && backBoardComponent.owner === "ai") {
@@ -399,7 +393,7 @@ function setupSceneSystem(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
   const ballBundle = createBall(
-    new Vector(canvasBounds.max.x / 2, canvasBounds.max.y / 2)
+    new Vector(canvasBounds.max.x / 2, canvasBounds.max.y / 2),
   );
 
   world.addBundle(ballBundle);
@@ -410,19 +404,19 @@ function setupSceneSystem(world: World, resources: ResourcePool) {
   const northWallBundle = createWall(
     new Vector(
       canvasBounds.center.center.x,
-      canvasBounds.min.y + walllThickness / 2
+      canvasBounds.min.y + walllThickness / 2,
     ),
     canvasBounds.max.x,
-    walllThickness
+    walllThickness,
   );
 
   const southWallBundle = createWall(
     new Vector(
       canvasBounds.center.center.x,
-      canvasBounds.max.y - walllThickness / 2
+      canvasBounds.max.y - walllThickness / 2,
     ),
     canvasBounds.max.x,
-    walllThickness
+    walllThickness,
   );
 
   const centerLineBundle = createBundle([
@@ -444,21 +438,21 @@ function setupSceneSystem(world: World, resources: ResourcePool) {
   const leftBackboardBundle = createBackboard(
     new Vector(
       canvasBounds.min.x + backboardThickness / 2,
-      canvasBounds.center.center.y
+      canvasBounds.center.center.y,
     ),
     backboardThickness,
     canvasBounds.max.y - 25,
-    "player"
+    "player",
   );
 
   const rightBackboardBundle = createBackboard(
     new Vector(
       canvasBounds.max.x - backboardThickness / 2,
-      canvasBounds.center.center.y
+      canvasBounds.center.center.y,
     ),
     backboardThickness,
     canvasBounds.max.y - 25,
-    "ai"
+    "ai",
   );
 
   world.addBundle(northWallBundle);
@@ -471,7 +465,7 @@ function setupSceneSystem(world: World, resources: ResourcePool) {
 
   const playerPaddleBundle = createPaddle(
     new Vector(canvasBounds.min.x + paddleWallOffset, canvasBounds.max.y / 2),
-    "player"
+    "player",
   );
 
   // The position the ai paddle is aiming to end up in
@@ -485,7 +479,7 @@ function setupSceneSystem(world: World, resources: ResourcePool) {
 
   const aiPaddleBundle = createPaddle(
     new Vector(canvasBounds.max.x - paddleWallOffset, canvasBounds.max.y / 2),
-    "ai"
+    "ai",
   );
   world.addBundle(aiPaddleTarget);
   world.addBundle(playerPaddleBundle);
@@ -497,31 +491,40 @@ function setupSceneSystem(world: World, resources: ResourcePool) {
   const playerScoreBundle = createScore(
     new Vector(
       canvasBounds.max.x / 2 - scoreXOffset,
-      canvasBounds.min.y + scoreYOffset
+      canvasBounds.min.y + scoreYOffset,
     ),
     "right",
-    "player-score"
+    "player-score",
   );
 
   const aiScoreBundle = createScore(
     new Vector(
       canvasBounds.max.x / 2 + scoreXOffset,
-      canvasBounds.min.y + scoreYOffset
+      canvasBounds.min.y + scoreYOffset,
     ),
     "left",
-    "ai-score"
+    "ai-score",
   );
 
   world.addBundle(playerScoreBundle);
   world.addBundle(aiScoreBundle);
 }
 
-// NOTE for when back: Currently trying to get pong working with changes to how systems work
-// Try improve design by removing parts and introducing self contained systems instead
+/**
+ * IMPROVEMENT IDEA:
+ * instead of initialising the game in this app class I could instead just return
+ * the created engine from a function. The engine already has the run and stop methods
+ * built in and so this App class wrapper is redundant. The "parent" html element
+ * require for p5 could just be passed through a constructor to this function
+ */
 class PongGameApp {
-  private _engine?: Engine<any>;
+  private _engine?: Engine<any, any>;
   run(parent?: HTMLElement) {
     const pong = EngineBuilder.create()
+      .event("setup")
+      .event("update")
+      .event("after-update")
+      .event("keyPressed")
       .state("render-trajectory", false)
       .state<"score", [number, number]>("score", [0, 0])
       .state<"app-state", ApplicationState>("app-state", "main-menu")
@@ -530,67 +533,91 @@ class PongGameApp {
     pong.part(p5Part([500, 500], parent));
     pong.part(collisions());
 
-    pong.system("setup-scene", onStart(), setupSceneSystem);
+    pong.system("setup-scene", pong.trigger.on("setup"), setupSceneSystem);
 
-    pong.system("createGameMenu", onStart(), createGameMenu);
-    pong.system("createEndMenu", onStart(), createEndMenu);
-    pong.system("createMainMenu", onStart(), createMainMenu);
+    pong.system("createGameMenu", pong.trigger.on("setup"), createGameMenu);
+    pong.system("createEndMenu", pong.trigger.on("setup"), createEndMenu);
+    pong.system("createMainMenu", pong.trigger.on("setup"), createMainMenu);
 
     pong.system(
       "showMainMenu",
-      onEnter("app-state", "main-menu"),
-      showMainMenu
+      pong.trigger.on("update").when("app-state").enters("main-menu"),
+      showMainMenu,
     );
-    pong.system("showGameMenu", onEnter("app-state", "in-game"), showGameMenu);
+    pong.system(
+      "showGameMenu",
+      pong.trigger.on("update").when("app-state").enters("in-game"),
+      showGameMenu,
+    );
     pong.system(
       "hideGameMenu",
-      onEnter("app-state", "main-menu"),
-      hideGameMenu
+      pong.trigger.on("update").when("app-state").enters("main-menu"),
+      hideGameMenu,
     );
-    pong.system("showEndMenu", onEnter("app-state", "end"), showEndMenu);
-    pong.system("hideEndMenu", onExit("app-state", "end"), hideEndMenu);
-    pong.system("hideMainMenu", onEnter("app-state", "in-game"), hideMainMenu);
+    pong.system(
+      "showEndMenu",
+      pong.trigger.on("update").when("app-state").enters("end"),
+      showEndMenu,
+    );
+    pong.system(
+      "hideEndMenu",
+      pong.trigger.on("update").when("app-state").enters("end"),
+      hideEndMenu,
+    );
+    pong.system(
+      "hideMainMenu",
+      pong.trigger.on("update").when("app-state").exits("in-game"),
+      hideMainMenu,
+    );
 
     pong.system(
       "endConditionSystem",
-      when("app-state", "in-game"),
-      endConditionSystem
+      pong.trigger.on("update").when("app-state").is("in-game"),
+      endConditionSystem,
     );
     pong.system(
       "ballCollisionHandlingSystem",
-      when("app-state", "in-game"),
-      ballCollisionHandlingSystem
+      pong.trigger.on("update").when("app-state").is("in-game"),
+      ballCollisionHandlingSystem,
     );
     pong.system(
       "backboardCollisionHandlingSystem",
-      when("app-state", "in-game"),
-      backboardCollisionHandlingSystem
+      pong.trigger.on("update").when("app-state").is("in-game"),
+      backboardCollisionHandlingSystem,
     );
-    pong.system("updateScoreBoard", onUpdate(), updateScoreBoard);
+    pong.system(
+      "updateScoreBoard",
+      pong.trigger.on("update"),
+      updateScoreBoard,
+    );
     pong.system(
       "paddleCollisionHandlingSystem",
-      when("app-state", "in-game"),
-      paddleCollisionHandlingSystem
+      pong.trigger.on("update").when("app-state").is("in-game"),
+      paddleCollisionHandlingSystem,
     );
     pong.system(
       "playerPaddleSystem",
-      when("app-state", "in-game"),
-      playerPaddleSystem
+      pong.trigger.on("update").when("app-state").is("in-game"),
+      playerPaddleSystem,
     );
-    pong.system("aiPaddleSystem", when("app-state", "in-game"), aiPaddleSystem);
+    pong.system(
+      "aiPaddleSystem",
+      pong.trigger.on("update").when("app-state").is("in-game"),
+      aiPaddleSystem,
+    );
     pong.system(
       "ballMovementSystem",
-      when("app-state", "in-game"),
-      ballMovementSystem
+      pong.trigger.on("update").when("app-state").is("in-game"),
+      ballMovementSystem,
     );
     pong.system(
       "ballTrajectorySystem",
-      when("app-state", "in-game"),
-      ballTrajectorySystem
+      pong.trigger.on("update").when("app-state").is("in-game"),
+      ballTrajectorySystem,
     );
 
     this._engine = pong;
-    pong.run();
+    pong.run("init");
   }
 
   stop() {

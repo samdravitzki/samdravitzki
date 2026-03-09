@@ -1,6 +1,6 @@
 import p5 from "p5";
 import Bounds from "../ecs/core/Bounds/Bounds";
-import Engine from "../ecs/core/Engine/Engine";
+import DufusEngine from "../ecs/core/Engine/Engine";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import { onStart } from "../ecs/core/Engine/SystemTrigger";
 import State from "../ecs/core/State/State";

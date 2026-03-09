@@ -1,8 +1,9 @@
 import Bounds from "../../ecs/core/Bounds/Bounds";
 import createBundle from "../../ecs/core/Bundle/createBundle";
-import Engine from "../../ecs/core/Engine/Engine";
+import DufusEngine from "../../ecs/core/Engine/Engine";
 import { ResourcePool } from "../../ecs/core/Engine/ResourcePool";
 import { onStart, onUpdate } from "../../ecs/core/Engine/SystemTrigger";
+import { Part } from "../../ecs/core/Part/Part";
 import State from "../../ecs/core/State/State";
 import Vector from "../../ecs/core/Vector/Vector";
 import World from "../../ecs/core/World/World";
@@ -13,9 +14,15 @@ export type Keypress = {
   time: number;
 };
 
-export default function bpmCounterPart<T extends { bpm: number }>(
-  engine: Engine<T>
-) {
+const bpmCounterPart: Part<
+  {
+    setup: unknown;
+    update: unknown;
+  },
+  {
+    bpm: number;
+  }
+> = ({ registerSystem, triggerBuilder }) => {
   function setupBpmText(world: World, resources: ResourcePool) {
     const canvasBounds = resources.get<Bounds>("canvas-bounds");
     const textBundle = createBundle([
@@ -37,7 +44,11 @@ export default function bpmCounterPart<T extends { bpm: number }>(
     world.addBundle(textBundle);
   }
 
-  function updateBpmText(world: World, {}, state: { bpm: State<number> }) {
+  function updateBpmText(
+    world: World,
+    resources: ResourcePool,
+    state: { bpm: State<number> },
+  ) {
     const [bpmText] = world.query<[PrimitiveShape]>([
       "primitive",
       "bpm-text",
@@ -51,6 +62,8 @@ export default function bpmCounterPart<T extends { bpm: number }>(
     }
   }
 
-  engine.system("bpm-text", onStart(), setupBpmText);
-  engine.system("bpm-counter", onUpdate(), updateBpmText);
-}
+  registerSystem("bpm-text", triggerBuilder.on("setup"), setupBpmText);
+  registerSystem("bpm-counter", triggerBuilder.on("update"), updateBpmText);
+};
+
+export default bpmCounterPart;

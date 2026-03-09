@@ -1,6 +1,6 @@
 import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
-import Engine from "../ecs/core/Engine/Engine";
+import DufusEngine, { Engine } from "../ecs/core/Engine/Engine";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import { onStart } from "../ecs/core/Engine/SystemTrigger";
@@ -15,7 +15,7 @@ import randomDots from "./random-dots/random-dots";
 function placeRandomDots(
   world: World,
   resources: ResourcePool,
-  { dotCount }: { dotCount: State<number> }
+  { dotCount }: { dotCount: State<number> },
 ) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
@@ -36,7 +36,7 @@ function placeRandomDots(
           name: "position",
           position: dot,
         },
-      ])
+      ]),
     );
   }
 }
@@ -63,7 +63,7 @@ function placePoissonDots(world: World, resources: ResourcePool) {
           name: "position",
           position: dot.plus(Vector.create(dotWidth, dotWidth)),
         },
-      ])
+      ]),
     );
   }
 }
@@ -72,17 +72,32 @@ function placePoissonDots(world: World, resources: ResourcePool) {
 // defined concept for this that reduces the requirement to repeat this for
 // every game
 class PoissonDiscSamplingDemoApp {
-  private _engine?: Engine<any>;
+  private _engine?: Engine<any, any>;
 
   run(parent?: HTMLElement) {
-    const engine = EngineBuilder.create().state("dotCount", 100).build();
+    const engine = EngineBuilder.create()
+      .state("dotCount", 100)
+      .event("setup")
+      .event("update")
+      .event("after-update")
+      .event("keyPressed")
+      .build();
+
     engine.part(p5Part([500, 500], parent));
-    engine.system("place-random-dots", onStart(), placeRandomDots);
-    engine.system("place-poisson-dots", onStart(), placePoissonDots);
+    engine.system(
+      "place-random-dots",
+      engine.trigger.on("setup"),
+      placeRandomDots,
+    );
+    engine.system(
+      "place-poisson-dots",
+      engine.trigger.on("setup"),
+      placePoissonDots,
+    );
 
     this._engine = engine;
 
-    engine.run();
+    engine.run("init");
   }
 
   stop() {

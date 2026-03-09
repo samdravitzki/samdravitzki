@@ -15,8 +15,9 @@ import World from "../ecs/core/World/World";
 import p5 from "p5";
 import State from "../ecs/core/State/State";
 import Bounds from "../ecs/core/Bounds/Bounds";
-import { onKeydown, onUpdate } from "../ecs/core/Engine/SystemTrigger";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
+import { Engine } from "../ecs/core/Engine/Engine";
+import p5Part from "../ecs/parts/p5/p5-part";
 
 /**
  * The idea is to make a game that makes the user feel like they're playing
@@ -56,7 +57,7 @@ import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 function calculateBpm(
   _world: World,
   _resources: ResourcePool,
-  state: { "key-presses": State<Keypress[]>; bpm: State<number> }
+  state: { "key-presses": State<Keypress[]>; bpm: State<number> },
 ) {
   const keyPresses = state["key-presses"];
   // The difference between each consecutive time
@@ -75,7 +76,7 @@ const drumkits = [parisHouseDrumkit, lofiHipHopDrumkit];
 function keypressTrackingSystem(
   _world: World,
   resources: ResourcePool,
-  state: { "key-presses": State<Keypress[]> }
+  state: { "key-presses": State<Keypress[]> },
 ) {
   const p = resources.get<p5>("p5");
   const keyPresses = state["key-presses"].value;
@@ -97,7 +98,7 @@ function keypressTrackingSystem(
 function sequenceIncrementerSystem(
   _world: World,
   _resources: ResourcePool,
-  state: { "sequence-index": State<number> }
+  state: { "sequence-index": State<number> },
 ) {
   const sequenceIndex = state["sequence-index"];
   const nextIndex = (sequenceIndex.value + 1) % 8;
@@ -110,7 +111,7 @@ function sequenceIncrementerSystem(
 function drumSystem(
   world: World,
   resources: ResourcePool,
-  state: { "sequence-index": State<number>; bpm: State<number> }
+  state: { "sequence-index": State<number>; bpm: State<number> },
 ) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
   const sequenceIndex = state["sequence-index"];
@@ -135,7 +136,7 @@ function drumSystem(
 
   const sequencesToPlay = tabs.find((tab) => tab.name === genereToPlay);
   const drumkitToPlay = drumkits.find(
-    (drumkit) => drumkit.name === genereToPlay
+    (drumkit) => drumkit.name === genereToPlay,
   );
 
   const textEffectBounds = canvasBounds.shrink(100);
@@ -143,41 +144,41 @@ function drumSystem(
   if (!sequencesToPlay || !drumkitToPlay) {
     parisHouseDrumkit.instruments.kick?.triggerAttackRelease("C2", "1n", time);
     world.addBundle(
-      createRandomlyPositionedTextBundle("kick", textEffectBounds)
+      createRandomlyPositionedTextBundle("kick", textEffectBounds),
     );
   } else {
     if (sequencesToPlay.pattern["C"][sequenceIndex.value] === 1) {
       drumkitToPlay.instruments.clap?.triggerAttackRelease("C2", "1n", time);
       world.addBundle(
-        createRandomlyPositionedTextBundle("clap", textEffectBounds)
+        createRandomlyPositionedTextBundle("clap", textEffectBounds),
       );
     }
 
     if (sequencesToPlay.pattern["K"][sequenceIndex.value] === 1) {
       drumkitToPlay.instruments.kick?.triggerAttackRelease("C2", "1n", time);
       world.addBundle(
-        createRandomlyPositionedTextBundle("kick", textEffectBounds)
+        createRandomlyPositionedTextBundle("kick", textEffectBounds),
       );
     }
 
     if (sequencesToPlay.pattern["HH"][sequenceIndex.value] === 1) {
       drumkitToPlay.instruments.hat?.triggerAttackRelease("C2", "1n", time);
       world.addBundle(
-        createRandomlyPositionedTextBundle("hat", textEffectBounds)
+        createRandomlyPositionedTextBundle("hat", textEffectBounds),
       );
     }
 
     if (sequencesToPlay.pattern["S"][sequenceIndex.value] === 1) {
       drumkitToPlay.instruments.snare?.triggerAttackRelease("C2", "1n", time);
       world.addBundle(
-        createRandomlyPositionedTextBundle("snare", textEffectBounds)
+        createRandomlyPositionedTextBundle("snare", textEffectBounds),
       );
     }
 
     if (sequencesToPlay.pattern["OH"][sequenceIndex.value] === 1) {
       drumkitToPlay.instruments.openHat?.triggerAttackRelease("C2", "1n", time);
       world.addBundle(
-        createRandomlyPositionedTextBundle("open hat", textEffectBounds)
+        createRandomlyPositionedTextBundle("open hat", textEffectBounds),
       );
     }
   }
@@ -211,22 +212,47 @@ function textFadeSystem(world: World, resources: ResourcePool) {
   }
 }
 
-const drums = EngineBuilder.create()
-  .state("sequence-index", 0)
-  .state<"key-presses", Keypress[]>("key-presses", [])
-  .state("bpm", 0)
-  .build();
+class DrumsThing {
+  private _engine?: Engine<any, any>;
 
-drums.part(primitiveRendererPart);
+  run(parent?: HTMLElement) {
+    const drums = EngineBuilder.create()
+      .event("setup")
+      .event("update")
+      .event("keyPressed")
+      .event("after-update")
+      .state("sequence-index", 0)
+      .state<"key-presses", Keypress[]>("key-presses", [])
+      .state("bpm", 0)
+      .build();
 
-drums.system("calculate-bpm", onKeydown(), calculateBpm);
+    drums.part(p5Part([500, 500], parent));
 
-drums.part(bpmCounterPart);
-drums.part(volumeSliderPart);
+    drums.system("calculate-bpm", drums.trigger.on("keyPressed"), calculateBpm);
 
-drums.system("track-keypresses", onKeydown(), keypressTrackingSystem);
-drums.system("sequence-incrementer", onKeydown(), sequenceIncrementerSystem);
-drums.system("drum", onKeydown(), drumSystem);
-drums.system("text-fade", onUpdate(), textFadeSystem);
+    drums.part(bpmCounterPart);
+    drums.part(volumeSliderPart);
 
-export default drums;
+    drums.system(
+      "track-keypresses",
+      drums.trigger.on("keyPressed"),
+      keypressTrackingSystem,
+    );
+    drums.system(
+      "sequence-incrementer",
+      drums.trigger.on("keyPressed"),
+      sequenceIncrementerSystem,
+    );
+    drums.system("drum", drums.trigger.on("keyPressed"), drumSystem);
+    drums.system("text-fade", drums.trigger.on("update"), textFadeSystem);
+
+    this._engine = drums;
+    drums.run("init");
+  }
+
+  stop() {
+    this._engine?.stop();
+  }
+}
+
+export default new DrumsThing();

@@ -1,61 +1,90 @@
 import p5 from "p5";
-import Engine from "../../core/Engine/Engine";
+import primitiveRendererSystem from "./primitive-renderer/primitive-renderer";
+import World from "../../core/World/World";
 import Bounds from "../../core/Bounds/Bounds";
 import Vector from "../../core/Vector/Vector";
-import primitiveRendererSystem from "./primitive-renderer/primitive-renderer";
-import { onUpdate } from "../../core/Engine/SystemTrigger";
+import { ResourcePool } from "../../core/Engine/ResourcePool";
+import { EventEmitter } from "../../core/System/System";
+import { Part } from "../../core/Part/Part";
 
 export type MousePosition = {
   x: number;
   y: number;
 };
 
-function p5Part<T extends Record<string, unknown>>(
-  size: [number, number],
-  parent?: HTMLElement
-) {
-  return (engine: Engine<T>) => {
-    engine.runner((systems, world, resources, states) => {
-      const p5Instance = new p5((sketch) => {
-        const p = sketch as unknown as p5;
-        const canvasBounds = Bounds.create(
-          Vector.create(0, 0),
-          Vector.create(...size)
-        );
+type P5Events = {
+  update: unknown;
+  "after-update": unknown;
+  init: unknown;
+  setup: unknown;
+  keyPressed: unknown;
+  // cheese: unknown; // Should get error with this! as its not defined in the engine
+};
 
-        p.setup = () => {
-          p.createCanvas(...canvasBounds.size);
-          p.colorMode(p.HSB, 360, 100, 100, 100);
-          p.noStroke();
-          p.rectMode(p.CENTER);
-          resources.set("canvas-bounds", canvasBounds);
-          resources.set("p5", p);
-
-          // Run systems on start
-        };
-
-        p.draw = () => {
-          p.background(240, 90, 60);
-          resources.set("mouse-position", {
-            x: p.mouseX,
-            y: p.mouseY,
-          });
-          resources.set("p5", p);
-
-          // Run systems that can run on this update loop
-          // Need to make something that when given the engine context it decides which systems run
-        };
-
-        p.keyPressed = () => {};
-      }, parent);
-
-      return () => {
-        p5Instance.remove();
+function createP5System(size: [number, number], parent?: HTMLElement) {
+  return function p5System(
+    world: World,
+    resources: ResourcePool,
+    state: unknown,
+    eventEmitter: EventEmitter<P5Events>,
+  ) {
+    const p5Instance = new p5((sketch) => {
+      const p = sketch;
+      const canvasBounds = Bounds.create(
+        Vector.create(0, 0),
+        Vector.create(...size),
+      );
+      p.setup = () => {
+        resources.set("p5", p);
+        p.createCanvas(...canvasBounds.size);
+        p.colorMode(p.HSB, 360, 100, 100, 100);
+        p.noStroke();
+        p.rectMode(p.CENTER);
+        resources.set("canvas-bounds", canvasBounds);
+        // trigger start event
+        eventEmitter.emit({ event: "setup" });
       };
-    });
 
-    engine.system("renderer", onUpdate(), primitiveRendererSystem);
+      p.draw = () => {
+        p.background(240, 90, 60);
+        resources.set("p5", p);
+        resources.set("mouse-position", {
+          x: p.mouseX,
+          y: p.mouseY,
+        });
+        // trigger update event
+        eventEmitter.emit({ event: "update" });
+        eventEmitter.emit({ event: "after-update" });
+      };
+
+      p.keyPressed = () => {
+        // trigger key pressed event
+        // This event isn't defined in pong-game, but is in drums. So id expect to get an error in pong but not getting it
+        eventEmitter.emit({ event: "keyPressed" });
+      };
+    }, parent);
+
+    return () => {
+      p5Instance.remove();
+    };
   };
+}
+
+function p5Part(size: [number, number], parent?: HTMLElement) {
+  const part: Part<P5Events> = ({ registerSystem, triggerBuilder }) => {
+    registerSystem(
+      "p5",
+      triggerBuilder.on("init"),
+      createP5System(size, parent),
+    );
+    registerSystem(
+      "renderer",
+      triggerBuilder.on("update"),
+      primitiveRendererSystem,
+    );
+  };
+
+  return part;
 }
 
 export default p5Part;

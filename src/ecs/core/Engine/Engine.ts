@@ -1,34 +1,80 @@
 import p5 from "p5";
-import System from "../System/System";
+import System, { Dispose, EventEmitter } from "../System/System";
 import World from "../World/World";
 import Bounds from "../Bounds/Bounds";
 import State from "../State/State";
 import { ResourcePool } from "./ResourcePool";
+import { Trigger, TriggerCondition } from "../Trigger/Trigger";
+import {
+  createTriggerBuilder,
+  TriggerBuilder,
+} from "../Trigger/TriggerBuilder";
+import { Part } from "../Part/Part";
 
 export type EngineOptions = Partial<{
   canvasBounds: Bounds;
 }>;
 
-type States<StateSet extends Record<string, unknown> = {}> = {
-  [Key in keyof StateSet]: State<StateSet[Key]>;
+type States<StateMap extends Record<string, unknown> = {}> = {
+  [Key in keyof StateMap]: State<StateMap[Key]>;
 };
 
-/**
- * A part is a set of functionality that you can use to
- * encapsualte engine configuration
- */
-type EnginePart<StateSet extends Record<string, unknown>> = (
-  engine: Engine<StateSet>
-) => void;
+export interface Engine<
+  EventMap extends Record<string, unknown> = {},
+  StateMap extends Record<string, unknown> = {},
+> {
+  get trigger(): TriggerBuilder<EventMap, StateMap>;
+
+  /**
+   * Register a system with the conditions under which it should trigger
+   *
+   * @param name
+   * @param trigger the conditions under which the system should trigger
+   * @param system
+   */
+  system: (
+    name: string,
+    trigger: Trigger<EventMap, StateMap>,
+    s: System<EventMap, StateMap>,
+  ) => void;
+
+  /**
+   * A part is a set of functionality used to
+   * encapsualte engine configuration into reusable,
+   * isolated and idependently testable modules
+   */
+  part: <
+    PartEventMap extends Partial<EventMap>,
+    PartStateMap extends Partial<StateMap>,
+  >(
+    p: Part<PartEventMap, PartStateMap>,
+  ) => void;
+  run: <Key extends keyof EventMap>(event: Key) => void;
+  stop(): void;
+}
 
 /**
  * Designed based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
  */
-export class Engine<StateSet extends Record<string, unknown> = {}> {
-  private _systems: [{ event: string }, System<States<StateSet>>][] = [];
-  private _states: States<StateSet>;
+class DufusEngine<
+  EventMap extends Record<string, unknown> = {},
+  StateMap extends Record<string, unknown> = {},
+> implements Engine<EventMap, StateMap> {
+  private _eventBus: Map<
+    keyof EventMap,
+    {
+      system: System<EventMap, StateMap>;
+      condition?: TriggerCondition<StateMap>;
+    }[]
+  > = new Map();
+
+  private _store: States<StateMap>;
+
   private _world = new World();
+
   private _resources = new ResourcePool();
+
+  private _cleanup: Dispose[] = [];
 
   /**
    * Add events (assuming event is the right name for what im envisioning here)
@@ -53,36 +99,90 @@ export class Engine<StateSet extends Record<string, unknown> = {}> {
    *   may be a good opportunity to apply some here
    */
 
-  constructor(stateSet: StateSet, options: EngineOptions = {}) {
-    this._states = Object.keys(stateSet).reduce((prev, next) => {
+  constructor(stateSet: StateMap, options: EngineOptions = {}) {
+    this._store = Object.keys(stateSet).reduce((prev, next) => {
       return {
         ...prev,
         [next]: new State(stateSet[next]),
       };
-    }, {}) as States<StateSet>;
+    }, {}) as States<StateMap>;
   }
 
   system(
-    name: string,
-    trigger: { event: string },
-    system: System<States<StateSet>>
+    name: string, // Remove this name field - no longer used
+    trigger: Trigger<EventMap, StateMap>,
+    sys: System<EventMap, StateMap>,
   ): void {
-    this._systems.push([{ event: trigger.event }, system]);
+    const systems = this._eventBus.get(trigger.event) || [];
+    systems.push({
+      system: sys,
+      condition: trigger.condition,
+    });
+    this._eventBus.set(trigger.event, systems);
   }
 
-  part(part: EnginePart<StateSet>) {
-    part(this);
+  get trigger() {
+    return createTriggerBuilder<EventMap, StateMap>();
+  }
+
+  part<
+    PartEventMap extends Partial<EventMap>,
+    PartStateMap extends Partial<StateMap>,
+  >(p: Part<PartEventMap, PartStateMap>) {
+    p({
+      registerSystem: (
+        name: string,
+        trigger: Trigger<PartEventMap, PartStateMap>,
+        sys: System<PartEventMap, PartStateMap>,
+      ) => {
+        // Figure out how to structure these types so that these assertions are not needed
+        this.system(
+          name,
+          trigger as Trigger<EventMap, StateMap>,
+          sys as unknown as System<EventMap, StateMap>,
+        );
+      },
+      triggerBuilder: createTriggerBuilder<PartEventMap, PartStateMap>(),
+    });
   }
 
   /**
    * Renders and runs the game within a HTML canvas element
    * @param parent optionally supply the parent element to render visuals within
    */
-  run() {}
+  run<Key extends keyof EventMap>(event: Key) {
+    const systems = this._eventBus.get(event) || [];
+
+    for (const { system, condition } of systems) {
+      const cleanup = system(this._world, this._resources, this._store, {
+        emit: ({ event: emittedEvent }) => {
+          console.debug(`Emitted event: ${String(emittedEvent)}`);
+
+          if (condition === undefined) {
+            // Figure out how to structure these types so that these assertions are not needed
+            this.run(emittedEvent as keyof EventMap); // Figure out how to remove this type assertion, currently needed to satisfy typescript that the emitted event is a key of the event map
+          } else {
+            if (
+              condition.type === "when" &&
+              this._store[condition.state].value === condition.value
+            ) {
+              // Figure out how to structure these types so that these assertions are not needed
+              this.run(emittedEvent as keyof EventMap);
+            }
+          }
+        },
+      });
+
+      if (cleanup) {
+        this._cleanup.push(cleanup);
+      }
+    }
+  }
 
   stop() {
     console.debug("Stopped");
+    this._cleanup.forEach((cleanup) => cleanup());
   }
 }
 
-export default Engine;
+export default DufusEngine;
