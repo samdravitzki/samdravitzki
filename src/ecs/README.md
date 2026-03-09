@@ -1,6 +1,6 @@
 ## _ECS engine_
 
-Always wanted to learn more about game engine design and ecs and so decided to build one with js and see how it goes
+Always wanted to learn more about game engine design and ecs and so decided to build a simple engine to assist in prototyping game ideas
 
 - [ ] Describe what this is, why it exists and what I want to do with it
 - [ ] copy in plans and ideas from notebook
