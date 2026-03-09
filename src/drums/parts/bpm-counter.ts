@@ -1,8 +1,6 @@
 import Bounds from "../../ecs/core/Bounds/Bounds";
 import createBundle from "../../ecs/core/Bundle/createBundle";
-import DufusEngine from "../../ecs/core/Engine/Engine";
 import { ResourcePool } from "../../ecs/core/Engine/ResourcePool";
-import { onStart, onUpdate } from "../../ecs/core/Engine/SystemTrigger";
 import { Part } from "../../ecs/core/Part/Part";
 import State from "../../ecs/core/State/State";
 import Vector from "../../ecs/core/Vector/Vector";

@@ -1,4 +1,5 @@
-import DufusEngine, { EngineOptions, Engine } from "./Engine";
+import DufusEngine from "./DufusEngine";
+import { EngineOptions, Engine } from "./Engine";
 
 /**
  * Testing out this way of implementing the builder pattern in typescript

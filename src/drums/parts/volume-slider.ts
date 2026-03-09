@@ -1,9 +1,7 @@
 import p5 from "p5";
-import DufusEngine from "../../ecs/core/Engine/Engine";
 import * as Tone from "tone";
 import Bounds from "../../ecs/core/Bounds/Bounds";
 import World from "../../ecs/core/World/World";
-import { onStart } from "../../ecs/core/Engine/SystemTrigger";
 import { ResourcePool } from "../../ecs/core/Engine/ResourcePool";
 import { Part } from "../../ecs/core/Part/Part";
 

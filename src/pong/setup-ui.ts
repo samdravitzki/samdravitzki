@@ -1,8 +1,6 @@
 import p5 from "p5";
 import Bounds from "../ecs/core/Bounds/Bounds";
-import DufusEngine from "../ecs/core/Engine/Engine";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
-import { onStart } from "../ecs/core/Engine/SystemTrigger";
 import State from "../ecs/core/State/State";
 import World from "../ecs/core/World/World";
 
@@ -17,7 +15,7 @@ function createGameMenu(
   state: {
     "app-state": State<"paused" | "main-menu" | "in-game" | "end">;
     "render-trajectory": State<boolean>;
-  }
+  },
 ) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
   const p = resources.get<p5>("p5");
@@ -60,7 +58,7 @@ function createEndMenu(
   state: {
     "app-state": State<"paused" | "main-menu" | "in-game" | "end">;
     score: State<[number, number]>;
-  }
+  },
 ) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
   const p = resources.get<p5>("p5");
@@ -97,7 +95,7 @@ function createMainMenu(
   resources: ResourcePool,
   state: {
     "app-state": State<"paused" | "main-menu" | "in-game" | "end">;
-  }
+  },
 ) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
   const p = resources.get<p5>("p5");

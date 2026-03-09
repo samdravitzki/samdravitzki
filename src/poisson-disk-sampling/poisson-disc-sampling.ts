@@ -1,14 +1,12 @@
 import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
-import DufusEngine, { Engine } from "../ecs/core/Engine/Engine";
+import { Engine } from "../ecs/core/Engine/Engine";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
-import { onStart } from "../ecs/core/Engine/SystemTrigger";
 import State from "../ecs/core/State/State";
 import Vector from "../ecs/core/Vector/Vector";
 import World from "../ecs/core/World/World";
 import p5Part from "../ecs/parts/p5/p5-part";
-import primitiveRendererPart from "../ecs/parts/p5/primitive-renderer/primitive-renderer";
 import poissonDisc from "../lib/poisson-disc/poisson-disc";
 import randomDots from "./random-dots/random-dots";
 
