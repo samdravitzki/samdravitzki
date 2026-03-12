@@ -16,6 +16,9 @@ type MiniAppInfo = {
   app: MiniApp;
 };
 
+// Possible categories to display as
+// Original games & prototypes, experiments, studies (recreations of games), colleciton of apps related to a subject (i.e. collision detection)
+
 const pong: MiniAppInfo = {
   name: "pong",
   symbol: "🎾",

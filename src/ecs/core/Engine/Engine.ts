@@ -28,6 +28,8 @@ export interface Engine<
   ) => void;
 
   /**
+   * Extend the engine by adding a part
+   *
    * A part is a set of functionality used to
    * encapsualte engine configuration into reusable,
    * isolated and idependently testable modules

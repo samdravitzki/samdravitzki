@@ -79,8 +79,6 @@ function showEndMenu(
   const p = resources.get<p5>("p5");
   const [playerScore, aiScore] = state.score.value;
 
-  console.log(`final score: player ${playerScore}, ai ${aiScore}`);
-
   const endMessageDiv = p.select("#end-menu > .message");
 
   if (endMessageDiv) {
@@ -303,7 +301,7 @@ function ballMovementSystem(world: World) {
 function ballTrajectorySystem(
   world: World,
   resources: ResourcePool,
-  state: Record<string, State<unknown>>,
+  state: { "render-trajectory": State<boolean> },
 ) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
   const renderTrajectory = state["render-trajectory"];
@@ -551,7 +549,7 @@ class PongGameApp {
     );
     pong.system(
       "hideGameMenu",
-      pong.trigger.on("update").when("app-state").enters("main-menu"),
+      pong.trigger.on("update").when("app-state").exits("in-game"),
       hideGameMenu,
     );
     pong.system(
@@ -561,12 +559,12 @@ class PongGameApp {
     );
     pong.system(
       "hideEndMenu",
-      pong.trigger.on("update").when("app-state").enters("end"),
+      pong.trigger.on("update").when("app-state").exits("end"),
       hideEndMenu,
     );
     pong.system(
       "hideMainMenu",
-      pong.trigger.on("update").when("app-state").exits("in-game"),
+      pong.trigger.on("update").when("app-state").exits("main-menu"),
       hideMainMenu,
     );
 

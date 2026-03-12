@@ -11,7 +11,7 @@ Always wanted to learn more about game engine design and ecs and so decided to b
 - Implement demos of the collision system
 - Implement demos for different features of ecs
 - Support different collision scenarions (box - box, circle - circle, ...)
-- Move to less naiive implementation of collision system
+- Move to less naive implementation of collision system
 - Add support for events
 - Add debug mode to view systems and their average run time
 
@@ -20,6 +20,14 @@ Always wanted to learn more about game engine design and ecs and so decided to b
 - [ ] Reset state of engine when it is stopped
 - [ ] Canvases dont look good as just squares in the middle of your screen
 - [ ] Describe what `State` is and why its required when components also store state
+
+## Ideas
+
+- Logger available to systems and engine that can be used to audit events and debug
+- Debug tools
+  - Searchable list of systems, events their triggered and someway to visualise when their executing
+  - Searchable list of entities in the world
+  - Could use https://tweakpane.github.io/docs/ for this
 
 ## Resources
 
