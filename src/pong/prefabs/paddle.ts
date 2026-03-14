@@ -19,6 +19,10 @@ function createPaddle(position: Vector, owner: "player" | "ai") {
       position,
     },
     {
+      name: "speed",
+      value: 0.01,
+    },
+    {
       name: "collider",
       type: "aabb",
       layer: "wall",
