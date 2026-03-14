@@ -4,11 +4,6 @@ import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import State from "../ecs/core/State/State";
 import World from "../ecs/core/World/World";
 
-/**
- * This EnginePart has a complicated generic because it is only compatible with an engine
- * that has the state described below, if an engine does not include this state it will
- * not be type safe
- */
 function createGameMenu(
   _world: World,
   resources: ResourcePool,

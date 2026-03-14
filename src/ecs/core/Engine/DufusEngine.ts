@@ -1,33 +1,16 @@
-import { Engine, EngineOptions } from "./Engine";
-import { ResourcePool } from "./ResourcePool";
-import { Part } from "../Part/Part";
 import State from "../State/State";
 import System, { Dispose } from "../System/System";
-import { TriggerCondition, Trigger } from "../Trigger/Trigger";
-import { createTriggerBuilder } from "../Trigger/TriggerBuilder";
 import World from "../World/World";
+import EventBus from "./EventBus";
+import { Engine } from "./Engine";
+import { ResourcePool } from "./ResourcePool";
+import { Part } from "../Part/Part";
+import { Trigger } from "../Trigger/Trigger";
+import { createTriggerBuilder } from "../Trigger/TriggerBuilder";
 
 type States<StateMap extends Record<string, unknown> = {}> = {
   [Key in keyof StateMap]: State<StateMap[Key]>;
 };
-
-type EventListener = () => void;
-
-class EventBus<EventMap extends Record<string, unknown>> {
-  private _subscribers = new Map<keyof EventMap, EventListener[]>();
-
-  subscribe(event: keyof EventMap, listener: EventListener) {
-    const listeners = this._subscribers.get(event) || [];
-    this._subscribers.set(event, [...listeners, listener]);
-  }
-
-  publish(event: keyof EventMap) {
-    const listeners = this._subscribers.get(event) || [];
-    for (const listener of listeners) {
-      listener();
-    }
-  }
-}
 
 type SystemRegistration<
   EventMap extends Record<string, unknown> = {},
@@ -48,8 +31,10 @@ class DufusEngine<
 
   private _store: States<StateMap>;
 
-  // Number of times a state change a system is dependent on has occured
-  // Needed so that when the event the system is dependent on triggers it can determine wheter it should run
+  /**
+   * Number of times a state change a system is dependent on has occured
+   * Needed so that when the event the system is dependent on triggers it can determine wheter it should run
+   */
   private _stateChangeTracker = new Map<System<EventMap, StateMap>, number>();
 
   private _world = new World();
@@ -64,23 +49,20 @@ class DufusEngine<
    * Add events (assuming event is the right name for what im envisioning here)
    *
    * Current ideas around how events should work
-   * - Should be able to define systems that run when events trigger
-   * - Should be able to define systems that trigger events
-   * - Should be able to configure how long an event sticks around for
-   * - Events should only last for the frame they are triggered and the next frame by default
+   * - Should be able to define systems that run when events trigger (tick) (should unit test this behaviour)
+   * - Should be able to define systems that trigger events (tick) (should unit test this behaviour)
+   * - Should be able to configure how long an event sticks around for (maybe for later, everything works fine without this atm)
+   * - Events should only last for the frame they are triggered and the next frame by default (not relevant as engine has events that can be shorter or longer than a frame)
    * - If an event is triggered in a frame and a system listening to it is yet to
-   *   trigger it should run in the same frame
+   *   trigger it should run in the same frame (not sure, should write a unit test to validate the engine behaves in this way)
    *
-   * - Use events to handle listening to changes in state
+   * - Use events to handle listening to changes in state (systems can be triggered on changes in state but it doesn't work via events, should unit test events triggering on changes in state)
    *  - When the state changes it should add an event which should then
    *    cause any systems listening to state change events to run
    *
-   * - Could also use events to trigger systems that run on p5 lifecycle events
+   * - Could also use events to trigger systems that run on p5 lifecycle events (tick)
    *   like start and draw. When p5 start function is called it could trigger a "start"
    *   event that all systems listen to.
-   *
-   * - Opportunity to learn more about datastructures and algorithms as this
-   *   may be a good opportunity to apply some here
    */
 
   constructor(stateSet: StateMap) {
@@ -146,11 +128,15 @@ class DufusEngine<
   }
 
   private _executeSystem(system: System<EventMap, StateMap>) {
-    system(this._world, this._resources, this._store, {
+    const cleanupFn = system(this._world, this._resources, this._store, {
       emit: ({ event: emittedEvent }) =>
         // This type assertion is also an issue I would like to resolve
         this._eventBus.publish(emittedEvent as keyof EventMap),
     });
+
+    if (cleanupFn) {
+      this._cleanup.push(cleanupFn);
+    }
   }
 
   /**
@@ -199,18 +185,9 @@ class DufusEngine<
     this._eventBus.publish("init");
   }
 
-  /**
-   * when trigger
-   * if (trigger.condition === "when" && this._state[trigger.condition.state].value === trigger.condition.value) { //... }
-   *
-   * on trigger
-   *
-   * if (trigger.condition === "on" && )
-   */
-
   stop() {
     console.log("Stopped");
-    // this._cleanup.forEach((cleanup) => cleanup()); // Need to get the cleanup stuff working
+    this._cleanup.forEach((cleanup) => cleanup()); // Need to get the cleanup stuff working
   }
 }
 

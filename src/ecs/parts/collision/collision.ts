@@ -43,7 +43,6 @@ function collisions(
       collisionSystem,
     );
 
-    // Collisions dont work because they need to be cleaned up at the end of the update
     registerSystem(
       "collisionCleanupSystem",
       triggerBuilder.on("after-update"),

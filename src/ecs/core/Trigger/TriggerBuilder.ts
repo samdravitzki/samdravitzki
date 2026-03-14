@@ -61,32 +61,3 @@ export function createTriggerBuilder<
     },
   };
 }
-
-// // Variance tests - Expected type behaviour when assigning this type to some of its variants
-// type MainTriggerBuilder = TriggerBuilder<
-//   {
-//     init: unknown;
-//     setup: unknown;
-//     update: unknown;
-//     "after-update": unknown;
-//     keyPressed: unknown;
-//   },
-//   {
-//     "render-trajectory": boolean;
-//     score: [number, number];
-//     "app-state": "a" | "b" | "c";
-//   }
-// >;
-
-// type SubTriggerBuilder = TriggerBuilder<
-//   { update: unknown; "after-update": unknown },
-//   {}
-// >;
-
-// let mainBuilder: MainTriggerBuilder = {} as MainTriggerBuilder;
-
-// let subBuilder: SubTriggerBuilder = {} as SubTriggerBuilder;
-
-// // Expect TriggerBuilder to be covariant
-// mainBuilder = subBuilder; // Should be able to assign sub builder to the main builder this to work
-// subBuilder = mainBuilder; // Should not be able to assign main builder to the sub builder this to work

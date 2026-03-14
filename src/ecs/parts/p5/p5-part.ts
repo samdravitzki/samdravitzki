@@ -18,7 +18,6 @@ type P5Events = {
   init: unknown;
   setup: unknown;
   keyPressed: unknown;
-  // cheese: unknown; // Should get error with this! as its not defined in the engine
 };
 
 function createP5System(size: [number, number], parent?: HTMLElement) {
@@ -41,7 +40,6 @@ function createP5System(size: [number, number], parent?: HTMLElement) {
         p.noStroke();
         p.rectMode(p.CENTER);
         resources.set("canvas-bounds", canvasBounds);
-        // trigger start event
         eventEmitter.emit({ event: "setup" });
       };
 
@@ -52,14 +50,11 @@ function createP5System(size: [number, number], parent?: HTMLElement) {
           x: p.mouseX,
           y: p.mouseY,
         });
-        // trigger update event
         eventEmitter.emit({ event: "update" });
         eventEmitter.emit({ event: "after-update" });
       };
 
       p.keyPressed = () => {
-        // trigger key pressed event
-        // This event isn't defined in pong-game, but is in drums. So id expect to get an error in pong but not getting it
         eventEmitter.emit({ event: "keyPressed" });
       };
     }, parent);

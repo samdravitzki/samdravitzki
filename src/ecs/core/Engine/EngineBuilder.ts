@@ -2,18 +2,10 @@ import DufusEngine from "./DufusEngine";
 import { EngineOptions, Engine } from "./Engine";
 
 /**
- * Testing out this way of implementing the builder pattern in typescript
- * so that as you run each build command it also incrementally builds the
- * types.
- *
- * Motivation: Currently there is an issue where when each state is added to
- * the engine there is no way for the systems to access the types of state
- * avaible and so each of them has to run their own checks to see if the
- * state they are accessing exists
+ * Builder for creating an Engine with type safety and autocompletion for states and events.
  *
  * got this trick from https://medium.hexlabs.io/the-builder-pattern-with-typescript-using-advanced-types-e05a03ffc36e
  *
- * TODO: I want to see if this can be combined with the engine class so that the consumer can directly use something called "Engine"
  */
 class EngineBuilder<
   EventMap extends Record<string, unknown> = {},
@@ -23,11 +15,6 @@ class EngineBuilder<
 
   /**
    * Register a state
-   *
-   * NOTE: The resulting object is pretty verbose due to all of the "&"
-   * causes by the intersection done on each call to state. This issue
-   * can be resolved using "Expand" types as described in the article
-   * above. I have chosen to leave this out for now to keep things simple
    *
    * @param name
    * @param value
@@ -58,7 +45,8 @@ class EngineBuilder<
 
   build(): Engine<
     {
-      [K in keyof EventMap]: EventMap[K]; // Required to condense intersections into a single object type making inferred types easier to read
+      // Required to condense intersections into a single object type making inferred types easier to read
+      [K in keyof EventMap]: EventMap[K];
     },
     {
       [K in keyof StateMap]: StateMap[K];
