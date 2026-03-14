@@ -53,21 +53,18 @@ class State<T> {
       listener();
     }
 
-    // We can assume there is an entry for value because of the above line
-    const valueStateListeners = this._transitionListeners.get(value)!;
-
-    valueStateListeners[stateChange].push(listener);
+    const listeners = this._transitionListeners.get(value)!;
+    listeners[stateChange].push(listener);
   }
 
   /**
    * Trigger on-enter listeners asscociated with value of state
    */
   private handleEnter(value: T) {
-    const valueStateListeners =
-      this._transitionListeners.get(value)?.["on-enter"];
+    const listeners = this._transitionListeners.get(value)?.["on-enter"];
 
-    if (valueStateListeners !== undefined) {
-      valueStateListeners.forEach((listener) => listener());
+    if (listeners !== undefined) {
+      listeners.forEach((listener) => listener());
     }
   }
 
@@ -75,11 +72,10 @@ class State<T> {
    * Trigger on-exit listeners asscociated with value of state
    */
   private handleExit(value: T) {
-    const valueStateListeners =
-      this._transitionListeners.get(value)?.["on-exit"];
+    const listeners = this._transitionListeners.get(value)?.["on-exit"];
 
-    if (valueStateListeners !== undefined) {
-      valueStateListeners.forEach((listener) => listener());
+    if (listeners !== undefined) {
+      listeners.forEach((listener) => listener());
     }
   }
 
@@ -89,8 +85,9 @@ class State<T> {
 
   setValue(value: T) {
     this.handleExit(this._value);
-    this.handleTransition(value, this._value);
+    let oldValue = this._value;
     this._value = value;
+    this.handleTransition(this._value, oldValue);
     this.handleEnter(this._value);
   }
 }
