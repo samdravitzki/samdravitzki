@@ -79,7 +79,7 @@ function p5Part(size: [number, number], parent?: HTMLElement) {
     );
     registerSystem(
       "renderer",
-      triggerBuilder.on("update"),
+      triggerBuilder.on("after-update"),
       primitiveRendererSystem,
     );
   };
