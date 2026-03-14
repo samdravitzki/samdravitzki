@@ -56,7 +56,7 @@ class EngineBuilder<
     >(this.stateSet);
   }
 
-  build(options: EngineOptions = {}): Engine<
+  build(): Engine<
     {
       [K in keyof EventMap]: EventMap[K]; // Required to condense intersections into a single object type making inferred types easier to read
     },
@@ -64,7 +64,7 @@ class EngineBuilder<
       [K in keyof StateMap]: StateMap[K];
     }
   > {
-    return new DufusEngine<EventMap, StateMap>(this.stateSet, options);
+    return new DufusEngine<EventMap, StateMap>(this.stateSet);
   }
 
   static create(): EngineBuilder<{ init: unknown }> {

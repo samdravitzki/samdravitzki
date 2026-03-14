@@ -88,7 +88,6 @@ function keypressTrackingSystem(
 
   // only keep sliding window of x most recent key presses
   const recentPresses = keyPresses.slice(-4);
-  console.debug(recentPresses.map((press) => press.key));
   state["key-presses"].setValue(recentPresses);
 }
 
