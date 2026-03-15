@@ -24,7 +24,9 @@ type SystemRegistration<
  * Designed based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
  */
 class DufusEngine<
-  EventMap extends Record<string, unknown> = {},
+  EventMap extends Record<string, unknown> & { init: unknown } = {
+    init: unknown;
+  },
   StateMap extends Record<string, unknown> = {},
 > implements Engine<EventMap, StateMap> {
   private _eventBus = new EventBus<EventMap>();
@@ -65,11 +67,11 @@ class DufusEngine<
    *   event that all systems listen to.
    */
 
-  constructor(stateSet: StateMap) {
-    this._store = Object.keys(stateSet).reduce((prev, next) => {
+  constructor(stateMap: StateMap) {
+    this._store = Object.keys(stateMap).reduce((prev, next) => {
       return {
         ...prev,
-        [next]: new State(stateSet[next]),
+        [next]: new State(stateMap[next]),
       };
     }, {}) as States<StateMap>;
   }
@@ -134,6 +136,7 @@ class DufusEngine<
         this._eventBus.publish(emittedEvent as keyof EventMap),
     });
 
+    // This approach will result in a memory leak if system triggered on update events require cleanup. Will need to look into different approach when this becomes a problem
     if (cleanupFn) {
       this._cleanup.push(cleanupFn);
     }
@@ -143,7 +146,7 @@ class DufusEngine<
    * Renders and runs the game within a HTML canvas element
    * @param parent optionally supply the parent element to render visuals within
    */
-  run<Key extends keyof EventMap>(event: Key) {
+  run() {
     const systemEventGroups = groupSystemsByEvent(this._systems);
     logSystemRegistrations(this._systems);
 

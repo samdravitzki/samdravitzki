@@ -8,7 +8,9 @@ import { EngineOptions, Engine } from "./Engine";
  *
  */
 class EngineBuilder<
-  EventMap extends Record<string, unknown> = {},
+  EventMap extends Record<string, unknown> & { init: unknown } = {
+    init: unknown;
+  },
   StateMap extends Record<string, unknown> = {},
 > {
   private constructor(private readonly stateSet: StateMap) {}

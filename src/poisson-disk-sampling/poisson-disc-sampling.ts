@@ -95,7 +95,7 @@ class PoissonDiscSamplingDemoApp {
 
     this._engine = engine;
 
-    engine.run("init");
+    engine.run();
   }
 
   stop() {

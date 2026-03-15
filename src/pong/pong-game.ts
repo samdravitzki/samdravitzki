@@ -615,7 +615,7 @@ class PongGameApp {
     );
 
     this._engine = pong;
-    pong.run("init");
+    pong.run();
   }
 
   stop() {

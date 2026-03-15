@@ -9,8 +9,8 @@ export type EngineOptions = Partial<{
 }>;
 
 export interface Engine<
-  EventMap extends Record<string, unknown> = {},
-  StateMap extends Record<string, unknown> = {},
+  EventMap extends Record<string, unknown> & { init: unknown },
+  StateMap extends Record<string, unknown>,
 > {
   get trigger(): TriggerBuilder<EventMap, StateMap>;
 
@@ -40,6 +40,8 @@ export interface Engine<
   >(
     p: Part<PartEventMap, PartStateMap>,
   ) => void;
-  run: <Key extends keyof EventMap>(event: Key) => void;
+
+  run: () => void;
+
   stop(): void;
 }

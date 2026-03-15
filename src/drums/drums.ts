@@ -246,7 +246,7 @@ class DrumsThing {
     drums.system("text-fade", drums.trigger.on("update"), textFadeSystem);
 
     this._engine = drums;
-    drums.run("init");
+    drums.run();
   }
 
   stop() {

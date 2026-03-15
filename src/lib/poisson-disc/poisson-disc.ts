@@ -1,4 +1,3 @@
-import { m } from "vitest/dist/reporters-yx5ZTtEV.js";
 import Bounds from "../../ecs/core/Bounds/Bounds";
 import Vector from "../../ecs/core/Vector/Vector";
 import randomInt from "../randomInt/randomInt";
@@ -20,7 +19,7 @@ import { BackgroundGrid } from "./BackgroundGrid/BackgroundGrid";
 function poissonDisc(
   bounds: Bounds,
   minDistance: number = 30,
-  sampleLimit: number = 30
+  sampleLimit: number = 30,
 ): Vector[] {
   const cellSize = minDistance / Math.sqrt(2);
 
@@ -28,7 +27,7 @@ function poissonDisc(
 
   const startingPoint = Vector.create(
     Math.random() * bounds.size[0],
-    Math.random() * bounds.size[1]
+    Math.random() * bounds.size[1],
   );
 
   backgroundGrid.addVector(startingPoint);
@@ -47,7 +46,7 @@ function poissonDisc(
       const newPoint = createRandomVectorNearby(
         activePoint,
         2 * minDistance,
-        minDistance
+        minDistance,
       );
 
       if (
