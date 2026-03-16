@@ -549,7 +549,7 @@ class PongGameApp {
     );
     pong.system(
       "hideGameMenu",
-      pong.trigger.on("update").when("app-state").exits("in-game"),
+      pong.trigger.on("update").when("app-state").enters("end"),
       hideGameMenu,
     );
     pong.system(
