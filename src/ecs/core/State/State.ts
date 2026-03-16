@@ -1,6 +1,6 @@
-export type Transistion = "on-enter" | "on-exit";
+type Transistion = "on-enter" | "on-exit";
 
-export type ChangeListener<T> = (to: T, from: T) => void;
+type ChangeListener<T> = (to: T, from: T) => void;
 
 class State<T> {
   private _value: T;
@@ -83,14 +83,19 @@ class State<T> {
     this._changeListeners.forEach((listener) => listener(to, from));
   }
 
-  setValue(value: T) {
-    this.handleExit(this._value);
+  setValue(newValue: T) {
     let oldValue = this._value;
-    this._value = value;
+
+    if (newValue === oldValue) {
+      return;
+    }
+
+    this.handleExit(this._value);
+    this._value = newValue;
     this.handleTransition(this._value, oldValue);
     this.handleEnter(this._value);
   }
 }
 
 export default State;
-export type { Transistion as StateChange };
+export type { Transistion, ChangeListener };
