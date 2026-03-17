@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import DufusEngine from "./DufusEngine";
-import State from "../State/State";
-
-// describe("system method", () => {});
 
 describe("part method", () => {
   test("should call the provided part function", () => {
