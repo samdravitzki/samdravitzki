@@ -30,21 +30,15 @@ class DufusEngine<
   StateMap extends Record<string, unknown> = {},
 > implements Engine<EventMap, StateMap> {
   private _eventBus = new EventBus<EventMap>();
-
   private _store: States<StateMap>;
-
   /**
    * Number of times a state change a system is dependent on has occured
    * Needed so that when the event the system is dependent on triggers it can determine wheter it should run
    */
   private _stateChangeTracker = new Map<System<EventMap, StateMap>, number>();
-
   private _world = new World();
-
   private _resources = new ResourcePool();
-
   private _systems: SystemRegistration<EventMap, StateMap>[] = [];
-
   private _cleanup: Dispose[] = [];
 
   /**
@@ -76,26 +70,71 @@ class DufusEngine<
     }, {}) as States<StateMap>;
   }
 
+  private _executeSystem(system: System<EventMap, StateMap>) {
+    const cleanupFn = system(this._world, this._resources, this._store, {
+      emit: ({ event: emittedEvent }) =>
+        // Would like to figure out why this type assertion is needed, and how it could be avoided
+        this._eventBus.publish(emittedEvent as keyof EventMap),
+    });
+
+    // This approach will result in a memory leak if system triggered on update events require cleanup. Will need to look into different approach when this becomes a problem
+    if (cleanupFn) {
+      this._cleanup.push(cleanupFn);
+    }
+  }
+
   system(
     name: string, // Remove this name field - no longer used
     trigger: Trigger<EventMap, StateMap>,
     s: System<EventMap, StateMap>,
   ): void {
+    const { condition, event } = trigger;
+
     this._systems.push({
       system: s,
       trigger,
     });
 
-    if (trigger.condition && trigger.condition.type === "on") {
-      const state = this._store[trigger.condition.state];
+    if (!condition) {
+      this._eventBus.subscribe(event, () => this._executeSystem(s));
+      return;
+    }
+
+    if (condition.type === "when") {
+      this._eventBus.subscribe(event, () => {
+        if (this._store[condition.state].value === condition.value) {
+          this._executeSystem(s);
+        }
+      });
+      return;
+    }
+
+    if (condition.type === "on") {
+      /**
+       * Need to figure out how to test behaviour - state can be changed many times but the system will only run when the event occurs
+       * Example test case:
+       * 1. define system that triggers on state x on enter
+       * 2. trigger event system is dependent on expecting it not to run
+       * 3. change state to x
+       * 4. trigger event system is dependent on expecting it to run
+       */
+      this._eventBus.subscribe(event, () => {
+        const trackedTransitionCount = this._stateChangeTracker.get(s);
+        if (trackedTransitionCount && trackedTransitionCount > 0) {
+          this._executeSystem(s);
+          this._stateChangeTracker.set(s, 0);
+        }
+      });
+
+      const state = this._store[condition.state];
       const transitionMap = {
         enter: "on-enter" as const,
         exit: "on-exit" as const,
       };
 
       state.onTransition(
-        trigger.condition.value,
-        transitionMap[trigger.condition.transition],
+        condition.value,
+        transitionMap[condition.transition],
         () => {
           const count = this._stateChangeTracker.get(s);
           if (!count) {
@@ -129,51 +168,11 @@ class DufusEngine<
     });
   }
 
-  private _executeSystem(system: System<EventMap, StateMap>) {
-    const cleanupFn = system(this._world, this._resources, this._store, {
-      emit: ({ event: emittedEvent }) =>
-        // This type assertion is also an issue I would like to resolve
-        this._eventBus.publish(emittedEvent as keyof EventMap),
-    });
-
-    // This approach will result in a memory leak if system triggered on update events require cleanup. Will need to look into different approach when this becomes a problem
-    if (cleanupFn) {
-      this._cleanup.push(cleanupFn);
-    }
-  }
-
   /**
-   * Renders and runs the game within a HTML canvas element
-   * @param parent optionally supply the parent element to render visuals within
+   * Starts the engine by triggering the "init" event
    */
   run() {
-    const systemEventGroups = groupSystemsByEvent(this._systems);
     logSystemRegistrations(this._systems);
-
-    // Link systems into events
-    Object.keys(systemEventGroups).map((event) => {
-      this._eventBus.subscribe(event, () => {
-        systemEventGroups[event].map(({ trigger, system }) => {
-          if (
-            !trigger.condition ||
-            (trigger.condition.type === "when" &&
-              this._store[trigger.condition.state].value ===
-                trigger.condition.value)
-          ) {
-            this._executeSystem(system);
-            return;
-          }
-
-          if (trigger.condition.type === "on") {
-            const hasStateTransitioned = this._stateChangeTracker.get(system);
-            if (hasStateTransitioned) {
-              this._executeSystem(system);
-              this._stateChangeTracker.set(system, 0);
-            }
-          }
-        });
-      });
-    });
 
     // Log state changes
     Object.keys(this._store).map((name) => {
@@ -189,8 +188,8 @@ class DufusEngine<
   }
 
   stop() {
+    this._cleanup.forEach((cleanup) => cleanup());
     console.log("Stopped");
-    this._cleanup.forEach((cleanup) => cleanup()); // Need to get the cleanup stuff working
   }
 }
 
