@@ -15,6 +15,7 @@
 
     /* Linting */
     "strict": true,
+    "strictFunctionTypes": true,
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"]

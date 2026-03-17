@@ -1,7 +1,7 @@
 import * as Tone from "tone";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
-import primitiveRenderer from "../ecs/parts/primitive-renderer/primitive-renderer";
-import { PrimitiveShape } from "../ecs/parts/primitive-renderer/components/Primitive";
+import primitiveRendererPart from "../ecs/parts/p5/primitive-renderer/primitive-renderer";
+import { PrimitiveShape } from "../ecs/parts/p5/primitive-renderer/components/Primitive";
 import Component from "../ecs/core/Component/Component";
 import bpmCounterPart, { Keypress } from "./parts/bpm-counter";
 import hiphopTab from "./tabs/hiphop";
@@ -11,12 +11,13 @@ import { parisHouseDrumkit } from "./drumkits/paris-house";
 import { createRandomlyPositionedTextBundle } from "./createRandomlyPositionedTextBundle";
 import { deriveBpm } from "./deriveBpm";
 import volumeSliderPart from "./parts/volume-slider";
-
-const drums = EngineBuilder.create()
-  .state("sequence-index", 0)
-  .state<"key-presses", Keypress[]>("key-presses", [])
-  .state("bpm", 0)
-  .build();
+import World from "../ecs/core/World/World";
+import p5 from "p5";
+import State from "../ecs/core/State/State";
+import Bounds from "../ecs/core/Bounds/Bounds";
+import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
+import { Engine } from "../ecs/core/Engine/Engine";
+import p5Part from "../ecs/parts/p5/p5-part";
 
 /**
  * The idea is to make a game that makes the user feel like they're playing
@@ -48,141 +49,139 @@ const drums = EngineBuilder.create()
  * drum machine based on tonejs alot as a reference for this
  */
 
-drums.part(primitiveRenderer);
-
-drums.system("calculate-bpm", { event: "keypress" }, (_world, {}, state) => {
+/**
+ * Calculate the bpm as the user taps it out
+ *
+ * Based on https://www.all8.com/tools/bpm.htm
+ */
+function calculateBpm(
+  _world: World,
+  _resources: ResourcePool,
+  state: { "key-presses": State<Keypress[]>; bpm: State<number> },
+) {
   const keyPresses = state["key-presses"];
   // The difference between each consecutive time
   const bpm = deriveBpm(keyPresses.value.map((press) => press.time));
   // I remove every odd beat in a tab to remove any rests and so have doubled the bpm to account for this
   state["bpm"].setValue(bpm / 2);
-});
-
-drums.part(bpmCounterPart);
-drums.part(volumeSliderPart);
+}
 
 const tabs = [houseTab, hiphopTab];
 const drumkits = [parisHouseDrumkit, lofiHipHopDrumkit];
+
 /**
  * Based on the pattern of keypresses entered by the user
  * determine the sequence that should start playing
  */
-drums.system(
-  "track-keypresses",
-  { event: "keypress" },
-  (_world, { p }, state) => {
-    const keyPresses = state["key-presses"].value;
+function keypressTrackingSystem(
+  _world: World,
+  resources: ResourcePool,
+  state: { "key-presses": State<Keypress[]> },
+) {
+  const p = resources.get<p5>("p5");
+  const keyPresses = state["key-presses"].value;
 
-    keyPresses.push({
-      key: p.key,
-      time: Date.now(),
-    });
+  keyPresses.push({
+    key: p.key,
+    time: Date.now(),
+  });
 
-    // only keep sliding window of x most recent key presses
-    const recentPresses = keyPresses.slice(-4);
-    console.debug(recentPresses.map((press) => press.key));
-    state["key-presses"].setValue(recentPresses);
-  }
-);
+  // only keep sliding window of x most recent key presses
+  const recentPresses = keyPresses.slice(-4);
+  state["key-presses"].setValue(recentPresses);
+}
 
 /**
  * On keypress increment through 8 note sequence
  */
-drums.system(
-  "sequence-incrementer",
-  { event: "keypress" },
-  (_world, {}, state) => {
-    const sequenceIndex = state["sequence-index"];
-    const nextIndex = (sequenceIndex.value + 1) % 8;
-    sequenceIndex.setValue(nextIndex);
-  }
-);
+function sequenceIncrementerSystem(
+  _world: World,
+  _resources: ResourcePool,
+  state: { "sequence-index": State<number> },
+) {
+  const sequenceIndex = state["sequence-index"];
+  const nextIndex = (sequenceIndex.value + 1) % 8;
+  sequenceIndex.setValue(nextIndex);
+}
 
 /**
  * Play drum sounds based on engine state
  */
-drums.system(
-  "drum",
-  { event: "keypress" },
-  (world, { canvasBounds }, state) => {
-    const sequenceIndex = state["sequence-index"];
+function drumSystem(
+  world: World,
+  resources: ResourcePool,
+  state: { "sequence-index": State<number>; bpm: State<number> },
+) {
+  const canvasBounds = resources.get<Bounds>("canvas-bounds");
+  const sequenceIndex = state["sequence-index"];
 
-    // TODO: need a way to gaurantee the order of systems executed so that we can assume the keypress state defined by the "pattern-detector" system is set before this runs so that there isn't stuff delayed to the next keypress
-    const time = Tone.now();
+  // TODO: need a way to gaurantee the order of systems executed so that we can assume the keypress state defined by the "pattern-detector" system is set before this runs so that there isn't stuff delayed to the next keypress
+  const time = Tone.now();
 
-    let genereToPlay: string | null = null;
+  let genereToPlay: string | null = null;
 
-    const bpm = state["bpm"].value;
+  const bpm = state["bpm"].value;
 
-    // Ranges based on the following with a little wiggle room https://www.izotope.com/en/learn/using-different-tempos-to-make-beats-for-different-genres.html
-    // It is good to limit these to only certain bpm ranges because it doesnt sound like a hiphop beat when its played over 100 bpm
-    // Needs to find ways to make it not so difficult as its hard to keep a consistent bpm when you dont know what you're doing
-    if (bpm <= 95) {
-      genereToPlay = "hiphop";
-    }
+  // Ranges based on the following with a little wiggle room https://www.izotope.com/en/learn/using-different-tempos-to-make-beats-for-different-genres.html
+  // It is good to limit these to only certain bpm ranges because it doesnt sound like a hiphop beat when its played over 100 bpm
+  // Needs to find ways to make it not so difficult as its hard to keep a consistent bpm when you dont know what you're doing
+  if (bpm <= 95) {
+    genereToPlay = "hiphop";
+  }
 
-    if (bpm >= 100) {
-      genereToPlay = "house";
-    }
+  if (bpm >= 100) {
+    genereToPlay = "house";
+  }
 
-    const sequencesToPlay = tabs.find((tab) => tab.name === genereToPlay);
-    const drumkitToPlay = drumkits.find(
-      (drumkit) => drumkit.name === genereToPlay
+  const sequencesToPlay = tabs.find((tab) => tab.name === genereToPlay);
+  const drumkitToPlay = drumkits.find(
+    (drumkit) => drumkit.name === genereToPlay,
+  );
+
+  const textEffectBounds = canvasBounds.shrink(100);
+
+  if (!sequencesToPlay || !drumkitToPlay) {
+    parisHouseDrumkit.instruments.kick?.triggerAttackRelease("C2", "1n", time);
+    world.addBundle(
+      createRandomlyPositionedTextBundle("kick", textEffectBounds),
     );
-
-    const textEffectBounds = canvasBounds.shrink(100);
-
-    if (!sequencesToPlay || !drumkitToPlay) {
-      parisHouseDrumkit.instruments.kick?.triggerAttackRelease(
-        "C2",
-        "1n",
-        time
-      );
+  } else {
+    if (sequencesToPlay.pattern["C"][sequenceIndex.value] === 1) {
+      drumkitToPlay.instruments.clap?.triggerAttackRelease("C2", "1n", time);
       world.addBundle(
-        createRandomlyPositionedTextBundle("kick", textEffectBounds)
+        createRandomlyPositionedTextBundle("clap", textEffectBounds),
       );
-    } else {
-      if (sequencesToPlay.pattern["C"][sequenceIndex.value] === 1) {
-        drumkitToPlay.instruments.clap?.triggerAttackRelease("C2", "1n", time);
-        world.addBundle(
-          createRandomlyPositionedTextBundle("clap", textEffectBounds)
-        );
-      }
+    }
 
-      if (sequencesToPlay.pattern["K"][sequenceIndex.value] === 1) {
-        drumkitToPlay.instruments.kick?.triggerAttackRelease("C2", "1n", time);
-        world.addBundle(
-          createRandomlyPositionedTextBundle("kick", textEffectBounds)
-        );
-      }
+    if (sequencesToPlay.pattern["K"][sequenceIndex.value] === 1) {
+      drumkitToPlay.instruments.kick?.triggerAttackRelease("C2", "1n", time);
+      world.addBundle(
+        createRandomlyPositionedTextBundle("kick", textEffectBounds),
+      );
+    }
 
-      if (sequencesToPlay.pattern["HH"][sequenceIndex.value] === 1) {
-        drumkitToPlay.instruments.hat?.triggerAttackRelease("C2", "1n", time);
-        world.addBundle(
-          createRandomlyPositionedTextBundle("hat", textEffectBounds)
-        );
-      }
+    if (sequencesToPlay.pattern["HH"][sequenceIndex.value] === 1) {
+      drumkitToPlay.instruments.hat?.triggerAttackRelease("C2", "1n", time);
+      world.addBundle(
+        createRandomlyPositionedTextBundle("hat", textEffectBounds),
+      );
+    }
 
-      if (sequencesToPlay.pattern["S"][sequenceIndex.value] === 1) {
-        drumkitToPlay.instruments.snare?.triggerAttackRelease("C2", "1n", time);
-        world.addBundle(
-          createRandomlyPositionedTextBundle("snare", textEffectBounds)
-        );
-      }
+    if (sequencesToPlay.pattern["S"][sequenceIndex.value] === 1) {
+      drumkitToPlay.instruments.snare?.triggerAttackRelease("C2", "1n", time);
+      world.addBundle(
+        createRandomlyPositionedTextBundle("snare", textEffectBounds),
+      );
+    }
 
-      if (sequencesToPlay.pattern["OH"][sequenceIndex.value] === 1) {
-        drumkitToPlay.instruments.openHat?.triggerAttackRelease(
-          "C2",
-          "1n",
-          time
-        );
-        world.addBundle(
-          createRandomlyPositionedTextBundle("open hat", textEffectBounds)
-        );
-      }
+    if (sequencesToPlay.pattern["OH"][sequenceIndex.value] === 1) {
+      drumkitToPlay.instruments.openHat?.triggerAttackRelease("C2", "1n", time);
+      world.addBundle(
+        createRandomlyPositionedTextBundle("open hat", textEffectBounds),
+      );
     }
   }
-);
+}
 
 export type TextEffectComponent = Component & {
   name: "text";
@@ -192,10 +191,11 @@ export type TextEffectComponent = Component & {
  * Fade out any text effect entities over time and when they are no
  * longer visible remove them
  */
-drums.system("text-fade", { event: "update" }, (world, { p }) => {
+function textFadeSystem(world: World, resources: ResourcePool) {
   for (const [primitive, entityId] of world.query<
     [PrimitiveShape, string, TextEffectComponent]
   >(["primitive", "entity-id", "faded"])) {
+    const p = resources.get<p5>("p5");
     if (primitive.fill) {
       const [r, g, b, alpha] = primitive.fill;
 
@@ -209,6 +209,49 @@ drums.system("text-fade", { event: "update" }, (world, { p }) => {
       primitive.fill = [r, g, b, newAlpha];
     }
   }
-});
+}
 
-export default drums;
+class DrumsThing {
+  private _engine?: Engine<any, any>;
+
+  run(parent?: HTMLElement) {
+    const drums = EngineBuilder.create()
+      .event("setup")
+      .event("update")
+      .event("keyPressed")
+      .event("after-update")
+      .state("sequence-index", 0)
+      .state<"key-presses", Keypress[]>("key-presses", [])
+      .state("bpm", 0)
+      .build();
+
+    drums.part(p5Part([500, 500], parent));
+
+    drums.system("calculate-bpm", drums.trigger.on("keyPressed"), calculateBpm);
+
+    drums.part(bpmCounterPart);
+    drums.part(volumeSliderPart);
+
+    drums.system(
+      "track-keypresses",
+      drums.trigger.on("keyPressed"),
+      keypressTrackingSystem,
+    );
+    drums.system(
+      "sequence-incrementer",
+      drums.trigger.on("keyPressed"),
+      sequenceIncrementerSystem,
+    );
+    drums.system("drum", drums.trigger.on("keyPressed"), drumSystem);
+    drums.system("text-fade", drums.trigger.on("update"), textFadeSystem);
+
+    this._engine = drums;
+    drums.run();
+  }
+
+  stop() {
+    this._engine?.stop();
+  }
+}
+
+export default new DrumsThing();

@@ -16,6 +16,9 @@ type MiniAppInfo = {
   app: MiniApp;
 };
 
+// Possible categories to display as
+// Original games & prototypes, experiments, studies (recreations of games), colleciton of apps related to a subject (i.e. collision detection)
+
 const pong: MiniAppInfo = {
   name: "pong",
   symbol: "🎾",
@@ -40,7 +43,7 @@ const poissonDiscSampling: MiniAppInfo = {
 const drums: MiniAppInfo = {
   name: "drums",
   symbol: "🥁",
-  appId: "drum-sketch",
+  appId: "drums-sketch",
   app: drumsGame,
 };
 
@@ -60,7 +63,7 @@ function createMiniAppSection(name: string) {
 }
 
 document.querySelector<HTMLDivElement>(
-  "#mini-app-selector-container"
+  "#mini-app-selector-container",
 )!.innerHTML = miniApps
   .map((appInfo) => createMiniAppButton(appInfo.name, appInfo.symbol))
   .join("");

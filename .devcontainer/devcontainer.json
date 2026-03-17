@@ -15,7 +15,8 @@
         "esbenp.prettier-vscode",
         "ms-azuretools.vscode-bicep",
         "github.vscode-github-actions",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        "YoavBls.pretty-ts-errors"
       ]
     }
   }

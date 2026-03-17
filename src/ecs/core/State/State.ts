@@ -1,9 +1,15 @@
-type StateChange = "on-enter" | "on-exit";
+type Transistion = "on-enter" | "on-exit";
+
+type ChangeListener<T> = (to: T, from: T) => void;
 
 class State<T> {
   private _value: T;
 
-  private _listeners = new Map<T, Record<StateChange, (() => void)[]>>();
+  private _transitionListeners = new Map<
+    T,
+    Record<Transistion, (() => void)[]>
+  >();
+  private _changeListeners: ChangeListener<T>[] = [];
 
   constructor(startingValue: T) {
     this._value = startingValue;
@@ -15,16 +21,27 @@ class State<T> {
   }
 
   /**
-   * Register a callback that will be invoked when the change in
-   * state specified by the user occurs
+   * Register a callback that will be invoked anytime the state
+   * changes
+   *
+   * @param listener
+   */
+  onChange(listener: ChangeListener<T>) {
+    this._changeListeners.push(listener);
+  }
+
+  /**
+   * Register a callback that will be invoked when the specified
+   * change in state occurs
    *
    * i.e. when a particular state exits, call the supplied function
+   * @param value
    * @param stateChange
    * @param listener
    */
-  registerListener(value: T, stateChange: StateChange, listener: () => void) {
-    if (!this._listeners.has(value)) {
-      this._listeners.set(value, {
+  onTransition(value: T, stateChange: Transistion, listener: () => void) {
+    if (!this._transitionListeners.has(value)) {
+      this._transitionListeners.set(value, {
         "on-enter": [],
         "on-exit": [],
       });
@@ -36,20 +53,18 @@ class State<T> {
       listener();
     }
 
-    // We can assume there is an entry for value because of the above line
-    const valueStateListeners = this._listeners.get(value)!;
-
-    valueStateListeners[stateChange].push(listener);
+    const listeners = this._transitionListeners.get(value)!;
+    listeners[stateChange].push(listener);
   }
 
   /**
    * Trigger on-enter listeners asscociated with value of state
    */
   private handleEnter(value: T) {
-    const valueStateListeners = this._listeners.get(value)?.["on-enter"];
+    const listeners = this._transitionListeners.get(value)?.["on-enter"];
 
-    if (valueStateListeners !== undefined) {
-      valueStateListeners.forEach((listener) => listener());
+    if (listeners !== undefined) {
+      listeners.forEach((listener) => listener());
     }
   }
 
@@ -57,19 +72,30 @@ class State<T> {
    * Trigger on-exit listeners asscociated with value of state
    */
   private handleExit(value: T) {
-    const valueStateListeners = this._listeners.get(value)?.["on-exit"];
+    const listeners = this._transitionListeners.get(value)?.["on-exit"];
 
-    if (valueStateListeners !== undefined) {
-      valueStateListeners.forEach((listener) => listener());
+    if (listeners !== undefined) {
+      listeners.forEach((listener) => listener());
     }
   }
 
-  setValue(value: T) {
+  private handleTransition(to: T, from: T) {
+    this._changeListeners.forEach((listener) => listener(to, from));
+  }
+
+  setValue(newValue: T) {
+    let oldValue = this._value;
+
+    if (newValue === oldValue) {
+      return;
+    }
+
     this.handleExit(this._value);
-    this._value = value;
+    this._value = newValue;
+    this.handleTransition(this._value, oldValue);
     this.handleEnter(this._value);
   }
 }
 
 export default State;
-export type { StateChange };
+export type { Transistion, ChangeListener };

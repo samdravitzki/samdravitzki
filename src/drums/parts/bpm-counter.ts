@@ -1,17 +1,28 @@
+import Bounds from "../../ecs/core/Bounds/Bounds";
 import createBundle from "../../ecs/core/Bundle/createBundle";
-import Engine from "../../ecs/core/Engine/Engine";
+import { ResourcePool } from "../../ecs/core/Engine/ResourcePool";
+import { Part } from "../../ecs/core/Part/Part";
+import State from "../../ecs/core/State/State";
 import Vector from "../../ecs/core/Vector/Vector";
-import { PrimitiveShape } from "../../ecs/parts/primitive-renderer/components/Primitive";
+import World from "../../ecs/core/World/World";
+import { PrimitiveShape } from "../../ecs/parts/p5/primitive-renderer/components/Primitive";
 
 export type Keypress = {
   key: string;
   time: number;
 };
 
-export default function bpmCounterPart<T extends { bpm: number }>(
-  engine: Engine<T>
-) {
-  engine.system("bpm-text", { event: "start" }, (world, { canvasBounds }) => {
+const bpmCounterPart: Part<
+  {
+    setup: unknown;
+    update: unknown;
+  },
+  {
+    bpm: number;
+  }
+> = ({ registerSystem, triggerBuilder }) => {
+  function setupBpmText(world: World, resources: ResourcePool) {
+    const canvasBounds = resources.get<Bounds>("canvas-bounds");
     const textBundle = createBundle([
       "bpm-text",
       {
@@ -29,13 +40,13 @@ export default function bpmCounterPart<T extends { bpm: number }>(
     ]);
 
     world.addBundle(textBundle);
-  });
-  /**
-   * Calculate the bpm as the user taps it out
-   *
-   * Based on https://www.all8.com/tools/bpm.htm
-   */
-  engine.system("bpm-counter", { event: "update" }, (world, {}, state) => {
+  }
+
+  function updateBpmText(
+    world: World,
+    resources: ResourcePool,
+    state: { bpm: State<number> },
+  ) {
     const [bpmText] = world.query<[PrimitiveShape]>([
       "primitive",
       "bpm-text",
@@ -47,5 +58,10 @@ export default function bpmCounterPart<T extends { bpm: number }>(
 
       bpmText.text = `${halfBpm.toString()} bpm`;
     }
-  });
-}
+  }
+
+  registerSystem("bpm-text", triggerBuilder.on("setup"), setupBpmText);
+  registerSystem("bpm-counter", triggerBuilder.on("update"), updateBpmText);
+};
+
+export default bpmCounterPart;

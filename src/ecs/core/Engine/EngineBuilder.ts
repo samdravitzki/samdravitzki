@@ -1,28 +1,22 @@
+import DufusEngine from "./DufusEngine";
 import { EngineOptions, Engine } from "./Engine";
 
 /**
- * Testing out this way of implementing the builder pattern in typescript
- * so that as you run each build command it also incrementally builds the
- * types.
- *
- * Motivation: Currently there is an issue where when each state is added to
- * the engine there is no way for the systems to access the types of state
- * avaible and so each of them has to run their own checks to see if the
- * state they are accessing exists
+ * Builder for creating an Engine with type safety and autocompletion for states and events.
  *
  * got this trick from https://medium.hexlabs.io/the-builder-pattern-with-typescript-using-advanced-types-e05a03ffc36e
  *
- * TODO: I want to see if this can be combined with the engine class so that the consumer can directly use something called "Engine"
  */
-class EngineBuilder<StateSet extends Record<string, unknown> = {}> {
-  private constructor(private readonly stateSet: StateSet) {}
+class EngineBuilder<
+  EventMap extends Record<string, unknown> & { init: unknown } = {
+    init: unknown;
+  },
+  StateMap extends Record<string, unknown> = {},
+> {
+  private constructor(private readonly stateSet: StateMap) {}
 
   /**
-   *
-   * NOTE: The resulting object is pretty verbose due to all of the "&"
-   * causes by the intersection done on each call to state. This issue
-   * can be resolved using "Expand" types as described in the article
-   * above. I have chosen to leave this out for now to keep things simple
+   * Register a state
    *
    * @param name
    * @param value
@@ -32,7 +26,8 @@ class EngineBuilder<StateSet extends Record<string, unknown> = {}> {
     const newState = { [name]: value };
 
     return new EngineBuilder<
-      StateSet & {
+      EventMap,
+      StateMap & {
         [k in K]: T;
       }
     >({
@@ -41,12 +36,29 @@ class EngineBuilder<StateSet extends Record<string, unknown> = {}> {
     });
   }
 
-  build(options: EngineOptions = {}) {
-    return new Engine(this.stateSet, options);
+  event<const K extends string>(name: K) {
+    return new EngineBuilder<
+      EventMap & {
+        [k in K]: unknown;
+      },
+      StateMap
+    >(this.stateSet);
   }
 
-  static create(): EngineBuilder {
-    return new EngineBuilder({});
+  build(): Engine<
+    {
+      // Required to condense intersections into a single object type making inferred types easier to read
+      [K in keyof EventMap]: EventMap[K];
+    },
+    {
+      [K in keyof StateMap]: StateMap[K];
+    }
+  > {
+    return new DufusEngine<EventMap, StateMap>(this.stateSet);
+  }
+
+  static create(): EngineBuilder<{ init: unknown }> {
+    return new EngineBuilder<{ init: unknown }>({});
   }
 }
 
