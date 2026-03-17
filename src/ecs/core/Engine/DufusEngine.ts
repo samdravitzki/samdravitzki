@@ -41,26 +41,6 @@ class DufusEngine<
   private _systems: SystemRegistration<EventMap, StateMap>[] = [];
   private _cleanup: Dispose[] = [];
 
-  /**
-   * Add events (assuming event is the right name for what im envisioning here)
-   *
-   * Current ideas around how events should work
-   * - Should be able to define systems that run when events trigger (tick) (should unit test this behaviour)
-   * - Should be able to define systems that trigger events (tick) (should unit test this behaviour)
-   * - Should be able to configure how long an event sticks around for (maybe for later, everything works fine without this atm)
-   * - Events should only last for the frame they are triggered and the next frame by default (not relevant as engine has events that can be shorter or longer than a frame)
-   * - If an event is triggered in a frame and a system listening to it is yet to
-   *   trigger it should run in the same frame (not sure, should write a unit test to validate the engine behaves in this way)
-   *
-   * - Use events to handle listening to changes in state (systems can be triggered on changes in state but it doesn't work via events, should unit test events triggering on changes in state)
-   *  - When the state changes it should add an event which should then
-   *    cause any systems listening to state change events to run
-   *
-   * - Could also use events to trigger systems that run on p5 lifecycle events (tick)
-   *   like start and draw. When p5 start function is called it could trigger a "start"
-   *   event that all systems listen to.
-   */
-
   constructor(stateMap: StateMap) {
     this._store = Object.keys(stateMap).reduce((prev, next) => {
       return {
@@ -111,12 +91,17 @@ class DufusEngine<
 
     if (condition.type === "on") {
       /**
-       * Need to figure out how to test behaviour - state can be changed many times but the system will only run when the event occurs
+       * Want to figure out how to test behaviour - state can be changed many times but the system will only run when the event occurs
        * Example test case:
        * 1. define system that triggers on state x on enter
        * 2. trigger event system is dependent on expecting it not to run
        * 3. change state to x
        * 4. trigger event system is dependent on expecting it to run
+       *
+       * The engine api dosen't allow triggering specific events making this scenario
+       * impossible to test. To test it im thinking should factor out the system
+       * execution logic to gain acess ot these controls and because it will split
+       * up the responsibilities making it easier to understand, extend and change
        */
       this._eventBus.subscribe(event, () => {
         const trackedTransitionCount = this._stateChangeTracker.get(s);
