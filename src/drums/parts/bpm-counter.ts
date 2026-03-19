@@ -23,7 +23,7 @@ const bpmCounterPart: Part<
 > = ({ registerSystem, triggerBuilder }) => {
   function setupBpmText(world: World, resources: ResourcePool) {
     const canvasBounds = resources.get<Bounds>("canvas-bounds");
-    const textBundle = createBundle([
+    const bpmBundle = createBundle([
       "bpm-text",
       {
         name: "position",
@@ -39,7 +39,24 @@ const bpmCounterPart: Part<
       },
     ]);
 
-    world.addBundle(textBundle);
+    const genreBundle = createBundle([
+      "genre-text",
+      {
+        name: "position",
+        position: canvasBounds.top.left.plus(Vector.create(10, 50)),
+      },
+      {
+        name: "primitive",
+        fill: [240, 60, 100, 255],
+        type: "text",
+        text: "0",
+        align: "left",
+        size: 15,
+      },
+    ]);
+
+    world.addBundle(bpmBundle);
+    world.addBundle(genreBundle);
   }
 
   function updateBpmText(
@@ -54,9 +71,22 @@ const bpmCounterPart: Part<
 
     if (bpmText.type === "text") {
       // Each press atm triggers two beats atm (all the second beats triggered by a keypress is empty atm)
-      const halfBpm = Math.round(state.bpm.value);
+      bpmText.text = `${Math.round(state.bpm.value).toString()} bpm`;
+    }
 
-      bpmText.text = `${halfBpm.toString()} bpm`;
+    const [genreText] = world.query<[PrimitiveShape]>([
+      "primitive",
+      "genre-text",
+    ])[0];
+
+    if (genreText.type === "text") {
+      if (state.bpm.value <= 95) {
+        genreText.text = "hiphop";
+      }
+
+      if (state.bpm.value >= 100) {
+        genreText.text = "house";
+      }
     }
   }
 
