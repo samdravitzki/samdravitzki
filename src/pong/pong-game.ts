@@ -508,120 +508,104 @@ function setupSceneSystem(world: World, resources: ResourcePool) {
   world.addBundle(aiScoreBundle);
 }
 
-/**
- * IMPROVEMENT IDEA:
- * instead of initialising the game in this app class I could instead just return
- * the created engine from a function. The engine already has the run and stop methods
- * built in and so this App class wrapper is redundant. The "parent" html element
- * require for p5 could just be passed through a constructor to this function
- */
-class PongGameApp {
-  private _engine?: Engine<any, any>;
-  run(parent?: HTMLElement) {
-    const pong = EngineBuilder.create()
-      .event("setup")
-      .event("update")
-      .event("after-update")
-      .event("keyPressed")
-      .state("render-trajectory", false)
-      .state<"score", [number, number]>("score", [0, 0])
-      .state<"app-state", ApplicationState>("app-state", "main-menu")
-      .build();
+export default function pong(parent?: HTMLElement) {
+  const engine = EngineBuilder.create()
+    .event("setup")
+    .event("update")
+    .event("after-update")
+    .event("keyPressed")
+    .state("render-trajectory", false)
+    .state<"score", [number, number]>("score", [0, 0])
+    .state<"app-state", ApplicationState>("app-state", "main-menu")
+    .build();
 
-    pong.part(p5Part([500, 500], parent));
-    pong.part(collisions());
+  engine.part(p5Part([500, 500], parent));
+  engine.part(collisions());
 
-    pong.system("setup-scene", pong.trigger.on("setup"), setupSceneSystem);
+  engine.system("setup-scene", engine.trigger.on("setup"), setupSceneSystem);
 
-    pong.system("createGameMenu", pong.trigger.on("setup"), createGameMenu);
-    pong.system("createEndMenu", pong.trigger.on("setup"), createEndMenu);
-    pong.system("createMainMenu", pong.trigger.on("setup"), createMainMenu);
+  engine.system("createGameMenu", engine.trigger.on("setup"), createGameMenu);
+  engine.system("createEndMenu", engine.trigger.on("setup"), createEndMenu);
+  engine.system("createMainMenu", engine.trigger.on("setup"), createMainMenu);
 
-    pong.system(
-      "showMainMenu",
-      pong.trigger.on("update").when("app-state").enters("main-menu"),
-      showMainMenu,
-    );
-    pong.system(
-      "showGameMenu",
-      pong.trigger.on("update").when("app-state").enters("in-game"),
-      showGameMenu,
-    );
-    pong.system(
-      "hideGameMenu",
-      pong.trigger.on("update").when("app-state").enters("end"),
-      hideGameMenu,
-    );
-    pong.system(
-      "showEndMenu",
-      pong.trigger.on("update").when("app-state").enters("end"),
-      showEndMenu,
-    );
-    pong.system(
-      "hideEndMenu",
-      pong.trigger.on("update").when("app-state").exits("end"),
-      hideEndMenu,
-    );
-    pong.system(
-      "hideMainMenu",
-      pong.trigger.on("update").when("app-state").exits("main-menu"),
-      hideMainMenu,
-    );
+  engine.system(
+    "showMainMenu",
+    engine.trigger.on("update").when("app-state").enters("main-menu"),
+    showMainMenu,
+  );
+  engine.system(
+    "showGameMenu",
+    engine.trigger.on("update").when("app-state").enters("in-game"),
+    showGameMenu,
+  );
+  engine.system(
+    "hideGameMenu",
+    engine.trigger.on("update").when("app-state").enters("end"),
+    hideGameMenu,
+  );
+  engine.system(
+    "showEndMenu",
+    engine.trigger.on("update").when("app-state").enters("end"),
+    showEndMenu,
+  );
+  engine.system(
+    "hideEndMenu",
+    engine.trigger.on("update").when("app-state").exits("end"),
+    hideEndMenu,
+  );
+  engine.system(
+    "hideMainMenu",
+    engine.trigger.on("update").when("app-state").exits("main-menu"),
+    hideMainMenu,
+  );
 
-    pong.system(
-      "endConditionSystem",
-      pong.trigger.on("update").when("app-state").is("in-game"),
-      endConditionSystem,
-    );
-    pong.system(
-      "ballCollisionHandlingSystem",
-      pong.trigger.on("update").when("app-state").is("in-game"),
-      ballCollisionHandlingSystem,
-    );
-    pong.system(
-      "backboardCollisionHandlingSystem",
-      pong.trigger.on("update").when("app-state").is("in-game"),
-      backboardCollisionHandlingSystem,
-    );
-    pong.system(
-      "updateScoreBoard",
-      pong.trigger.on("update"),
-      updateScoreBoard,
-    );
-    pong.system(
-      "paddleCollisionHandlingSystem",
-      pong.trigger.on("update").when("app-state").is("in-game"),
-      paddleCollisionHandlingSystem,
-    );
-    pong.system(
-      "playerPaddleSystem",
-      pong.trigger.on("update").when("app-state").is("in-game"),
-      playerPaddleSystem,
-    );
-    pong.system(
-      "aiPaddleSystem",
-      pong.trigger.on("update").when("app-state").is("in-game"),
-      aiPaddleSystem,
-    );
-    pong.system(
-      "ballMovementSystem",
-      pong.trigger.on("update").when("app-state").is("in-game"),
-      ballMovementSystem,
-    );
-    pong.system(
-      "ballTrajectorySystem",
-      pong.trigger.on("update").when("app-state").is("in-game"),
-      ballTrajectorySystem,
-    );
+  engine.system(
+    "endConditionSystem",
+    engine.trigger.on("update").when("app-state").is("in-game"),
+    endConditionSystem,
+  );
+  engine.system(
+    "ballCollisionHandlingSystem",
+    engine.trigger.on("update").when("app-state").is("in-game"),
+    ballCollisionHandlingSystem,
+  );
+  engine.system(
+    "backboardCollisionHandlingSystem",
+    engine.trigger.on("update").when("app-state").is("in-game"),
+    backboardCollisionHandlingSystem,
+  );
+  engine.system(
+    "updateScoreBoard",
+    engine.trigger.on("update"),
+    updateScoreBoard,
+  );
+  engine.system(
+    "paddleCollisionHandlingSystem",
+    engine.trigger.on("update").when("app-state").is("in-game"),
+    paddleCollisionHandlingSystem,
+  );
+  engine.system(
+    "playerPaddleSystem",
+    engine.trigger.on("update").when("app-state").is("in-game"),
+    playerPaddleSystem,
+  );
+  engine.system(
+    "aiPaddleSystem",
+    engine.trigger.on("update").when("app-state").is("in-game"),
+    aiPaddleSystem,
+  );
+  engine.system(
+    "ballMovementSystem",
+    engine.trigger.on("update").when("app-state").is("in-game"),
+    ballMovementSystem,
+  );
+  engine.system(
+    "ballTrajectorySystem",
+    engine.trigger.on("update").when("app-state").is("in-game"),
+    ballTrajectorySystem,
+  );
 
-    this._engine = pong;
-    pong.run();
-  }
-
-  stop() {
-    this._engine?.stop();
-  }
+  return engine;
 }
 
 export type { ApplicationState };
-export default new PongGameApp();

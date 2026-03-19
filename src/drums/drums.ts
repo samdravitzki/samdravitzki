@@ -211,47 +211,36 @@ function textFadeSystem(world: World, resources: ResourcePool) {
   }
 }
 
-class DrumsThing {
-  private _engine?: Engine<any, any>;
+export default function drums(parent?: HTMLElement) {
+  const engine = EngineBuilder.create()
+    .event("setup")
+    .event("update")
+    .event("keyPressed")
+    .event("after-update")
+    .state("sequence-index", 0)
+    .state<"key-presses", Keypress[]>("key-presses", [])
+    .state("bpm", 0)
+    .build();
 
-  run(parent?: HTMLElement) {
-    const drums = EngineBuilder.create()
-      .event("setup")
-      .event("update")
-      .event("keyPressed")
-      .event("after-update")
-      .state("sequence-index", 0)
-      .state<"key-presses", Keypress[]>("key-presses", [])
-      .state("bpm", 0)
-      .build();
+  engine.part(p5Part([500, 500], parent));
 
-    drums.part(p5Part([500, 500], parent));
+  engine.system("calculate-bpm", engine.trigger.on("keyPressed"), calculateBpm);
 
-    drums.system("calculate-bpm", drums.trigger.on("keyPressed"), calculateBpm);
+  engine.part(bpmCounterPart);
+  engine.part(volumeSliderPart);
 
-    drums.part(bpmCounterPart);
-    drums.part(volumeSliderPart);
+  engine.system(
+    "track-keypresses",
+    engine.trigger.on("keyPressed"),
+    keypressTrackingSystem,
+  );
+  engine.system(
+    "sequence-incrementer",
+    engine.trigger.on("keyPressed"),
+    sequenceIncrementerSystem,
+  );
+  engine.system("drum", engine.trigger.on("keyPressed"), drumSystem);
+  engine.system("text-fade", engine.trigger.on("update"), textFadeSystem);
 
-    drums.system(
-      "track-keypresses",
-      drums.trigger.on("keyPressed"),
-      keypressTrackingSystem,
-    );
-    drums.system(
-      "sequence-incrementer",
-      drums.trigger.on("keyPressed"),
-      sequenceIncrementerSystem,
-    );
-    drums.system("drum", drums.trigger.on("keyPressed"), drumSystem);
-    drums.system("text-fade", drums.trigger.on("update"), textFadeSystem);
-
-    this._engine = drums;
-    drums.run();
-  }
-
-  stop() {
-    this._engine?.stop();
-  }
+  return engine;
 }
-
-export default new DrumsThing();

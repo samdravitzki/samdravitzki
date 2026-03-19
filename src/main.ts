@@ -1,6 +1,7 @@
 import drumsGame from "./drums/drums";
+import { Engine } from "./ecs/core/Engine/Engine";
 import poissonDiscSamplingDemo from "./poisson-disk-sampling/poisson-disc-sampling";
-import pongGame from "./pong/pong-game";
+import pong from "./pong/pong-game";
 import snakeGame from "./snake/snake-game";
 import "./style.css";
 
@@ -13,41 +14,41 @@ type MiniAppInfo = {
   name: string;
   symbol: string;
   appId: string;
-  app: MiniApp;
+  app: (parent?: HTMLElement) => Engine<any, any>;
 };
 
 // Possible categories to display as
 // Original games & prototypes, experiments, studies (recreations of games), colleciton of apps related to a subject (i.e. collision detection)
 
-const pong: MiniAppInfo = {
-  name: "pong",
-  symbol: "🎾",
-  appId: "pong-sketch",
-  app: pongGame,
-};
+const miniApps: MiniAppInfo[] = [];
 
-const snake: MiniAppInfo = {
+miniApps.push({
   name: "snake",
   symbol: "🐍",
   appId: "snake-sketch",
   app: snakeGame,
-};
+});
 
-const poissonDiscSampling: MiniAppInfo = {
+miniApps.push({
+  name: "pong",
+  symbol: "🎾",
+  appId: "pong-sketch",
+  app: pong,
+});
+
+miniApps.push({
   name: "poisson-disc-sampling",
   symbol: "⋆.˚",
   appId: "poisson-disc-sampling-sketch",
   app: poissonDiscSamplingDemo,
-};
+});
 
-const drums: MiniAppInfo = {
+miniApps.push({
   name: "drums",
   symbol: "🥁",
   appId: "drums-sketch",
   app: drumsGame,
-};
-
-const miniApps: MiniAppInfo[] = [snake, pong, poissonDiscSampling, drums];
+});
 
 function createMiniAppButton(name: string, symbol: string) {
   return `<button id="${name}-button">${symbol}</button>`;
@@ -71,24 +72,7 @@ document.querySelector<HTMLDivElement>(
 document.querySelector<HTMLDivElement>("#mini-app-container")!.innerHTML =
   miniApps.map((appInfo) => createMiniAppSection(appInfo.name)).join("");
 
-// Load persisted state from localStorage
 const savedAppState = localStorage.getItem("activeApp");
-
-// Restore app displayed based on saved state
-if (savedAppState) {
-  const mainContent = document.getElementById("menu")!;
-  mainContent.style.display = "none";
-
-  const activeApp = document.getElementById(`${savedAppState}-app`)!;
-  activeApp.style.display = "block";
-
-  const appInfo = miniApps.find((info) => info.name === savedAppState);
-
-  if (appInfo) {
-    const canvasParent = document.getElementById(`${appInfo.name}-sketch`)!;
-    appInfo.app.run(canvasParent);
-  }
-}
 
 miniApps.forEach((appInfo) => {
   const appElement = document.getElementById(`${appInfo.name}-app`)!;
@@ -96,14 +80,15 @@ miniApps.forEach((appInfo) => {
 
   const canvasParent = document.getElementById(`${appInfo.name}-sketch`)!;
 
+  const app = appInfo.app(canvasParent);
+
   document
     .getElementById(`${appInfo.name}-button`)
     ?.addEventListener("click", () => {
       appElement.style.display = "block";
       mainContent.style.display = "none";
-      appInfo.app.run(canvasParent);
-
-      // Save the current active app to localStorage
+      // Start app and save the current active app to localStorage
+      app.run();
       localStorage.setItem("activeApp", appInfo.name);
     });
 
@@ -113,9 +98,17 @@ miniApps.forEach((appInfo) => {
       appElement.style.display = "none";
       mainContent.style.display = "block";
 
-      appInfo.app.stop();
-
-      // Clear the saved app state
+      // Stop app and clear the saved app state
+      app.stop();
       localStorage.removeItem("activeApp");
     });
+
+  // Restore app displayed based on saved state
+  if (savedAppState && savedAppState === appInfo.name) {
+    mainContent.style.display = "none";
+    appElement.style.display = "block";
+    if (appInfo) {
+      app.run();
+    }
+  }
 });

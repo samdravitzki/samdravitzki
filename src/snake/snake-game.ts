@@ -3,6 +3,7 @@ import Direction from "./Direction/Direction";
 import Snake from "./Snake";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import Vector from "../ecs/core/Vector/Vector";
+import { Engine } from "../ecs/core/Engine/Engine";
 
 function generateSnackPosition(bounds: Bounds) {
   return bounds.randomPosition(10).minus(Vector.create(10, 10));
@@ -18,7 +19,7 @@ class SnakeEngine {
 
       const playBounds = Bounds.create(
         Vector.create(0, 0),
-        Vector.create(500, 500)
+        Vector.create(500, 500),
       );
       const snakeChunkSize = 10;
 
@@ -26,7 +27,7 @@ class SnakeEngine {
       let snake = Snake.create(
         snakeStartingSize,
         Vector.create(120, 120),
-        snakeChunkSize
+        snakeChunkSize,
       );
       let slitheringDirection = new Direction("south");
 
@@ -50,7 +51,7 @@ class SnakeEngine {
           playBounds.min.x,
           playBounds.min.y,
           playBounds.max.x,
-          playBounds.max.y
+          playBounds.max.y,
         );
 
         gradient.addColorStop(0, "#22C1C3");
@@ -63,7 +64,7 @@ class SnakeEngine {
           playBounds.min.x,
           playBounds.min.y,
           playBounds.max.x,
-          playBounds.max.y
+          playBounds.max.y,
         );
 
         (p.drawingContext as CanvasRenderingContext2D).fillStyle = "#FFFFFF";
@@ -85,7 +86,7 @@ class SnakeEngine {
         snake = Snake.create(
           snakeStartingSize,
           playBounds.randomPosition(snakeChunkSize),
-          snakeChunkSize
+          snakeChunkSize,
         );
         slitheringDirection = new Direction("south");
         score = 0;
@@ -142,6 +143,6 @@ class SnakeEngine {
   }
 }
 
-const snake = new SnakeEngine();
-
-export default snake;
+export default function snake(parent?: HTMLElement) {
+  return new SnakeEngine() as Engine<any, any>;
+}

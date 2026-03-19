@@ -66,41 +66,26 @@ function placePoissonDots(world: World, resources: ResourcePool) {
   }
 }
 
-// NOTE: This App class was made temporarily, I think I should come up with a more
-// defined concept for this that reduces the requirement to repeat this for
-// every game
-class PoissonDiscSamplingDemoApp {
-  private _engine?: Engine<any, any>;
+export default function poissonDiscSamplingDemoApp(parent?: HTMLElement) {
+  const engine = EngineBuilder.create()
+    .state("dotCount", 100)
+    .event("setup")
+    .event("update")
+    .event("after-update")
+    .event("keyPressed")
+    .build();
 
-  run(parent?: HTMLElement) {
-    const engine = EngineBuilder.create()
-      .state("dotCount", 100)
-      .event("setup")
-      .event("update")
-      .event("after-update")
-      .event("keyPressed")
-      .build();
+  engine.part(p5Part([500, 500], parent));
+  engine.system(
+    "place-random-dots",
+    engine.trigger.on("setup"),
+    placeRandomDots,
+  );
+  engine.system(
+    "place-poisson-dots",
+    engine.trigger.on("setup"),
+    placePoissonDots,
+  );
 
-    engine.part(p5Part([500, 500], parent));
-    engine.system(
-      "place-random-dots",
-      engine.trigger.on("setup"),
-      placeRandomDots,
-    );
-    engine.system(
-      "place-poisson-dots",
-      engine.trigger.on("setup"),
-      placePoissonDots,
-    );
-
-    this._engine = engine;
-
-    engine.run();
-  }
-
-  stop() {
-    this._engine?.stop();
-  }
+  return engine;
 }
-
-export default new PoissonDiscSamplingDemoApp();
