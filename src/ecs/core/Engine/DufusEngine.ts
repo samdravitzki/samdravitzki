@@ -16,6 +16,7 @@ type SystemRegistration<
   EventMap extends Record<string, unknown> = {},
   StateMap extends Record<string, unknown> = {},
 > = {
+  name: string;
   system: System<EventMap, StateMap>;
   trigger: Trigger<EventMap, StateMap>;
 };
@@ -71,6 +72,7 @@ class DufusEngine<
     const { condition, event } = trigger;
 
     this._systems.push({
+      name,
       system: s,
       trigger,
     });
@@ -218,22 +220,22 @@ function logSystemRegistrations<
     .sort()
     .map((event) => {
       console.group(`${event} event`);
-      systemEventGroups[event].map(({ trigger, system }) => {
+      systemEventGroups[event].map(({ trigger, system, name }) => {
         if (!trigger.condition) {
-          console.log(system.name);
+          console.log(name);
           return;
         }
 
         if (trigger.condition.type === "when") {
           console.log(
-            `${system.name} when ${trigger.condition.state.toString()} is ${trigger.condition.value}`,
+            `${name} when ${trigger.condition.state.toString()} is ${trigger.condition.value}`,
           );
           return;
         }
 
         if (trigger.condition.type === "on") {
           console.log(
-            `${system.name} on ${trigger.condition.state.toString()} ${trigger.condition.transition} ${trigger.condition.value}`,
+            `${name} on ${trigger.condition.state.toString()} ${trigger.condition.transition} ${trigger.condition.value}`,
           );
           return;
         }
