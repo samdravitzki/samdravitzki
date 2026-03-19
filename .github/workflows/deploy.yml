@@ -18,7 +18,7 @@ jobs:
   validate-bicep:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: azure/login@v2
         name: Sign into Azure
@@ -48,7 +48,7 @@ jobs:
       personalSiteResourceName: ${{ steps.deploy.outputs.personalSiteResourceName }}
       personalSiteUrl: ${{ steps.deploy.outputs.personalSiteUri }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - uses: azure/login@v1
         name: Sign in to Azure
         with:
@@ -108,6 +108,7 @@ jobs:
           app_location: "dist/"
           output_location: ""
           skip_app_build: true
+
 # Static site is being deployed, run smoke tests to validate deployment was successful
 # smoke-test:
 #   runs-on: ubuntu-latest
