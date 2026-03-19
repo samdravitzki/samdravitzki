@@ -3,6 +3,7 @@ import checker from "vite-plugin-checker";
 
 export default defineConfig({
   test: {
+    silent: "passed-only",
     environment: "jsdom",
     coverage: {
       enabled: true,
