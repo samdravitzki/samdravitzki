@@ -171,6 +171,8 @@ class DufusEngine<
       );
     });
 
+    // Problem: Run can currently be called many times, resulting in multiple 'init' events
+    // Probably should either block this, or reset the world and state when a new init event is triggered
     this._eventBus.publish("init");
   }
 

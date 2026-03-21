@@ -5,16 +5,13 @@ import pong from "./pong/pong-game";
 import snakeGame from "./snake/snake-game";
 import "./style.css";
 
-type MiniApp = {
-  run: (parent?: HTMLElement) => void;
-  stop: () => void;
-};
+type MiniApp = (parent?: HTMLElement) => Engine<any, any>;
 
 type MiniAppInfo = {
   name: string;
   symbol: string;
   appId: string;
-  app: (parent?: HTMLElement) => Engine<any, any>;
+  app: MiniApp;
 };
 
 // Possible categories to display as
@@ -80,7 +77,7 @@ miniApps.forEach((appInfo) => {
 
   const canvasParent = document.getElementById(`${appInfo.name}-sketch`)!;
 
-  const app = appInfo.app(canvasParent);
+  let app: Engine<any, any> | null = null;
 
   document
     .getElementById(`${appInfo.name}-button`)
@@ -88,6 +85,7 @@ miniApps.forEach((appInfo) => {
       appElement.style.display = "block";
       mainContent.style.display = "none";
       // Start app and save the current active app to localStorage
+      app = appInfo.app(canvasParent);
       app.run();
       localStorage.setItem("activeApp", appInfo.name);
     });
@@ -99,7 +97,10 @@ miniApps.forEach((appInfo) => {
       mainContent.style.display = "block";
 
       // Stop app and clear the saved app state
-      app.stop();
+      if (app) {
+        app.stop();
+        app = null;
+      }
       localStorage.removeItem("activeApp");
     });
 
@@ -108,6 +109,7 @@ miniApps.forEach((appInfo) => {
     mainContent.style.display = "none";
     appElement.style.display = "block";
     if (appInfo) {
+      app = appInfo.app(canvasParent);
       app.run();
     }
   }
