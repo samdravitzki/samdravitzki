@@ -19,8 +19,12 @@ const volumeSliderPart: Part<{
     const icon = p.createSpan("🔊");
     icon.parent(menuArea);
 
-    const volumeSlider = p.createSlider(-46, 4);
+    const DEFAULT_VOLUME = -10;
+
+    const volumeSlider = p.createSlider(-46, 4, DEFAULT_VOLUME);
     volumeSlider.parent(menuArea);
+
+    Tone.getDestination().volume.value = DEFAULT_VOLUME;
 
     (volumeSlider as any).input(() => {
       Tone.getDestination().volume.value = Number(volumeSlider.value());

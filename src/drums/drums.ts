@@ -1,6 +1,5 @@
 import * as Tone from "tone";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
-import primitiveRendererPart from "../ecs/parts/p5/primitive-renderer/primitive-renderer";
 import { PrimitiveShape } from "../ecs/parts/p5/primitive-renderer/components/Primitive";
 import Component from "../ecs/core/Component/Component";
 import bpmCounterPart, { Keypress } from "./parts/bpm-counter";
@@ -16,8 +15,18 @@ import p5 from "p5";
 import State from "../ecs/core/State/State";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
-import { Engine } from "../ecs/core/Engine/Engine";
 import p5Part from "../ecs/parts/p5/p5-part";
+import { EventEmitter } from "../ecs/core/System/System";
+
+const tabs = {
+  house: houseTab,
+  hiphop: hiphopTab,
+};
+
+const drumkits = {
+  house: parisHouseDrumkit,
+  hiphop: lofiHipHopDrumkit,
+};
 
 /**
  * The idea is to make a game that makes the user feel like they're playing
@@ -66,9 +75,6 @@ function calculateBpm(
   state["bpm"].setValue(bpm / 2);
 }
 
-const tabs = [houseTab, hiphopTab];
-const drumkits = [parisHouseDrumkit, lofiHipHopDrumkit];
-
 /**
  * Based on the pattern of keypresses entered by the user
  * determine the sequence that should start playing
@@ -104,83 +110,98 @@ function sequenceIncrementerSystem(
   sequenceIndex.setValue(nextIndex);
 }
 
+function genreSelector(
+  world: World,
+  resource: ResourcePool,
+  state: { bpm: State<number>; genre: State<string> },
+) {
+  const bpm = state["bpm"].value;
+
+  // Ranges based on the following with a little wiggle room https://www.izotope.com/en/learn/using-different-tempos-to-make-beats-for-different-genres.html
+  // Needs to find ways to make it not so difficult as its hard to keep a consistent bpm when you dont know what you're doing
+  if (bpm <= 95) {
+    state.genre.setValue("hiphop");
+  } else if (bpm >= 100) {
+    state.genre.setValue("house");
+  }
+}
+
 /**
  * Play drum sounds based on engine state
  */
 function drumSystem(
   world: World,
   resources: ResourcePool,
-  state: { "sequence-index": State<number>; bpm: State<number> },
+  state: { "sequence-index": State<number>; genre: State<string> },
+  emitter: EventEmitter<{ hit: DrumHitEventPayload }>,
 ) {
-  const canvasBounds = resources.get<Bounds>("canvas-bounds");
   const sequenceIndex = state["sequence-index"];
 
-  // TODO: need a way to gaurantee the order of systems executed so that we can assume the keypress state defined by the "pattern-detector" system is set before this runs so that there isn't stuff delayed to the next keypress
   const time = Tone.now();
 
-  let genereToPlay: string | null = null;
+  const genereToPlay = state.genre.value;
 
-  const bpm = state["bpm"].value;
+  const sequencesToPlay = tabs[genereToPlay as keyof typeof tabs];
 
-  // Ranges based on the following with a little wiggle room https://www.izotope.com/en/learn/using-different-tempos-to-make-beats-for-different-genres.html
-  // It is good to limit these to only certain bpm ranges because it doesnt sound like a hiphop beat when its played over 100 bpm
-  // Needs to find ways to make it not so difficult as its hard to keep a consistent bpm when you dont know what you're doing
-  if (bpm <= 95) {
-    genereToPlay = "hiphop";
-  }
-
-  if (bpm >= 100) {
-    genereToPlay = "house";
-  }
-
-  const sequencesToPlay = tabs.find((tab) => tab.name === genereToPlay);
-  const drumkitToPlay = drumkits.find(
-    (drumkit) => drumkit.name === genereToPlay,
-  );
-
-  const textEffectBounds = canvasBounds.shrink(100);
-
-  if (!sequencesToPlay || !drumkitToPlay) {
-    parisHouseDrumkit.instruments.kick?.triggerAttackRelease("C2", "1n", time);
-    world.addBundle(
-      createRandomlyPositionedTextBundle("kick", textEffectBounds),
-    );
+  if (!sequencesToPlay) {
+    emitter.emit({ event: "hit", payload: { element: "kick", time: time } });
   } else {
     if (sequencesToPlay.pattern["C"][sequenceIndex.value] === 1) {
-      drumkitToPlay.instruments.clap?.triggerAttackRelease("C2", "1n", time);
-      world.addBundle(
-        createRandomlyPositionedTextBundle("clap", textEffectBounds),
-      );
+      emitter.emit({ event: "hit", payload: { element: "clap", time: time } });
     }
 
     if (sequencesToPlay.pattern["K"][sequenceIndex.value] === 1) {
-      drumkitToPlay.instruments.kick?.triggerAttackRelease("C2", "1n", time);
-      world.addBundle(
-        createRandomlyPositionedTextBundle("kick", textEffectBounds),
-      );
+      emitter.emit({ event: "hit", payload: { element: "kick", time: time } });
     }
 
     if (sequencesToPlay.pattern["HH"][sequenceIndex.value] === 1) {
-      drumkitToPlay.instruments.hat?.triggerAttackRelease("C2", "1n", time);
-      world.addBundle(
-        createRandomlyPositionedTextBundle("hat", textEffectBounds),
-      );
+      emitter.emit({ event: "hit", payload: { element: "hat", time: time } });
     }
 
     if (sequencesToPlay.pattern["S"][sequenceIndex.value] === 1) {
-      drumkitToPlay.instruments.snare?.triggerAttackRelease("C2", "1n", time);
-      world.addBundle(
-        createRandomlyPositionedTextBundle("snare", textEffectBounds),
-      );
+      emitter.emit({ event: "hit", payload: { element: "snare", time: time } });
     }
 
     if (sequencesToPlay.pattern["OH"][sequenceIndex.value] === 1) {
-      drumkitToPlay.instruments.openHat?.triggerAttackRelease("C2", "1n", time);
-      world.addBundle(
-        createRandomlyPositionedTextBundle("open hat", textEffectBounds),
-      );
+      emitter.emit({
+        event: "hit",
+        payload: { element: "openHat", time: time },
+      });
     }
   }
+}
+
+function drumPlayer(
+  world: World,
+  resources: ResourcePool,
+  state: { genre: State<string> },
+  eventEmitter: unknown,
+  drumEvent: DrumHitEventPayload,
+) {
+  const genereToPlay = state.genre.value;
+
+  const kitType = genereToPlay as keyof typeof drumkits;
+  const drumkitToPlay = drumkits[kitType];
+
+  const element = drumEvent.element as keyof typeof drumkitToPlay.instruments;
+
+  const intrument = drumkitToPlay.instruments[element];
+
+  intrument?.triggerAttackRelease("C2", "1n", drumEvent.time);
+}
+
+function drumElementDisplay(
+  world: World,
+  resources: ResourcePool,
+  state: unknown,
+  eventEmitter: unknown,
+  drumEvent: DrumHitEventPayload,
+) {
+  const canvasBounds = resources.get<Bounds>("canvas-bounds");
+  const textEffectBounds = canvasBounds.shrink(100);
+  world.addBundle(
+    createRandomlyPositionedTextBundle(drumEvent.element, textEffectBounds),
+  );
 }
 
 export type TextEffectComponent = Component & {
@@ -211,36 +232,40 @@ function textFadeSystem(world: World, resources: ResourcePool) {
   }
 }
 
+type DrumHitEventPayload = { element: string; time: number };
+
 export default function drums(parent?: HTMLElement) {
   const engine = EngineBuilder.create()
     .event("setup")
     .event("update")
     .event("keyPressed")
     .event("after-update")
+    .event<"hit", DrumHitEventPayload>("hit")
     .state("sequence-index", 0)
     .state<"key-presses", Keypress[]>("key-presses", [])
     .state("bpm", 0)
+    .state<"genre", string>("genre", "dead-air")
     .build();
+
+  const t = engine.trigger;
 
   engine.part(p5Part([500, 500], parent));
 
-  engine.system("calculate-bpm", engine.trigger.on("keyPressed"), calculateBpm);
+  engine.system("calculate-bpm", t.on("keyPressed"), calculateBpm);
 
   engine.part(bpmCounterPart);
   engine.part(volumeSliderPart);
 
-  engine.system(
-    "track-keypresses",
-    engine.trigger.on("keyPressed"),
-    keypressTrackingSystem,
-  );
-  engine.system(
-    "sequence-incrementer",
-    engine.trigger.on("keyPressed"),
-    sequenceIncrementerSystem,
-  );
-  engine.system("drum", engine.trigger.on("keyPressed"), drumSystem);
-  engine.system("text-fade", engine.trigger.on("update"), textFadeSystem);
+  engine.system("track-keypresses", t.on("keyPressed"), keypressTrackingSystem);
+  engine.system("sequencer", t.on("keyPressed"), sequenceIncrementerSystem);
+
+  engine.system("genre-selector", t.on("keyPressed"), genreSelector);
+  engine.system("drum", t.on("keyPressed"), drumSystem);
+
+  engine.system("element-display", t.on("hit"), drumElementDisplay);
+  engine.system("player", t.on("hit"), drumPlayer);
+
+  engine.system("text-fade", t.on("update"), textFadeSystem);
 
   return engine;
 }
