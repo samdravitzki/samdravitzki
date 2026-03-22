@@ -6,7 +6,7 @@ import { ResourcePool } from "../../ecs/core/Engine/ResourcePool";
 import { Part } from "../../ecs/core/Part/Part";
 
 const volumeSliderPart: Part<{
-  setup: unknown;
+  setup: void;
 }> = ({ registerSystem, triggerBuilder }) => {
   function setupVolumeSlider(_world: World, resources: ResourcePool) {
     const p = resources.get<p5>("p5");

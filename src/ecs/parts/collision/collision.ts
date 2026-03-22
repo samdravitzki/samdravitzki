@@ -34,8 +34,8 @@ function collisions(
   logging: boolean = false,
 ) {
   const part: Part<{
-    update: unknown;
-    "after-update": unknown;
+    update: void;
+    "after-update": void;
   }> = ({ registerSystem, triggerBuilder }) => {
     registerSystem(
       "collisionSystem",

@@ -26,12 +26,12 @@ type SystemRegistration<
  * Designed based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
  */
 class DufusEngine<
-  EventMap extends Record<string, unknown> & { init: unknown } = {
-    init: unknown;
+  EventMap extends Record<string, unknown> & { init: void } = {
+    init: void;
   },
   StateMap extends Record<string, unknown> = {},
 > implements Engine<EventMap, StateMap> {
-  private _eventBus = new EventDipatcher<EventMap>();
+  private _eventDispatcher = new EventDipatcher<EventMap>();
   private _store: States<StateMap>;
   /**
    * Number of times a state change a system is dependent on has occured
@@ -55,7 +55,7 @@ class DufusEngine<
 
   private _executeSystem<Event extends keyof EventMap>(
     system: System<EventMap, StateMap, Event>,
-    eventPayload: EventMap[Event] | undefined,
+    eventPayload: EventMap[Event],
   ) {
     const cleanupFn = system(
       this._world,
@@ -64,8 +64,8 @@ class DufusEngine<
       {
         emit: ({ event: emittedEvent, payload }) =>
           // Would like to figure out why this type assertion is needed, and how it could be avoided
-          this._eventBus.publish(
-            emittedEvent as keyof EventMap,
+          this._eventDispatcher.publish(
+            emittedEvent as Event,
             payload as EventMap[Event],
           ),
       },
@@ -92,14 +92,14 @@ class DufusEngine<
     });
 
     if (!condition) {
-      this._eventBus.subscribe(event, (payload) =>
+      this._eventDispatcher.subscribe(event, (payload) =>
         this._executeSystem(s, payload),
       );
       return;
     }
 
     if (condition.type === "when") {
-      this._eventBus.subscribe(event, (payload) => {
+      this._eventDispatcher.subscribe(event, (payload) => {
         if (this._store[condition.state].value === condition.value) {
           this._executeSystem(s, payload);
         }
@@ -121,7 +121,7 @@ class DufusEngine<
        * execution logic to gain acess ot these controls and because it will split
        * up the responsibilities making it easier to understand, extend and change
        */
-      this._eventBus.subscribe(event, (payload) => {
+      this._eventDispatcher.subscribe(event, (payload) => {
         const trackedTransitionCount = this._stateChangeTracker.get(s);
         if (trackedTransitionCount && trackedTransitionCount > 0) {
           this._executeSystem(s, payload);
@@ -189,7 +189,9 @@ class DufusEngine<
 
     // Problem: Run can currently be called many times, resulting in multiple 'init' events
     // Probably should either block this, or reset the world and state when a new init event is triggered
-    this._eventBus.publish("init");
+    type X = EventMap["init"];
+
+    this._eventDispatcher.publish("init", undefined);
   }
 
   stop() {

@@ -13,11 +13,11 @@ export type MousePosition = {
 };
 
 type P5Events = {
-  update: unknown;
-  "after-update": unknown;
-  init: unknown;
-  setup: unknown;
-  keyPressed: unknown;
+  update: void;
+  "after-update": void;
+  init: void;
+  setup: void;
+  keyPressed: void;
 };
 
 function createP5System(size: [number, number], parent?: HTMLElement) {

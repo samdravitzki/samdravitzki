@@ -8,8 +8,8 @@ import { Engine } from "./Engine";
  *
  */
 class EngineBuilder<
-  EventMap extends Record<string, unknown> & { init: unknown } = {
-    init: unknown;
+  EventMap extends Record<string, unknown> & { init: void } = {
+    init: void;
   },
   StateMap extends Record<string, unknown> = {},
 > {
@@ -36,7 +36,7 @@ class EngineBuilder<
     });
   }
 
-  event<const K extends string, Payload = unknown>(name: K) {
+  event<const K extends string, Payload = void>(name: K) {
     return new EngineBuilder<
       EventMap & {
         [k in K]: Payload;
@@ -57,8 +57,8 @@ class EngineBuilder<
     return new DufusEngine<EventMap, StateMap>(this.stateSet);
   }
 
-  static create(): EngineBuilder<{ init: unknown }> {
-    return new EngineBuilder<{ init: unknown }>({});
+  static create(): EngineBuilder<{ init: void }> {
+    return new EngineBuilder<{ init: void }>({});
   }
 }
 

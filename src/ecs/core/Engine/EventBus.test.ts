@@ -1,7 +1,21 @@
 import { describe, expect, test, vi } from "vitest";
 import EventDipatcher from "./EventBus";
 
-test("listeners subscribed to event should be called when the event is published with the same payload", () => {
+test("listeners subscribed to event should be called when the event is published", () => {
+  const eventBus = new EventDipatcher<{ testEvent: void }>();
+  const listener1 = vi.fn();
+  const listener2 = vi.fn();
+  const testPaylaod = "test-payload";
+
+  eventBus.subscribe("testEvent", listener1);
+  eventBus.subscribe("testEvent", listener2);
+  eventBus.publish("testEvent", undefined);
+
+  expect(listener1).toHaveBeenCalledExactlyOnceWith(undefined);
+  expect(listener2).toHaveBeenCalledExactlyOnceWith(undefined);
+});
+
+test("listeners should be supplied payload of published events", () => {
   const eventBus = new EventDipatcher<{ testEvent: string }>();
   const listener1 = vi.fn();
   const listener2 = vi.fn();
@@ -17,14 +31,14 @@ test("listeners subscribed to event should be called when the event is published
 
 test("listeners subscribed to other events should not be called when the event is published", () => {
   const eventBus = new EventDipatcher<{
-    testEvent: unknown;
-    otherEvent: unknown;
+    testEvent: void;
+    otherEvent: void;
   }>();
 
   const listener = vi.fn();
   eventBus.subscribe("otherEvent", listener);
 
-  eventBus.publish("testEvent");
+  eventBus.publish("testEvent", undefined);
 
   expect(listener).not.toHaveBeenCalled();
 });

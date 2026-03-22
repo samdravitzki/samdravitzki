@@ -31,7 +31,7 @@ type System<
     [Key in keyof StateMap]: State<StateMap[Key]>;
   },
   eventEmitter: EventEmitter<EventMap>,
-  eventPayload: EventMap[Event] | undefined,
+  eventPayload: EventMap[Event],
 ) => Dispose | void;
 
 export default System;

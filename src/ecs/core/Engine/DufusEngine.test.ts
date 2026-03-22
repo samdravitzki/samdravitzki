@@ -42,7 +42,7 @@ describe("when a system emits an event", () => {
   type TestState = "start" | "middle" | "end";
 
   let engine: DufusEngine<
-    { init: unknown; "test-event": unknown; "other-event": unknown },
+    { init: void; "test-event": void; "other-event": void },
     { testState: TestState }
   >;
 

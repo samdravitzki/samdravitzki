@@ -14,8 +14,8 @@ export type Keypress = {
 
 const bpmCounterPart: Part<
   {
-    setup: unknown;
-    update: unknown;
+    setup: void;
+    update: void;
   },
   {
     bpm: number;
