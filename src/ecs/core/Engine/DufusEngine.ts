@@ -1,7 +1,7 @@
 import State from "../State/State";
 import System, { Dispose } from "../System/System";
 import World from "../World/World";
-import EventDipatcher from "./EventBus";
+import EventDipatcher from "./EventDipatcher";
 import { Engine } from "./Engine";
 import { ResourcePool } from "./ResourcePool";
 import { Part } from "../Part/Part";
