@@ -28,6 +28,7 @@ Always wanted to learn more about game engine design and ecs and so decided to b
   - Searchable list of systems, events their triggered and someway to visualise when their executing
   - Searchable list of entities in the world
   - Could use https://tweakpane.github.io/docs/ for this
+- Color palette tool - setup a color palette that can be reused throughout systems and components resulting in consistent good looking apps
 
 ## Resources
 
