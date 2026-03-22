@@ -1,5 +1,5 @@
-import { describe, expect, test, vi } from "vitest";
-import EventDipatcher from "./EventBus";
+import { expect, test, vi } from "vitest";
+import EventDipatcher from "./EventDipatcher";
 
 test("listeners subscribed to event should be called when the event is published", () => {
   const eventBus = new EventDipatcher<{ testEvent: void }>();
