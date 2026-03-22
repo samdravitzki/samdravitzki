@@ -37,8 +37,9 @@ export type TriggerCondition<StateMap extends Record<string, unknown>> =
 export type Trigger<
   EventMap extends Record<string, unknown>,
   StateMap extends Record<string, unknown>,
+  Event extends keyof EventMap,
 > = {
-  event: keyof EventMap;
+  event: Event;
 } & {
   condition?: TriggerCondition<StateMap>;
 };

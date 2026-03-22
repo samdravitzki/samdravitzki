@@ -1,12 +1,7 @@
-import System, { Dispose, EventEmitter } from "../System/System";
-import Bounds from "../Bounds/Bounds";
+import System from "../System/System";
 import { Trigger } from "../Trigger/Trigger";
 import { TriggerBuilder } from "../Trigger/TriggerBuilder";
 import { Part } from "../Part/Part";
-
-export type EngineOptions = Partial<{
-  canvasBounds: Bounds;
-}>;
 
 export interface Engine<
   EventMap extends Record<string, unknown> & { init: unknown },
@@ -21,10 +16,10 @@ export interface Engine<
    * @param trigger the conditions under which the system should trigger
    * @param system
    */
-  system: (
+  system: <Event extends keyof EventMap>(
     name: string,
-    trigger: Trigger<EventMap, StateMap>,
-    s: System<EventMap, StateMap>,
+    trigger: Trigger<EventMap, StateMap, Event>,
+    s: System<EventMap, StateMap, Event>,
   ) => void;
 
   /**

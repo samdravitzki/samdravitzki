@@ -1,7 +1,7 @@
 import State from "../State/State";
 import System, { Dispose } from "../System/System";
 import World from "../World/World";
-import EventBus from "./EventBus";
+import EventDipatcher from "./EventBus";
 import { Engine } from "./Engine";
 import { ResourcePool } from "./ResourcePool";
 import { Part } from "../Part/Part";
@@ -13,12 +13,13 @@ type States<StateMap extends Record<string, unknown> = {}> = {
 };
 
 type SystemRegistration<
-  EventMap extends Record<string, unknown> = {},
-  StateMap extends Record<string, unknown> = {},
+  EventMap extends Record<string, unknown>,
+  StateMap extends Record<string, unknown>,
+  EventKey extends keyof EventMap,
 > = {
   name: string;
-  system: System<EventMap, StateMap>;
-  trigger: Trigger<EventMap, StateMap>;
+  system: System<EventMap, StateMap, EventKey>;
+  trigger: Trigger<EventMap, StateMap, EventKey>;
 };
 
 /**
@@ -30,16 +31,17 @@ class DufusEngine<
   },
   StateMap extends Record<string, unknown> = {},
 > implements Engine<EventMap, StateMap> {
-  private _eventBus = new EventBus<EventMap>();
+  private _eventBus = new EventDipatcher<EventMap>();
   private _store: States<StateMap>;
   /**
    * Number of times a state change a system is dependent on has occured
    * Needed so that when the event the system is dependent on triggers it can determine wheter it should run
    */
-  private _stateChangeTracker = new Map<System<EventMap, StateMap>, number>();
+  private _stateChangeTracker = new Map<Function, number>();
   private _world = new World();
   private _resources = new ResourcePool();
-  private _systems: SystemRegistration<EventMap, StateMap>[] = [];
+  private _systems: SystemRegistration<EventMap, StateMap, keyof EventMap>[] =
+    [];
   private _cleanup: Dispose[] = [];
 
   constructor(stateMap: StateMap) {
@@ -51,12 +53,24 @@ class DufusEngine<
     }, {}) as States<StateMap>;
   }
 
-  private _executeSystem(system: System<EventMap, StateMap>) {
-    const cleanupFn = system(this._world, this._resources, this._store, {
-      emit: ({ event: emittedEvent }) =>
-        // Would like to figure out why this type assertion is needed, and how it could be avoided
-        this._eventBus.publish(emittedEvent as keyof EventMap),
-    });
+  private _executeSystem<Event extends keyof EventMap>(
+    system: System<EventMap, StateMap, Event>,
+    eventPayload: EventMap[Event] | undefined,
+  ) {
+    const cleanupFn = system(
+      this._world,
+      this._resources,
+      this._store,
+      {
+        emit: ({ event: emittedEvent, payload }) =>
+          // Would like to figure out why this type assertion is needed, and how it could be avoided
+          this._eventBus.publish(
+            emittedEvent as keyof EventMap,
+            payload as EventMap[Event],
+          ),
+      },
+      eventPayload,
+    );
 
     // This approach will result in a memory leak if system triggered on update events require cleanup. Will need to look into different approach when this becomes a problem
     if (cleanupFn) {
@@ -64,28 +78,30 @@ class DufusEngine<
     }
   }
 
-  system(
+  system<Event extends keyof EventMap>(
     name: string, // Remove this name field - no longer used
-    trigger: Trigger<EventMap, StateMap>,
-    s: System<EventMap, StateMap>,
+    trigger: Trigger<EventMap, StateMap, Event>,
+    s: System<EventMap, StateMap, Event>,
   ): void {
     const { condition, event } = trigger;
 
     this._systems.push({
       name,
-      system: s,
+      system: s as System<EventMap, StateMap, keyof EventMap>,
       trigger,
     });
 
     if (!condition) {
-      this._eventBus.subscribe(event, () => this._executeSystem(s));
+      this._eventBus.subscribe(event, (payload) =>
+        this._executeSystem(s, payload),
+      );
       return;
     }
 
     if (condition.type === "when") {
-      this._eventBus.subscribe(event, () => {
+      this._eventBus.subscribe(event, (payload) => {
         if (this._store[condition.state].value === condition.value) {
-          this._executeSystem(s);
+          this._executeSystem(s, payload);
         }
       });
       return;
@@ -105,10 +121,10 @@ class DufusEngine<
        * execution logic to gain acess ot these controls and because it will split
        * up the responsibilities making it easier to understand, extend and change
        */
-      this._eventBus.subscribe(event, () => {
+      this._eventBus.subscribe(event, (payload) => {
         const trackedTransitionCount = this._stateChangeTracker.get(s);
         if (trackedTransitionCount && trackedTransitionCount > 0) {
-          this._executeSystem(s);
+          this._executeSystem(s, payload);
           this._stateChangeTracker.set(s, 0);
         }
       });
@@ -147,8 +163,8 @@ class DufusEngine<
         // Would like to figure out how to structure these types so that these assertions are not needed
         this.system(
           name,
-          trigger as Trigger<EventMap, StateMap>,
-          sys as unknown as System<EventMap, StateMap>,
+          trigger as Trigger<EventMap, StateMap, keyof EventMap>,
+          sys as unknown as System<EventMap, StateMap, keyof EventMap>,
         );
       },
       triggerBuilder: createTriggerBuilder<PartEventMap, PartStateMap>(),
@@ -159,7 +175,7 @@ class DufusEngine<
    * Starts the engine by triggering the "init" event
    */
   run() {
-    logSystemRegistrations(this._systems);
+    // logSystemRegistrations(this._systems);
 
     // Log state changes
     Object.keys(this._store).map((name) => {
@@ -182,68 +198,68 @@ class DufusEngine<
   }
 }
 
-type EventSystemMap<
-  EventMap extends Record<string, unknown> = {},
-  StateMap extends Record<string, unknown> = {},
-> = Record<keyof EventMap, SystemRegistration<EventMap, StateMap>[]>;
+// type EventSystemMap<
+//   EventMap extends Record<string, unknown> = {},
+//   StateMap extends Record<string, unknown> = {},
+// > = Record<keyof EventMap, SystemRegistration<EventMap, StateMap>[]>;
 
-function groupSystemsByEvent<
-  EventMap extends Record<string, unknown> = {},
-  StateMap extends Record<string, unknown> = {},
->(systemRegistrations: SystemRegistration<EventMap, StateMap>[]) {
-  return systemRegistrations.reduce<EventSystemMap<EventMap, StateMap>>(
-    (groups, systemReg) => {
-      if (groups[systemReg.trigger.event] === undefined) {
-        return {
-          ...groups,
-          [systemReg.trigger.event]: [systemReg],
-        };
-      }
+// function groupSystemsByEvent<
+//   EventMap extends Record<string, unknown> = {},
+//   StateMap extends Record<string, unknown> = {},
+// >(systemRegistrations: SystemRegistration<EventMap, StateMap>[]) {
+//   return systemRegistrations.reduce<EventSystemMap<EventMap, StateMap>>(
+//     (groups, systemReg) => {
+//       if (groups[systemReg.trigger.event] === undefined) {
+//         return {
+//           ...groups,
+//           [systemReg.trigger.event]: [systemReg],
+//         };
+//       }
 
-      return {
-        ...groups,
-        [systemReg.trigger.event]: [
-          ...groups[systemReg.trigger.event],
-          systemReg,
-        ],
-      };
-    },
-    {} as EventSystemMap<EventMap, StateMap>,
-  );
-}
+//       return {
+//         ...groups,
+//         [systemReg.trigger.event]: [
+//           ...groups[systemReg.trigger.event],
+//           systemReg,
+//         ],
+//       };
+//     },
+//     {} as EventSystemMap<EventMap, StateMap>,
+//   );
+// }
 
-function logSystemRegistrations<
-  EventMap extends Record<string, unknown> = {},
-  StateMap extends Record<string, unknown> = {},
->(systemRegistrations: SystemRegistration<EventMap, StateMap>[]) {
-  const systemEventGroups = groupSystemsByEvent(systemRegistrations);
+// function logSystemRegistrations<
+//   EventMap extends Record<string, unknown> = {},
+//   StateMap extends Record<string, unknown> = {},
+// >(systemRegistrations: SystemRegistration<EventMap, StateMap>[]) {
+//   const systemEventGroups = groupSystemsByEvent(systemRegistrations);
 
-  Object.keys(systemEventGroups)
-    .sort()
-    .map((event) => {
-      console.group(`${event} event`);
-      systemEventGroups[event].map(({ trigger, system, name }) => {
-        if (!trigger.condition) {
-          console.log(name);
-          return;
-        }
+//   Object.keys(systemEventGroups)
+//     .sort()
+//     .map((event) => {
+//       console.group(`${event} event`);
+//       systemEventGroups[event].map(({ trigger, system, name }) => {
+//         if (!trigger.condition) {
+//           console.log(name);
+//           return;
+//         }
 
-        if (trigger.condition.type === "when") {
-          console.log(
-            `${name} when ${trigger.condition.state.toString()} is ${trigger.condition.value}`,
-          );
-          return;
-        }
+//         if (trigger.condition.type === "when") {
+//           console.log(
+//             `${name} when ${trigger.condition.state.toString()} is ${trigger.condition.value}`,
+//           );
+//           return;
+//         }
 
-        if (trigger.condition.type === "on") {
-          console.log(
-            `${name} on ${trigger.condition.state.toString()} ${trigger.condition.transition} ${trigger.condition.value}`,
-          );
-          return;
-        }
-      });
-      console.groupEnd();
-    });
-}
+//         if (trigger.condition.type === "on") {
+//           console.log(
+//             `${name} on ${trigger.condition.state.toString()} ${trigger.condition.transition} ${trigger.condition.value}`,
+//           );
+//           return;
+//         }
+//       });
+//       console.groupEnd();
+//     });
+// }
 
 export default DufusEngine;

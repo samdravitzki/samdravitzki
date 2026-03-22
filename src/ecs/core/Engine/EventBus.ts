@@ -1,20 +1,37 @@
-type EventListener = () => void;
+type EventListener<T> = (payload: T | undefined) => void;
 
-class EventBus<EventMap extends Record<string, unknown>> {
-  private _subscribers = new Map<keyof EventMap, EventListener[]>();
+type ListenerStore<EventMap extends Record<string, unknown>> = {
+  [EventKey in keyof EventMap]?: EventListener<EventMap[EventKey]>[];
+};
 
-  subscribe(event: keyof EventMap, listener: EventListener) {
-    const listeners = this._subscribers.get(event) || [];
-    this._subscribers.set(event, [...listeners, listener]);
+/**
+ * Responsible for receiving event messaging and routing them
+ * to listeners that care about the event
+ */
+class EventDipatcher<EventMap extends Record<string, unknown>> {
+  private _store: ListenerStore<EventMap> = {};
+
+  subscribe<EventKey extends keyof EventMap>(
+    event: EventKey,
+    listener: EventListener<EventMap[EventKey]>,
+  ) {
+    if (!this._store[event]) {
+      this._store[event] = [listener];
+    } else {
+      this._store[event].push(listener);
+    }
   }
 
-  publish(event: keyof EventMap) {
-    const listeners = this._subscribers.get(event) || [];
+  publish<EventKey extends keyof EventMap>(
+    event: EventKey,
+    payload?: EventMap[EventKey],
+  ) {
+    const listeners = this._store[event] || [];
     for (const listener of listeners) {
-      listener();
+      listener(payload);
     }
   }
 }
 
-export default EventBus;
+export default EventDipatcher;
 export type { EventListener };

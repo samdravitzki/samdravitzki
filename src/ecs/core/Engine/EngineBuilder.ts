@@ -1,5 +1,5 @@
 import DufusEngine from "./DufusEngine";
-import { EngineOptions, Engine } from "./Engine";
+import { Engine } from "./Engine";
 
 /**
  * Builder for creating an Engine with type safety and autocompletion for states and events.
@@ -36,10 +36,10 @@ class EngineBuilder<
     });
   }
 
-  event<const K extends string>(name: K) {
+  event<const K extends string, Payload = unknown>(name: K) {
     return new EngineBuilder<
       EventMap & {
-        [k in K]: unknown;
+        [k in K]: Payload;
       },
       StateMap
     >(this.stateSet);

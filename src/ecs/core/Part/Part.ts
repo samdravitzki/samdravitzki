@@ -7,10 +7,10 @@ type EngineContext<
   StateMap extends Record<string, unknown> = {},
 > = {
   triggerBuilder: TriggerBuilder<EventMap, StateMap>;
-  registerSystem: (
+  registerSystem: <Event extends keyof EventMap>(
     name: string,
-    trigger: Trigger<EventMap, StateMap>,
-    system: System<EventMap, StateMap>,
+    trigger: Trigger<EventMap, StateMap, Event>,
+    system: System<EventMap, StateMap, Event>,
   ) => void;
 };
 

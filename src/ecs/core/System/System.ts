@@ -23,6 +23,7 @@ type EventEmitter<EventMap extends Record<string, unknown>> = {
 type System<
   EventMap extends Record<string, unknown>,
   StateMap extends Record<string, unknown>,
+  Event extends keyof EventMap,
 > = (
   world: World,
   resources: ResourcePool,
@@ -30,6 +31,7 @@ type System<
     [Key in keyof StateMap]: State<StateMap[Key]>;
   },
   eventEmitter: EventEmitter<EventMap>,
+  eventPayload: EventMap[Event] | undefined,
 ) => Dispose | void;
 
 export default System;

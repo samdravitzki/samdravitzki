@@ -6,13 +6,17 @@ export type TriggerBuilder<
 > = {
   on: <EventKey extends keyof EventMap>(
     event: EventKey,
-  ) => { event: keyof EventMap } & {
+  ) => { event: EventKey } & {
     when: <StateKey extends keyof StateMap>(
       state: StateKey,
     ) => {
-      is: (value: StateMap[StateKey]) => Trigger<EventMap, StateMap>;
-      enters: (value: StateMap[StateKey]) => Trigger<EventMap, StateMap>;
-      exits: (value: StateMap[StateKey]) => Trigger<EventMap, StateMap>;
+      is: (value: StateMap[StateKey]) => Trigger<EventMap, StateMap, EventKey>;
+      enters: (
+        value: StateMap[StateKey],
+      ) => Trigger<EventMap, StateMap, EventKey>;
+      exits: (
+        value: StateMap[StateKey],
+      ) => Trigger<EventMap, StateMap, EventKey>;
     };
   };
 };
