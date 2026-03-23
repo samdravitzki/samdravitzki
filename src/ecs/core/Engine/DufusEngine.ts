@@ -175,7 +175,7 @@ class DufusEngine<
    * Starts the engine by triggering the "init" event
    */
   run() {
-    // logSystemRegistrations(this._systems);
+    logSystemRegistrations(this._systems);
 
     // Log state changes
     Object.keys(this._store).map((name) => {
@@ -189,8 +189,6 @@ class DufusEngine<
 
     // Problem: Run can currently be called many times, resulting in multiple 'init' events
     // Probably should either block this, or reset the world and state when a new init event is triggered
-    type X = EventMap["init"];
-
     this._eventDispatcher.publish("init", undefined);
   }
 
@@ -200,68 +198,75 @@ class DufusEngine<
   }
 }
 
-// type EventSystemMap<
-//   EventMap extends Record<string, unknown> = {},
-//   StateMap extends Record<string, unknown> = {},
-// > = Record<keyof EventMap, SystemRegistration<EventMap, StateMap>[]>;
+type EventSystemMap<
+  EventMap extends Record<string, unknown> = {},
+  StateMap extends Record<string, unknown> = {},
+> = Record<
+  keyof EventMap,
+  SystemRegistration<EventMap, StateMap, keyof EventMap>[]
+>;
 
-// function groupSystemsByEvent<
-//   EventMap extends Record<string, unknown> = {},
-//   StateMap extends Record<string, unknown> = {},
-// >(systemRegistrations: SystemRegistration<EventMap, StateMap>[]) {
-//   return systemRegistrations.reduce<EventSystemMap<EventMap, StateMap>>(
-//     (groups, systemReg) => {
-//       if (groups[systemReg.trigger.event] === undefined) {
-//         return {
-//           ...groups,
-//           [systemReg.trigger.event]: [systemReg],
-//         };
-//       }
+function groupSystemsByEvent<
+  EventMap extends Record<string, unknown> = {},
+  StateMap extends Record<string, unknown> = {},
+>(
+  systemRegistrations: SystemRegistration<EventMap, StateMap, keyof EventMap>[],
+) {
+  return systemRegistrations.reduce<EventSystemMap<EventMap, StateMap>>(
+    (groups, systemReg) => {
+      if (groups[systemReg.trigger.event] === undefined) {
+        return {
+          ...groups,
+          [systemReg.trigger.event]: [systemReg],
+        };
+      }
 
-//       return {
-//         ...groups,
-//         [systemReg.trigger.event]: [
-//           ...groups[systemReg.trigger.event],
-//           systemReg,
-//         ],
-//       };
-//     },
-//     {} as EventSystemMap<EventMap, StateMap>,
-//   );
-// }
+      return {
+        ...groups,
+        [systemReg.trigger.event]: [
+          ...groups[systemReg.trigger.event],
+          systemReg,
+        ],
+      };
+    },
+    {} as EventSystemMap<EventMap, StateMap>,
+  );
+}
 
-// function logSystemRegistrations<
-//   EventMap extends Record<string, unknown> = {},
-//   StateMap extends Record<string, unknown> = {},
-// >(systemRegistrations: SystemRegistration<EventMap, StateMap>[]) {
-//   const systemEventGroups = groupSystemsByEvent(systemRegistrations);
+function logSystemRegistrations<
+  EventMap extends Record<string, unknown> = {},
+  StateMap extends Record<string, unknown> = {},
+>(
+  systemRegistrations: SystemRegistration<EventMap, StateMap, keyof EventMap>[],
+) {
+  const systemEventGroups = groupSystemsByEvent(systemRegistrations);
 
-//   Object.keys(systemEventGroups)
-//     .sort()
-//     .map((event) => {
-//       console.group(`${event} event`);
-//       systemEventGroups[event].map(({ trigger, system, name }) => {
-//         if (!trigger.condition) {
-//           console.log(name);
-//           return;
-//         }
+  Object.keys(systemEventGroups)
+    .sort()
+    .map((event) => {
+      console.group(`${event} event`);
+      systemEventGroups[event].map(({ trigger, name }) => {
+        if (!trigger.condition) {
+          console.log(name);
+          return;
+        }
 
-//         if (trigger.condition.type === "when") {
-//           console.log(
-//             `${name} when ${trigger.condition.state.toString()} is ${trigger.condition.value}`,
-//           );
-//           return;
-//         }
+        if (trigger.condition.type === "when") {
+          console.log(
+            `${name} when ${trigger.condition.state.toString()} is ${trigger.condition.value}`,
+          );
+          return;
+        }
 
-//         if (trigger.condition.type === "on") {
-//           console.log(
-//             `${name} on ${trigger.condition.state.toString()} ${trigger.condition.transition} ${trigger.condition.value}`,
-//           );
-//           return;
-//         }
-//       });
-//       console.groupEnd();
-//     });
-// }
+        if (trigger.condition.type === "on") {
+          console.log(
+            `${name} on ${trigger.condition.state.toString()} ${trigger.condition.transition} ${trigger.condition.value}`,
+          );
+          return;
+        }
+      });
+      console.groupEnd();
+    });
+}
 
 export default DufusEngine;
