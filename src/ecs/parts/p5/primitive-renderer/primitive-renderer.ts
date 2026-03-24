@@ -36,7 +36,7 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
     if (primitive.type === "line") {
       if (primitive.dash) {
         (p.drawingContext as CanvasRenderingContext2D).setLineDash(
-          primitive.dash
+          primitive.dash,
         );
       }
 
@@ -49,7 +49,7 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
         primitive.start.x + position.position.x,
         primitive.start.y + position.position.y,
         primitive.end.x + position.position.x,
-        primitive.end.y + position.position.y
+        primitive.end.y + position.position.y,
       );
 
       if (primitive.dash) {
@@ -66,7 +66,7 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
         position.position.x,
         position.position.y,
         primitive.width,
-        primitive.height
+        primitive.height,
       );
     }
 
@@ -75,6 +75,7 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
 
       if (primitive.align === "left") p.textAlign(p.LEFT);
       if (primitive.align === "right") p.textAlign(p.RIGHT);
+      if (primitive.align === "center") p.textAlign(p.CENTER);
 
       p.text(primitive.text, position.position.x, position.position.y);
     }

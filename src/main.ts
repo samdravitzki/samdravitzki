@@ -2,6 +2,7 @@ import drumsGame from "./drums/drums";
 import { Engine } from "./ecs/core/Engine/Engine";
 import poissonDiscSamplingDemo from "./poisson-disk-sampling/poisson-disc-sampling";
 import pong from "./pong/pong-game";
+import shifter from "./shifter/shifter";
 import snakeGame from "./snake/snake-game";
 import "./style.css";
 
@@ -45,6 +46,13 @@ miniApps.push({
   symbol: "🥁",
   appId: "drums-sketch",
   app: drumsGame,
+});
+
+miniApps.push({
+  name: "shifter",
+  symbol: "🕹️",
+  appId: "shifter-sketch",
+  app: shifter,
 });
 
 function createMiniAppButton(name: string, symbol: string) {

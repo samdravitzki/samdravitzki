@@ -25,7 +25,7 @@ export type PrimitiveShape = Component & {
       }
     | {
         type: "text";
-        align: "left" | "right";
+        align: "left" | "right" | "center";
         size: number;
         text: string;
       }
