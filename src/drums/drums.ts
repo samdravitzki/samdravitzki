@@ -15,7 +15,7 @@ import p5 from "p5";
 import State from "../ecs/core/State/State";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
-import p5Part from "../ecs/parts/p5/p5-part";
+import p5Part, { KeypressEvent } from "../ecs/parts/p5/p5-part";
 import { EventEmitter } from "../ecs/core/System/System";
 
 const tabs = {
@@ -238,7 +238,7 @@ export default function drums(parent?: HTMLElement) {
   const engine = EngineBuilder.create()
     .event("setup")
     .event("update")
-    .event("keyPressed")
+    .event<"keyPressed", KeypressEvent>("keyPressed")
     .event("after-update")
     .event<"hit", DrumHitEventPayload>("hit")
     .state("sequence-index", 0)

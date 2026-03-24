@@ -22,8 +22,7 @@ import collisions from "../ecs/parts/collision/collision";
 import { createEndMenu, createGameMenu, createMainMenu } from "./setup-ui";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
-import p5Part, { MousePosition } from "../ecs/parts/p5/p5-part";
-import { Engine } from "../ecs/core/Engine/Engine";
+import p5Part, { KeypressEvent, MousePosition } from "../ecs/parts/p5/p5-part";
 import createBall from "./prefabs/ball";
 import createBackboard from "./prefabs/backboard";
 import createWall from "./prefabs/wall";
@@ -513,7 +512,7 @@ export default function pong(parent?: HTMLElement) {
     .event("setup")
     .event("update")
     .event("after-update")
-    .event("keyPressed")
+    .event<"keyPressed", KeypressEvent>("keyPressed")
     .state("render-trajectory", false)
     .state<"score", [number, number]>("score", [0, 0])
     .state<"app-state", ApplicationState>("app-state", "main-menu")

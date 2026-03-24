@@ -1,12 +1,11 @@
 import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
-import { Engine } from "../ecs/core/Engine/Engine";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import State from "../ecs/core/State/State";
 import Vector from "../ecs/core/Vector/Vector";
 import World from "../ecs/core/World/World";
-import p5Part from "../ecs/parts/p5/p5-part";
+import p5Part, { KeypressEvent } from "../ecs/parts/p5/p5-part";
 import poissonDisc from "../lib/poisson-disc/poisson-disc";
 import randomDots from "./random-dots/random-dots";
 
@@ -72,7 +71,7 @@ export default function poissonDiscSamplingDemoApp(parent?: HTMLElement) {
     .event("setup")
     .event("update")
     .event("after-update")
-    .event("keyPressed")
+    .event<"keyPressed", KeypressEvent>("keyPressed")
     .build();
 
   engine.part(p5Part([500, 500], parent));

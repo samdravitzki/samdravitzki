@@ -7,9 +7,14 @@ import { ResourcePool } from "../../core/Engine/ResourcePool";
 import { EventEmitter } from "../../core/System/System";
 import { Part } from "../../core/Part/Part";
 
-export type MousePosition = {
+type MousePosition = {
   x: number;
   y: number;
+};
+
+type KeypressEvent = {
+  key: string;
+  keyCode: number;
 };
 
 type P5Events = {
@@ -17,10 +22,14 @@ type P5Events = {
   "after-update": void;
   init: void;
   setup: void;
-  keyPressed: void;
+  keyPressed: KeypressEvent;
 };
 
-function createP5System(size: [number, number], parent?: HTMLElement) {
+function createP5System(
+  size: [number, number],
+  parent?: HTMLElement,
+  background: [number, number, number] = [240, 90, 60],
+) {
   return function p5System(
     world: World,
     resources: ResourcePool,
@@ -44,7 +53,7 @@ function createP5System(size: [number, number], parent?: HTMLElement) {
       };
 
       p.draw = () => {
-        p.background(240, 90, 60);
+        p.background(...background);
         resources.set("p5", p);
         resources.set("mouse-position", {
           x: p.mouseX,
@@ -55,7 +64,12 @@ function createP5System(size: [number, number], parent?: HTMLElement) {
       };
 
       p.keyPressed = () => {
-        eventEmitter.emit({ event: "keyPressed" });
+        const payload: KeypressEvent = {
+          key: p.key,
+          keyCode: p.keyCode,
+        };
+
+        eventEmitter.emit({ event: "keyPressed", payload });
       };
     }, parent);
 
@@ -65,12 +79,16 @@ function createP5System(size: [number, number], parent?: HTMLElement) {
   };
 }
 
-function p5Part(size: [number, number], parent?: HTMLElement) {
+function p5Part(
+  size: [number, number],
+  parent?: HTMLElement,
+  background: [number, number, number] = [240, 90, 60],
+) {
   const part: Part<P5Events> = ({ registerSystem, triggerBuilder }) => {
     registerSystem(
       "p5",
       triggerBuilder.on("init"),
-      createP5System(size, parent),
+      createP5System(size, parent, background),
     );
     registerSystem(
       "renderer",
@@ -83,3 +101,4 @@ function p5Part(size: [number, number], parent?: HTMLElement) {
 }
 
 export default p5Part;
+export type { KeypressEvent, MousePosition };
