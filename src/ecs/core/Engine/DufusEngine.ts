@@ -181,9 +181,7 @@ class DufusEngine<
     Object.keys(this._store).map((name) => {
       const state = this._store[name];
       state.onChange((to, from) =>
-        console.debug(
-          `(state) ${name} is ${JSON.stringify(to)} (was ${JSON.stringify(from)})`,
-        ),
+        console.debug(`(state) ${name} is ${to} (was ${from})`),
       );
     });
 
