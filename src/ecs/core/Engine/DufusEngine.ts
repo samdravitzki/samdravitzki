@@ -180,9 +180,15 @@ class DufusEngine<
     // Log state changes
     Object.keys(this._store).map((name) => {
       const state = this._store[name];
-      state.onChange((to, from) =>
-        console.debug(`(state) ${name} is ${to} (was ${from})`),
-      );
+      state.onChange((to, from) => {
+        try {
+          const jsonTo = JSON.stringify(to);
+          const jsonFrom = JSON.stringify(from);
+          console.debug(`(state) ${name} is ${jsonTo} (was ${jsonFrom})`);
+        } catch (e) {
+          console.debug(`(state) ${name} is ${to} (was ${from})`);
+        }
+      });
     });
 
     // Problem: Run can currently be called many times, resulting in multiple 'init' events

@@ -8,81 +8,17 @@ import Vector from "../ecs/core/Vector/Vector";
 import World from "../ecs/core/World/World";
 import p5Part, { KeypressEvent } from "../ecs/parts/p5/p5-part";
 import { PrimitiveShape } from "../ecs/parts/p5/primitive-renderer/components/Primitive";
-
-type ShiftPosition =
-  | "neutral"
-  | "1st"
-  | "2nd"
-  | "3rd"
-  | "4th"
-  | "5th"
-  | "reverse"
-  | "pass";
-
-type Direction = "up" | "down" | "left" | "right";
-
-type Neighbour = {
-  dir: Direction;
-  node: Node;
-};
-
-class Node {
-  neighbours: Readonly<Neighbour>[] = [];
-
-  constructor(
-    public readonly name: ShiftPosition,
-    public readonly position: Vector,
-  ) {}
-
-  toString() {
-    return this.name;
-  }
-}
-const first = new Node("1st", Vector.create(-30, -50));
-const second = new Node("2nd", Vector.create(-30, 50));
-const passLeft = new Node("pass", Vector.create(-30, 0));
-const third = new Node("3rd", Vector.create(0, -50));
-const fourth = new Node("4th", Vector.create(0, 50));
-const fifth = new Node("5th", Vector.create(30, -50));
-const reverse = new Node("reverse", Vector.create(30, 50));
-const passRight = new Node("pass", Vector.create(30, 0));
-const neutral = new Node("neutral", Vector.create(0, 0));
-
-first.neighbours.push({ dir: "down", node: passLeft });
-second.neighbours.push({ dir: "up", node: passLeft });
-third.neighbours.push({ dir: "down", node: neutral });
-fourth.neighbours.push({ dir: "up", node: neutral });
-fifth.neighbours.push({ dir: "down", node: passRight });
-reverse.neighbours.push({ dir: "up", node: passRight });
-
-passLeft.neighbours.push({ dir: "up", node: first });
-passLeft.neighbours.push({ dir: "down", node: second });
-passLeft.neighbours.push({ dir: "right", node: neutral });
-
-passRight.neighbours.push({ dir: "up", node: fifth });
-passRight.neighbours.push({ dir: "down", node: reverse });
-passRight.neighbours.push({ dir: "left", node: neutral });
-
-neutral.neighbours.push({ dir: "up", node: third });
-neutral.neighbours.push({ dir: "down", node: fourth });
-neutral.neighbours.push({ dir: "left", node: passLeft });
-neutral.neighbours.push({ dir: "right", node: passRight });
-
-const shiftPoints: Node[] = [];
-shiftPoints.push(neutral);
-shiftPoints.push(first);
-shiftPoints.push(passLeft);
-shiftPoints.push(second);
-shiftPoints.push(third);
-shiftPoints.push(fourth);
-shiftPoints.push(fifth);
-shiftPoints.push(passRight);
-shiftPoints.push(reverse);
+import GateNode, {
+  commonGate,
+  shortestPath,
+  Direction,
+  furtherestNodeInDirection,
+} from "./gate";
 
 function setupGate(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-  for (const point of shiftPoints) {
+  for (const point of Object.values(commonGate)) {
     const pos = point.position.times(2).plus(canvasBounds.center.center);
 
     const position: Position = {
@@ -129,7 +65,7 @@ function setupGate(world: World, resources: ResourcePool) {
 function setupGearText(
   world: World,
   resources: ResourcePool,
-  state: { "shift-position": State<Node> },
+  state: { "shift-position": State<GateNode> },
 ) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
@@ -161,6 +97,14 @@ keyToDirectionMap.set("ArrowDown", "down");
 keyToDirectionMap.set("ArrowRight", "right");
 
 /**
+ * Map of keys currently being held down
+ * A
+ */
+type HeldKeys = Record<string, number>;
+
+type KeyHoldReleasedEvent = KeypressEvent & { duration: number };
+
+/**
  * A form of input that mimics the behaviour of a manual cars shifter
  *
  * To not get too sidetracked I want to limit each game/thing to adding a
@@ -172,8 +116,11 @@ export default function shifter(parent?: HTMLElement) {
     .event("setup")
     .event("update")
     .event<"keyPressed", KeypressEvent>("keyPressed")
+    .event<"keyReleased", KeypressEvent>("keyReleased")
+    .event<"keyHoldReleased", KeyHoldReleasedEvent>("keyHoldReleased")
     .event("after-update")
-    .state<"shift-position", Node>("shift-position", neutral)
+    .state<"shift-position", GateNode>("shift-position", commonGate.neutral)
+    .state<"held-keys", HeldKeys>("held-keys", {})
     .build();
 
   const t = engine.trigger;
@@ -185,22 +132,54 @@ export default function shifter(parent?: HTMLElement) {
 
   engine.system(
     "shift-gear",
-    t.on("keyPressed"),
+    t.on("keyHoldReleased"),
     (world, resources, state, emitter, eventPayload) => {
       const dir = keyToDirectionMap.get(eventPayload.key);
       if (!dir) return;
 
-      const currentNode = state["shift-position"].value;
+      const currentShiftPosition = state["shift-position"].value;
 
-      const neighbourInDirection = currentNode.neighbours.find(
+      const neighbourInDirection = currentShiftPosition.neighbours.find(
         (neighbour) => neighbour.dir === dir,
       );
 
       if (neighbourInDirection) {
-        state["shift-position"].setValue(neighbourInDirection.node);
+        const newShiftPosition = neighbourInDirection.node;
+        state["shift-position"].setValue(newShiftPosition);
+
+        const pathHome = shortestPath(
+          currentShiftPosition,
+          commonGate.neutral,
+        );
+
+        console.log(
+          `path home:`,
+          pathHome.map((node) => node.name).join(" -> "),
+        );
+
+        const pathInDir = furtherestNodeInDirection(currentShiftPosition, dir);
+
+        console.log(
+          `path as far as possible in ${dir}:`,
+          pathInDir.map((node) => node.name).join(" -> "),
+        );
       }
     },
   );
+
+  // const HOLD_THRESHOLD = 150;
+
+  // ON HOLD RELEASE: Go as far as possible in held direction
+  // ON TAP RELEASE: Go to home, if starting from home go one step in direction, if this results in 'pass', go back to home
+
+  // if (eventPayload.duration > HOLD_THRESHOLD) {
+  //   // console.log(`${dir} was held for ${eventPayload.duration}`);
+  //   console.log(`path as far as possible in ${dir}`);
+  // } else {
+  //   console.log(`path home`);
+
+  //   console.log(`${dir} was just pressed`);
+  // }
 
   engine.system("move-shifter", t.on("update"), (world, resources, state) => {
     const [leverPosition] = world.query<[Position]>([
@@ -227,6 +206,43 @@ export default function shifter(parent?: HTMLElement) {
       gearText.text = state["shift-position"].value.name;
     }
   });
+
+  engine.system(
+    "key-hold-press-detector",
+    t.on("keyPressed"),
+    (world, resources, state, emitter, eventPayload) => {
+      const heldKeys = state["held-keys"];
+      if (Object.keys(heldKeys.value).includes(eventPayload.key)) {
+        return;
+      }
+
+      heldKeys.setValue({
+        ...heldKeys.value,
+        [eventPayload.key]: Date.now(),
+      });
+    },
+  );
+
+  engine.system(
+    "key-hold-release-detector",
+    t.on("keyReleased"),
+    (world, resources, state, emitter, eventPayload) => {
+      const { [eventPayload.key]: releasedKeyPressTime, ...otherKeys } =
+        state["held-keys"].value;
+
+      const holdDuration = Date.now() - releasedKeyPressTime;
+
+      state["held-keys"].setValue(otherKeys);
+
+      emitter.emit({
+        event: "keyHoldReleased",
+        payload: {
+          ...eventPayload,
+          duration: holdDuration,
+        },
+      });
+    },
+  );
 
   return engine;
 }
