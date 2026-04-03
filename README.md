@@ -15,15 +15,14 @@ Things to do that aren't related to any project in specific. Includes work on th
 ### The site
 
 - [ ] A cool logo
-  - a character as the logo would be cool. would like if it had the simplicity of a web icon
+  - A character logo. Style has the simplicity of a web icon
   - inspo
-    - lots of different designs of icons to take inspo from at - https://www.toools.design/free-open-source-icon-libraries
-    - simple face character like the following could work - https://iconmonstr.com/?s=face, specifically https://iconmonstr.com/smiley-15-svg/
-    - this cat with sunglasses is also pretty cool, I like the roundedness - https://www.streamlinehq.com/icons/flex-remix?search=cat&icon=ico_nIkbkPG7WZL74GtV
-    - like the designs in general of the faces in the flex remix icon library - https://www.streamlinehq.com/icons/flex-remix?search=face
-- [ ] Cool cohesive design
+    - https://www.toools.design/free-open-source-icon-libraries
+    - https://iconmonstr.com/?s=face, specifically https://iconmonstr.com/smiley-15-svg/
+    - https://www.streamlinehq.com/icons/flex-remix?search=cat&icon=ico_nIkbkPG7WZL74GtV
+    - https://www.streamlinehq.com/icons/flex-remix?search=face
+- [ ] Cohesive design
 - [ ] Publish updates to social platforms
-  - Once the site has a cool cohesive design, a cool logo and analytics
 - [ ] A layout that can support more information
   - Each interactable thing should be the first thing someone sees
   - There should be groups of interactable things such as collision system demos
@@ -36,7 +35,6 @@ Things to do that aren't related to any project in specific. Includes work on th
 - [ ] Mobile friendly
 - [ ] Implement more extensible approach to adding new games to the site
 - [ ] Someway for any viewers to give feedback
-- [ ] Ability to visibility of projects within site
 - [x] Analytics
 
 ### Maintenance and maintainability
@@ -44,14 +42,14 @@ Things to do that aren't related to any project in specific. Includes work on th
 All the things that need to be done to support building and maintain these projects
 
 - [ ] Linting
-- [ ] Dependency bot
+- [x] Dependency bot
 - [ ] Publish coverage reports (using codecov?)
 - [x] Unit test runner
 - [x] Formatting
 
 ### Continuous Integration
 
-- [ ] Automate linting in the CI
+- [ ] Automate lint checking in the CI
 - [x] Automate unit tests in the CI
 
 ### Continuous deployment
@@ -64,4 +62,4 @@ All the things that need to be done to support building and maintain these proje
 
 ### Development environment
 
-- [x] Use GitHub codespaces making a portable development environment
+- [x] Use GitHub Codespaces making a portable development environment
