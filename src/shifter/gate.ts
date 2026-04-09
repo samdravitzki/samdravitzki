@@ -25,19 +25,23 @@ class GateNode {
     public readonly position: Vector,
   ) {}
 
+  neighborInDirection(dir: Direction): GateNode | undefined {
+    return this.neighbours.find((neighbour) => neighbour.dir === dir)?.node;
+  }
+
   toString() {
     return this.name;
   }
 }
 
-const first = new GateNode("1st", Vector.create(-30, -50));
-const second = new GateNode("2nd", Vector.create(-30, 50));
-const passLeft = new GateNode("pass", Vector.create(-30, 0));
-const third = new GateNode("3rd", Vector.create(0, -50));
-const fourth = new GateNode("4th", Vector.create(0, 50));
-const fifth = new GateNode("5th", Vector.create(30, -50));
-const reverse = new GateNode("reverse", Vector.create(30, 50));
-const passRight = new GateNode("pass", Vector.create(30, 0));
+const first = new GateNode("1st", Vector.create(-60, -100));
+const second = new GateNode("2nd", Vector.create(-60, 100));
+const passLeft = new GateNode("pass", Vector.create(-60, 0));
+const third = new GateNode("3rd", Vector.create(0, -100));
+const fourth = new GateNode("4th", Vector.create(0, 100));
+const fifth = new GateNode("5th", Vector.create(60, -100));
+const reverse = new GateNode("reverse", Vector.create(60, 100));
+const passRight = new GateNode("pass", Vector.create(60, 0));
 const neutral = new GateNode("neutral", Vector.create(0, 0));
 
 first.neighbours.push({ dir: "down", node: passLeft });
@@ -70,9 +74,16 @@ const commonGate = {
   fifth,
   passRight,
   reverse,
-};
+} as const;
 
-function furtherestNodeInDirection(from: GateNode, dir: Direction) {
+/**
+ * Calcuate the path of nodes in the given direction until no more nodes
+ * are found in that direction. The returned path includes the starting node.
+ * @param from start node
+ * @param dir direction to traverse
+ * @returns list of nodes in the given direction, starting with the provided node
+ */
+function nodesInDirection(from: GateNode, dir: Direction) {
   let current = from;
   const path = [current];
   while (current.neighbours.some((neighbour) => neighbour.dir === dir)) {
@@ -121,5 +132,5 @@ function shortestPath(from: GateNode, to: GateNode) {
 }
 
 export default GateNode;
-export { commonGate, shortestPath, furtherestNodeInDirection };
+export { commonGate, shortestPath, nodesInDirection };
 export type { GatePosition as GatePosition, Direction, Neighbour };

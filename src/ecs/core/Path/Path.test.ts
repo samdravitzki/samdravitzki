@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import Path from "./Path";
-import Vector from "../ecs/core/Vector/Vector";
+import Vector from "../Vector/Vector";
 
 describe("edges getter", () => {
   test("returns the edges of the path", () => {

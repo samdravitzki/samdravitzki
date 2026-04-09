@@ -29,7 +29,7 @@ type P5Events = {
 function createP5System(
   size: [number, number],
   parent?: HTMLElement,
-  background: [number, number, number] = [240, 90, 60],
+  background: [number, number, number] | string = [240, 90, 60],
 ) {
   return function p5System(
     world: World,
@@ -54,7 +54,11 @@ function createP5System(
       };
 
       p.draw = () => {
-        p.background(...background);
+        p.background(
+          Array.isArray(background)
+            ? p.color(...background)
+            : p.color(background),
+        );
         resources.set("p5", p);
         resources.set("mouse-position", {
           x: p.mouseX,
@@ -73,6 +77,9 @@ function createP5System(
         };
 
         eventEmitter.emit({ event: "keyPressed", payload });
+
+        // Prevent default browser behavior for certain keys (like arrow keys, space, etc.)
+        return false;
       };
 
       p.keyReleased = (event) => {
@@ -96,7 +103,7 @@ function createP5System(
 function p5Part(
   size: [number, number],
   parent?: HTMLElement,
-  background: [number, number, number] = [240, 90, 60],
+  background: [number, number, number] | string = [240, 90, 60],
 ) {
   const part: Part<P5Events> = ({ registerSystem, triggerBuilder }) => {
     registerSystem(

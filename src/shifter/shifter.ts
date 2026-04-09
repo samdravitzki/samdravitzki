@@ -12,15 +12,15 @@ import GateNode, {
   commonGate,
   shortestPath,
   Direction,
-  furtherestNodeInDirection,
+  nodesInDirection,
 } from "./gate";
-import Path from "./Path";
+import Path, { drawDebugPath } from "../ecs/core/Path/Path";
 
 function setupGate(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
   for (const point of Object.values(commonGate)) {
-    const pos = point.position.times(2).plus(canvasBounds.center.center);
+    const pos = point.position.plus(canvasBounds.center.center);
 
     const position: Position = {
       name: "position",
@@ -63,30 +63,6 @@ function setupGate(world: World, resources: ResourcePool) {
   );
 }
 
-function setupGearText(
-  world: World,
-  resources: ResourcePool,
-  state: { "shift-position": State<GateNode> },
-) {
-  const canvasBounds = resources.get<Bounds>("canvas-bounds");
-
-  const text: PrimitiveShape = {
-    name: "primitive",
-    fill: [240, 60, 100, 255],
-    type: "text",
-    text: state["shift-position"].value.name,
-    align: "center",
-    size: 20,
-  };
-
-  const position: Position = {
-    name: "position",
-    position: canvasBounds.center.top.plus(Vector.create(0, 50)),
-  };
-
-  world.addBundle(createBundle(["gear-text", text, position]));
-}
-
 const keyToDirectionMap = new Map<string, Direction>();
 keyToDirectionMap.set("w", "up");
 keyToDirectionMap.set("a", "left");
@@ -97,63 +73,7 @@ keyToDirectionMap.set("ArrowLeft", "left");
 keyToDirectionMap.set("ArrowDown", "down");
 keyToDirectionMap.set("ArrowRight", "right");
 
-const HOLD_THRESHOLD = 150;
-
-function shiftGearSystem(
-  world: World,
-  resources: ResourcePool,
-  state: { "shift-position": State<GateNode> },
-  emitter: unknown,
-  eventPayload: KeyHoldReleasedEvent,
-) {
-  const dir = keyToDirectionMap.get(eventPayload.key);
-  if (!dir) return;
-
-  const currentShiftPosition = state["shift-position"].value;
-
-  const neighbourInDirection = currentShiftPosition.neighbours.find(
-    (neighbour) => neighbour.dir === dir,
-  );
-
-  if (!neighbourInDirection) {
-    return;
-  }
-
-  if (
-    currentShiftPosition.name === "neutral" ||
-    currentShiftPosition.name === "pass"
-  ) {
-    state["shift-position"].setValue(neighbourInDirection.node);
-    return;
-  }
-
-  if (eventPayload.duration <= HOLD_THRESHOLD) {
-    const nodes = shortestPath(currentShiftPosition, commonGate.neutral);
-    const path = new Path(nodes.map((node) => node.position));
-
-    const newShiftPosition = nodes[nodes.length - 1];
-    state["shift-position"].setValue(newShiftPosition);
-  } else {
-    const nodes = furtherestNodeInDirection(currentShiftPosition, dir);
-    const newShiftPosition = nodes[nodes.length - 1];
-    state["shift-position"].setValue(newShiftPosition);
-  }
-}
-
-function currentGearDisplay(
-  world: World,
-  resources: ResourcePool,
-  state: { "shift-position": State<GateNode> },
-) {
-  const [gearText] = world.query<[PrimitiveShape]>([
-    "primitive",
-    "gear-text",
-  ])[0];
-
-  if (gearText.type === "text") {
-    gearText.text = state["shift-position"].value.name;
-  }
-}
+const HOLD_THRESHOLD = 120;
 
 /**
  * Map of keys currently being held down
@@ -161,7 +81,17 @@ function currentGearDisplay(
  */
 type HeldKeys = Record<string, number>;
 
+/**
+ * Key released event that also includes the duration the key was held for.
+ */
 type KeyHoldReleasedEvent = KeypressEvent & { duration: number };
+
+/**
+ * Event emitted when a key has been held down for longer than the HOLD_THRESHOLD
+ */
+type KeyHeldOverThresholdEvent = {
+  key: string;
+};
 
 /**
  * A form of input that mimics the behaviour of a manual cars shifter
@@ -177,6 +107,10 @@ export default function shifter(parent?: HTMLElement) {
     .event<"keyPressed", KeypressEvent>("keyPressed")
     .event<"keyReleased", KeypressEvent>("keyReleased")
     .event<"keyHoldReleased", KeyHoldReleasedEvent>("keyHoldReleased")
+    .event<
+      "keyHeldOverThreshold",
+      KeyHeldOverThresholdEvent
+    >("keyHeldOverThreshold")
     .event("after-update")
     .state<"shift-position", GateNode>("shift-position", commonGate.neutral)
     .state<"held-keys", HeldKeys>("held-keys", {})
@@ -187,9 +121,68 @@ export default function shifter(parent?: HTMLElement) {
   engine.part(p5Part([500, 500], parent, [0, 0, 14]));
 
   engine.system("setupGate", t.on("setup"), setupGate);
-  engine.system("setupGearText", t.on("setup"), setupGearText);
 
-  engine.system("shift-gear", t.on("keyHoldReleased"), shiftGearSystem);
+  engine.system(
+    "shift-gear",
+    t.on("keyHoldReleased"),
+    (world, resources, state, emitter, eventPayload) => {
+      const dir = keyToDirectionMap.get(eventPayload.key);
+      if (!dir) return;
+
+      const currentShiftPosition = state["shift-position"].value;
+
+      const neighbourInDirection =
+        currentShiftPosition.neighborInDirection(dir);
+
+      if (!neighbourInDirection) {
+        return;
+      }
+
+      state["shift-position"].setValue(neighbourInDirection);
+
+      // Shift home if tapped
+      // if (eventPayload.duration <= HOLD_THRESHOLD) {
+      //   if (
+      //     currentShiftPosition.name === "neutral" ||
+      //     currentShiftPosition.name === "pass"
+      //   ) {
+      //     state["shift-position"].setValue(neighbourInDirection);
+      //     return;
+      //   }
+
+      //   const nodes = shortestPath(currentShiftPosition, commonGate.neutral);
+      //   const path = new Path(nodes.map((node) => node.position));
+
+      //   const newShiftPosition = nodes[nodes.length - 1];
+      //   state["shift-position"].setValue(newShiftPosition);
+      // }
+    },
+  );
+
+  engine.system(
+    "move-shifter-in-dir",
+    t.on("keyHeldOverThreshold"),
+    (world, resources, state, emitter, eventPayload) => {
+      const dir = keyToDirectionMap.get(eventPayload.key);
+      if (!dir) return;
+
+      console.log("Held over threshold", eventPayload.key);
+
+      const currentShiftPosition = state["shift-position"].value;
+
+      const neighbourInDirection =
+        currentShiftPosition.neighborInDirection(dir);
+
+      if (!neighbourInDirection) {
+        return;
+      }
+
+      const nodes = nodesInDirection(currentShiftPosition, dir);
+      const furtherestNode = nodes[nodes.length - 1];
+
+      state["shift-position"].setValue(furtherestNode);
+    },
+  );
 
   engine.system("move-shifter", t.on("update"), (world, resources, state) => {
     const [leverPosition] = world.query<[Position]>([
@@ -199,101 +192,35 @@ export default function shifter(parent?: HTMLElement) {
 
     const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-    const newLeverPos = state["shift-position"].value.position
-      .times(2)
-      .plus(canvasBounds.center.center);
+    const newLeverPos = state["shift-position"].value.position.plus(
+      canvasBounds.center.center,
+    );
 
     leverPosition.position = newLeverPos;
   });
 
-  engine.system("display-gear", t.on("update"), currentGearDisplay);
-
   engine.system(
-    "clear-path-visualisation",
-    t.on("keyHoldReleased"),
-    (world) => {
-      for (const [entityId] of world.query<[string, string]>([
-        "entity-id",
-        "path-vis",
-      ])) {
-        world.removeEntity(entityId);
-      }
-    },
-  );
+    "hold-threshold-detector",
+    t.on("update"),
+    (world, resources, state, emitter) => {
+      const heldKeys = state["held-keys"].value;
 
-  engine.system(
-    "visualise-path-home",
-    t.on("keyPressed"),
-    (world, resources, state, emitter, eventPayload) => {
-      const canvasBounds = resources.get<Bounds>("canvas-bounds");
-      const currentShiftPosition = state["shift-position"].value;
+      for (const [key, pressTime] of Object.entries(heldKeys)) {
+        const holdDuration = Date.now() - pressTime;
 
-      const pathHome = new Path(
-        shortestPath(currentShiftPosition, commonGate.neutral).map(
-          (node) => node.position,
-        ),
-      );
-
-      for (const edge of pathHome.edges()) {
-        world.addBundle(
-          createBundle([
-            "path-vis",
-            {
-              name: "position",
-              position: canvasBounds.center.center,
+        if (holdDuration > HOLD_THRESHOLD) {
+          emitter.emit({
+            event: "keyHeldOverThreshold",
+            payload: {
+              key,
             },
-            {
-              name: "primitive",
-              type: "line",
-              start: edge.start.times(2),
-              end: edge.end.times(2),
-              stroke: [125, 99, 99],
-              strokeWeight: 2,
-              fill: false,
-            } satisfies PrimitiveShape,
-          ]),
-        );
+          });
+
+          delete heldKeys[key];
+        }
       }
-    },
-  );
 
-  engine.system(
-    "visualise-futherest-path-in-dir",
-    t.on("keyPressed"),
-    (world, resources, state, emitter, eventPayload) => {
-      const canvasBounds = resources.get<Bounds>("canvas-bounds");
-      const currentShiftPosition = state["shift-position"].value;
-
-      const dir = keyToDirectionMap.get(eventPayload.key);
-      if (!dir) return;
-
-      const pathInDir = new Path(
-        furtherestNodeInDirection(currentShiftPosition, dir).map(
-          (node) => node.position,
-        ),
-      );
-
-      for (const edge of pathInDir.edges()) {
-        world.addBundle(
-          createBundle([
-            "path-vis",
-            {
-              name: "position",
-              position: canvasBounds.center.center,
-            },
-            {
-              name: "primitive",
-              type: "line",
-              start: edge.start.times(2),
-              end: edge.end.times(2),
-              stroke: [294, 99, 99],
-              strokeWeight: 2,
-              dash: [5, 10],
-              fill: false,
-            } satisfies PrimitiveShape,
-          ]),
-        );
-      }
+      state["held-keys"].setValue(heldKeys);
     },
   );
 
@@ -331,6 +258,62 @@ export default function shifter(parent?: HTMLElement) {
           duration: holdDuration,
         },
       });
+    },
+  );
+
+  engine.system(
+    "clear-path-visualisation",
+    t.on("keyHoldReleased"),
+    (world) => {
+      for (const [entityId] of world.query<[string, string]>([
+        "entity-id",
+        "path-vis",
+      ])) {
+        world.removeEntity(entityId);
+      }
+    },
+  );
+
+  engine.system(
+    "visualise-path-home",
+    t.on("keyPressed"),
+    (world, resources, state, emitter, eventPayload) => {
+      const canvasBounds = resources.get<Bounds>("canvas-bounds");
+      const currentShiftPosition = state["shift-position"].value;
+
+      const pathHome = new Path(
+        shortestPath(currentShiftPosition, commonGate.neutral).map(
+          (node) => node.position,
+        ),
+      );
+
+      drawDebugPath(world, canvasBounds.center.center, pathHome, [125, 99, 99]);
+    },
+  );
+
+  engine.system(
+    "visualise-futherest-path-in-dir",
+    t.on("keyPressed"),
+    (world, resources, state, emitter, eventPayload) => {
+      const canvasBounds = resources.get<Bounds>("canvas-bounds");
+      const currentShiftPosition = state["shift-position"].value;
+
+      const dir = keyToDirectionMap.get(eventPayload.key);
+      if (!dir) return;
+
+      const pathInDir = new Path(
+        nodesInDirection(currentShiftPosition, dir).map(
+          (node) => node.position,
+        ),
+      );
+
+      drawDebugPath(
+        world,
+        canvasBounds.center.center,
+        pathInDir,
+        [294, 99, 99],
+        [5, 10],
+      );
     },
   );
 

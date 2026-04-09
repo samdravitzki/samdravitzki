@@ -1,11 +1,13 @@
 import Vector from "../../../../core/Vector/Vector";
 import Component from "../../../../core/Component/Component";
 
+export type Color = number[] | string;
+
 export type PrimitiveShape = Component & {
   name: "primitive";
-  stroke?: number[];
+  stroke?: Color;
   strokeWeight?: number;
-  fill: false | number[]; // Fill doesn't make sense for line
+  fill: false | Color; // Fill doesn't make sense for line
   dash?: number[];
   dashOffset?: number;
 } & (

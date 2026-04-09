@@ -1,7 +1,7 @@
 import p5 from "p5";
 import World from "../../../core/World/World";
 import { Position } from "../../../components/Position";
-import { PrimitiveShape } from "./components/Primitive";
+import { PrimitiveShape, Color } from "./components/Primitive";
 import { ResourcePool } from "../../../core/Engine/ResourcePool";
 
 function primitiveRendererSystem(world: World, resources: ResourcePool) {
@@ -10,6 +10,13 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
     "primitive",
   ])) {
     const p = resources.get<p5>("p5");
+
+    function toP5Color(color: string | number[]) {
+      if (typeof color === "string") {
+        return p.color(color);
+      }
+      return p.color(color);
+    }
 
     if (!primitive.strokeWeight) {
       p.strokeWeight(0);
@@ -20,13 +27,13 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
     if (!primitive.stroke) {
       p.noStroke();
     } else {
-      p.stroke(primitive.stroke);
+      p.stroke(toP5Color(primitive.stroke));
     }
 
     if (!primitive.fill) {
       p.noFill();
     } else {
-      p.fill(primitive.fill);
+      p.fill(toP5Color(primitive.fill));
     }
 
     if (primitive.type === "circle") {

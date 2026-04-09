@@ -218,7 +218,7 @@ function textFadeSystem(world: World, resources: ResourcePool) {
   >(["primitive", "entity-id", "faded"])) {
     const p = resources.get<p5>("p5");
     if (primitive.fill) {
-      const [r, g, b, alpha] = primitive.fill;
+      const [r, g, b, alpha] = primitive.fill as number[];
 
       const fadeSpeed = 0.4;
       const newAlpha = alpha - p.deltaTime * fadeSpeed;
