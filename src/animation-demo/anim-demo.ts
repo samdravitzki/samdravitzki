@@ -20,20 +20,58 @@ const palette = {
   900: "#FAC4B8",
 };
 
+const startTime = Date.now();
+
+// https://easings.net/#easeInOutCubic
+function easeInOutCubic(x: number): number {
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
+// https://easings.net/#easeInOutSine
+function easeInOutSine(x: number): number {
+  return -(Math.cos(Math.PI * x) - 1) / 2;
+}
+
+// https://easings.net/#easeInOutCirc
+function easeInOutCirc(x: number): number {
+  return x < 0.5
+    ? (1 - Math.sqrt(1 - Math.pow(2 * x, 2))) / 2
+    : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2;
+}
+
+const animation = () => {
+  const start = Vector.create(-300, 100);
+  const end = Vector.create(300, -100);
+
+  function seek(t: number) {
+    // ease out
+    const easedT = easeInOutCubic(t);
+
+    return Vector.lerp(start, end, easedT);
+  }
+
+  return {
+    start,
+    end,
+    speed: 0.0003,
+    seek,
+  };
+};
+
+const animationProperties = animation();
+
 export default function animationDemo(parent?: HTMLElement) {
   const engine = EngineBuilder.create()
     .event("setup")
     .event("update")
-    .event<"keyPressed", KeypressEvent>("keyPressed")
-    .event<"keyReleased", KeypressEvent>("keyReleased")
     .event("after-update")
     .build();
 
   engine.part(p5Part([700, 400], parent, palette[200]));
 
-  const t = engine.trigger;
+  const trigger = engine.trigger;
 
-  engine.system("setup-line", t.on("setup"), (world, resources) => {
+  engine.system("setup-line", trigger.on("setup"), (world, resources) => {
     const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
     world.addBundle(
@@ -45,8 +83,8 @@ export default function animationDemo(parent?: HTMLElement) {
         {
           name: "primitive",
           type: "line",
-          start: Vector.create(-300, 0),
-          end: Vector.create(300, 0),
+          start: animationProperties.start,
+          end: animationProperties.end,
           stroke: palette[300],
           strokeWeight: 2,
           fill: false,
@@ -55,41 +93,46 @@ export default function animationDemo(parent?: HTMLElement) {
     );
   });
 
-  engine.system("setup-animation-target", t.on("setup"), (world, resources) => {
-    const canvasBounds = resources.get<Bounds>("canvas-bounds");
+  engine.system(
+    "setup-animation-target",
+    trigger.on("setup"),
+    (world, resources) => {
+      const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-    world.addBundle(
-      createBundle([
-        "animation-target",
-        {
-          name: "position",
-          position: canvasBounds.center.center.plus(
-            Vector.create(-300 - 10, 0),
-          ),
-        },
-        {
-          name: "primitive",
-          type: "circle",
-          radius: 20,
-          fill: palette[600],
-          stroke: palette[600],
-          strokeWeight: 2,
-        } satisfies PrimitiveShape,
-      ]),
-    );
-  });
+      world.addBundle(
+        createBundle([
+          "animation-target",
+          {
+            name: "position",
+            position: animationProperties.start.plus(
+              canvasBounds.center.center,
+            ),
+          },
+          {
+            name: "primitive",
+            type: "circle",
+            radius: 20,
+            fill: palette[600],
+            strokeWeight: 3,
+          } satisfies PrimitiveShape,
+        ]),
+      );
+    },
+  );
 
-  engine.system("animate-target", t.on("update"), (world, resources) => {
+  engine.system("animate", trigger.on("update"), (world, resources) => {
     const canvasBounds = resources.get<Bounds>("canvas-bounds");
-    const p = resources.get<p5>("p5");
     const targetQuery = world.query<[Position]>([
       "position",
       "animation-target",
     ]);
 
     for (const [position] of targetQuery) {
-      const newX = 5 * p.sin(p.millis() / 1000);
-      position.position = position.position.plus(Vector.create(newX, 0));
+      const speed = animationProperties.speed;
+      const t = ((Date.now() - startTime) * speed) % 1; // use Date.now() as incrementing value to se=ek animation and normalize a value between 0 and 1
+      const newPos = animationProperties.seek(t);
+
+      position.position = newPos.plus(canvasBounds.center.center);
     }
   });
 

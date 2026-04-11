@@ -73,6 +73,17 @@ export default class Vector {
     return this.minus(normal.times(this.dot(normal) * 2));
   }
 
+  /**
+   * Return a new vector that is a linear interpolation between two vectors
+   * @param start The starting vector
+   * @param end The ending vector
+   * @param t The interpolation factor (0 to 1)
+   * @returns The interpolated vector
+   */
+  static lerp(start: Vector, end: Vector, t: number): Vector {
+    return start.plus(end.minus(start).times(t));
+  }
+
   toString() {
     return `(${this.x}, ${this.y})`;
   }
