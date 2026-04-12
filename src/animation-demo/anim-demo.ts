@@ -20,8 +20,6 @@ const palette = {
   900: "#FAC4B8",
 };
 
-const startTime = Date.now();
-
 // https://easings.net/#easeInOutCubic
 function easeInOutCubic(x: number): number {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
@@ -39,26 +37,91 @@ function easeInOutCirc(x: number): number {
     : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2;
 }
 
-const animation = () => {
-  const start = Vector.create(-300, 100);
-  const end = Vector.create(300, -100);
+// https://easings.net/#easeOutElastic
+function easeOutElastic(x: number): number {
+  const c4 = (1 * Math.PI) / 5;
+
+  return x === 0
+    ? 0
+    : x === 1
+      ? 1
+      : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * c4) + 1;
+}
+
+// https://easings.net/#easeOutBounce
+function easeOutBounce(x: number): number {
+  const n1 = 7.5625;
+  const d1 = 2.75;
+
+  if (x < 1 / d1) {
+    return n1 * x * x;
+  } else if (x < 2 / d1) {
+    return n1 * (x -= 1.5 / d1) * x + 0.75;
+  } else if (x < 2.5 / d1) {
+    return n1 * (x -= 2.25 / d1) * x + 0.9375;
+  } else {
+    return n1 * (x -= 2.625 / d1) * x + 0.984375;
+  }
+}
+
+// Next step: create second animation that triggers on click of a button
+const animation = ({
+  from,
+  to,
+  target,
+  duration,
+  loop = true,
+}: {
+  from: Vector;
+  to: Vector;
+  target: string;
+  duration: number;
+  loop?: boolean;
+}) => {
+  const startTime = Date.now();
 
   function seek(t: number) {
-    // ease out
     const easedT = easeInOutCubic(t);
+    return Vector.lerp(from, to, easedT);
+  }
 
-    return Vector.lerp(start, end, easedT);
+  function tick() {
+    const elapsed = Date.now() - startTime;
+    let t = 0;
+    if (loop) {
+      t = (elapsed % duration) / duration; // Normalize elapsed time to a value between 0 and 1
+    } else {
+      t = Math.min(elapsed / duration, 1); // Clamp to 1 if elapsed time exceeds duration
+    }
+    return seek(t);
   }
 
   return {
-    start,
-    end,
-    speed: 0.0003,
+    from,
+    to,
+    target,
     seek,
+    tick,
   };
 };
 
-const animationProperties = animation();
+const basicLoopAnimation = animation({
+  from: Vector.create(-300, -100),
+  to: Vector.create(300, -100),
+  target: `animation-target-${1}`,
+  duration: 2000,
+  loop: true,
+});
+
+const notLoopingAnimation = animation({
+  from: Vector.create(-300, 0),
+  to: Vector.create(300, 0),
+  target: `animation-target-${2}`,
+  duration: 2000,
+  loop: false,
+});
+
+const animations = [basicLoopAnimation, notLoopingAnimation];
 
 export default function animationDemo(parent?: HTMLElement) {
   const engine = EngineBuilder.create()
@@ -71,27 +134,47 @@ export default function animationDemo(parent?: HTMLElement) {
 
   const trigger = engine.trigger;
 
-  engine.system("setup-line", trigger.on("setup"), (world, resources) => {
+  engine.system("animate", trigger.on("update"), (world, resources) => {
     const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-    world.addBundle(
-      createBundle([
-        {
-          name: "position",
-          position: canvasBounds.center.center,
-        },
-        {
-          name: "primitive",
-          type: "line",
-          start: animationProperties.start,
-          end: animationProperties.end,
-          stroke: palette[300],
-          strokeWeight: 2,
-          fill: false,
-        } satisfies PrimitiveShape,
-      ]),
-    );
+    for (const animation of animations) {
+      const [position] = world.query<[Position]>([
+        "position",
+        animation.target,
+      ])[0];
+
+      const newPos = animation.tick();
+      position.position = newPos.plus(canvasBounds.center.center);
+    }
   });
+
+  engine.system(
+    "setup-animation-path-lines",
+    trigger.on("setup"),
+    (world, resources) => {
+      const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+      for (const animation of animations) {
+        world.addBundle(
+          createBundle([
+            {
+              name: "position",
+              position: canvasBounds.center.center,
+            },
+            {
+              name: "primitive",
+              type: "line",
+              start: animation.from,
+              end: animation.to,
+              stroke: palette[300],
+              strokeWeight: 2,
+              fill: false,
+            } satisfies PrimitiveShape,
+          ]),
+        );
+      }
+    },
+  );
 
   engine.system(
     "setup-animation-target",
@@ -99,42 +182,25 @@ export default function animationDemo(parent?: HTMLElement) {
     (world, resources) => {
       const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-      world.addBundle(
-        createBundle([
-          "animation-target",
-          {
-            name: "position",
-            position: animationProperties.start.plus(
-              canvasBounds.center.center,
-            ),
-          },
-          {
-            name: "primitive",
-            type: "circle",
-            radius: 20,
-            fill: palette[600],
-            strokeWeight: 3,
-          } satisfies PrimitiveShape,
-        ]),
-      );
+      animations.forEach((animation, i) => {
+        world.addBundle(
+          createBundle([
+            `animation-target-${i + 1}`,
+            {
+              name: "position",
+              position: animation.from.plus(canvasBounds.center.center),
+            },
+            {
+              name: "primitive",
+              type: "circle",
+              radius: 10,
+              fill: palette[600],
+            } satisfies PrimitiveShape,
+          ]),
+        );
+      });
     },
   );
-
-  engine.system("animate", trigger.on("update"), (world, resources) => {
-    const canvasBounds = resources.get<Bounds>("canvas-bounds");
-    const targetQuery = world.query<[Position]>([
-      "position",
-      "animation-target",
-    ]);
-
-    for (const [position] of targetQuery) {
-      const speed = animationProperties.speed;
-      const t = ((Date.now() - startTime) * speed) % 1; // use Date.now() as incrementing value to se=ek animation and normalize a value between 0 and 1
-      const newPos = animationProperties.seek(t);
-
-      position.position = newPos.plus(canvasBounds.center.center);
-    }
-  });
 
   return engine;
 }
