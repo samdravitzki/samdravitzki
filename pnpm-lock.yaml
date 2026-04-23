@@ -12,8 +12,8 @@ importers:
         specifier: ^2.0.28
         version: 2.0.28
       p5:
-        specifier: ^2.1.2
-        version: 2.2.2
+        specifier: ^2.2.3
+        version: 2.2.3
       tone:
         specifier: ^15.1.22
         version: 15.1.22
@@ -765,8 +765,8 @@ packages:
   omggif@1.0.10:
     resolution: {integrity: sha512-LMJTtvgc/nugXj0Vcrrs68Mn2D1r0zf630VNtqtpI1FEO7e+O9FP4gqs9AcnBaSEeoHIPm28u6qgPR0oyEpGSw==}
 
-  p5@2.2.2:
-    resolution: {integrity: sha512-zJ3NJDtvZ8rsrVik8LcMaRurbE70Dqjy4Dku6/7lOz8jMnbkBVVyimknElzRwxG/X+sqHtkQKzZulNcZtRmy0w==}
+  p5@2.2.3:
+    resolution: {integrity: sha512-jz9uy0k3Fcj9vKSOafQlIrpaPZZjO4rAEBZF6dGkbokisshP0M3aFm4qtLHYCoEW1XJSkFaVaOMILCQAQxUHHA==}
 
   pako@2.1.0:
     resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
@@ -1668,7 +1668,7 @@ snapshots:
 
   omggif@1.0.10: {}
 
-  p5@2.2.2:
+  p5@2.2.3:
     dependencies:
       '@davepagurek/bezier-path': 0.0.7
       '@japont/unicode-range': 1.0.0
