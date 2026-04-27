@@ -37,7 +37,7 @@ export default function animationDemo(parent?: HTMLElement) {
 
   const trigger = engine.trigger;
 
-  engine.system("setup-animations", trigger.on("setup"), (world, resources) => {
+  engine.system("setup-animations", trigger.on("setup"), (world) => {
     const basicLoopAnimation = createAnimation({
       from: Vector.create(-300, -100),
       to: Vector.create(300, -100),
@@ -144,16 +144,6 @@ export default function animationDemo(parent?: HTMLElement) {
       });
     });
 
-    // const resetButton = p.createButton("reset");
-
-    // resetButton.mousePressed(() => {
-    //   world.query<[Animation]>(["animation"]).forEach(([animation]) => {
-    //     animation.startTime = Date.now();
-    //     animation.t = 0;
-    //   });
-    // });
-
-    // resetButton.parent(uiContainer);
     playButton.parent(uiContainer);
   });
 

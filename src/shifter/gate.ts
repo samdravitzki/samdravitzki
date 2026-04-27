@@ -133,4 +133,4 @@ function shortestPath(from: GateNode, to: GateNode) {
 
 export default GateNode;
 export { commonGate, shortestPath, nodesInDirection };
-export type { GatePosition as GatePosition, Direction, Neighbour };
+export type { GatePosition, Direction, Neighbour };

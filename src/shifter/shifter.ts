@@ -3,11 +3,10 @@ import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
-import State from "../ecs/core/State/State";
-import Vector from "../ecs/core/Vector/Vector";
 import World from "../ecs/core/World/World";
 import p5Part, { KeypressEvent } from "../ecs/parts/p5/p5-part";
 import { PrimitiveShape } from "../ecs/parts/p5/primitive-renderer/components/Primitive";
+import gearText from "./gear-text";
 import GateNode, {
   commonGate,
   shortestPath,
@@ -15,9 +14,40 @@ import GateNode, {
   nodesInDirection,
 } from "./gate";
 import Path, { drawDebugPath } from "../ecs/core/Path/Path";
+import animation from "../ecs/parts/animation/animation";
+import Vector from "../ecs/core/Vector/Vector";
+import {
+  Animation,
+  createAnimation,
+} from "../ecs/parts/animation/components/Animation";
+import { EntityId } from "../ecs/core/Entity/Entity";
 
 function setupGate(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+  // Draw edges
+  for (const node of Object.values(commonGate)) {
+    for (const neighbour of node.neighbours) {
+      const midPoint = node.position.plus(neighbour.node.position).times(0.5);
+
+      const position: Position = {
+        name: "position",
+        position: midPoint.plus(canvasBounds.center.center),
+      };
+
+      const edge: PrimitiveShape = {
+        name: "primitive",
+        stroke: [0, 0, 25],
+        fill: [0, 0, 25],
+        type: "line",
+        strokeWeight: 2,
+        start: node.position.minus(midPoint),
+        end: neighbour.node.position.minus(midPoint),
+      };
+
+      world.addBundle(createBundle([edge, position]));
+    }
+  }
 
   for (const point of Object.values(commonGate)) {
     const pos = point.position.plus(canvasBounds.center.center);
@@ -61,6 +91,17 @@ function setupGate(world: World, resources: ResourcePool) {
       },
     ]),
   );
+
+  // Animation - change this so that the animation is added when button is pressed then removed when animation completes
+  const shifterAnimation = createAnimation({
+    from: Vector.create(0, 0),
+    to: Vector.create(0, 0),
+    target: "shift-lever",
+    duration: 100,
+    loop: false,
+  });
+
+  world.addBundle(createBundle(["shift-lever-animation", shifterAnimation]));
 }
 
 const keyToDirectionMap = new Map<string, Direction>();
@@ -119,12 +160,28 @@ export default function shifter(parent?: HTMLElement) {
   const t = engine.trigger;
 
   engine.part(p5Part([500, 500], parent, [0, 0, 14]));
+  engine.part(gearText());
+  engine.part(animation());
 
   engine.system("setupGate", t.on("setup"), setupGate);
 
+  engine.system("animate-shifter", t.on("update"), (world, resources) => {
+    const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+    const [, animation] = world.query<[EntityId, Animation]>([
+      "shift-lever-animation",
+      "animation",
+    ])[0];
+
+    const [position] = world.query<[Position]>(["position", "shift-lever"])[0];
+
+    const newPos = Vector.lerp(animation.from, animation.to, animation.t);
+    position.position = newPos.plus(canvasBounds.center.center);
+  });
+
   engine.system(
     "shift-gear",
-    t.on("keyHoldReleased"),
+    t.on("keyPressed"),
     (world, resources, state, emitter, eventPayload) => {
       const dir = keyToDirectionMap.get(eventPayload.key);
       if (!dir) return;
@@ -140,182 +197,176 @@ export default function shifter(parent?: HTMLElement) {
 
       state["shift-position"].setValue(neighbourInDirection);
 
-      // Shift home if tapped
-      // if (eventPayload.duration <= HOLD_THRESHOLD) {
-      //   if (
-      //     currentShiftPosition.name === "neutral" ||
-      //     currentShiftPosition.name === "pass"
-      //   ) {
-      //     state["shift-position"].setValue(neighbourInDirection);
-      //     return;
-      //   }
+      const [shifterAnimation] = world.query<[Animation, EntityId]>([
+        "animation",
+        "shift-lever-animation",
+      ])[0];
 
-      //   const nodes = shortestPath(currentShiftPosition, commonGate.neutral);
-      //   const path = new Path(nodes.map((node) => node.position));
-
-      //   const newShiftPosition = nodes[nodes.length - 1];
-      //   state["shift-position"].setValue(newShiftPosition);
-      // }
-    },
-  );
-
-  engine.system(
-    "move-shifter-in-dir",
-    t.on("keyHeldOverThreshold"),
-    (world, resources, state, emitter, eventPayload) => {
-      const dir = keyToDirectionMap.get(eventPayload.key);
-      if (!dir) return;
-
-      console.log("Held over threshold", eventPayload.key);
-
-      const currentShiftPosition = state["shift-position"].value;
-
-      const neighbourInDirection =
-        currentShiftPosition.neighborInDirection(dir);
-
-      if (!neighbourInDirection) {
-        return;
-      }
-
-      const nodes = nodesInDirection(currentShiftPosition, dir);
-      const furtherestNode = nodes[nodes.length - 1];
-
-      state["shift-position"].setValue(furtherestNode);
-    },
-  );
-
-  engine.system("move-shifter", t.on("update"), (world, resources, state) => {
-    const [leverPosition] = world.query<[Position]>([
-      "position",
-      "shift-lever",
-    ])[0];
-
-    const canvasBounds = resources.get<Bounds>("canvas-bounds");
-
-    const newLeverPos = state["shift-position"].value.position.plus(
-      canvasBounds.center.center,
-    );
-
-    leverPosition.position = newLeverPos;
-  });
-
-  engine.system(
-    "hold-threshold-detector",
-    t.on("update"),
-    (world, resources, state, emitter) => {
-      const heldKeys = state["held-keys"].value;
-
-      for (const [key, pressTime] of Object.entries(heldKeys)) {
-        const holdDuration = Date.now() - pressTime;
-
-        if (holdDuration > HOLD_THRESHOLD) {
-          emitter.emit({
-            event: "keyHeldOverThreshold",
-            payload: {
-              key,
-            },
-          });
-
-          delete heldKeys[key];
-        }
-      }
-
-      state["held-keys"].setValue(heldKeys);
-    },
-  );
-
-  engine.system(
-    "key-hold-press-detector",
-    t.on("keyPressed"),
-    (world, resources, state, emitter, eventPayload) => {
-      const heldKeys = state["held-keys"];
-      if (Object.keys(heldKeys.value).includes(eventPayload.key)) {
-        return;
-      }
-
-      heldKeys.setValue({
-        ...heldKeys.value,
-        [eventPayload.key]: Date.now(),
-      });
-    },
-  );
-
-  engine.system(
-    "key-hold-release-detector",
-    t.on("keyReleased"),
-    (world, resources, state, emitter, eventPayload) => {
-      const { [eventPayload.key]: releasedKeyPressTime, ...otherKeys } =
-        state["held-keys"].value;
-
-      const holdDuration = Date.now() - releasedKeyPressTime;
-
-      state["held-keys"].setValue(otherKeys);
-
-      emitter.emit({
-        event: "keyHoldReleased",
-        payload: {
-          ...eventPayload,
-          duration: holdDuration,
-        },
-      });
-    },
-  );
-
-  engine.system(
-    "clear-path-visualisation",
-    t.on("keyHoldReleased"),
-    (world) => {
-      for (const [entityId] of world.query<[string, string]>([
-        "entity-id",
-        "path-vis",
-      ])) {
-        world.removeEntity(entityId);
+      if (shifterAnimation) {
+        shifterAnimation.from = currentShiftPosition.position;
+        shifterAnimation.to = neighbourInDirection.position;
+        shifterAnimation.startTime = Date.now();
       }
     },
   );
 
-  engine.system(
-    "visualise-path-home",
-    t.on("keyPressed"),
-    (world, resources, state, emitter, eventPayload) => {
-      const canvasBounds = resources.get<Bounds>("canvas-bounds");
-      const currentShiftPosition = state["shift-position"].value;
+  // engine.system(
+  //   "move-shifter-in-dir",
+  //   t.on("keyHeldOverThreshold"),
+  //   (world, resources, state, emitter, eventPayload) => {
+  //     const dir = keyToDirectionMap.get(eventPayload.key);
+  //     if (!dir) return;
 
-      const pathHome = new Path(
-        shortestPath(currentShiftPosition, commonGate.neutral).map(
-          (node) => node.position,
-        ),
-      );
+  //     console.log("Held over threshold", eventPayload.key);
 
-      drawDebugPath(world, canvasBounds.center.center, pathHome, [125, 99, 99]);
-    },
-  );
+  //       const currentShiftPosition = state["shift-position"].value;
 
-  engine.system(
-    "visualise-futherest-path-in-dir",
-    t.on("keyPressed"),
-    (world, resources, state, emitter, eventPayload) => {
-      const canvasBounds = resources.get<Bounds>("canvas-bounds");
-      const currentShiftPosition = state["shift-position"].value;
+  //       const neighbourInDirection =
+  //         currentShiftPosition.neighborInDirection(dir);
 
-      const dir = keyToDirectionMap.get(eventPayload.key);
-      if (!dir) return;
+  //       if (!neighbourInDirection) {
+  //         return;
+  //       }
 
-      const pathInDir = new Path(
-        nodesInDirection(currentShiftPosition, dir).map(
-          (node) => node.position,
-        ),
-      );
+  //       const nodes = nodesInDirection(currentShiftPosition, dir);
+  //       const furtherestNode = nodes[nodes.length - 1];
 
-      drawDebugPath(
-        world,
-        canvasBounds.center.center,
-        pathInDir,
-        [294, 99, 99],
-        [5, 10],
-      );
-    },
-  );
+  //       state["shift-position"].setValue(furtherestNode);
+  //   },
+  // );
+
+  // engine.system("move-shifter", t.on("update"), (world, resources, state) => {
+  //   const [leverPosition] = world.query<[Position]>([
+  //     "position",
+  //     "shift-lever",
+  //   ])[0];
+
+  //   const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+  //   const newLeverPos = state["shift-position"].value.position.plus(
+  //     canvasBounds.center.center,
+  //   );
+
+  //   leverPosition.position = newLeverPos;
+  // });
+
+  // engine.system(
+  //   "hold-threshold-detector",
+  //   t.on("update"),
+  //   (world, resources, state, emitter) => {
+  //     const heldKeys = state["held-keys"].value;
+
+  //     for (const [key, pressTime] of Object.entries(heldKeys)) {
+  //       const holdDuration = Date.now() - pressTime;
+
+  //       if (holdDuration > HOLD_THRESHOLD) {
+  //         emitter.emit({
+  //           event: "keyHeldOverThreshold",
+  //           payload: {
+  //             key,
+  //           },
+  //         });
+
+  //         delete heldKeys[key];
+  //       }
+  //     }
+
+  //     state["held-keys"].setValue(heldKeys);
+  //   },
+  // );
+
+  // engine.system(
+  //   "key-hold-press-detector",
+  //   t.on("keyPressed"),
+  //   (world, resources, state, emitter, eventPayload) => {
+  //     const heldKeys = state["held-keys"];
+  //     if (Object.keys(heldKeys.value).includes(eventPayload.key)) {
+  //       return;
+  //     }
+
+  //     heldKeys.setValue({
+  //       ...heldKeys.value,
+  //       [eventPayload.key]: Date.now(),
+  //     });
+  //   },
+  // );
+
+  // engine.system(
+  //   "key-hold-release-detector",
+  //   t.on("keyReleased"),
+  //   (world, resources, state, emitter, eventPayload) => {
+  //     const { [eventPayload.key]: releasedKeyPressTime, ...otherKeys } =
+  //       state["held-keys"].value;
+
+  //     const holdDuration = Date.now() - releasedKeyPressTime;
+
+  //     state["held-keys"].setValue(otherKeys);
+
+  //     emitter.emit({
+  //       event: "keyHoldReleased",
+  //       payload: {
+  //         ...eventPayload,
+  //         duration: holdDuration,
+  //       },
+  //     });
+  //   },
+  // );
+
+  // engine.system(
+  //   "clear-path-visualisation",
+  //   t.on("keyHoldReleased"),
+  //   (world) => {
+  //     for (const [entityId] of world.query<[string, string]>([
+  //       "entity-id",
+  //       "path-vis",
+  //     ])) {
+  //       world.removeEntity(entityId);
+  //     }
+  //   },
+  // );
+
+  // engine.system(
+  //   "visualise-path-home",
+  //   t.on("keyPressed"),
+  //   (world, resources, state, emitter, eventPayload) => {
+  //     const canvasBounds = resources.get<Bounds>("canvas-bounds");
+  //     const currentShiftPosition = state["shift-position"].value;
+
+  //     const pathHome = new Path(
+  //       shortestPath(currentShiftPosition, commonGate.neutral).map(
+  //         (node) => node.position,
+  //       ),
+  //     );
+
+  //     drawDebugPath(world, canvasBounds.center.center, pathHome, [125, 99, 99]);
+  //   },
+  // );
+
+  // engine.system(
+  //   "visualise-futherest-path-in-dir",
+  //   t.on("keyPressed"),
+  //   (world, resources, state, emitter, eventPayload) => {
+  //     const canvasBounds = resources.get<Bounds>("canvas-bounds");
+  //     const currentShiftPosition = state["shift-position"].value;
+
+  //     const dir = keyToDirectionMap.get(eventPayload.key);
+  //     if (!dir) return;
+
+  //     const pathInDir = new Path(
+  //       nodesInDirection(currentShiftPosition, dir).map(
+  //         (node) => node.position,
+  //       ),
+  //     );
+
+  //     drawDebugPath(
+  //       world,
+  //       canvasBounds.center.center,
+  //       pathInDir,
+  //       [294, 99, 99],
+  //       [5, 10],
+  //     );
+  //   },
+  // );
 
   return engine;
 }
