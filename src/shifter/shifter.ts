@@ -178,6 +178,40 @@ export default function shifter(parent?: HTMLElement) {
   );
 
   engine.system(
+    "unstick-shifter-from-pass-nodes",
+    t.on("keyReleased"),
+    (world, resources, state, emitter, eventPayload) => {
+      const dir = keyToDirectionMap.get(eventPayload.key);
+      if (!dir) return;
+
+      const currentShiftPosition = state["shift-position"].value;
+
+      if (currentShiftPosition.name === "pass") {
+        const neighbourInDirection =
+          currentShiftPosition.neighborInDirection(dir);
+
+        if (!neighbourInDirection) {
+          const neutral = commonGate.neutral;
+          state["shift-position"].setValue(neutral);
+
+          const shifterAnimation = createAnimation({
+            from: currentShiftPosition.position,
+            to: neutral.position,
+            target: "shift-lever",
+            duration: 100,
+            loop: false,
+            startTime: Date.now(),
+          });
+
+          world.addBundle(
+            createBundle(["shift-lever-animation", shifterAnimation]),
+          );
+        }
+      }
+    },
+  );
+
+  engine.system(
     "redirect-shifter",
     t.on("animation:completed"),
     (world, resources, state, emitter, eventPayload) => {
@@ -192,31 +226,28 @@ export default function shifter(parent?: HTMLElement) {
           const pressedKey = p.key;
           const pressedDir = keyToDirectionMap.get(pressedKey);
 
-          let nextPosition: GateNode = commonGate.neutral;
+          let nextPosition: GateNode | undefined = commonGate.neutral;
 
           if (pressedDir) {
-            const neighbor =
-              currentShiftPosition.neighborInDirection(pressedDir);
-
-            if (neighbor) {
-              nextPosition = neighbor;
-            }
+            nextPosition = currentShiftPosition.neighborInDirection(pressedDir);
           }
 
-          state["shift-position"].setValue(nextPosition);
+          if (nextPosition) {
+            state["shift-position"].setValue(nextPosition);
 
-          const shifterAnimation = createAnimation({
-            from: currentShiftPosition.position,
-            to: nextPosition.position,
-            target: "shift-lever",
-            duration: 100,
-            loop: false,
-            startTime: Date.now(),
-          });
+            const shifterAnimation = createAnimation({
+              from: currentShiftPosition.position,
+              to: nextPosition.position,
+              target: "shift-lever",
+              duration: 100,
+              loop: false,
+              startTime: Date.now(),
+            });
 
-          world.addBundle(
-            createBundle(["shift-lever-animation", shifterAnimation]),
-          );
+            world.addBundle(
+              createBundle(["shift-lever-animation", shifterAnimation]),
+            );
+          }
         }
       }
     },
