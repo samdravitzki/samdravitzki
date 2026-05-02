@@ -7,20 +7,14 @@ import World from "../ecs/core/World/World";
 import p5Part, { KeypressEvent } from "../ecs/parts/p5/p5-part";
 import { PrimitiveShape } from "../ecs/parts/p5/primitive-renderer/components/Primitive";
 import gearText from "./gear-text";
-import GateNode, {
-  commonGate,
-  shortestPath,
-  Direction,
-  nodesInDirection,
-} from "./gate";
-import Path, { drawDebugPath } from "../ecs/core/Path/Path";
+import GateNode, { commonGate, Direction } from "./gate";
 import animation from "../ecs/parts/animation/animation";
 import Vector from "../ecs/core/Vector/Vector";
 import {
   Animation,
   createAnimation,
 } from "../ecs/parts/animation/components/Animation";
-import { EntityId } from "../ecs/core/Entity/Entity";
+import p5 from "p5";
 
 function setupGate(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
@@ -91,17 +85,6 @@ function setupGate(world: World, resources: ResourcePool) {
       },
     ]),
   );
-
-  // Animation - change this so that the animation is added when button is pressed then removed when animation completes
-  const shifterAnimation = createAnimation({
-    from: Vector.create(0, 0),
-    to: Vector.create(0, 0),
-    target: "shift-lever",
-    duration: 100,
-    loop: false,
-  });
-
-  world.addBundle(createBundle(["shift-lever-animation", shifterAnimation]));
 }
 
 const keyToDirectionMap = new Map<string, Direction>();
@@ -113,26 +96,6 @@ keyToDirectionMap.set("ArrowUp", "up");
 keyToDirectionMap.set("ArrowLeft", "left");
 keyToDirectionMap.set("ArrowDown", "down");
 keyToDirectionMap.set("ArrowRight", "right");
-
-const HOLD_THRESHOLD = 120;
-
-/**
- * Map of keys currently being held down
- * A
- */
-type HeldKeys = Record<string, number>;
-
-/**
- * Key released event that also includes the duration the key was held for.
- */
-type KeyHoldReleasedEvent = KeypressEvent & { duration: number };
-
-/**
- * Event emitted when a key has been held down for longer than the HOLD_THRESHOLD
- */
-type KeyHeldOverThresholdEvent = {
-  key: string;
-};
 
 /**
  * A form of input that mimics the behaviour of a manual cars shifter
@@ -147,14 +110,10 @@ export default function shifter(parent?: HTMLElement) {
     .event("update")
     .event<"keyPressed", KeypressEvent>("keyPressed")
     .event<"keyReleased", KeypressEvent>("keyReleased")
-    .event<"keyHoldReleased", KeyHoldReleasedEvent>("keyHoldReleased")
-    .event<
-      "keyHeldOverThreshold",
-      KeyHeldOverThresholdEvent
-    >("keyHeldOverThreshold")
     .event("after-update")
+    .event<"animation:started", Animation>("animation:started")
+    .event<"animation:completed", Animation>("animation:completed")
     .state<"shift-position", GateNode>("shift-position", commonGate.neutral)
-    .state<"held-keys", HeldKeys>("held-keys", {})
     .build();
 
   const t = engine.trigger;
@@ -167,14 +126,20 @@ export default function shifter(parent?: HTMLElement) {
 
   engine.system("animate-shifter", t.on("update"), (world, resources) => {
     const canvasBounds = resources.get<Bounds>("canvas-bounds");
-
-    const [, animation] = world.query<[EntityId, Animation]>([
-      "shift-lever-animation",
+    const result = world.query<[Animation]>([
       "animation",
+      "shift-lever-animation",
     ])[0];
 
-    const [position] = world.query<[Position]>(["position", "shift-lever"])[0];
+    if (!result) {
+      return;
+    }
 
+    const [animation] = result;
+    const [position] = world.query<[Position]>([
+      "position",
+      animation.target,
+    ])[0];
     const newPos = Vector.lerp(animation.from, animation.to, animation.t);
     position.position = newPos.plus(canvasBounds.center.center);
   });
@@ -197,176 +162,65 @@ export default function shifter(parent?: HTMLElement) {
 
       state["shift-position"].setValue(neighbourInDirection);
 
-      const [shifterAnimation] = world.query<[Animation, EntityId]>([
-        "animation",
-        "shift-lever-animation",
-      ])[0];
+      const shifterAnimation = createAnimation({
+        from: currentShiftPosition.position,
+        to: neighbourInDirection.position,
+        target: "shift-lever",
+        duration: 100,
+        loop: false,
+        startTime: Date.now(),
+      });
 
-      if (shifterAnimation) {
-        shifterAnimation.from = currentShiftPosition.position;
-        shifterAnimation.to = neighbourInDirection.position;
-        shifterAnimation.startTime = Date.now();
-      }
+      world.addBundle(
+        createBundle(["shift-lever-animation", shifterAnimation]),
+      );
     },
   );
 
-  // engine.system(
-  //   "move-shifter-in-dir",
-  //   t.on("keyHeldOverThreshold"),
-  //   (world, resources, state, emitter, eventPayload) => {
-  //     const dir = keyToDirectionMap.get(eventPayload.key);
-  //     if (!dir) return;
+  engine.system(
+    "redirect-shifter",
+    t.on("animation:completed"),
+    (world, resources, state, emitter, eventPayload) => {
+      const p = resources.get<p5>("p5");
 
-  //     console.log("Held over threshold", eventPayload.key);
+      if (eventPayload.target === "shift-lever") {
+        // add support for event triggers to be conditional on the payload
+        const currentShiftPosition = state["shift-position"].value;
 
-  //       const currentShiftPosition = state["shift-position"].value;
+        // Set shifter back to neutral if the user doesn't have key down in direction of the next node.
+        if (currentShiftPosition.name === "pass") {
+          const pressedKey = p.key;
+          const pressedDir = keyToDirectionMap.get(pressedKey);
 
-  //       const neighbourInDirection =
-  //         currentShiftPosition.neighborInDirection(dir);
+          let nextPosition: GateNode = commonGate.neutral;
 
-  //       if (!neighbourInDirection) {
-  //         return;
-  //       }
+          if (pressedDir) {
+            const neighbor =
+              currentShiftPosition.neighborInDirection(pressedDir);
 
-  //       const nodes = nodesInDirection(currentShiftPosition, dir);
-  //       const furtherestNode = nodes[nodes.length - 1];
+            if (neighbor) {
+              nextPosition = neighbor;
+            }
+          }
 
-  //       state["shift-position"].setValue(furtherestNode);
-  //   },
-  // );
+          state["shift-position"].setValue(nextPosition);
 
-  // engine.system("move-shifter", t.on("update"), (world, resources, state) => {
-  //   const [leverPosition] = world.query<[Position]>([
-  //     "position",
-  //     "shift-lever",
-  //   ])[0];
+          const shifterAnimation = createAnimation({
+            from: currentShiftPosition.position,
+            to: nextPosition.position,
+            target: "shift-lever",
+            duration: 100,
+            loop: false,
+            startTime: Date.now(),
+          });
 
-  //   const canvasBounds = resources.get<Bounds>("canvas-bounds");
-
-  //   const newLeverPos = state["shift-position"].value.position.plus(
-  //     canvasBounds.center.center,
-  //   );
-
-  //   leverPosition.position = newLeverPos;
-  // });
-
-  // engine.system(
-  //   "hold-threshold-detector",
-  //   t.on("update"),
-  //   (world, resources, state, emitter) => {
-  //     const heldKeys = state["held-keys"].value;
-
-  //     for (const [key, pressTime] of Object.entries(heldKeys)) {
-  //       const holdDuration = Date.now() - pressTime;
-
-  //       if (holdDuration > HOLD_THRESHOLD) {
-  //         emitter.emit({
-  //           event: "keyHeldOverThreshold",
-  //           payload: {
-  //             key,
-  //           },
-  //         });
-
-  //         delete heldKeys[key];
-  //       }
-  //     }
-
-  //     state["held-keys"].setValue(heldKeys);
-  //   },
-  // );
-
-  // engine.system(
-  //   "key-hold-press-detector",
-  //   t.on("keyPressed"),
-  //   (world, resources, state, emitter, eventPayload) => {
-  //     const heldKeys = state["held-keys"];
-  //     if (Object.keys(heldKeys.value).includes(eventPayload.key)) {
-  //       return;
-  //     }
-
-  //     heldKeys.setValue({
-  //       ...heldKeys.value,
-  //       [eventPayload.key]: Date.now(),
-  //     });
-  //   },
-  // );
-
-  // engine.system(
-  //   "key-hold-release-detector",
-  //   t.on("keyReleased"),
-  //   (world, resources, state, emitter, eventPayload) => {
-  //     const { [eventPayload.key]: releasedKeyPressTime, ...otherKeys } =
-  //       state["held-keys"].value;
-
-  //     const holdDuration = Date.now() - releasedKeyPressTime;
-
-  //     state["held-keys"].setValue(otherKeys);
-
-  //     emitter.emit({
-  //       event: "keyHoldReleased",
-  //       payload: {
-  //         ...eventPayload,
-  //         duration: holdDuration,
-  //       },
-  //     });
-  //   },
-  // );
-
-  // engine.system(
-  //   "clear-path-visualisation",
-  //   t.on("keyHoldReleased"),
-  //   (world) => {
-  //     for (const [entityId] of world.query<[string, string]>([
-  //       "entity-id",
-  //       "path-vis",
-  //     ])) {
-  //       world.removeEntity(entityId);
-  //     }
-  //   },
-  // );
-
-  // engine.system(
-  //   "visualise-path-home",
-  //   t.on("keyPressed"),
-  //   (world, resources, state, emitter, eventPayload) => {
-  //     const canvasBounds = resources.get<Bounds>("canvas-bounds");
-  //     const currentShiftPosition = state["shift-position"].value;
-
-  //     const pathHome = new Path(
-  //       shortestPath(currentShiftPosition, commonGate.neutral).map(
-  //         (node) => node.position,
-  //       ),
-  //     );
-
-  //     drawDebugPath(world, canvasBounds.center.center, pathHome, [125, 99, 99]);
-  //   },
-  // );
-
-  // engine.system(
-  //   "visualise-futherest-path-in-dir",
-  //   t.on("keyPressed"),
-  //   (world, resources, state, emitter, eventPayload) => {
-  //     const canvasBounds = resources.get<Bounds>("canvas-bounds");
-  //     const currentShiftPosition = state["shift-position"].value;
-
-  //     const dir = keyToDirectionMap.get(eventPayload.key);
-  //     if (!dir) return;
-
-  //     const pathInDir = new Path(
-  //       nodesInDirection(currentShiftPosition, dir).map(
-  //         (node) => node.position,
-  //       ),
-  //     );
-
-  //     drawDebugPath(
-  //       world,
-  //       canvasBounds.center.center,
-  //       pathInDir,
-  //       [294, 99, 99],
-  //       [5, 10],
-  //     );
-  //   },
-  // );
+          world.addBundle(
+            createBundle(["shift-lever-animation", shifterAnimation]),
+          );
+        }
+      }
+    },
+  );
 
   return engine;
 }
