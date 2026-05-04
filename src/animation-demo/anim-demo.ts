@@ -39,6 +39,7 @@ export default function animationDemo(parent?: HTMLElement) {
 
   engine.system("setup-animations", trigger.on("setup"), (world) => {
     const basicLoopAnimation = createAnimation({
+      name: "basic-loop",
       from: Vector.create(-300, -100),
       to: Vector.create(300, -100),
       target: `animation-target-1`,
@@ -47,6 +48,7 @@ export default function animationDemo(parent?: HTMLElement) {
     });
 
     const notLoopingAnimation = createAnimation({
+      name: "not-looping",
       from: Vector.create(-300, 0),
       to: Vector.create(300, 0),
       target: `animation-target-2`,
@@ -55,8 +57,8 @@ export default function animationDemo(parent?: HTMLElement) {
       easing: "easeOutBounce",
     });
 
-    world.addBundle(createBundle([basicLoopAnimation]));
-    world.addBundle(createBundle([notLoopingAnimation]));
+    world.addBundle(basicLoopAnimation);
+    world.addBundle(notLoopingAnimation);
   });
 
   engine.system("apply-animation", trigger.on("update"), (world, resources) => {

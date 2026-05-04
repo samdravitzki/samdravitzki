@@ -1,6 +1,7 @@
 import Vector from "../../../core/Vector/Vector";
 import Component from "../../../core/Component/Component";
 import { easings } from "../easing";
+import createBundle from "../../../core/Bundle/createBundle";
 
 type EasingName = keyof typeof easings;
 
@@ -29,6 +30,7 @@ export type Animation = Component & {
  * Factory used to create an animation component
  */
 export function createAnimation(params: {
+  name: string;
   from: Vector;
   to: Vector;
   target: string;
@@ -37,8 +39,10 @@ export function createAnimation(params: {
   loop?: boolean;
   paused?: boolean;
   easing?: EasingName;
-}): Animation {
-  return {
+}) {
+  const { name, ...animationParams } = params;
+
+  const animations: Animation = {
     t: 0,
     elapsedTime: 0,
     name: "animation",
@@ -46,6 +50,8 @@ export function createAnimation(params: {
     loop: false,
     state: "ready",
     previousState: undefined,
-    ...params,
+    ...animationParams,
   };
+
+  return createBundle([name, animations]);
 }

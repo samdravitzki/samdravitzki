@@ -87,6 +87,18 @@ function setupGate(world: World, resources: ResourcePool) {
   );
 }
 
+function createShiftLeverAnimation(from: Vector, to: Vector) {
+  return createAnimation({
+    name: "shift-lever-animation",
+    from: from,
+    to: to,
+    target: "shift-lever",
+    duration: 100,
+    loop: false,
+    startTime: Date.now(),
+  });
+}
+
 const keyToDirectionMap = new Map<string, Direction>();
 keyToDirectionMap.set("w", "up");
 keyToDirectionMap.set("a", "left");
@@ -113,7 +125,9 @@ export default function shifter(parent?: HTMLElement) {
     .event("after-update")
     .event<"animation:started", Animation>("animation:started")
     .event<"animation:completed", Animation>("animation:completed")
+    .event<"shifter-moved", { from: GateNode; to: GateNode }>("shifter-moved")
     .state<"shift-position", GateNode>("shift-position", commonGate.neutral)
+    .state<"next-shift-position", GateNode | null>("next-shift-position", null)
     .build();
 
   const t = engine.trigger;
@@ -145,6 +159,41 @@ export default function shifter(parent?: HTMLElement) {
   });
 
   engine.system(
+    "move-shifter",
+    t.on("shifter-moved"),
+    (world, resources, state, emitter, { from, to }) => {
+      if (state["next-shift-position"].value === null) {
+        const shifterAnimation = createShiftLeverAnimation(
+          from.position,
+          to.position,
+        );
+
+        world.addBundle(shifterAnimation);
+        state["next-shift-position"].setValue(to);
+      }
+    },
+  );
+
+  engine.system(
+    "complete-movement",
+    t.on("animation:completed"),
+    (world, resources, state, emitter, animation) => {
+      if (
+        animation.target === "shift-lever" &&
+        state["next-shift-position"].value
+      ) {
+        const nextPosition = state["next-shift-position"].value;
+
+        if (!nextPosition) {
+          return;
+        }
+        state["shift-position"].setValue(nextPosition);
+        state["next-shift-position"].setValue(null);
+      }
+    },
+  );
+
+  engine.system(
     "shift-gear",
     t.on("keyPressed"),
     (world, resources, state, emitter, eventPayload) => {
@@ -160,25 +209,18 @@ export default function shifter(parent?: HTMLElement) {
         return;
       }
 
-      state["shift-position"].setValue(neighbourInDirection);
-
-      const shifterAnimation = createAnimation({
-        from: currentShiftPosition.position,
-        to: neighbourInDirection.position,
-        target: "shift-lever",
-        duration: 100,
-        loop: false,
-        startTime: Date.now(),
+      emitter.emit({
+        event: "shifter-moved",
+        payload: {
+          from: currentShiftPosition,
+          to: neighbourInDirection,
+        },
       });
-
-      world.addBundle(
-        createBundle(["shift-lever-animation", shifterAnimation]),
-      );
     },
   );
 
   engine.system(
-    "unstick-shifter-from-pass-nodes",
+    "relase-shifter",
     t.on("keyReleased"),
     (world, resources, state, emitter, eventPayload) => {
       const dir = keyToDirectionMap.get(eventPayload.key);
@@ -192,20 +234,14 @@ export default function shifter(parent?: HTMLElement) {
 
         if (!neighbourInDirection) {
           const neutral = commonGate.neutral;
-          state["shift-position"].setValue(neutral);
 
-          const shifterAnimation = createAnimation({
-            from: currentShiftPosition.position,
-            to: neutral.position,
-            target: "shift-lever",
-            duration: 100,
-            loop: false,
-            startTime: Date.now(),
+          emitter.emit({
+            event: "shifter-moved",
+            payload: {
+              from: currentShiftPosition,
+              to: neutral,
+            },
           });
-
-          world.addBundle(
-            createBundle(["shift-lever-animation", shifterAnimation]),
-          );
         }
       }
     },
@@ -221,33 +257,28 @@ export default function shifter(parent?: HTMLElement) {
         // add support for event triggers to be conditional on the payload
         const currentShiftPosition = state["shift-position"].value;
 
+        if (currentShiftPosition.name !== "pass") {
+          return;
+        }
+
         // Set shifter back to neutral if the user doesn't have key down in direction of the next node.
-        if (currentShiftPosition.name === "pass") {
-          const pressedKey = p.key;
-          const pressedDir = keyToDirectionMap.get(pressedKey);
+        const pressedKey = p.key;
+        const pressedDir = keyToDirectionMap.get(pressedKey);
 
-          let nextPosition: GateNode | undefined = commonGate.neutral;
+        let nextPosition: GateNode | undefined = commonGate.neutral;
 
-          if (pressedDir) {
-            nextPosition = currentShiftPosition.neighborInDirection(pressedDir);
-          }
+        if (pressedDir) {
+          nextPosition = currentShiftPosition.neighborInDirection(pressedDir);
+        }
 
-          if (nextPosition) {
-            state["shift-position"].setValue(nextPosition);
-
-            const shifterAnimation = createAnimation({
-              from: currentShiftPosition.position,
-              to: nextPosition.position,
-              target: "shift-lever",
-              duration: 100,
-              loop: false,
-              startTime: Date.now(),
-            });
-
-            world.addBundle(
-              createBundle(["shift-lever-animation", shifterAnimation]),
-            );
-          }
+        if (nextPosition) {
+          emitter.emit({
+            event: "shifter-moved",
+            payload: {
+              from: currentShiftPosition,
+              to: nextPosition,
+            },
+          });
         }
       }
     },
