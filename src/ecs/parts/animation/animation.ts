@@ -1,5 +1,7 @@
+import { Position } from "../../components/Position";
 import { EntityId } from "../../core/Entity/Entity";
 import { Part } from "../../core/Part/Part";
+import Vector from "../../core/Vector/Vector";
 import { Animation } from "./components/Animation";
 import { easings } from "./easing";
 
@@ -45,6 +47,17 @@ function animation() {
 
         animation.previousState = animation.state;
         animation.state = !isFinsihed(animation) ? "running" : "completed";
+
+        const [position] = world.query<[Position]>([
+          "position",
+          animation.target,
+        ])[0];
+
+        position.position = Vector.lerp(
+          animation.from,
+          animation.to,
+          animation.t,
+        );
       }
     });
 
