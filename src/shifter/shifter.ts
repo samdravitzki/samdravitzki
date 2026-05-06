@@ -87,18 +87,6 @@ function setupGate(world: World, resources: ResourcePool) {
   );
 }
 
-function createShiftLeverAnimation(from: Vector, to: Vector) {
-  return createAnimation({
-    name: "shift-lever-animation",
-    from: from,
-    to: to,
-    target: "shift-lever",
-    duration: 100,
-    loop: false,
-    startTime: Date.now(),
-  });
-}
-
 const keyToDirectionMap = new Map<string, Direction>();
 keyToDirectionMap.set("w", "up");
 keyToDirectionMap.set("a", "left");
@@ -137,61 +125,6 @@ export default function shifter(parent?: HTMLElement) {
   engine.part(animation());
 
   engine.system("setupGate", t.on("setup"), setupGate);
-
-  engine.system("animate-shifter", t.on("update"), (world, resources) => {
-    const canvasBounds = resources.get<Bounds>("canvas-bounds");
-    const result = world.query<[Animation]>([
-      "animation",
-      "shift-lever-animation",
-    ])[0];
-
-    if (!result) {
-      return;
-    }
-
-    const [animation] = result;
-    const [position] = world.query<[Position]>([
-      "position",
-      animation.target,
-    ])[0];
-    const newPos = Vector.lerp(animation.from, animation.to, animation.t);
-    position.position = newPos.plus(canvasBounds.center.center);
-  });
-
-  engine.system(
-    "move-shifter",
-    t.on("shifter-moved"),
-    (world, resources, state, emitter, { from, to }) => {
-      if (state["next-shift-position"].value === null) {
-        const shifterAnimation = createShiftLeverAnimation(
-          from.position,
-          to.position,
-        );
-
-        world.addBundle(shifterAnimation);
-        state["next-shift-position"].setValue(to);
-      }
-    },
-  );
-
-  engine.system(
-    "complete-movement",
-    t.on("animation:completed"),
-    (world, resources, state, emitter, animation) => {
-      if (
-        animation.target === "shift-lever" &&
-        state["next-shift-position"].value
-      ) {
-        const nextPosition = state["next-shift-position"].value;
-
-        if (!nextPosition) {
-          return;
-        }
-        state["shift-position"].setValue(nextPosition);
-        state["next-shift-position"].setValue(null);
-      }
-    },
-  );
 
   engine.system(
     "shift-gear",
@@ -248,6 +181,25 @@ export default function shifter(parent?: HTMLElement) {
   );
 
   engine.system(
+    "complete-movement",
+    t.on("animation:completed"),
+    (world, resources, state, emitter, animation) => {
+      if (
+        animation.target === "shift-lever" &&
+        state["next-shift-position"].value
+      ) {
+        const nextPosition = state["next-shift-position"].value;
+
+        if (!nextPosition) {
+          return;
+        }
+        state["shift-position"].setValue(nextPosition);
+        state["next-shift-position"].setValue(null);
+      }
+    },
+  );
+
+  engine.system(
     "redirect-shifter",
     t.on("animation:completed"),
     (world, resources, state, emitter, eventPayload) => {
@@ -257,15 +209,13 @@ export default function shifter(parent?: HTMLElement) {
         // add support for event triggers to be conditional on the payload
         const currentShiftPosition = state["shift-position"].value;
 
-        if (currentShiftPosition.name !== "pass") {
-          return;
-        }
-
-        // Set shifter back to neutral if the user doesn't have key down in direction of the next node.
         const pressedKey = p.key;
         const pressedDir = keyToDirectionMap.get(pressedKey);
 
-        let nextPosition: GateNode | undefined = commonGate.neutral;
+        // Set shifter back to neutral if the user doesn't have key down in direction of the next node when current node is a pass.
+
+        let nextPosition: GateNode | undefined =
+          currentShiftPosition.name === "pass" ? commonGate.neutral : undefined;
 
         if (pressedDir) {
           nextPosition = currentShiftPosition.neighborInDirection(pressedDir);
@@ -280,6 +230,29 @@ export default function shifter(parent?: HTMLElement) {
             },
           });
         }
+      }
+    },
+  );
+
+  engine.system(
+    "move-shifter",
+    t.on("shifter-moved"),
+    (world, resources, state, emitter, { from, to }) => {
+      if (state["next-shift-position"].value === null) {
+        const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+        const shifterAnimation = createAnimation({
+          name: "shift-lever-animation",
+          from: from.position.plus(canvasBounds.center.center),
+          to: to.position.plus(canvasBounds.center.center),
+          target: "shift-lever",
+          duration: 120,
+          loop: false,
+          startTime: Date.now(),
+        });
+
+        world.addBundle(shifterAnimation);
+        state["next-shift-position"].setValue(to);
       }
     },
   );
