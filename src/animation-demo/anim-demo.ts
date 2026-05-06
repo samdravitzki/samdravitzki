@@ -37,11 +37,13 @@ export default function animationDemo(parent?: HTMLElement) {
 
   const trigger = engine.trigger;
 
-  engine.system("setup-animations", trigger.on("setup"), (world) => {
+  engine.system("setup-animations", trigger.on("setup"), (world, resources) => {
+    const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
     const basicLoopAnimation = createAnimation({
       name: "basic-loop",
-      from: Vector.create(-300, -100),
-      to: Vector.create(300, -100),
+      from: Vector.create(-300, -100).plus(canvasBounds.center.center),
+      to: Vector.create(300, -100).plus(canvasBounds.center.center),
       target: `animation-target-1`,
       duration: 2000,
       loop: true,
@@ -49,8 +51,8 @@ export default function animationDemo(parent?: HTMLElement) {
 
     const notLoopingAnimation = createAnimation({
       name: "not-looping",
-      from: Vector.create(-300, 0),
-      to: Vector.create(300, 0),
+      from: Vector.create(-300, 0).plus(canvasBounds.center.center),
+      to: Vector.create(300, 0).plus(canvasBounds.center.center),
       target: `animation-target-2`,
       duration: 2000,
       loop: false,
@@ -61,19 +63,19 @@ export default function animationDemo(parent?: HTMLElement) {
     world.addBundle(notLoopingAnimation);
   });
 
-  engine.system("apply-animation", trigger.on("update"), (world, resources) => {
-    const canvasBounds = resources.get<Bounds>("canvas-bounds");
+  // engine.system("apply-animation", trigger.on("update"), (world, resources) => {
+  //   const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-    for (const [animation] of world.query<[Animation]>(["animation"])) {
-      const [position] = world.query<[Position]>([
-        "position",
-        animation.target,
-      ])[0];
+  //   for (const [animation] of world.query<[Animation]>(["animation"])) {
+  //     const [position] = world.query<[Position]>([
+  //       "position",
+  //       animation.target,
+  //     ])[0];
 
-      const newPos = Vector.lerp(animation.from, animation.to, animation.t);
-      position.position = newPos.plus(canvasBounds.center.center);
-    }
-  });
+  //     const newPos = Vector.lerp(animation.from, animation.to, animation.t);
+  //     position.position = newPos;
+  //   }
+  // });
 
   engine.system(
     "setup-animation-path-lines",
@@ -85,7 +87,7 @@ export default function animationDemo(parent?: HTMLElement) {
           createBundle([
             {
               name: "position",
-              position: canvasBounds.center.center,
+              position: new Vector(0, 0),
             },
             {
               name: "primitive",
