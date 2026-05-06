@@ -16,7 +16,7 @@ import {
 } from "../ecs/parts/animation/components/Animation";
 import p5 from "p5";
 
-function setupGate(world: World, resources: ResourcePool) {
+function buildGate(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
   // Draw edges
@@ -113,7 +113,7 @@ export default function shifter(parent?: HTMLElement) {
     .event("after-update")
     .event<"animation:started", Animation>("animation:started")
     .event<"animation:completed", Animation>("animation:completed")
-    .event<"shifter-moved", { from: GateNode; to: GateNode }>("shifter-moved")
+    .event<"shift", { from: GateNode; to: GateNode }>("shift")
     .state<"shift-position", GateNode>("shift-position", commonGate.neutral)
     .state<"next-shift-position", GateNode | null>("next-shift-position", null)
     .build();
@@ -124,10 +124,10 @@ export default function shifter(parent?: HTMLElement) {
   engine.part(gearText());
   engine.part(animation());
 
-  engine.system("setupGate", t.on("setup"), setupGate);
+  engine.system("setupGate", t.on("setup"), buildGate);
 
   engine.system(
-    "shift-gear",
+    "initiate-shift",
     t.on("keyPressed"),
     (world, resources, state, emitter, eventPayload) => {
       const dir = keyToDirectionMap.get(eventPayload.key);
@@ -143,7 +143,7 @@ export default function shifter(parent?: HTMLElement) {
       }
 
       emitter.emit({
-        event: "shifter-moved",
+        event: "shift",
         payload: {
           from: currentShiftPosition,
           to: neighbourInDirection,
@@ -169,7 +169,7 @@ export default function shifter(parent?: HTMLElement) {
           const neutral = commonGate.neutral;
 
           emitter.emit({
-            event: "shifter-moved",
+            event: "shift",
             payload: {
               from: currentShiftPosition,
               to: neutral,
@@ -181,7 +181,7 @@ export default function shifter(parent?: HTMLElement) {
   );
 
   engine.system(
-    "complete-movement",
+    "complete-shift",
     t.on("animation:completed"),
     (world, resources, state, emitter, animation) => {
       if (
@@ -200,7 +200,7 @@ export default function shifter(parent?: HTMLElement) {
   );
 
   engine.system(
-    "redirect-shifter",
+    "chain-shift",
     t.on("animation:completed"),
     (world, resources, state, emitter, eventPayload) => {
       const p = resources.get<p5>("p5");
@@ -223,7 +223,7 @@ export default function shifter(parent?: HTMLElement) {
 
         if (nextPosition) {
           emitter.emit({
-            event: "shifter-moved",
+            event: "shift",
             payload: {
               from: currentShiftPosition,
               to: nextPosition,
@@ -236,7 +236,7 @@ export default function shifter(parent?: HTMLElement) {
 
   engine.system(
     "move-shifter",
-    t.on("shifter-moved"),
+    t.on("shift"),
     (world, resources, state, emitter, { from, to }) => {
       if (state["next-shift-position"].value === null) {
         const canvasBounds = resources.get<Bounds>("canvas-bounds");
