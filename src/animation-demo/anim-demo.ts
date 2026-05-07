@@ -63,20 +63,6 @@ export default function animationDemo(parent?: HTMLElement) {
     world.addBundle(notLoopingAnimation);
   });
 
-  // engine.system("apply-animation", trigger.on("update"), (world, resources) => {
-  //   const canvasBounds = resources.get<Bounds>("canvas-bounds");
-
-  //   for (const [animation] of world.query<[Animation]>(["animation"])) {
-  //     const [position] = world.query<[Position]>([
-  //       "position",
-  //       animation.target,
-  //     ])[0];
-
-  //     const newPos = Vector.lerp(animation.from, animation.to, animation.t);
-  //     position.position = newPos;
-  //   }
-  // });
-
   engine.system(
     "setup-animation-path-lines",
     trigger.on("setup"),

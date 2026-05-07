@@ -13,6 +13,7 @@ type MiniAppInfo = {
   name: string;
   symbol: string;
   appId: string;
+  controls?: [string, string][];
   app: MiniApp;
 };
 
@@ -53,6 +54,7 @@ miniApps.push({
   name: "shifter",
   symbol: "🕹️",
   appId: "shifter-sketch",
+  controls: [["move", "wasd or arrow keys"]],
   app: shifter,
 });
 
@@ -67,13 +69,32 @@ function createMiniAppButton(name: string, symbol: string) {
   return `<button id="${name}-button">${symbol}</button>`;
 }
 
-function createMiniAppSection(name: string) {
+function createMiniAppSection({ name, controls }: MiniAppInfo) {
   return `
       <div id="${name}-app" style="display:none;">
         <button id="exit-${name}-button">❌</button>
         <div style="position: relative;" id="${name}-sketch"></div>
+        ${controls ? createControlInfo(controls) : ""}
       </div>
     `;
+}
+
+// Simple control helper info listed horzontally as key values in monospace font with key same size but wrapped in a box with radius, no border
+function createControlInfo(controls: [string, string][]) {
+  return `
+    <div style="display: flex; gap: 16px; margin-top: 8px;">
+      ${controls
+        .map(
+          ([action, control]) => `
+        <div style="display: flex; gap: 8px; align-items: center; font-family: monospace;">
+          <div style="background-color: #313131; border-radius: 4px; padding: 4px 8px;">${action}</div>
+          <div>${control}</div>
+        </div>
+      `,
+        )
+        .join("")}
+    </div>
+  `;
 }
 
 document.querySelector<HTMLDivElement>(
@@ -83,7 +104,7 @@ document.querySelector<HTMLDivElement>(
   .join("");
 
 document.querySelector<HTMLDivElement>("#mini-app-container")!.innerHTML =
-  miniApps.map((appInfo) => createMiniAppSection(appInfo.name)).join("");
+  miniApps.map((appInfo) => createMiniAppSection(appInfo)).join("");
 
 const savedAppState = localStorage.getItem("activeApp");
 

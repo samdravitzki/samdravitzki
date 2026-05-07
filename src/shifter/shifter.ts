@@ -15,6 +15,18 @@ import {
   createAnimation,
 } from "../ecs/parts/animation/components/Animation";
 import p5 from "p5";
+import State from "../ecs/core/State/State";
+import { EventEmitter } from "../ecs/core/System/System";
+
+const keyToDirectionMap = new Map<string, Direction>();
+keyToDirectionMap.set("w", "up");
+keyToDirectionMap.set("a", "left");
+keyToDirectionMap.set("s", "down");
+keyToDirectionMap.set("d", "right");
+keyToDirectionMap.set("ArrowUp", "up");
+keyToDirectionMap.set("ArrowLeft", "left");
+keyToDirectionMap.set("ArrowDown", "down");
+keyToDirectionMap.set("ArrowRight", "right");
 
 function buildGate(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
@@ -87,15 +99,152 @@ function buildGate(world: World, resources: ResourcePool) {
   );
 }
 
-const keyToDirectionMap = new Map<string, Direction>();
-keyToDirectionMap.set("w", "up");
-keyToDirectionMap.set("a", "left");
-keyToDirectionMap.set("s", "down");
-keyToDirectionMap.set("d", "right");
-keyToDirectionMap.set("ArrowUp", "up");
-keyToDirectionMap.set("ArrowLeft", "left");
-keyToDirectionMap.set("ArrowDown", "down");
-keyToDirectionMap.set("ArrowRight", "right");
+type ShiftEventPayload = { from: GateNode; to: GateNode };
+
+function initiateShift(
+  world: World,
+  resources: ResourcePool,
+  state: { "shift-position": State<GateNode> },
+  emitter: EventEmitter<{ shift: ShiftEventPayload }>,
+  eventPayload: KeypressEvent,
+) {
+  const dir = keyToDirectionMap.get(eventPayload.key);
+  if (!dir) return;
+
+  const currentShiftPosition = state["shift-position"].value;
+
+  const neighbourInDirection = currentShiftPosition.neighborInDirection(dir);
+
+  if (!neighbourInDirection) {
+    return;
+  }
+
+  emitter.emit({
+    event: "shift",
+    payload: {
+      from: currentShiftPosition,
+      to: neighbourInDirection,
+    },
+  });
+}
+
+function releaseShifter(
+  world: World,
+  resources: ResourcePool,
+  state: { "shift-position": State<GateNode> },
+  emitter: EventEmitter<{ shift: ShiftEventPayload }>,
+  eventPayload: KeypressEvent,
+) {
+  const dir = keyToDirectionMap.get(eventPayload.key);
+  if (!dir) return;
+
+  const currentShiftPosition = state["shift-position"].value;
+
+  if (currentShiftPosition.name === "pass") {
+    const neighbourInDirection = currentShiftPosition.neighborInDirection(dir);
+
+    if (!neighbourInDirection) {
+      const neutral = commonGate.neutral;
+
+      emitter.emit({
+        event: "shift",
+        payload: {
+          from: currentShiftPosition,
+          to: neutral,
+        },
+      });
+    }
+  }
+}
+
+function completeShift(
+  world: World,
+  resources: ResourcePool,
+  state: {
+    "shift-position": State<GateNode>;
+    "next-shift-position": State<GateNode | null>;
+  },
+  emitter: EventEmitter<{ shift: ShiftEventPayload }>,
+  animation: Animation,
+) {
+  if (
+    animation.target === "shift-lever" &&
+    state["next-shift-position"].value
+  ) {
+    const nextPosition = state["next-shift-position"].value;
+
+    if (!nextPosition) {
+      return;
+    }
+    state["shift-position"].setValue(nextPosition);
+    state["next-shift-position"].setValue(null);
+  }
+}
+
+function chainShift(
+  world: World,
+  resources: ResourcePool,
+  state: {
+    "shift-position": State<GateNode>;
+    "next-shift-position": State<GateNode | null>;
+  },
+  emitter: EventEmitter<{ shift: ShiftEventPayload }>,
+  animation: Animation,
+) {
+  const p = resources.get<p5>("p5");
+
+  if (animation.target === "shift-lever") {
+    // add support for event triggers to be conditional on the payload
+    const currentShiftPosition = state["shift-position"].value;
+
+    const pressedKey = p.key;
+    const pressedDir = keyToDirectionMap.get(pressedKey);
+
+    // Set shifter back to neutral if the user doesn't have key down in direction of the next node when current node is a pass.
+
+    let nextPosition: GateNode | undefined =
+      currentShiftPosition.name === "pass" ? commonGate.neutral : undefined;
+
+    if (pressedDir) {
+      nextPosition = currentShiftPosition.neighborInDirection(pressedDir);
+    }
+
+    if (nextPosition) {
+      emitter.emit({
+        event: "shift",
+        payload: {
+          from: currentShiftPosition,
+          to: nextPosition,
+        },
+      });
+    }
+  }
+}
+
+function moveShifter(
+  world: World,
+  resources: ResourcePool,
+  state: { "next-shift-position": State<GateNode | null> },
+  emitter: unknown,
+  { from, to }: { from: GateNode; to: GateNode },
+) {
+  if (state["next-shift-position"].value === null) {
+    const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+    const shifterAnimation = createAnimation({
+      name: "shift-lever-animation",
+      from: from.position.plus(canvasBounds.center.center),
+      to: to.position.plus(canvasBounds.center.center),
+      target: "shift-lever",
+      duration: 120,
+      loop: false,
+      startTime: Date.now(),
+    });
+
+    world.addBundle(shifterAnimation);
+    state["next-shift-position"].setValue(to);
+  }
+}
 
 /**
  * A form of input that mimics the behaviour of a manual cars shifter
@@ -113,7 +262,7 @@ export default function shifter(parent?: HTMLElement) {
     .event("after-update")
     .event<"animation:started", Animation>("animation:started")
     .event<"animation:completed", Animation>("animation:completed")
-    .event<"shift", { from: GateNode; to: GateNode }>("shift")
+    .event<"shift", ShiftEventPayload>("shift")
     .state<"shift-position", GateNode>("shift-position", commonGate.neutral)
     .state<"next-shift-position", GateNode | null>("next-shift-position", null)
     .build();
@@ -126,136 +275,11 @@ export default function shifter(parent?: HTMLElement) {
 
   engine.system("setupGate", t.on("setup"), buildGate);
 
-  engine.system(
-    "initiate-shift",
-    t.on("keyPressed"),
-    (world, resources, state, emitter, eventPayload) => {
-      const dir = keyToDirectionMap.get(eventPayload.key);
-      if (!dir) return;
-
-      const currentShiftPosition = state["shift-position"].value;
-
-      const neighbourInDirection =
-        currentShiftPosition.neighborInDirection(dir);
-
-      if (!neighbourInDirection) {
-        return;
-      }
-
-      emitter.emit({
-        event: "shift",
-        payload: {
-          from: currentShiftPosition,
-          to: neighbourInDirection,
-        },
-      });
-    },
-  );
-
-  engine.system(
-    "relase-shifter",
-    t.on("keyReleased"),
-    (world, resources, state, emitter, eventPayload) => {
-      const dir = keyToDirectionMap.get(eventPayload.key);
-      if (!dir) return;
-
-      const currentShiftPosition = state["shift-position"].value;
-
-      if (currentShiftPosition.name === "pass") {
-        const neighbourInDirection =
-          currentShiftPosition.neighborInDirection(dir);
-
-        if (!neighbourInDirection) {
-          const neutral = commonGate.neutral;
-
-          emitter.emit({
-            event: "shift",
-            payload: {
-              from: currentShiftPosition,
-              to: neutral,
-            },
-          });
-        }
-      }
-    },
-  );
-
-  engine.system(
-    "complete-shift",
-    t.on("animation:completed"),
-    (world, resources, state, emitter, animation) => {
-      if (
-        animation.target === "shift-lever" &&
-        state["next-shift-position"].value
-      ) {
-        const nextPosition = state["next-shift-position"].value;
-
-        if (!nextPosition) {
-          return;
-        }
-        state["shift-position"].setValue(nextPosition);
-        state["next-shift-position"].setValue(null);
-      }
-    },
-  );
-
-  engine.system(
-    "chain-shift",
-    t.on("animation:completed"),
-    (world, resources, state, emitter, eventPayload) => {
-      const p = resources.get<p5>("p5");
-
-      if (eventPayload.target === "shift-lever") {
-        // add support for event triggers to be conditional on the payload
-        const currentShiftPosition = state["shift-position"].value;
-
-        const pressedKey = p.key;
-        const pressedDir = keyToDirectionMap.get(pressedKey);
-
-        // Set shifter back to neutral if the user doesn't have key down in direction of the next node when current node is a pass.
-
-        let nextPosition: GateNode | undefined =
-          currentShiftPosition.name === "pass" ? commonGate.neutral : undefined;
-
-        if (pressedDir) {
-          nextPosition = currentShiftPosition.neighborInDirection(pressedDir);
-        }
-
-        if (nextPosition) {
-          emitter.emit({
-            event: "shift",
-            payload: {
-              from: currentShiftPosition,
-              to: nextPosition,
-            },
-          });
-        }
-      }
-    },
-  );
-
-  engine.system(
-    "move-shifter",
-    t.on("shift"),
-    (world, resources, state, emitter, { from, to }) => {
-      if (state["next-shift-position"].value === null) {
-        const canvasBounds = resources.get<Bounds>("canvas-bounds");
-
-        const shifterAnimation = createAnimation({
-          name: "shift-lever-animation",
-          from: from.position.plus(canvasBounds.center.center),
-          to: to.position.plus(canvasBounds.center.center),
-          target: "shift-lever",
-          duration: 120,
-          loop: false,
-          startTime: Date.now(),
-        });
-
-        world.addBundle(shifterAnimation);
-        state["next-shift-position"].setValue(to);
-      }
-    },
-  );
+  engine.system("initiate-shift", t.on("keyPressed"), initiateShift);
+  engine.system("relase-shifter", t.on("keyReleased"), releaseShifter);
+  engine.system("complete-shift", t.on("animation:completed"), completeShift);
+  engine.system("chain-shift", t.on("animation:completed"), chainShift);
+  engine.system("move-shifter", t.on("shift"), moveShifter);
 
   return engine;
 }

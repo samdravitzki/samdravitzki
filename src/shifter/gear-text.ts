@@ -32,8 +32,8 @@ function setupGearText(
 
       const position: Position = {
         name: "position",
-        position: canvasBounds.center.top
-          .plus(Vector.create(index * 60, 50))
+        position: canvasBounds.center.bottom
+          .plus(Vector.create(index * 60, -50))
           .minus(centerOffset),
       };
 
