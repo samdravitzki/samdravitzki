@@ -19,11 +19,18 @@ function createGameMenu(
   const renderTrajectory = state["render-trajectory"];
 
   const gameMenu = p.createDiv();
-  gameMenu.position(0, canvasBounds.max.y, "absolute");
+  gameMenu.position(canvasBounds.bottom.left.x, canvasBounds.bottom.left.y + 4);
+  gameMenu.style("width", "100%");
   gameMenu.id("game-menu");
 
+  const gameMenuContainer = p.createDiv();
+  gameMenuContainer.style("display", "flex");
+  gameMenuContainer.style("flex-direction", "row-reverse");
+  gameMenuContainer.style("gap", "4px")
+  gameMenuContainer.parent(gameMenu);
+
   const pauseButton = p.createButton("pause");
-  pauseButton.parent(gameMenu);
+  pauseButton.parent(gameMenuContainer);
 
   pauseButton.mousePressed(() => {
     if (appState.value === "in-game") {
@@ -38,7 +45,7 @@ function createGameMenu(
   });
 
   const trajectoryButton = p.createButton("trajectory");
-  trajectoryButton.parent(gameMenu);
+  trajectoryButton.parent(gameMenuContainer);
 
   trajectoryButton.mousePressed(() => {
     renderTrajectory.setValue(!renderTrajectory.value);

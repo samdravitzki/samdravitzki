@@ -26,6 +26,7 @@ miniApps.push({
   name: "snake",
   symbol: "🐍",
   appId: "snake-sketch",
+  controls: [["move", "wasd or arrow keys"]],
   app: snakeGame,
 });
 
@@ -33,6 +34,7 @@ miniApps.push({
   name: "pong",
   symbol: "🎾",
   appId: "pong-sketch",
+  controls: [["move paddle", "mouse"]],
   app: pong,
 });
 
@@ -47,6 +49,7 @@ miniApps.push({
   name: "drums",
   symbol: "🥁",
   appId: "drums-sketch",
+  controls: [["hit drum", "any key"]],
   app: drumsGame,
 });
 

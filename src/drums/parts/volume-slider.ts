@@ -14,15 +14,20 @@ const volumeSliderPart: Part<{
 
     const menuArea = p.createDiv();
     menuArea.position(canvasBounds.bottom.left.x, canvasBounds.bottom.left.y);
+    menuArea.style("width", "100%");
     menuArea.style("display", "flex");
+    menuArea.style("flex-direction", "row-reverse");
+
+    const sliderContainer = p.createDiv();
+    sliderContainer.parent(menuArea);
 
     const icon = p.createSpan("🔊");
-    icon.parent(menuArea);
+    icon.parent(sliderContainer);
 
     const DEFAULT_VOLUME = -10;
 
     const volumeSlider = p.createSlider(-46, 4, DEFAULT_VOLUME);
-    volumeSlider.parent(menuArea);
+    volumeSlider.parent(sliderContainer);
 
     Tone.getDestination().volume.value = DEFAULT_VOLUME;
 
