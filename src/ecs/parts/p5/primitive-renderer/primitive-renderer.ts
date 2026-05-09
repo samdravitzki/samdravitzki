@@ -36,22 +36,22 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
       p.fill(toP5Color(primitive.fill));
     }
 
+    if (primitive.dash) {
+      (p.drawingContext as CanvasRenderingContext2D).setLineDash(
+        primitive.dash,
+      );
+    }
+
+    if (primitive.dashOffset) {
+      (p.drawingContext as CanvasRenderingContext2D).lineDashOffset =
+        primitive.dashOffset;
+    }
+
     if (primitive.type === "circle") {
       p.circle(position.position.x, position.position.y, primitive.radius * 2);
     }
 
     if (primitive.type === "line") {
-      if (primitive.dash) {
-        (p.drawingContext as CanvasRenderingContext2D).setLineDash(
-          primitive.dash,
-        );
-      }
-
-      if (primitive.dashOffset) {
-        (p.drawingContext as CanvasRenderingContext2D).lineDashOffset =
-          primitive.dashOffset;
-      }
-
       p.line(
         primitive.start.x + position.position.x,
         primitive.start.y + position.position.y,
@@ -74,6 +74,7 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
         position.position.y,
         primitive.width,
         primitive.height,
+        primitive.borderRadius ?? 0,
       );
     }
 
@@ -85,6 +86,10 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
       if (primitive.align === "center") p.textAlign(p.CENTER);
 
       p.text(primitive.text, position.position.x, position.position.y);
+
+      if (primitive.font) {
+        p.textFont(primitive.font);
+      }
     }
   }
 }

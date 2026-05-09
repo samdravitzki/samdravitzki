@@ -25,7 +25,6 @@ function placeRandomDots(
           name: "primitive",
           stroke: [240, 60, 70],
           strokeWeight: 2,
-          fill: false,
           type: "circle",
           radius: 5,
         },

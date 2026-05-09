@@ -6,20 +6,19 @@ Always wanted to learn more about game engine design and ecs and so decided to b
 - [ ] copy in plans and ideas from notebook
 - [ ] Publish as npm package
 
-- [] Write down plans and ideas
 - Implement demos for different features of ecs engine
 - Implement demos of the collision system
 - Implement demos for different features of ecs
 - Support different collision scenarions (box - box, circle - circle, ...)
 - Move to less naive implementation of collision system
-- Add support for events
 - Add debug mode to view systems and their average run time
+- Add ability to move viewport with a 2d camera
 
 ## todos
 
 - [ ] Reset state of engine when it is stopped
-- [ ] Canvases dont look good as just squares in the middle of your screen
-- [ ] Describe what `State` is and why its required when components also store state
+- [ ] Some kind of logging of all major engine activity that can the be fitlered on for easy debugging
+  - i.e. log systems triggered, event ocurrances, state changes, etc.
 
 ## Ideas
 

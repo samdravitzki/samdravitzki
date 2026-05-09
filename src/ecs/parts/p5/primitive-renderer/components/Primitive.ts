@@ -7,7 +7,7 @@ export type PrimitiveShape = Component & {
   name: "primitive";
   stroke?: Color;
   strokeWeight?: number;
-  fill: false | Color; // Fill doesn't make sense for line
+  fill?: false | Color; // Fill doesn't make sense for line
   dash?: number[];
   dashOffset?: number;
 } & (
@@ -24,11 +24,13 @@ export type PrimitiveShape = Component & {
         type: "square";
         width: number;
         height: number;
+        borderRadius?: number;
       }
     | {
         type: "text";
         align: "left" | "right" | "center";
         size: number;
         text: string;
+        font?: string;
       }
   );

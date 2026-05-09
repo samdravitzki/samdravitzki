@@ -42,7 +42,6 @@ export function drawDebugPath(
           stroke: color,
           strokeWeight: 2,
           dash,
-          fill: false,
         } satisfies PrimitiveShape,
       ]),
     );

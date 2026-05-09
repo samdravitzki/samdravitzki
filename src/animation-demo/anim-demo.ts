@@ -82,7 +82,6 @@ export default function animationDemo(parent?: HTMLElement) {
               end: animation.to,
               stroke: palette[300],
               strokeWeight: 2,
-              fill: false,
             } satisfies PrimitiveShape,
           ]),
         );

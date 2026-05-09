@@ -18,6 +18,8 @@ import p5 from "p5";
 import State from "../ecs/core/State/State";
 import { EventEmitter } from "../ecs/core/System/System";
 
+type ShiftEventPayload = { from: GateNode; to: GateNode };
+
 const keyToDirectionMap = new Map<string, Direction>();
 keyToDirectionMap.set("w", "up");
 keyToDirectionMap.set("a", "left");
@@ -98,8 +100,6 @@ function buildGate(world: World, resources: ResourcePool) {
     ]),
   );
 }
-
-type ShiftEventPayload = { from: GateNode; to: GateNode };
 
 function initiateShift(
   world: World,

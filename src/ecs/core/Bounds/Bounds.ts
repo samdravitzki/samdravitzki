@@ -64,6 +64,14 @@ export default class Bounds {
     return [this.max.x - this.min.x, this.max.y - this.min.y];
   }
 
+  get width(): number {
+    return this.max.x - this.min.x;
+  }
+
+  get height(): number {
+    return this.max.y - this.min.y;
+  }
+
   /**
    * Generates a random position in the bounds
    * @param increment only generate a random position that is a multiple of the supplied increment
@@ -84,7 +92,7 @@ export default class Bounds {
   boundedMod(position: Vector): Vector {
     return Vector.create(
       boundedMod(position.x, this.max.x, this.min.x),
-      boundedMod(position.y, this.max.y, this.min.y)
+      boundedMod(position.y, this.max.y, this.min.y),
     );
   }
 
@@ -105,7 +113,7 @@ export default class Bounds {
   shrink(amount: number) {
     return Bounds.create(
       Vector.create(this.min.x + amount, this.min.y + amount),
-      Vector.create(this.max.x - amount, this.max.y - amount)
+      Vector.create(this.max.x - amount, this.max.y - amount),
     );
   }
 }

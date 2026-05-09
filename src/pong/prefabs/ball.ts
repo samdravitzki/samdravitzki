@@ -8,7 +8,6 @@ function createBall(position: Vector) {
       name: "primitive",
       stroke: [240, 60, 100],
       strokeWeight: 2,
-      fill: false,
       type: "circle",
       radius: 5,
     },
