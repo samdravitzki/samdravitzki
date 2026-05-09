@@ -79,7 +79,9 @@ export default class World {
    * associated with a particular entity that has those components)
    * @param query a list of components to query for (if 'entity-id' is supplied the it will return the entities id)
    */
-  query<T extends (EntityId | Component)[]>(query: string[]): T[] {
+  query<T extends (EntityId | Component)[]>(
+    query: (string | "entity-id")[],
+  ): T[] {
     const result: T[] = [];
 
     for (var [entityId, entitiesComponents] of this._entities.entries()) {

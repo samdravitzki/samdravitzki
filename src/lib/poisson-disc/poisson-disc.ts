@@ -26,8 +26,8 @@ function poissonDisc(
   const backgroundGrid = new BackgroundGrid(bounds, cellSize);
 
   const startingPoint = Vector.create(
-    Math.random() * bounds.size[0],
-    Math.random() * bounds.size[1],
+    Math.random() * bounds.width,
+    Math.random() * bounds.height,
   );
 
   backgroundGrid.addVector(startingPoint);

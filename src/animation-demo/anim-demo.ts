@@ -12,7 +12,6 @@ import {
 } from "../ecs/parts/animation/components/Animation";
 import animation from "../ecs/parts/animation/animation";
 
-// from https://hihayk.github.io/scale/#4/3/64/72/58/8/18/20/17F350/20/243/80/black
 const palette = {
   100: "#0A090A",
   200: "#302329",
@@ -63,31 +62,26 @@ export default function animationDemo(parent?: HTMLElement) {
     world.addBundle(notLoopingAnimation);
   });
 
-  engine.system(
-    "setup-animation-path-lines",
-    trigger.on("setup"),
-    (world, resources) => {
-      const canvasBounds = resources.get<Bounds>("canvas-bounds");
-      for (const [animation] of world.query<[Animation]>(["animation"])) {
-        world.addBundle(
-          createBundle([
-            {
-              name: "position",
-              position: new Vector(0, 0),
-            },
-            {
-              name: "primitive",
-              type: "line",
-              start: animation.from,
-              end: animation.to,
-              stroke: palette[300],
-              strokeWeight: 2,
-            } satisfies PrimitiveShape,
-          ]),
-        );
-      }
-    },
-  );
+  engine.system("setup-animation-path-lines", trigger.on("setup"), (world) => {
+    for (const [animation] of world.query<[Animation]>(["animation"])) {
+      world.addBundle(
+        createBundle([
+          {
+            name: "position",
+            position: new Vector(0, 0),
+          },
+          {
+            name: "primitive",
+            type: "line",
+            start: animation.from,
+            end: animation.to,
+            stroke: palette[300],
+            strokeWeight: 2,
+          } satisfies PrimitiveShape,
+        ]),
+      );
+    }
+  });
 
   engine.system(
     "setup-animation-target",

@@ -84,9 +84,9 @@ function createMiniAppButton(name: string, symbol: string) {
 function createMiniAppSection({ name, controls }: MiniAppInfo) {
   return `
       <div id="${name}-app" style="display:none;">
-        <button id="exit-${name}-button">❌</button>
-        <div style="position: relative;" id="${name}-sketch"></div>
-        ${controls ? createControlInfo(controls) : ""}
+          <button id="exit-${name}-button" style="margin-bottom: 4px;">❌</button>
+          <div style="position: relative;" id="${name}-sketch"></div>
+          ${controls ? createControlInfo(controls) : ""}
       </div>
     `;
 }
@@ -94,7 +94,7 @@ function createMiniAppSection({ name, controls }: MiniAppInfo) {
 // Simple control helper info listed horzontally as key values in monospace font with key same size but wrapped in a box with radius, no border
 function createControlInfo(controls: [string, string][]) {
   return `
-    <div style="display: flex; gap: 16px; margin-top: 8px;">
+    <div style="display: flex; gap: 16px;">
       ${controls
         .map(
           ([action, control]) => `

@@ -1,3 +1,5 @@
+import p5 from "p5";
+import { Pane } from "tweakpane";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
@@ -8,22 +10,25 @@ import World from "../ecs/core/World/World";
 import p5Part, { KeypressEvent } from "../ecs/parts/p5/p5-part";
 import poissonDisc from "../lib/poisson-disc/poisson-disc";
 import randomDots from "./random-dots/random-dots";
+import { Position } from "../ecs/components/Position";
 
-function placeRandomDots(
-  world: World,
-  resources: ResourcePool,
-  { dotCount }: { dotCount: State<number> },
-) {
+const pallete = {
+  background: "#151515",
+  secondary: "#252525",
+  primary: "#F97316",
+};
+
+function placeRandomDots(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-  const dots = randomDots(dotCount.value, canvasBounds);
+  const dots = randomDots(100, canvasBounds);
 
   for (const dot of dots) {
     world.addBundle(
       createBundle([
         {
           name: "primitive",
-          stroke: [240, 60, 70],
+          stroke: pallete.secondary,
           strokeWeight: 2,
           type: "circle",
           radius: 5,
@@ -37,52 +42,167 @@ function placeRandomDots(
   }
 }
 
+const DEFAULT_MIN_DISTANCE = 40;
+const DEFAULT_SAMPLE_LIMIT = 30;
+
+function createPoissonDot(dot: Vector) {
+  const DOT_WIDTH = 3;
+  return createBundle([
+    "poisson-dot",
+    {
+      name: "primitive",
+      fill: pallete.primary,
+      type: "circle",
+      radius: DOT_WIDTH,
+    },
+    {
+      name: "position",
+      position: dot.plus(Vector.create(DOT_WIDTH, DOT_WIDTH)),
+    },
+  ]);
+}
+
 function placePoissonDots(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-  const dots = poissonDisc(canvasBounds);
-
-  const dotWidth = 2;
+  const dots = poissonDisc(
+    canvasBounds,
+    DEFAULT_MIN_DISTANCE,
+    DEFAULT_SAMPLE_LIMIT,
+  );
 
   for (const dot of dots) {
-    world.addBundle(
-      createBundle([
-        {
-          name: "primitive",
-          stroke: [345, 80, 100],
-          strokeWeight: 2,
-          fill: [345, 80, 100],
-          type: "circle",
-          radius: dotWidth,
-        },
-        {
-          name: "position",
-          position: dot.plus(Vector.create(dotWidth, dotWidth)),
-        },
-      ]),
-    );
+    world.addBundle(createPoissonDot(dot));
   }
 }
 
 export default function poissonDiscSamplingDemoApp(parent?: HTMLElement) {
   const engine = EngineBuilder.create()
-    .state("dotCount", 100)
+    .state("poisson:min-distance", DEFAULT_MIN_DISTANCE)
+    .state("poisson:sample-limit", DEFAULT_SAMPLE_LIMIT)
+    .event("poisson:config-change")
     .event("setup")
     .event("update")
     .event("after-update")
-    .event<"keyPressed", KeypressEvent>("keyPressed")
     .build();
 
-  engine.part(p5Part([500, 500], parent));
+  engine.part(p5Part([500, 500], parent, pallete.background));
+
   engine.system(
     "place-random-dots",
     engine.trigger.on("setup"),
     placeRandomDots,
   );
+
   engine.system(
     "place-poisson-dots",
     engine.trigger.on("setup"),
     placePoissonDots,
+  );
+
+  engine.system(
+    "update-poisson-dots",
+    engine.trigger.on("poisson:config-change"),
+    (world, resources, state) => {
+      const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+      const poissonDots = world.query<[Position, string]>([
+        "position",
+        "entity-id",
+        "poisson-dot",
+      ]);
+
+      const minDistance = state["poisson:min-distance"].value;
+      const sampleLimit = state["poisson:sample-limit"].value;
+
+      const dots = poissonDisc(canvasBounds, minDistance, sampleLimit);
+
+      for (const [index, entity] of poissonDots.entries()) {
+        const [position, entityId] = entity;
+
+        const dot = dots[index];
+
+        if (dot) {
+          position.position = dot;
+        } else {
+          // Remove extra dots if the new config results in less dots being generated
+          world.removeEntity(entityId);
+        }
+      }
+
+      // Create new dots if more were generated as a result of the config change
+      if (dots.length > poissonDots.length) {
+        for (let i = poissonDots.length; i < dots.length; i++) {
+          const dot = dots[i];
+          world.addBundle(createPoissonDot(dot));
+        }
+      }
+    },
+  );
+
+  engine.system(
+    "setup-debug-gui",
+    engine.trigger.on("setup"),
+    (world, resources, state, emitter) => {
+      const p = resources.get<p5>("p5");
+      const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+      const debugGui = p.createDiv();
+      debugGui.position(0, canvasBounds.max.y + 8, "absolute");
+      debugGui.style("width", canvasBounds.width + "px");
+
+      const pane = new Pane({
+        container: debugGui.elt,
+        title: "Poisson Disc Sampling",
+      });
+
+      type BindableState = {
+        [K in keyof typeof state]: (typeof state)[K] extends State<infer U>
+          ? U
+          : never;
+      };
+
+      const bindableState = Object.fromEntries(
+        Object.entries(state).map(([key, state]) => [key, state.value]),
+      ) as BindableState;
+
+      const proxiedBindableState = new Proxy(bindableState, {
+        set(
+          target,
+          prop: keyof BindableState,
+          value: BindableState[typeof prop],
+        ) {
+          state[prop].setValue(value);
+          target[prop] = value;
+          return true;
+        },
+      });
+
+      pane
+        .addBinding(proxiedBindableState, "poisson:min-distance", {
+          min: 10,
+          max: 50,
+        })
+        .on("change", (ev) => {
+          emitter.emit({
+            event: "poisson:config-change",
+          });
+        });
+
+      pane
+        .addBinding(proxiedBindableState, "poisson:sample-limit", {
+          min: 1,
+          max: 100,
+          step: 1,
+        })
+        .on("change", (ev) => {
+          emitter.emit({
+            event: "poisson:config-change",
+          });
+        });
+
+      return () => pane.dispose();
+    },
   );
 
   return engine;

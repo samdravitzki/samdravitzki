@@ -17,7 +17,13 @@ importers:
       tone:
         specifier: ^15.1.22
         version: 15.1.22
+      tweakpane:
+        specifier: ^4.0.5
+        version: 4.0.5
     devDependencies:
+      '@tweakpane/core':
+        specifier: ^2.0.5
+        version: 2.0.5
       '@types/p5':
         specifier: ^1.7.6
         version: 1.7.7
@@ -415,6 +421,9 @@ packages:
 
   '@tonejs/midi@2.0.28':
     resolution: {integrity: sha512-RII6YpInPsOZ5t3Si/20QKpNqB1lZ2OCFJSOzJxz38YdY/3zqDr3uaml4JuCWkdixuPqP1/TBnXzhQ39csyoVg==}
+
+  '@tweakpane/core@2.0.5':
+    resolution: {integrity: sha512-punBgD5rKCF5vcNo6BsSOXiDR/NSs9VM7SG65QSLJIxfRaGgj54ree9zQW6bO3pNFf3AogiGgaNODUVQRk9YqQ==}
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
@@ -893,6 +902,9 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
+  tweakpane@4.0.5:
+    resolution: {integrity: sha512-rxEXdSI+ArlG1RyO6FghC4ZUX8JkEfz8F3v1JuteXSV0pEtHJzyo07fcDG+NsJfN5L39kSbCYbB9cBGHyuI/tQ==}
+
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
@@ -1306,6 +1318,8 @@ snapshots:
     dependencies:
       array-flatten: 3.0.0
       midi-file: 1.2.4
+
+  '@tweakpane/core@2.0.5': {}
 
   '@tybys/wasm-util@0.10.1':
     dependencies:
@@ -1799,6 +1813,8 @@ snapshots:
       punycode: 2.3.1
 
   tslib@2.8.1: {}
+
+  tweakpane@4.0.5: {}
 
   typescript@5.9.3: {}
 
