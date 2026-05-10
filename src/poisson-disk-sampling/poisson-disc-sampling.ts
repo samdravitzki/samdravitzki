@@ -7,10 +7,11 @@ import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import State from "../ecs/core/State/State";
 import Vector from "../ecs/core/Vector/Vector";
 import World from "../ecs/core/World/World";
-import p5Part, { KeypressEvent } from "../ecs/parts/p5/p5-part";
+import p5Part, { MousePosition } from "../ecs/parts/p5/p5-part";
 import poissonDisc from "../lib/poisson-disc/poisson-disc";
 import randomDots from "./random-dots/random-dots";
 import { Position } from "../ecs/components/Position";
+import { PrimitiveShape } from "../ecs/parts/p5/primitive-renderer/components/Primitive";
 
 const pallete = {
   background: "#151515",
@@ -42,7 +43,7 @@ function placeRandomDots(world: World, resources: ResourcePool) {
   }
 }
 
-const DEFAULT_MIN_DISTANCE = 40;
+const DEFAULT_MIN_DISTANCE = 12;
 const DEFAULT_SAMPLE_LIMIT = 30;
 
 function createPoissonDot(dot: Vector) {
@@ -101,7 +102,7 @@ export default function poissonDiscSamplingDemoApp(parent?: HTMLElement) {
   );
 
   engine.system(
-    "update-poisson-dots",
+    "regenerate-poisson-dots",
     engine.trigger.on("poisson:config-change"),
     (world, resources, state) => {
       const canvasBounds = resources.get<Bounds>("canvas-bounds");
@@ -135,6 +136,40 @@ export default function poissonDiscSamplingDemoApp(parent?: HTMLElement) {
         for (let i = poissonDots.length; i < dots.length; i++) {
           const dot = dots[i];
           world.addBundle(createPoissonDot(dot));
+        }
+      }
+    },
+  );
+
+  engine.system(
+    "dot-size-hover-effect",
+    engine.trigger.on("update"),
+    (world, resources) => {
+      const p = resources.get<p5>("p5");
+
+      const { x: mouseX, y: mouseY } =
+        resources.get<MousePosition>("mouse-position");
+      const mousePosition = Vector.create(mouseX, mouseY);
+
+      const HOVER_RADIUS = 100;
+      const MAX_SCALE = 3;
+
+      const poissonDots = world.query<[Position, PrimitiveShape]>([
+        "position",
+        "primitive",
+        "poisson-dot",
+      ]);
+
+      for (const [position, primitive] of poissonDots) {
+        if (primitive.type !== "circle") continue;
+
+        const distance = position.position.distance(mousePosition);
+
+        if (distance < HOVER_RADIUS) {
+          const scale = 1 + (MAX_SCALE - 1) * (1 - distance / HOVER_RADIUS);
+          primitive.radius = 3 * scale;
+        } else {
+          primitive.radius = 3;
         }
       }
     },
