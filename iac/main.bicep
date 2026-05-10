@@ -20,5 +20,10 @@ resource wwwDomain 'Microsoft.Web/staticSites/customDomains@2024-11-01' = {
   name: 'www.dravitzki.com'
 }
 
+resource rootDomain 'Microsoft.Web/staticSites/customDomains@2024-11-01' = {
+  parent: site
+  name: 'dravitzki.com'
+}
+
 output personalSiteResourceName string = site.name
 output personalSiteUri string = 'https://${site.properties.defaultHostname}'
