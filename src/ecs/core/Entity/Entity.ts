@@ -10,6 +10,10 @@ class Entity {
     return Array.from(this._components.values());
   }
 
+  hasComponent(componentName: string) {
+    return this._components.has(componentName);
+  }
+
   getComponent(componentName: string) {
     return this._components.get(componentName);
   }
