@@ -1,7 +1,10 @@
 import createBundle from "../Bundle/createBundle";
 import Vector from "../Vector/Vector";
 import World from "../World/World";
-import { PrimitiveShape } from "../../parts/p5/primitive-renderer/components/Primitive";
+import {
+  Line,
+  ShapeStyle,
+} from "../../parts/p5/primitive-renderer/components/Primitive";
 
 type PathEdge = { start: Vector; end: Vector };
 
@@ -35,14 +38,16 @@ export function drawDebugPath(
           position: position,
         },
         {
-          name: "primitive",
-          type: "line",
+          name: "line",
           start: edge.start,
           end: edge.end,
+        } satisfies Line,
+        {
+          name: "shape-style",
           stroke: color,
           strokeWeight: 2,
           dash,
-        } satisfies PrimitiveShape,
+        },
       ]),
     );
   }

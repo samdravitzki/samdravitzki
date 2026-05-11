@@ -1,27 +1,34 @@
+import { Position } from "../../ecs/components/Position";
 import createBundle from "../../ecs/core/Bundle/createBundle";
 import Vector from "../../ecs/core/Vector/Vector";
+import {
+  ShapeStyle,
+  Text,
+} from "../../ecs/parts/p5/primitive-renderer/components/Primitive";
 
 function createScore(
   position: Vector,
   align: "left" | "right",
-  type: "player-score" | "ai-score"
+  type: "player-score" | "ai-score",
 ) {
   return createBundle([
     type,
     {
       name: "position",
       position,
-    },
+    } satisfies Position,
     {
-      name: "primitive",
-      stroke: [240, 60, 100],
-      strokeWeight: 2,
-      fill: [240, 60, 100],
-      type: "text",
+      name: "text",
       text: "0",
       align,
       size: 25,
-    },
+    } satisfies Text,
+    {
+      name: "shape-style",
+      stroke: [240, 60, 100],
+      strokeWeight: 2,
+      fill: [240, 60, 100],
+    } satisfies ShapeStyle,
   ]);
 }
 

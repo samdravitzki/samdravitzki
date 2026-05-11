@@ -11,7 +11,11 @@ import {
 } from "./components";
 import { Collision } from "../ecs/parts/collision/components/Collision";
 import { Position } from "../ecs/components/Position";
-import { PrimitiveShape } from "../ecs/parts/p5/primitive-renderer/components/Primitive";
+import {
+  Line,
+  ShapeStyle,
+  Text,
+} from "../ecs/parts/p5/primitive-renderer/components/Primitive";
 import castRay from "../ecs/parts/collision/cast-ray";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import minionBongUrl from "./sounds/minion-bong.mp3";
@@ -175,25 +179,15 @@ function updateScoreBoard(
 ) {
   const [playerScore, aiScore] = state.score.value;
 
-  const [playerScoreText] = world.query<[PrimitiveShape]>([
-    "primitive",
-    "player-score",
-  ])[0];
+  const [playerScoreText] = world.query<[Text]>(["text", "player-score"])[0];
 
   // Its pretty weird the type has to be narrowed after you receive it from a query
   // Seems like the query should be responsible for this
-  if (playerScoreText.type === "text") {
-    playerScoreText.text = playerScore.toString();
-  }
+  playerScoreText.text = playerScore.toString();
 
-  const [aiScoreText] = world.query<[PrimitiveShape]>([
-    "primitive",
-    "ai-score",
-  ])[0];
+  const [aiScoreText] = world.query<[Text]>(["text", "ai-score"])[0];
 
-  if (aiScoreText.type === "text") {
-    aiScoreText.text = aiScore.toString();
-  }
+  aiScoreText.text = aiScore.toString();
 }
 
 // Describes bow the collision handling worked in the orginial pong game
@@ -356,14 +350,17 @@ function ballTrajectorySystem(
 
     if (renderTrajectory.value) {
       trajectoryLineComponents.push({
-        name: "primitive",
+        name: "line",
+        start: Vector.create(0, 0),
+        end: end.minus(start),
+      } as Line);
+
+      trajectoryLineComponents.push({
+        name: "shape-style",
         stroke: [240, 60, 100],
         dash: linesAdded === 0 ? 0 : [5, 5],
         strokeWeight: 2,
-        type: "line",
-        start: Vector.create(0, 0),
-        end: end.minus(start),
-      } as PrimitiveShape);
+      } as ShapeStyle);
     }
 
     world.addBundle(createBundle(trajectoryLineComponents));
@@ -418,18 +415,21 @@ function setupSceneSystem(world: World, resources: ResourcePool) {
 
   const centerLineBundle = createBundle([
     {
-      name: "primitive",
+      name: "line",
+      start: new Vector(0, -canvasBounds.center.center.y),
+      end: new Vector(0, canvasBounds.center.center.y),
+    } satisfies Line,
+    {
+      name: "shape-style",
+
       stroke: [240, 60, 100],
       strokeWeight: 2,
       fill: [240, 60, 100],
-      type: "line",
-      start: new Vector(0, -canvasBounds.center.center.y),
-      end: new Vector(0, canvasBounds.center.center.y),
-    },
+    } satisfies ShapeStyle,
     {
       name: "position",
       position: canvasBounds.center.center,
-    },
+    } satisfies Position,
   ]);
 
   const leftBackboardBundle = createBackboard(

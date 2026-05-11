@@ -8,7 +8,6 @@ import World from "../ecs/core/World/World";
 import p5Part from "../ecs/parts/p5/p5-part";
 import {
   Circle,
-  PrimitiveShape,
   ShapeStyle,
   Square,
 } from "../ecs/parts/p5/primitive-renderer/components/Primitive";

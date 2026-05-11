@@ -1,5 +1,11 @@
+import { Position } from "../../ecs/components/Position";
 import createBundle from "../../ecs/core/Bundle/createBundle";
 import Vector from "../../ecs/core/Vector/Vector";
+import { Collider } from "../../ecs/parts/collision/components/Collider";
+import {
+  ShapeStyle,
+  Square,
+} from "../../ecs/parts/p5/primitive-renderer/components/Primitive";
 
 function createPaddle(position: Vector, owner: "player" | "ai") {
   const paddleSize = 40;
@@ -8,16 +14,18 @@ function createPaddle(position: Vector, owner: "player" | "ai") {
     owner,
     "paddle",
     {
-      name: "primitive",
-      fill: [240, 60, 100],
-      type: "square",
+      name: "square",
       width: 5,
       height: paddleSize,
-    },
+    } satisfies Square,
+    {
+      name: "shape-style",
+      fill: [240, 60, 100],
+    } satisfies ShapeStyle,
     {
       name: "position",
       position,
-    },
+    } satisfies Position,
     {
       name: "speed",
       value: 0.01,
@@ -28,7 +36,7 @@ function createPaddle(position: Vector, owner: "player" | "ai") {
       layer: "wall",
       width: 5,
       height: paddleSize,
-    },
+    } satisfies Collider,
   ]);
 }
 

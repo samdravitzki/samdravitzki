@@ -5,7 +5,11 @@ import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import World from "../ecs/core/World/World";
 import p5Part, { KeypressEvent } from "../ecs/parts/p5/p5-part";
-import { PrimitiveShape } from "../ecs/parts/p5/primitive-renderer/components/Primitive";
+import {
+  Circle,
+  Line,
+  ShapeStyle,
+} from "../ecs/parts/p5/primitive-renderer/components/Primitive";
 import gearText from "./gear-text";
 import GateNode, { commonGate, Direction } from "./gate";
 import animation from "../ecs/parts/animation/animation";
@@ -43,17 +47,20 @@ function buildGate(world: World, resources: ResourcePool) {
         position: midPoint.plus(canvasBounds.center.center),
       };
 
-      const edge: PrimitiveShape = {
-        name: "primitive",
-        stroke: [0, 0, 25],
-        fill: [0, 0, 25],
-        type: "line",
-        strokeWeight: 2,
+      const edge: Line = {
+        name: "line",
         start: node.position.minus(midPoint),
         end: neighbour.node.position.minus(midPoint),
       };
 
-      world.addBundle(createBundle([edge, position]));
+      const style: ShapeStyle = {
+        name: "shape-style",
+        stroke: [0, 0, 25],
+        fill: [0, 0, 25],
+        strokeWeight: 2,
+      };
+
+      world.addBundle(createBundle([edge, position, style]));
     }
   }
 
@@ -65,38 +72,41 @@ function buildGate(world: World, resources: ResourcePool) {
       position: pos,
     };
 
-    const primitive: PrimitiveShape =
+    const circle: Circle =
       point.name === "pass"
         ? {
-            name: "primitive",
-            fill: [0, 0, 25],
-            type: "circle",
+            name: "circle",
             radius: 3,
           }
         : {
-            name: "primitive",
-            fill: [240, 60, 100],
-            type: "circle",
+            name: "circle",
             radius: 5,
           };
 
-    world.addBundle(createBundle([primitive, position]));
+    const style: ShapeStyle = {
+      name: "shape-style",
+      fill: point.name === "pass" ? [0, 0, 25] : [240, 60, 100],
+    };
+
+    world.addBundle(createBundle([circle, position, style]));
   }
 
   // Shift Lever
   world.addBundle(
     createBundle([
-      "shift-lever",
-      {
-        name: "primitive",
-        fill: [0, 60, 100],
-        type: "circle",
-        radius: 15,
-      },
       {
         name: "position",
         position: canvasBounds.center.center,
-      },
+      } satisfies Position,
+      "shift-lever",
+      {
+        name: "circle",
+        radius: 15,
+      } satisfies Circle,
+      {
+        name: "shape-style",
+        fill: [0, 60, 100],
+      } satisfies ShapeStyle,
     ]),
   );
 }

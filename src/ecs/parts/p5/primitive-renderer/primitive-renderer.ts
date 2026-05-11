@@ -1,14 +1,7 @@
 import p5 from "p5";
 import World from "../../../core/World/World";
 import { Position } from "../../../components/Position";
-import {
-  PrimitiveShape,
-  Color,
-  ShapeStyle,
-  Square,
-  Line,
-  Text,
-} from "./components/Primitive";
+import { Color, ShapeStyle, Square, Line, Text } from "./components/Primitive";
 import { ResourcePool } from "../../../core/Engine/ResourcePool";
 
 function toP5Color(p: p5, color: string | number[]) {
@@ -116,51 +109,7 @@ function applyPrimitiveStyle(
 }
 
 function primitiveRendererSystem(world: World, resources: ResourcePool) {
-  const oldPrimitiveShapes = world.query<[Position, PrimitiveShape]>([
-    "position",
-    "primitive",
-  ]);
-
   const p = resources.get<p5>("p5");
-
-  for (const [position, primitive] of oldPrimitiveShapes) {
-    applyPrimitiveStyle(p, {
-      stroke: primitive.stroke,
-      strokeWeight: primitive.strokeWeight,
-      fill: primitive.fill === false ? undefined : primitive.fill,
-      dash: primitive.dash,
-      dashOffset: primitive.dashOffset,
-    });
-
-    if (primitive.type === "circle") {
-      drawCircle(p, position, primitive.radius);
-    }
-
-    if (primitive.type === "line") {
-      drawLine(p, position, primitive.start, primitive.end);
-    }
-
-    if (primitive.type === "square") {
-      drawSquare(
-        p,
-        position,
-        primitive.width,
-        primitive.height,
-        primitive.borderRadius,
-      );
-    }
-
-    if (primitive.type === "text") {
-      drawText(
-        p,
-        position,
-        primitive.text,
-        primitive.size,
-        primitive.align,
-        primitive.font,
-      );
-    }
-  }
 
   const squares = world.query<[string, Position, ShapeStyle]>([
     "entity-id",
@@ -193,14 +142,7 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
 
     if (entity.hasComponent("text")) {
       const text = entity.getComponent("text") as Text;
-      drawText(
-        p,
-        position,
-        text.text,
-        text.size,
-        text.align,
-        text.font,
-      );
+      drawText(p, position, text.text, text.size, text.align, text.font);
     }
   }
 }

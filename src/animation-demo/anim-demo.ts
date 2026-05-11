@@ -4,8 +4,12 @@ import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import Vector from "../ecs/core/Vector/Vector";
-import p5Part, { KeypressEvent } from "../ecs/parts/p5/p5-part";
-import { PrimitiveShape } from "../ecs/parts/p5/primitive-renderer/components/Primitive";
+import p5Part from "../ecs/parts/p5/p5-part";
+import {
+  Circle,
+  Line,
+  ShapeStyle,
+} from "../ecs/parts/p5/primitive-renderer/components/Primitive";
 import {
   createAnimation,
   Animation,
@@ -69,15 +73,17 @@ export default function animationDemo(parent?: HTMLElement) {
           {
             name: "position",
             position: new Vector(0, 0),
-          },
+          } satisfies Position,
           {
-            name: "primitive",
-            type: "line",
+            name: "line",
             start: animation.from,
             end: animation.to,
+          } satisfies Line,
+          {
+            name: "shape-style",
             stroke: palette[300],
             strokeWeight: 2,
-          } satisfies PrimitiveShape,
+          } satisfies ShapeStyle,
         ]),
       );
     }
@@ -96,13 +102,16 @@ export default function animationDemo(parent?: HTMLElement) {
             {
               name: "position",
               position: animation.from.plus(canvasBounds.center.center),
-            },
+            } satisfies Position,
             {
-              name: "primitive",
-              type: "circle",
+              name: "circle",
               radius: 10,
+            } satisfies Circle,
+            {
+              name: "shape-style",
               fill: palette[600],
-            } satisfies PrimitiveShape,
+              strokeWeight: 2,
+            } satisfies ShapeStyle,
           ]),
         );
       });

@@ -5,7 +5,11 @@ import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import World from "../ecs/core/World/World";
 import p5Part from "../ecs/parts/p5/p5-part";
-import { PrimitiveShape } from "../ecs/parts/p5/primitive-renderer/components/Primitive";
+import {
+  Text,
+  ShapeStyle,
+  Square,
+} from "../ecs/parts/p5/primitive-renderer/components/Primitive";
 
 function templateInfo(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
@@ -16,14 +20,16 @@ function templateInfo(world: World, resources: ResourcePool) {
       position: canvasBounds.center.center,
     } satisfies Position,
     {
-      name: "primitive",
-      type: "text",
+      name: "text",
       text: "[template project]",
-      fill: "#ffffffde",
       size: 25,
       align: "center",
       font: "Courier New",
-    } satisfies PrimitiveShape,
+    } satisfies Text,
+    {
+      name: "shape-style",
+      fill: "#ffffffde",
+    } satisfies ShapeStyle,
   ]);
 
   world.addBundle(text);
@@ -36,15 +42,17 @@ function templateInfo(world: World, resources: ResourcePool) {
       position: canvasBounds.center.center,
     } satisfies Position,
     {
-      name: "primitive",
-      type: "square",
-      stroke: "#ffffff78",
-      strokeWeight: 3,
-      dash: [10, 10],
+      name: "square",
       width: canvasBounds.width - borderInset,
       height: canvasBounds.height - borderInset,
       borderRadius: 20,
-    } satisfies PrimitiveShape,
+    } satisfies Square,
+    {
+      name: "shape-style",
+      stroke: "#ffffff78",
+      strokeWeight: 3,
+      dash: [10, 10],
+    } satisfies ShapeStyle,
   ]);
 
   world.addBundle(border);

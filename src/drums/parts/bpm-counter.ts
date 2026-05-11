@@ -1,3 +1,4 @@
+import { Position } from "../../ecs/components/Position";
 import Bounds from "../../ecs/core/Bounds/Bounds";
 import createBundle from "../../ecs/core/Bundle/createBundle";
 import { ResourcePool } from "../../ecs/core/Engine/ResourcePool";
@@ -5,7 +6,10 @@ import { Part } from "../../ecs/core/Part/Part";
 import State from "../../ecs/core/State/State";
 import Vector from "../../ecs/core/Vector/Vector";
 import World from "../../ecs/core/World/World";
-import { PrimitiveShape } from "../../ecs/parts/p5/primitive-renderer/components/Primitive";
+import {
+  ShapeStyle,
+  Text,
+} from "../../ecs/parts/p5/primitive-renderer/components/Primitive";
 
 export type Keypress = {
   key: string;
@@ -28,15 +32,17 @@ const bpmCounterPart: Part<
       {
         name: "position",
         position: canvasBounds.top.left.plus(Vector.create(10, 30)),
-      },
+      } satisfies Position,
       {
-        name: "primitive",
-        fill: [240, 60, 100, 255],
-        type: "text",
+        name: "text",
         text: "0",
         align: "left",
         size: 25,
-      },
+      } satisfies Text,
+      {
+        name: "shape-style",
+        fill: [240, 60, 100, 255],
+      } satisfies ShapeStyle,
     ]);
 
     const genreBundle = createBundle([
@@ -44,15 +50,17 @@ const bpmCounterPart: Part<
       {
         name: "position",
         position: canvasBounds.top.left.plus(Vector.create(10, 50)),
-      },
+      } satisfies Position,
       {
-        name: "primitive",
-        fill: [240, 60, 100, 255],
-        type: "text",
+        name: "text",
         text: "0",
         align: "left",
         size: 15,
-      },
+      } satisfies Text,
+      {
+        name: "shape-style",
+        fill: [240, 60, 100, 255],
+      } satisfies ShapeStyle,
     ]);
 
     world.addBundle(bpmBundle);
@@ -64,29 +72,19 @@ const bpmCounterPart: Part<
     resources: ResourcePool,
     state: { bpm: State<number> },
   ) {
-    const [bpmText] = world.query<[PrimitiveShape]>([
-      "primitive",
-      "bpm-text",
-    ])[0];
+    const [bpmText] = world.query<[Text]>(["text", "bpm-text"])[0];
 
-    if (bpmText.type === "text") {
-      // Each press atm triggers two beats atm (all the second beats triggered by a keypress is empty atm)
-      bpmText.text = `${Math.round(state.bpm.value).toString()} bpm`;
+    // Each press atm triggers two beats atm (all the second beats triggered by a keypress is empty atm)
+    bpmText.text = `${Math.round(state.bpm.value).toString()} bpm`;
+
+    const [genreText] = world.query<[Text]>(["text", "genre-text"])[0];
+
+    if (state.bpm.value <= 95) {
+      genreText.text = "hiphop";
     }
 
-    const [genreText] = world.query<[PrimitiveShape]>([
-      "primitive",
-      "genre-text",
-    ])[0];
-
-    if (genreText.type === "text") {
-      if (state.bpm.value <= 95) {
-        genreText.text = "hiphop";
-      }
-
-      if (state.bpm.value >= 100) {
-        genreText.text = "house";
-      }
+    if (state.bpm.value >= 100) {
+      genreText.text = "house";
     }
   }
 
