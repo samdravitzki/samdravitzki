@@ -45,9 +45,9 @@ function placeRandomDots(world: World, resources: ResourcePool) {
 
 const DEFAULT_MIN_DISTANCE = 12;
 const DEFAULT_SAMPLE_LIMIT = 30;
+const DOT_WIDTH = 2;
 
 function createPoissonDot(dot: Vector) {
-  const DOT_WIDTH = 3;
   return createBundle([
     "poisson-dot",
     {
@@ -58,7 +58,7 @@ function createPoissonDot(dot: Vector) {
     },
     {
       name: "position",
-      position: dot.plus(Vector.create(DOT_WIDTH, DOT_WIDTH)),
+      position: dot,
     },
   ]);
 }
@@ -167,9 +167,9 @@ export default function poissonDiscSamplingDemoApp(parent?: HTMLElement) {
 
         if (distance < HOVER_RADIUS) {
           const scale = 1 + (MAX_SCALE - 1) * (1 - distance / HOVER_RADIUS);
-          primitive.radius = 3 * scale;
+          primitive.radius = DOT_WIDTH * scale;
         } else {
-          primitive.radius = 3;
+          primitive.radius = DOT_WIDTH;
         }
       }
     },
