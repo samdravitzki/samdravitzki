@@ -133,6 +133,7 @@ export default function animationDemo(parent?: HTMLElement) {
     playButton.mousePressed(() => {
       world.query<[Animation]>(["animation"]).forEach(([animation]) => {
         animation.startTime = Date.now();
+        animation.t = 0;
       });
     });
 
