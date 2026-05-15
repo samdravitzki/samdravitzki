@@ -5,11 +5,9 @@ import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import World from "../ecs/core/World/World";
 import p5Part from "../ecs/parts/p5/p5-part";
-import {
-  Text,
-  ShapeStyle,
-  Square,
-} from "../ecs/parts/p5/primitive-renderer/components/Primitive";
+import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
+import { Text } from "../ecs/parts/p5/shape-components";
+import { Square } from "../ecs/parts/p5/shape-components";
 
 function templateInfo(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
@@ -52,6 +50,7 @@ function templateInfo(world: World, resources: ResourcePool) {
       stroke: "#ffffff78",
       strokeWeight: 3,
       dash: [10, 10],
+      dashOffset: 0,
     } satisfies ShapeStyle,
   ]);
 

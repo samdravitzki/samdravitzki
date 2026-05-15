@@ -1,10 +1,8 @@
 import createBundle from "../Bundle/createBundle";
 import Vector from "../Vector/Vector";
 import World from "../World/World";
-import {
-  Line,
-  ShapeStyle,
-} from "../../parts/p5/primitive-renderer/components/Primitive";
+import { ShapeStyle } from "../../parts/p5/primitive-renderer/ShapeStyle";
+import { Line } from "../../parts/p5/shape-components";
 
 type PathEdge = { start: Vector; end: Vector };
 

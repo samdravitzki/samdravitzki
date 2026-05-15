@@ -11,11 +11,9 @@ import {
 } from "./components";
 import { Collision } from "../ecs/parts/collision/components/Collision";
 import { Position } from "../ecs/components/Position";
-import {
-  Line,
-  ShapeStyle,
-  Text,
-} from "../ecs/parts/p5/primitive-renderer/components/Primitive";
+import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
+import { Text } from "../ecs/parts/p5/shape-components";
+import { Line } from "../ecs/parts/p5/shape-components";
 import castRay from "../ecs/parts/collision/cast-ray";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import minionBongUrl from "./sounds/minion-bong.mp3";

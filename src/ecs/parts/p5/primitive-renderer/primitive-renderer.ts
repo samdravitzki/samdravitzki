@@ -1,7 +1,10 @@
 import p5 from "p5";
 import World from "../../../core/World/World";
 import { Position } from "../../../components/Position";
-import { Color, ShapeStyle, Square, Line, Text } from "./components/Primitive";
+import { Color, ShapeStyle } from "./ShapeStyle";
+import { Text } from "../shape-components";
+import { Square } from "../shape-components";
+import { Line } from "../shape-components";
 import { ResourcePool } from "../../../core/Engine/ResourcePool";
 
 function toP5Color(p: p5, color: string | number[]) {
@@ -53,17 +56,16 @@ function drawText(
   align?: "left" | "right" | "center",
   font?: string,
 ) {
-  p.textSize(size);
-
   if (align === "left") p.textAlign(p.LEFT);
   if (align === "right") p.textAlign(p.RIGHT);
   if (!align || align === "center") p.textAlign(p.CENTER);
 
-  p.text(text, position.position.x, position.position.y);
-
   if (font) {
     p.textFont(font);
   }
+  p.textSize(size);
+
+  p.text(text, position.position.x, position.position.y);
 }
 
 function applyPrimitiveStyle(
@@ -118,6 +120,7 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
   ]);
 
   for (const [entityId, position, style] of squares) {
+    p.push();
     applyPrimitiveStyle(p, style);
 
     const entity = world.entity(entityId);
@@ -144,6 +147,7 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
       const text = entity.getComponent("text") as Text;
       drawText(p, position, text.text, text.size, text.align, text.font);
     }
+    p.pop();
   }
 }
 

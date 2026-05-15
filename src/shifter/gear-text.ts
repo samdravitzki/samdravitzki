@@ -6,10 +6,8 @@ import { Part } from "../ecs/core/Part/Part";
 import State from "../ecs/core/State/State";
 import Vector from "../ecs/core/Vector/Vector";
 import World from "../ecs/core/World/World";
-import {
-  Text,
-  ShapeStyle,
-} from "../ecs/parts/p5/primitive-renderer/components/Primitive";
+import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
+import { Text } from "../ecs/parts/p5/shape-components";
 import GateNode, { commonGate } from "./gate";
 
 function setupGearText(

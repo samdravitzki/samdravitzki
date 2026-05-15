@@ -5,11 +5,9 @@ import createBundle from "../ecs/core/Bundle/createBundle";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import Vector from "../ecs/core/Vector/Vector";
 import p5Part from "../ecs/parts/p5/p5-part";
-import {
-  Circle,
-  Line,
-  ShapeStyle,
-} from "../ecs/parts/p5/primitive-renderer/components/Primitive";
+import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
+import { Line } from "../ecs/parts/p5/shape-components";
+import { Circle } from "../ecs/parts/p5/shape-components";
 import {
   createAnimation,
   Animation,

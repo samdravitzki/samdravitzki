@@ -11,10 +11,8 @@ import p5Part, { MousePosition } from "../ecs/parts/p5/p5-part";
 import poissonDisc from "../lib/poisson-disc/poisson-disc";
 import randomDots from "./random-dots/random-dots";
 import { Position } from "../ecs/components/Position";
-import {
-  Circle,
-  ShapeStyle,
-} from "../ecs/parts/p5/primitive-renderer/components/Primitive";
+import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
+import { Circle } from "../ecs/parts/p5/shape-components";
 
 const pallete = {
   background: "#151515",

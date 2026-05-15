@@ -5,11 +5,9 @@ import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import World from "../ecs/core/World/World";
 import p5Part, { KeypressEvent } from "../ecs/parts/p5/p5-part";
-import {
-  Circle,
-  Line,
-  ShapeStyle,
-} from "../ecs/parts/p5/primitive-renderer/components/Primitive";
+import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
+import { Line } from "../ecs/parts/p5/shape-components";
+import { Circle } from "../ecs/parts/p5/shape-components";
 import gearText from "./gear-text";
 import GateNode, { commonGate, Direction } from "./gate";
 import animation from "../ecs/parts/animation/animation";

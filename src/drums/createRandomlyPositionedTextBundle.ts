@@ -2,10 +2,8 @@ import { Position } from "../ecs/components/Position";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import Vector from "../ecs/core/Vector/Vector";
-import {
-  ShapeStyle,
-  Text,
-} from "../ecs/parts/p5/primitive-renderer/components/Primitive";
+import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
+import { Text } from "../ecs/parts/p5/shape-components";
 import randomInt from "../lib/randomInt/randomInt";
 
 export function createRandomlyPositionedTextBundle(

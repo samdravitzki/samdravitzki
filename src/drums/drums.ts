@@ -16,7 +16,7 @@ import Bounds from "../ecs/core/Bounds/Bounds";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import p5Part, { KeypressEvent } from "../ecs/parts/p5/p5-part";
 import { EventEmitter } from "../ecs/core/System/System";
-import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/components/Primitive";
+import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
 
 const tabs = {
   house: houseTab,

@@ -1,0 +1,206 @@
+import p5 from "p5";
+import { ResourcePool } from "../../../core/Engine/ResourcePool";
+import World from "../../../core/World/World";
+import { Position } from "../../../components/Position";
+import { Circle, Square } from "../shape-components";
+import Bounds from "../../../core/Bounds/Bounds";
+import sdf from "../../../../sdf/sdf";
+
+function drawCircle(p: p5.Graphics, position: Position, radius: number) {
+  p.circle(position.position.x, position.position.y, radius * 2);
+}
+
+function drawSquare(
+  p: p5.Graphics,
+  position: Position,
+  width: number,
+  height: number,
+  borderRadius?: number,
+) {
+  p.rect(
+    position.position.x,
+    position.position.y,
+    width,
+    height,
+    borderRadius ?? 0,
+  );
+}
+
+let vertSrc = `
+precision highp float;
+
+attribute vec3 aPosition;
+
+// The transform of the object being drawn
+uniform mat4 uModelViewMatrix;
+// Transforms 3D coordinates to
+// 2D screen coordinates
+uniform mat4 uProjectionMatrix;
+
+void main() {
+   // Apply the camera transform
+  vec4 viewModelPosition = uModelViewMatrix * vec4(aPosition, 1.0);
+
+  // Tell WebGL where the vertex goes
+  gl_Position = uProjectionMatrix * viewModelPosition;
+}
+`;
+
+// based on https://www.shadertoy.com/view/X3j3Wd
+let fragSrc = `
+precision highp float;
+
+const int MAX_SHAPE_COUNT = 128;
+uniform int u_shape_types[MAX_SHAPE_COUNT];
+uniform vec2 u_shape_pos[MAX_SHAPE_COUNT];
+uniform vec2 u_shape_size[MAX_SHAPE_COUNT];
+uniform int u_shape_count;
+
+float sdCircle(vec2 p, float radius) {
+    return length(p) - radius;
+}
+
+float sdBox(vec2 p, vec2 size) {
+    vec2 d = abs(p) - size;
+    return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+}
+
+float smin(float a, float b, float k) {
+    float h = clamp(0.5 + 0.5 * (b - a) / k, 0., 1.);
+    return mix(b, a, h) - k * h * (1. - h);
+}
+
+const vec4 YELLOW_DARK = vec4(1.0, 0.79, 0.22, 1.0);
+const vec4 YELLOW_LIGHT = vec4(1.0, 0.88, 0.4, 1.0);
+const vec4 BLUE_DARK = vec4(0.54, 0.79, 1.0, 1.0);
+const vec4 TRANSPARENT = vec4(0, 0, 0, 0);
+
+void main() {
+  float frag = 99999999.0;
+
+  for (int i = 0; i < MAX_SHAPE_COUNT; i++) {
+    int type = u_shape_types[i];
+    vec2 pos = u_shape_pos[i];
+    vec2 size = u_shape_size[i];
+
+    if (type == 0) {
+      float res = sdCircle(pos - gl_FragCoord.xy, size.x);
+      frag = smin(frag, res, 100.0);
+    }
+
+    if (type == 1) {
+      float res = sdBox(pos - gl_FragCoord.xy, size);
+      frag = smin(frag, res, 100.0);
+    }
+  }
+
+  // vec2 posa = u_shape_pos[0];
+  // vec2 sizea = u_shape_size[0];
+  // vec2 posb = u_shape_pos[1];
+  // vec2 sizeb = u_shape_size[1];
+
+  // float d1 = sdCircle(posa - gl_FragCoord.xy, sizea.x);
+  // float d2 = sdBox(posb - gl_FragCoord.xy, sizeb);
+
+  // float frag = smin(d1, d2, 100.0);
+
+  if (frag < 0.0) {
+      gl_FragColor = YELLOW_DARK;
+  } 
+      else {
+      gl_FragColor = BLUE_DARK;
+  }
+}`;
+
+function sdfRendererSetupSystem(world: World, resources: ResourcePool) {
+  const p = resources.get<p5>("p5");
+  const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+  const sdfShader = p.createShader(vertSrc, fragSrc);
+  const sdfBuffer = p.createGraphics(
+    canvasBounds.width,
+    canvasBounds.height,
+    p.WEBGL,
+  );
+  // console.log("pixelDensity", p.pixelDensity());
+  //
+  // sdfBuffer.pixelDensity(1);
+
+  resources.set("sdf-shader", sdfShader);
+  resources.set("sdf-buffer", sdfBuffer);
+}
+
+function sdfRendererSystem(world: World, resources: ResourcePool) {
+  const p = resources.get<p5>("p5");
+  const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+  const scale = p.pixelDensity();
+  const bufferWidth = canvasBounds.width * scale;
+  const bufferHeight = canvasBounds.width * scale;
+
+  const sdfShader = resources.get<p5.Shader>("sdf-shader");
+  const sdfBuffer = resources.get<p5.Graphics>("sdf-buffer");
+
+  const shapes = world.query<[string, Position]>([
+    "entity-id",
+    "position",
+    "sdf-shape",
+  ]);
+
+  sdfBuffer.shader(sdfShader);
+
+  const shapeType: number[] = [];
+  const shapePos: [number, number][] = [];
+  const shapeSize: [number, number][] = [];
+
+  for (const [entityId, position] of shapes) {
+    const entity = world.entity(entityId);
+
+    if (entity.hasComponent("circle")) {
+      const circle = entity.getComponent("circle") as Circle;
+
+      const type = 0;
+      // Not sure why the positions have to be doulbed
+      const x = position.position.x * scale;
+      const y = bufferHeight - position.position.y * scale;
+
+      const radius = circle.radius * scale;
+
+      shapeType.push(type);
+      shapePos.push([x, y]);
+      shapeSize.push([radius, 0]);
+    }
+
+    if (entity.hasComponent("square")) {
+      const square = entity.getComponent("square") as Square;
+
+      const type = 1;
+      // Need to figure out the transformations, the WEBGL centering needs to be considered
+      const x = position.position.x * scale;
+      const y = bufferHeight - position.position.y * scale;
+      const sizeX = square.width * scale;
+      const sizeY = square.height * scale;
+
+      shapeType.push(type);
+      shapePos.push([x, y]);
+      shapeSize.push([sizeX / 2, sizeY / 2]);
+    }
+  }
+
+  sdfShader.setUniform("u_shape_types", shapeType);
+  sdfShader.setUniform("u_shape_pos", shapePos.flat());
+  sdfShader.setUniform("u_shape_size", shapeSize.flat());
+  sdfShader.setUniform("u_shape_count", shapeType.length);
+
+  sdfBuffer.rect(
+    -bufferWidth / 2,
+    -bufferHeight / 2,
+    bufferWidth,
+    bufferHeight,
+  );
+
+  p.image(sdfBuffer, 0, 0);
+}
+
+export default sdfRendererSystem;
+export { sdfRendererSetupSystem };

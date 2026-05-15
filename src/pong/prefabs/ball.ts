@@ -2,10 +2,8 @@ import { Position } from "../../ecs/components/Position";
 import createBundle from "../../ecs/core/Bundle/createBundle";
 import Vector from "../../ecs/core/Vector/Vector";
 import { Collider } from "../../ecs/parts/collision/components/Collider";
-import {
-  Circle,
-  ShapeStyle,
-} from "../../ecs/parts/p5/primitive-renderer/components/Primitive";
+import { ShapeStyle } from "../../ecs/parts/p5/primitive-renderer/ShapeStyle";
+import { Circle } from "../../ecs/parts/p5/shape-components";
 
 function createBall(position: Vector) {
   return createBundle([
