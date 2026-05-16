@@ -15,6 +15,11 @@ type KeypressEvent = {
   keyCode: string;
 };
 
+type MousepressEvent = {
+  position: MousePosition;
+  button: number; // 0 = left click, 1 = middle click, 2 = right click
+};
+
 type P5Events = {
   update: void;
   "after-update": void;
@@ -22,6 +27,7 @@ type P5Events = {
   setup: void;
   keyPressed: KeypressEvent;
   keyReleased: KeypressEvent;
+  mousePressed: MousepressEvent;
 };
 
 function createP5System(
@@ -91,6 +97,17 @@ function createP5System(
 
         eventEmitter.emit({ event: "keyReleased", payload });
       };
+
+      p.mousePressed = (event) => {
+        if (!event) return;
+
+        const payload: MousepressEvent = {
+          position: { x: event.x, y: event.y },
+          button: event.button,
+        };
+
+        eventEmitter.emit({ event: "mousePressed", payload });
+      };
     }, parent);
 
     return () => {
@@ -101,4 +118,4 @@ function createP5System(
 
 export default createP5System;
 
-export type { MousePosition, P5Events, KeypressEvent };
+export type { MousePosition, P5Events, KeypressEvent, MousepressEvent };

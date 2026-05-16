@@ -6,20 +6,25 @@ import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import Vector from "../ecs/core/Vector/Vector";
 import World from "../ecs/core/World/World";
 import p5Part, { KeypressEvent, MousePosition } from "../ecs/parts/p5/p5-part";
+import { MousepressEvent } from "../ecs/parts/p5/p5-setup";
 import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
+import sdfRendererPart from "../ecs/parts/p5/sdf-renderer/sdf-renderer-part";
 import { Square } from "../ecs/parts/p5/shape-components";
 import { Circle } from "../ecs/parts/p5/shape-components";
 
-function sdfShapes(world: World, resources: ResourcePool) {
-  const canvasBounds = resources.get<Bounds>("canvas-bounds");
-  const style = {
+const baseShapeComponents = [
+  "sdf-shape",
+  {
     name: "shape-style",
     stroke: "#ffffff78",
     strokeWeight: 3,
     dash: [10, 15],
-  } satisfies ShapeStyle;
+  } satisfies ShapeStyle,
+];
 
-  const sdfShapeComponent = "sdf-shape";
+function sdfShapes(world: World, resources: ResourcePool) {
+  const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
   const circle = createBundle([
     {
       name: "position",
@@ -29,8 +34,7 @@ function sdfShapes(world: World, resources: ResourcePool) {
       name: "circle",
       radius: 75,
     } satisfies Circle,
-    style,
-    sdfShapeComponent,
+    ...baseShapeComponents,
   ]);
 
   const square = createBundle([
@@ -43,11 +47,7 @@ function sdfShapes(world: World, resources: ResourcePool) {
       width: 150,
       height: 150,
     } satisfies Square,
-    {
-      ...style,
-      dashOffset: 5,
-    },
-    sdfShapeComponent,
+    ...baseShapeComponents,
   ]);
 
   world.addBundle(circle);
@@ -60,26 +60,18 @@ export default function sdf(parent?: HTMLElement) {
     .event("update")
     .event("after-update")
     .event<"keyPressed", KeypressEvent>("keyPressed")
-    .event("keypress")
+    .event<"mousePressed", MousepressEvent>("mousePressed")
     .build();
 
   engine.part(p5Part([500, 500], parent, [0, 0, 14]));
+  engine.part(sdfRendererPart());
 
   engine.system("sdf-shapes", engine.trigger.on("setup"), sdfShapes);
   engine.system(
     "move-circle",
-    engine.trigger.on("keyPressed"),
+    engine.trigger.on("mousePressed"),
     (world, resources) => {
-      const canvasBounds = resources.get<Bounds>("canvas-bounds");
       const mousePosition = resources.get<MousePosition>("mouse-position");
-      const style = {
-        name: "shape-style",
-        stroke: "#ffffff78",
-        strokeWeight: 3,
-        dash: [10, 15],
-      } satisfies ShapeStyle;
-
-      const sdfShapeComponent = "sdf-shape";
       const circle = createBundle([
         {
           name: "position",
@@ -89,8 +81,7 @@ export default function sdf(parent?: HTMLElement) {
           name: "circle",
           radius: 75,
         } satisfies Circle,
-        style,
-        sdfShapeComponent,
+        ...baseShapeComponents,
       ]);
 
       world.addBundle(circle);

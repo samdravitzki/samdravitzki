@@ -25,13 +25,6 @@ function p5Part(
       triggerBuilder.on("after-update"),
       primitiveRendererSystem,
     );
-
-    registerSystem("p5", triggerBuilder.on("setup"), sdfRendererSetupSystem);
-    registerSystem(
-      "sdf-renderer",
-      triggerBuilder.on("after-update"),
-      sdfRendererSystem,
-    );
   };
 
   return part;

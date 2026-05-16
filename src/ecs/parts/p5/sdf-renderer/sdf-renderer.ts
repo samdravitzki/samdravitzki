@@ -70,15 +70,19 @@ float smin(float a, float b, float k) {
     return mix(b, a, h) - k * h * (1. - h);
 }
 
+const vec4 RED = vec4(1.0, 0.0, 0.0, 1.0);
 const vec4 YELLOW_DARK = vec4(1.0, 0.79, 0.22, 1.0);
 const vec4 YELLOW_LIGHT = vec4(1.0, 0.88, 0.4, 1.0);
 const vec4 BLUE_DARK = vec4(0.54, 0.79, 1.0, 1.0);
+const vec4 BLUE_LIGHT = vec4(0.76, 0.89, 1.0, 1.0);
 const vec4 TRANSPARENT = vec4(0, 0, 0, 0);
 
 void main() {
   float frag = 99999999.0;
 
   for (int i = 0; i < MAX_SHAPE_COUNT; i++) {
+    if (i > u_shape_count - 1) { break; }
+
     int type = u_shape_types[i];
     vec2 pos = u_shape_pos[i];
     vec2 size = u_shape_size[i];
@@ -94,21 +98,20 @@ void main() {
     }
   }
 
-  // vec2 posa = u_shape_pos[0];
-  // vec2 sizea = u_shape_size[0];
-  // vec2 posb = u_shape_pos[1];
-  // vec2 sizeb = u_shape_size[1];
+  float fragRes = floor(abs(mod(0.15*frag, 2.0)-1.0) + 0.5);
 
-  // float d1 = sdCircle(posa - gl_FragCoord.xy, sizea.x);
-  // float d2 = sdBox(posb - gl_FragCoord.xy, sizeb);
-
-  // float frag = smin(d1, d2, 100.0);
-
+  // Internal colour
   if (frag < 0.0) {
-      gl_FragColor = YELLOW_DARK;
+      gl_FragColor = mix(BLUE_LIGHT, BLUE_DARK, abs(fragRes));;
   } 
-      else {
-      gl_FragColor = BLUE_DARK;
+  // External colour
+  else {
+      gl_FragColor = mix(YELLOW_LIGHT, YELLOW_DARK, fragRes);
+  }
+
+  // Shape outline
+  if (abs(frag)-1.0 < 0.9) {
+      gl_FragColor = RED;
   }
 }`;
 
@@ -122,9 +125,6 @@ function sdfRendererSetupSystem(world: World, resources: ResourcePool) {
     canvasBounds.height,
     p.WEBGL,
   );
-  // console.log("pixelDensity", p.pixelDensity());
-  //
-  // sdfBuffer.pixelDensity(1);
 
   resources.set("sdf-shader", sdfShader);
   resources.set("sdf-buffer", sdfBuffer);
@@ -186,6 +186,11 @@ function sdfRendererSystem(world: World, resources: ResourcePool) {
       shapeSize.push([sizeX / 2, sizeY / 2]);
     }
   }
+
+  // console.log("u_shape_types", shapeType);
+  // console.log("u_shape_pos", shapePos.flat());
+  // console.log("u_shape_size", shapeSize.flat());
+  // console.log("u_shape_count", shapeType.length);
 
   sdfShader.setUniform("u_shape_types", shapeType);
   sdfShader.setUniform("u_shape_pos", shapePos.flat());
