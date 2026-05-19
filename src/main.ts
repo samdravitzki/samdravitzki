@@ -74,6 +74,7 @@ miniApps.push({
   name: "sdf",
   symbol: "💧",
   appId: "sdf-sketch",
+  controls: [["create sdf circle", "click + drag"]],
   app: sdf,
 });
 

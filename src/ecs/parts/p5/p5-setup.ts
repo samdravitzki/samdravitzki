@@ -28,6 +28,7 @@ type P5Events = {
   keyPressed: KeypressEvent;
   keyReleased: KeypressEvent;
   mousePressed: MousepressEvent;
+  mouseReleased: MousepressEvent;
 };
 
 function createP5System(
@@ -107,6 +108,17 @@ function createP5System(
         };
 
         eventEmitter.emit({ event: "mousePressed", payload });
+      };
+
+      p.mouseReleased = (event) => {
+        if (!event) return;
+
+        const payload: MousepressEvent = {
+          position: { x: event.x, y: event.y },
+          button: event.button,
+        };
+
+        eventEmitter.emit({ event: "mouseReleased", payload });
       };
     }, parent);
 

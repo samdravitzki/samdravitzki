@@ -3,6 +3,7 @@ import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
+import { EntityId } from "../ecs/core/Entity/Entity";
 import Vector from "../ecs/core/Vector/Vector";
 import World from "../ecs/core/World/World";
 import p5Part, { KeypressEvent, MousePosition } from "../ecs/parts/p5/p5-part";
@@ -61,6 +62,7 @@ export default function sdf(parent?: HTMLElement) {
     .event("after-update")
     .event<"keyPressed", KeypressEvent>("keyPressed")
     .event<"mousePressed", MousepressEvent>("mousePressed")
+    .event<"mouseReleased", MousepressEvent>("mouseReleased")
     .build();
 
   engine.part(p5Part([500, 500], parent, [0, 0, 14]));
@@ -68,11 +70,12 @@ export default function sdf(parent?: HTMLElement) {
 
   engine.system("sdf-shapes", engine.trigger.on("setup"), sdfShapes);
   engine.system(
-    "move-circle",
+    "create-interactive-shape",
     engine.trigger.on("mousePressed"),
     (world, resources) => {
       const mousePosition = resources.get<MousePosition>("mouse-position");
       const circle = createBundle([
+        "interactive-shape",
         {
           name: "position",
           position: Vector.create(mousePosition.x, mousePosition.y),
@@ -85,6 +88,39 @@ export default function sdf(parent?: HTMLElement) {
       ]);
 
       world.addBundle(circle);
+    },
+  );
+
+  engine.system(
+    "move-interactive-shape",
+    engine.trigger.on("update"),
+    (world, resources) => {
+      const mousePosition = resources.get<MousePosition>("mouse-position");
+      const interactiveShape = world.query<[Position]>([
+        "position",
+        "interactive-shape",
+      ])[0];
+
+      if (!interactiveShape) {
+        return;
+      }
+
+      const [position] = interactiveShape;
+
+      position.position = Vector.create(mousePosition.x, mousePosition.y);
+    },
+  );
+
+  engine.system(
+    "remove-interactive-shape",
+    engine.trigger.on("mouseReleased"),
+    (world) => {
+      const [entityId] = world.query<[EntityId]>([
+        "entity-id",
+        "interactive-shape",
+      ])[0];
+
+      world.removeEntity(entityId);
     },
   );
 

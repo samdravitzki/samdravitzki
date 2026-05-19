@@ -1,8 +1,5 @@
 import { Part } from "../../core/Part/Part";
 import primitiveRendererSystem from "./primitive-renderer/primitive-renderer";
-import sdfRendererSystem, {
-  sdfRendererSetupSystem,
-} from "./sdf-renderer/sdf-renderer";
 import createP5System, {
   KeypressEvent,
   MousePosition,
