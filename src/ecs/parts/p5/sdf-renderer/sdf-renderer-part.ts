@@ -2,10 +2,15 @@ import { Part } from "../../../core/Part/Part";
 import sdfRendererSystem, { sdfRendererSetupSystem } from "./sdf-renderer";
 
 function sdfRendererPart() {
-  const part: Part<{
-    setup: void;
-    "after-update": void;
-  }> = ({ registerSystem, triggerBuilder }) => {
+  const part: Part<
+    {
+      setup: void;
+      "after-update": void;
+    },
+    {
+      "sdf-renderer:debug": boolean;
+    }
+  > = ({ registerSystem, triggerBuilder }) => {
     registerSystem(
       "sdf-renderer-setup",
       triggerBuilder.on("setup"),

@@ -4,7 +4,7 @@ import createP5System, {
   KeypressEvent,
   MousePosition,
   P5Events,
-} from "./p5-setup";
+} from "./p5-system";
 
 function p5Part(
   size: [number, number],

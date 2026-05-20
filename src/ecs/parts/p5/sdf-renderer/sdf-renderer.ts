@@ -5,6 +5,7 @@ import { Position } from "../../../components/Position";
 import { Circle, Square } from "../shape-components";
 import Bounds from "../../../core/Bounds/Bounds";
 import sdf from "../../../../sdf/sdf";
+import State from "../../../core/State/State";
 
 function drawCircle(p: p5.Graphics, position: Position, radius: number) {
   p.circle(position.position.x, position.position.y, radius * 2);
@@ -55,6 +56,7 @@ uniform int u_shape_types[MAX_SHAPE_COUNT];
 uniform vec2 u_shape_pos[MAX_SHAPE_COUNT];
 uniform vec2 u_shape_size[MAX_SHAPE_COUNT];
 uniform int u_shape_count;
+uniform bool u_debug;
 
 float sdCircle(vec2 p, float radius) {
     return length(p) - radius;
@@ -98,21 +100,30 @@ void main() {
     }
   }
 
-  float fragRes = floor(abs(mod(0.15*frag, 2.0)-1.0) + 0.5);
+  if (u_debug) {
+    float fragRes = floor(abs(mod(0.15*frag, 2.0)-1.0) + 0.5);
 
-  // Internal colour
-  if (frag < 0.0) {
-      gl_FragColor = mix(BLUE_LIGHT, BLUE_DARK, abs(fragRes));;
-  } 
-  // External colour
-  else {
-      gl_FragColor = mix(YELLOW_LIGHT, YELLOW_DARK, fragRes);
+    // Internal colour
+    if (frag < 0.0) {
+        gl_FragColor = mix(BLUE_LIGHT, BLUE_DARK, abs(fragRes));;
+    } 
+    // External colour
+    else {
+        gl_FragColor = mix(YELLOW_LIGHT, YELLOW_DARK, fragRes);
+    }
+
+    // Shape outline
+    if (abs(frag)-1.0 < 0.9) {
+        gl_FragColor = RED;
+    }
+  } else {
+    if (abs(frag)-1.0 < 0.9) {
+        gl_FragColor = RED;
+    } else {
+        gl_FragColor = TRANSPARENT;
+    }
   }
 
-  // Shape outline
-  if (abs(frag)-1.0 < 0.9) {
-      gl_FragColor = RED;
-  }
 }`;
 
 function sdfRendererSetupSystem(world: World, resources: ResourcePool) {
@@ -130,7 +141,13 @@ function sdfRendererSetupSystem(world: World, resources: ResourcePool) {
   resources.set("sdf-buffer", sdfBuffer);
 }
 
-function sdfRendererSystem(world: World, resources: ResourcePool) {
+function sdfRendererSystem(
+  world: World,
+  resources: ResourcePool,
+  state: {
+    "sdf-renderer:debug": State<boolean>;
+  },
+) {
   const p = resources.get<p5>("p5");
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
@@ -187,16 +204,13 @@ function sdfRendererSystem(world: World, resources: ResourcePool) {
     }
   }
 
-  // console.log("u_shape_types", shapeType);
-  // console.log("u_shape_pos", shapePos.flat());
-  // console.log("u_shape_size", shapeSize.flat());
-  // console.log("u_shape_count", shapeType.length);
-
   sdfShader.setUniform("u_shape_types", shapeType);
   sdfShader.setUniform("u_shape_pos", shapePos.flat());
   sdfShader.setUniform("u_shape_size", shapeSize.flat());
   sdfShader.setUniform("u_shape_count", shapeType.length);
+  sdfShader.setUniform("u_debug", state["sdf-renderer:debug"].value);
 
+  sdfBuffer.background(0, 0);
   sdfBuffer.rect(
     -bufferWidth / 2,
     -bufferHeight / 2,

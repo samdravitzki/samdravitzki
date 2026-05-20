@@ -1,3 +1,5 @@
+import p5 from "p5";
+import { Pane } from "tweakpane";
 import { Position } from "../ecs/components/Position";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
@@ -7,11 +9,12 @@ import { EntityId } from "../ecs/core/Entity/Entity";
 import Vector from "../ecs/core/Vector/Vector";
 import World from "../ecs/core/World/World";
 import p5Part, { KeypressEvent, MousePosition } from "../ecs/parts/p5/p5-part";
-import { MousepressEvent } from "../ecs/parts/p5/p5-setup";
+import { MousepressEvent } from "../ecs/parts/p5/p5-system";
 import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
 import sdfRendererPart from "../ecs/parts/p5/sdf-renderer/sdf-renderer-part";
 import { Square } from "../ecs/parts/p5/shape-components";
 import { Circle } from "../ecs/parts/p5/shape-components";
+import State from "../ecs/core/State/State";
 
 const baseShapeComponents = [
   "sdf-shape",
@@ -57,6 +60,7 @@ function sdfShapes(world: World, resources: ResourcePool) {
 
 export default function sdf(parent?: HTMLElement) {
   const engine = EngineBuilder.create()
+    .state("sdf-renderer:debug", false)
     .event("setup")
     .event("update")
     .event("after-update")
@@ -74,11 +78,18 @@ export default function sdf(parent?: HTMLElement) {
     engine.trigger.on("mousePressed"),
     (world, resources) => {
       const mousePosition = resources.get<MousePosition>("mouse-position");
+      const mousePosVector = Vector.create(mousePosition.x, mousePosition.y);
+      const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+      if (!canvasBounds.inBounds(mousePosVector)) {
+        return;
+      }
+
       const circle = createBundle([
         "interactive-shape",
         {
           name: "position",
-          position: Vector.create(mousePosition.x, mousePosition.y),
+          position: mousePosVector,
         } satisfies Position,
         {
           name: "circle",
@@ -121,6 +132,50 @@ export default function sdf(parent?: HTMLElement) {
       ])[0];
 
       world.removeEntity(entityId);
+    },
+  );
+
+  engine.system(
+    "setup-debug-gui",
+    engine.trigger.on("setup"),
+    (world, resources, state, emitter) => {
+      const p = resources.get<p5>("p5");
+      const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+      const debugGui = p.createDiv();
+      debugGui.position(0, canvasBounds.max.y + 40, "absolute");
+      debugGui.style("width", canvasBounds.width + "px");
+
+      const pane = new Pane({
+        container: debugGui.elt,
+        title: "Signed distance functions",
+      });
+
+      type BindableState = {
+        [K in keyof typeof state]: (typeof state)[K] extends State<infer U>
+          ? U
+          : never;
+      };
+
+      const bindableState = Object.fromEntries(
+        Object.entries(state).map(([key, state]) => [key, state.value]),
+      ) as BindableState;
+
+      const proxiedBindableState = new Proxy(bindableState, {
+        set(
+          target,
+          prop: keyof BindableState,
+          value: BindableState[typeof prop],
+        ) {
+          state[prop].setValue(value);
+          target[prop] = value;
+          return true;
+        },
+      });
+
+      pane.addBinding(proxiedBindableState, "sdf-renderer:debug");
+
+      return () => pane.dispose();
     },
   );
 
