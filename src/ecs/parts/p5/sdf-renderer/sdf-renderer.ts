@@ -6,26 +6,13 @@ import { Circle, Square } from "../shape-components";
 import Bounds from "../../../core/Bounds/Bounds";
 import sdf from "../../../../sdf/sdf";
 import State from "../../../core/State/State";
+import Component from "../../../core/Component/Component";
+import { Color } from "../primitive-renderer/ShapeStyle";
 
-function drawCircle(p: p5.Graphics, position: Position, radius: number) {
-  p.circle(position.position.x, position.position.y, radius * 2);
-}
-
-function drawSquare(
-  p: p5.Graphics,
-  position: Position,
-  width: number,
-  height: number,
-  borderRadius?: number,
-) {
-  p.rect(
-    position.position.x,
-    position.position.y,
-    width,
-    height,
-    borderRadius ?? 0,
-  );
-}
+export type SdfShape = Component & {
+  name: "sdf-shape";
+  fill: number[];
+};
 
 let vertSrc = `
 precision highp float;
@@ -55,6 +42,7 @@ const int MAX_SHAPE_COUNT = 128;
 uniform int u_shape_types[MAX_SHAPE_COUNT];
 uniform vec2 u_shape_pos[MAX_SHAPE_COUNT];
 uniform vec2 u_shape_size[MAX_SHAPE_COUNT];
+uniform vec3 u_shape_fill[MAX_SHAPE_COUNT];
 uniform int u_shape_count;
 uniform bool u_debug;
 
@@ -81,6 +69,7 @@ const vec4 TRANSPARENT = vec4(0, 0, 0, 0);
 
 void main() {
   float frag = 99999999.0;
+  vec3 fillAcc = vec3(0.0);
 
   for (int i = 0; i < MAX_SHAPE_COUNT; i++) {
     if (i > u_shape_count - 1) { break; }
@@ -88,41 +77,41 @@ void main() {
     int type = u_shape_types[i];
     vec2 pos = u_shape_pos[i];
     vec2 size = u_shape_size[i];
+    vec3 fill = u_shape_fill[i];
+
+    float shape = 0.0;
 
     if (type == 0) {
-      float res = sdCircle(pos - gl_FragCoord.xy, size.x);
-      frag = smin(frag, res, 100.0);
+      shape = sdCircle(pos - gl_FragCoord.xy, size.x);
     }
 
     if (type == 1) {
-      float res = sdBox(pos - gl_FragCoord.xy, size);
-      frag = smin(frag, res, 100.0);
+      shape = sdBox(pos - gl_FragCoord.xy, size);
     }
+
+
+    float weight = 100.0;
+
+    float h = clamp(0.5 + 0.5 * (shape - frag) / weight, 0.0, 1.0);
+
+    frag = mix(shape, frag, h) - weight * h * (1.0 - h);
+
+    fillAcc = mix(fill, fillAcc, h);
   }
+
+  float insideMask = 1.0 - step(0.0, frag);
 
   if (u_debug) {
     float fragRes = floor(abs(mod(0.15*frag, 2.0)-1.0) + 0.5);
-
-    // Internal colour
-    if (frag < 0.0) {
-        gl_FragColor = mix(BLUE_LIGHT, BLUE_DARK, abs(fragRes));;
-    } 
-    // External colour
-    else {
-        gl_FragColor = mix(YELLOW_LIGHT, YELLOW_DARK, fragRes);
-    }
-
-    // Shape outline
-    if (abs(frag)-1.0 < 0.9) {
-        gl_FragColor = RED;
-    }
+    vec4 insideColor = mix(BLUE_LIGHT, BLUE_DARK, abs(fragRes));
+    vec4 outsideColor = mix(YELLOW_LIGHT, YELLOW_DARK, fragRes);
+    gl_FragColor = mix(outsideColor, insideColor, insideMask);
   } else {
-    if (abs(frag)-1.0 < 0.9) {
-        gl_FragColor = RED;
-    } else {
-        gl_FragColor = TRANSPARENT;
-    }
+    gl_FragColor = mix(TRANSPARENT, vec4(fillAcc, 1.0), insideMask);
   }
+
+  float outlineMask = 1.0 - smoothstep(1.0, 2.0, abs(frag));
+  gl_FragColor = mix(gl_FragColor, RED, outlineMask);
 
 }`;
 
@@ -158,7 +147,7 @@ function sdfRendererSystem(
   const sdfShader = resources.get<p5.Shader>("sdf-shader");
   const sdfBuffer = resources.get<p5.Graphics>("sdf-buffer");
 
-  const shapes = world.query<[string, Position]>([
+  const shapes = world.query<[string, Position, SdfShape]>([
     "entity-id",
     "position",
     "sdf-shape",
@@ -169,9 +158,12 @@ function sdfRendererSystem(
   const shapeType: number[] = [];
   const shapePos: [number, number][] = [];
   const shapeSize: [number, number][] = [];
+  const shapeFill: [number, number, number][] = [];
 
-  for (const [entityId, position] of shapes) {
+  for (const [entityId, position, sdfShape] of shapes) {
     const entity = world.entity(entityId);
+
+    shapeFill.push([sdfShape.fill[0], sdfShape.fill[1], sdfShape.fill[2]]);
 
     if (entity.hasComponent("circle")) {
       const circle = entity.getComponent("circle") as Circle;
@@ -207,6 +199,7 @@ function sdfRendererSystem(
   sdfShader.setUniform("u_shape_types", shapeType);
   sdfShader.setUniform("u_shape_pos", shapePos.flat());
   sdfShader.setUniform("u_shape_size", shapeSize.flat());
+  sdfShader.setUniform("u_shape_fill", shapeFill.flat());
   sdfShader.setUniform("u_shape_count", shapeType.length);
   sdfShader.setUniform("u_debug", state["sdf-renderer:debug"].value);
 

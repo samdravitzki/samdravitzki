@@ -15,9 +15,9 @@ import sdfRendererPart from "../ecs/parts/p5/sdf-renderer/sdf-renderer-part";
 import { Square } from "../ecs/parts/p5/shape-components";
 import { Circle } from "../ecs/parts/p5/shape-components";
 import State from "../ecs/core/State/State";
+import { SdfShape } from "../ecs/parts/p5/sdf-renderer/sdf-renderer";
 
 const baseShapeComponents = [
-  "sdf-shape",
   {
     name: "shape-style",
     stroke: "#ffffff78",
@@ -38,6 +38,10 @@ function sdfShapes(world: World, resources: ResourcePool) {
       name: "circle",
       radius: 75,
     } satisfies Circle,
+    {
+      name: "sdf-shape",
+      fill: [255, 255, 0],
+    } satisfies SdfShape,
     ...baseShapeComponents,
   ]);
 
@@ -51,6 +55,10 @@ function sdfShapes(world: World, resources: ResourcePool) {
       width: 150,
       height: 150,
     } satisfies Square,
+    {
+      name: "sdf-shape",
+      fill: [255, 255, 255],
+    } satisfies SdfShape,
     ...baseShapeComponents,
   ]);
 
@@ -95,6 +103,10 @@ export default function sdf(parent?: HTMLElement) {
           name: "circle",
           radius: 75,
         } satisfies Circle,
+        {
+          name: "sdf-shape",
+          fill: [255, 255, 0],
+        } satisfies SdfShape,
         ...baseShapeComponents,
       ]);
 
@@ -126,12 +138,15 @@ export default function sdf(parent?: HTMLElement) {
     "remove-interactive-shape",
     engine.trigger.on("mouseReleased"),
     (world) => {
-      const [entityId] = world.query<[EntityId]>([
+      const interactiveShape = world.query<[EntityId]>([
         "entity-id",
         "interactive-shape",
       ])[0];
 
-      world.removeEntity(entityId);
+      if (interactiveShape) {
+        const [entityId] = interactiveShape;
+        world.removeEntity(entityId);
+      }
     },
   );
 
