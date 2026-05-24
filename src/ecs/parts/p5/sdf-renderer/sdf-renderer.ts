@@ -110,11 +110,14 @@ function sdfRendererSystem(
   sdfShader.setUniform("u_debug", state["sdf-renderer:debug"].value);
 
   sdfBuffer.background(0, 0);
+
+  const padding = 10;
+
   sdfBuffer.rect(
-    -bufferWidth / 2,
-    -bufferHeight / 2,
-    bufferWidth,
-    bufferHeight,
+    -(bufferWidth / 2 + padding),
+    -(bufferHeight / 2 + padding),
+    bufferWidth + padding * 2,
+    bufferHeight + padding * 2,
   );
 
   p.image(sdfBuffer, 0, 0);
