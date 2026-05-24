@@ -13,7 +13,8 @@
         "ms-azuretools.vscode-bicep",
         "github.vscode-github-actions",
         "eamodio.gitlens",
-        "YoavBls.pretty-ts-errors"
+        "YoavBls.pretty-ts-errors",
+        "raczzalan.webgl-glsl-editor"
       ]
     }
   }

@@ -40,6 +40,7 @@ function sdfShapes(world: World, resources: ResourcePool) {
     } satisfies Circle,
     {
       name: "sdf-shape",
+      // fill: [0, 0, 0],
       fill: [255, 255, 0],
     } satisfies SdfShape,
     ...baseShapeComponents,
@@ -57,13 +58,14 @@ function sdfShapes(world: World, resources: ResourcePool) {
     } satisfies Square,
     {
       name: "sdf-shape",
-      fill: [255, 255, 255],
+      // fill: [0, 0, 0],
+      fill: [255, 0, 255],
     } satisfies SdfShape,
     ...baseShapeComponents,
   ]);
 
-  world.addBundle(circle);
   world.addBundle(square);
+  world.addBundle(circle);
 }
 
 export default function sdf(parent?: HTMLElement) {
@@ -105,7 +107,9 @@ export default function sdf(parent?: HTMLElement) {
         } satisfies Circle,
         {
           name: "sdf-shape",
-          fill: [255, 255, 0],
+          // fill: [0, 0, 0],
+          // fill: [255, 255, 255],
+          fill: [0, 255, 255],
         } satisfies SdfShape,
         ...baseShapeComponents,
       ]);
