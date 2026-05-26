@@ -4,8 +4,25 @@ import { Collider } from "./components/Collider";
 import { Collision } from "./components/Collision";
 import aabbAabbIntersection from "./intersection/aabb-aabb-intersection";
 import { Aabb } from "./intersection/intersection-shapes";
+import { ResourcePool } from "../../core/Engine/ResourcePool";
+import { EventEmitter } from "../../core/System/System";
 
-function collisionSystem(world: World) {
+type CollisionEventPayload = {
+  type: "enter" | "exit";
+  collidingEntity: string;
+  collidedEntity: string;
+};
+
+type CollisionSystemEvents = {
+  collision: CollisionEventPayload;
+};
+
+function collisionSystem(
+  world: World,
+  resources: ResourcePool,
+  state: unknown,
+  eventEmitter: EventEmitter<CollisionSystemEvents>,
+) {
   const colliders = world.query<[string, Position, Collider]>([
     "entity-id",
     "position",
@@ -43,7 +60,40 @@ function collisionSystem(world: World) {
             entityId: entityB,
           };
 
+          if (!world.entity(entityA).hasComponent("collision")) {
+            eventEmitter.emit({
+              event: "collision",
+              payload: {
+                type: "enter",
+                collidingEntity: entityA,
+                collidedEntity: entityB,
+              },
+            });
+          }
+
+          /**
+           * An entity can only store one collision with another entity. This wont work
+           * if there is a need to store multiple collisions. May need to update the Collision
+           * component to store the list of entities an entity is Colliding with instead, if
+           * needed in the future.
+           */
           world.entity(entityA).replaceComponent(collision);
+        } else {
+          const collision = world
+            .entity(entityA)
+            .getComponent("collision") as Collision;
+
+          if (collision && collision.entityId === entityB) {
+            world.entity(entityA).removeComponent("collision");
+            eventEmitter.emit({
+              event: "collision",
+              payload: {
+                type: "exit",
+                collidingEntity: entityA,
+                collidedEntity: entityB,
+              },
+            });
+          }
         }
       }
     }
@@ -56,22 +106,7 @@ function collisionLoggingSystem(world: World) {
   }
 }
 
-/**
- * Remove all the collisions that exist in the world
- *
- * Designed to be used to cleanup the collisions at the end of tick so that collisions
- * are not left over after they have completed
- * @param world
- */
-function collisionCleanupSystem(world: World) {
-  for (const [entityId, collision] of world.query<[string, Collision]>([
-    "entity-id",
-    "collision",
-  ])) {
-    world.entity(entityId).removeComponent(collision.name);
-  }
-}
-
 export default collisionSystem;
 
-export { collisionCleanupSystem, collisionLoggingSystem };
+export { collisionLoggingSystem };
+export type { CollisionEventPayload };

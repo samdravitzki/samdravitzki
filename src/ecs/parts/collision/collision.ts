@@ -1,11 +1,10 @@
 import p5 from "p5";
 import World from "../../core/World/World";
-import { Engine } from "../../core/Engine/Engine";
 import { Collider } from "./components/Collider";
 import { Position } from "../../components/Position";
 import collisionSystem, {
-  collisionCleanupSystem,
   collisionLoggingSystem,
+  CollisionEventPayload,
 } from "./collision-systems";
 import { ResourcePool } from "../../core/Engine/ResourcePool";
 import { Part } from "../../core/Part/Part";
@@ -36,6 +35,7 @@ function collisions(
   const part: Part<{
     update: void;
     "after-update": void;
+    collision: CollisionEventPayload;
   }> = ({ registerSystem, triggerBuilder }) => {
     registerSystem(
       "collisionSystem",
@@ -43,16 +43,10 @@ function collisions(
       collisionSystem,
     );
 
-    registerSystem(
-      "collisionCleanupSystem",
-      triggerBuilder.on("after-update"),
-      collisionCleanupSystem,
-    );
-
     if (visualiseColliders) {
       registerSystem(
         "collisionRender",
-        triggerBuilder.on("update"),
+        triggerBuilder.on("after-update"),
         collisionRenderSystem,
       );
     }
@@ -70,3 +64,4 @@ function collisions(
 }
 
 export default collisions;
+export type { CollisionEventPayload };

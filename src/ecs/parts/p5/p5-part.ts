@@ -10,12 +10,13 @@ function p5Part(
   size: [number, number],
   parent?: HTMLElement,
   background: [number, number, number] | string = [240, 90, 60],
+  hideCursor: boolean = false,
 ) {
   const part: Part<P5Events> = ({ registerSystem, triggerBuilder }) => {
     registerSystem(
       "p5",
       triggerBuilder.on("init"),
-      createP5System(size, parent, background),
+      createP5System(size, parent, background, hideCursor),
     );
     registerSystem(
       "primitive-renderer",

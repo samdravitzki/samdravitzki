@@ -35,6 +35,7 @@ function createP5System(
   size: [number, number],
   parent?: HTMLElement,
   background: [number, number, number] | string = [240, 90, 60],
+  hideCursor: boolean = false,
 ) {
   return function p5System(
     world: World,
@@ -55,6 +56,9 @@ function createP5System(
         p.colorMode(p.HSB, 360, 100, 100, 100);
         p.noStroke();
         p.rectMode(p.CENTER);
+        if (hideCursor) {
+          p.noCursor();
+        }
         resources.set("canvas-bounds", canvasBounds);
         eventEmitter.emit({ event: "setup" });
       };
