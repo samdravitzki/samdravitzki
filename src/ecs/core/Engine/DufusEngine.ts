@@ -65,7 +65,7 @@ class DufusEngine<
         emit: ({ event: emittedEvent, payload }) =>
           // Would like to figure out why this type assertion is needed, and how it could be avoided
           this._eventDispatcher.publish(
-            emittedEvent as Event,
+            emittedEvent as keyof EventMap,
             payload as EventMap[Event],
           ),
       },

@@ -4,17 +4,11 @@ import { ResourcePool } from "../Engine/ResourcePool";
 
 type Dispose = () => void;
 
-type EventPayloadPairs<EventMap extends Record<string, unknown>> = {
-  [EventKey in keyof EventMap]: {
-    event: EventKey;
-    payload?: EventMap[EventKey];
-  };
-}[keyof EventMap];
-
 type EventEmitter<EventMap extends Record<string, unknown>> = {
-  emit: <EmitterEventMap extends EventMap>(
-    events: EventPayloadPairs<EmitterEventMap>,
-  ) => void;
+  emit: <M extends EventMap, K extends keyof M>(events: {
+    event: K;
+    payload?: M[K];
+  }) => void;
 };
 
 /**
