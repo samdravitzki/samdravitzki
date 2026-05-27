@@ -41,6 +41,7 @@ float smin(float a, float b, float k) {
 // }
 
 const vec4 RED = vec4(1.0, 0.0, 0.0, 1.0);
+const vec4 WHITE = vec4(1.0, 1.0, 1.0, 1.0);
 const vec4 YELLOW_DARK = vec4(1.0, 0.79, 0.22, 1.0);
 const vec4 YELLOW_LIGHT = vec4(1.0, 0.88, 0.4, 1.0);
 const vec4 BLUE_DARK = vec4(0.54, 0.79, 1.0, 1.0);
@@ -98,6 +99,6 @@ void main() {
     float outlineWidth = 3.0;
     float outlineMask = 1.0 - smoothstep(1.0, outlineWidth, abs(overallSignedDistance));
     // float outlineMask = 1.0 - step(outlineWidth, abs(overallSignedDistance));
-    gl_FragColor = mix(gl_FragColor, RED, outlineMask);
+    gl_FragColor = mix(gl_FragColor, WHITE, outlineMask);
 
 }

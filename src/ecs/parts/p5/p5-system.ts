@@ -15,7 +15,8 @@ type KeypressEvent = {
   keyCode: string;
 };
 
-type MousepressEvent = {
+type ClickEventPayload = {
+  type: "press" | "release";
   position: MousePosition;
   button: number; // 0 = left click, 1 = middle click, 2 = right click
 };
@@ -27,8 +28,9 @@ type P5Events = {
   setup: void;
   keyPressed: KeypressEvent;
   keyReleased: KeypressEvent;
-  mousePressed: MousepressEvent;
-  mouseReleased: MousepressEvent;
+  "click:press": ClickEventPayload;
+  "click:release": ClickEventPayload;
+  click: ClickEventPayload;
 };
 
 function createP5System(
@@ -55,6 +57,7 @@ function createP5System(
         p.createCanvas(canvasBounds.width, canvasBounds.height);
         p.colorMode(p.HSB, 360, 100, 100, 100);
         p.noStroke();
+        p.smooth();
         p.rectMode(p.CENTER);
         if (hideCursor) {
           p.noCursor();
@@ -106,23 +109,30 @@ function createP5System(
       p.mousePressed = (event) => {
         if (!event) return;
 
-        const payload: MousepressEvent = {
+        const payload: ClickEventPayload = {
+          type: "press",
           position: { x: event.x, y: event.y },
           button: event.button,
         };
 
-        eventEmitter.emit({ event: "mousePressed", payload });
+        eventEmitter.emit({ event: "click", payload });
+        eventEmitter.emit({ event: "click:press", payload });
       };
 
       p.mouseReleased = (event) => {
         if (!event) return;
 
-        const payload: MousepressEvent = {
+        const payload: ClickEventPayload = {
+          type: "release",
           position: { x: event.x, y: event.y },
           button: event.button,
         };
 
-        eventEmitter.emit({ event: "mouseReleased", payload });
+        eventEmitter.emit({ event: "click", payload });
+        eventEmitter.emit({
+          event: "click:release",
+          payload,
+        });
       };
     }, parent);
 
@@ -134,4 +144,4 @@ function createP5System(
 
 export default createP5System;
 
-export type { MousePosition, P5Events, KeypressEvent, MousepressEvent };
+export type { MousePosition, P5Events, KeypressEvent, ClickEventPayload };
