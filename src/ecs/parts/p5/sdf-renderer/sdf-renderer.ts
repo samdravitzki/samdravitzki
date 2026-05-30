@@ -35,8 +35,11 @@ function sdfRendererSystem(
   resources: ResourcePool,
   state: {
     "sdf-renderer:debug": State<boolean>;
+    "sdf-renderer:enabled": State<boolean>;
   },
 ) {
+  if (!state["sdf-renderer:enabled"].value) return;
+
   const p = resources.get<p5>("p5");
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
@@ -99,8 +102,6 @@ function sdfRendererSystem(
       shapeSize.push([sizeX / 2, sizeY / 2]);
     }
   }
-
-  // console.log("u_shape_fill", shapeFill.flat());
 
   sdfShader.setUniform("u_shape_types", shapeType);
   sdfShader.setUniform("u_shape_pos", shapePos.flat());

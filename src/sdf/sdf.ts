@@ -82,7 +82,7 @@ const square = [
   } satisfies ShapeStyle,
 ];
 
-function sdfShapes(world: World, resources: ResourcePool) {
+function sdfShapes(world: World) {
   world.addBundle(
     createBundle([
       ...square,
@@ -106,6 +106,7 @@ function sdfShapes(world: World, resources: ResourcePool) {
 export default function sdf(parent?: HTMLElement) {
   const engine = EngineBuilder.create()
     .state("sdf-renderer:debug", false)
+    .state("sdf-renderer:enabled", true)
     .event("setup")
     .event("update")
     .event("after-update")
@@ -122,10 +123,15 @@ export default function sdf(parent?: HTMLElement) {
 
   engine.system("sdf-shapes", engine.trigger.on("setup"), sdfShapes);
 
+  engine.system("setup-toolbar", engine.trigger.on("setup"), () => {
+    // create one button for grabbing and dragging, and two others for square and circle creation
+    // default to grab and drag, if you click a shape, then place it somewhere it switches to grab and drag mode
+  })
+
   engine.system(
     "setup-cursor",
     engine.trigger.on("setup"),
-    (world, resources) => {
+    (world) => {
       const cursorCollider = createBundle([
         "cursor",
         {
@@ -329,6 +335,7 @@ export default function sdf(parent?: HTMLElement) {
       });
 
       pane.addBinding(proxiedBindableState, "sdf-renderer:debug");
+      pane.addBinding(proxiedBindableState, "sdf-renderer:enabled");
 
       return () => pane.dispose();
     },

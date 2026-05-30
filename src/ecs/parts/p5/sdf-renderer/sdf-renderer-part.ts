@@ -9,6 +9,7 @@ function sdfRendererPart() {
     },
     {
       "sdf-renderer:debug": boolean;
+      "sdf-renderer:enabled": boolean;
     }
   > = ({ registerSystem, triggerBuilder }) => {
     registerSystem(
