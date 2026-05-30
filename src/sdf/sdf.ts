@@ -22,15 +22,6 @@ import collisions, {
 } from "../ecs/parts/collision/collision";
 import { Collision } from "../ecs/parts/collision/components/Collision";
 
-const baseShapeStyle = [
-  {
-    name: "shape-style",
-    stroke: "#ffffff78",
-    strokeWeight: 3,
-    dash: [10, 15],
-  } satisfies ShapeStyle,
-];
-
 const circle = [
   {
     name: "circle",
@@ -126,43 +117,39 @@ export default function sdf(parent?: HTMLElement) {
   engine.system("setup-toolbar", engine.trigger.on("setup"), () => {
     // create one button for grabbing and dragging, and two others for square and circle creation
     // default to grab and drag, if you click a shape, then place it somewhere it switches to grab and drag mode
-  })
+  });
 
-  engine.system(
-    "setup-cursor",
-    engine.trigger.on("setup"),
-    (world) => {
-      const cursorCollider = createBundle([
-        "cursor",
-        {
-          name: "shape-style",
-          stroke: "#ffffff",
-          strokeWeight: 3,
-        } satisfies ShapeStyle,
-        {
-          name: "position",
-          position: Vector.create(0, 0),
-        } satisfies Position,
-        {
-          name: "circle",
-          radius: 5,
-        } satisfies Circle,
-        {
-          name: "sdf-shape",
-          fill: [255, 255, 255],
-        } satisfies SdfShape,
-        {
-          name: "collider",
-          type: "aabb",
-          layer: "wall",
-          width: 10,
-          height: 10,
-        } satisfies Collider,
-      ]);
+  engine.system("setup-cursor", engine.trigger.on("setup"), (world) => {
+    const cursorCollider = createBundle([
+      "cursor",
+      {
+        name: "shape-style",
+        stroke: "#ffffff",
+        strokeWeight: 3,
+      } satisfies ShapeStyle,
+      {
+        name: "position",
+        position: Vector.create(0, 0),
+      } satisfies Position,
+      {
+        name: "circle",
+        radius: 5,
+      } satisfies Circle,
+      {
+        name: "sdf-shape",
+        fill: [255, 255, 255],
+      } satisfies SdfShape,
+      {
+        name: "collider",
+        type: "aabb",
+        layer: "wall",
+        width: 10,
+        height: 10,
+      } satisfies Collider,
+    ]);
 
-      world.addBundle(cursorCollider);
-    },
-  );
+    world.addBundle(cursorCollider);
+  });
 
   engine.system(
     "move-cursor",

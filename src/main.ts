@@ -7,6 +7,7 @@ import projectTemplate from "./project-template/project-template";
 import sdf from "./sdf/sdf";
 import shifter from "./shifter/shifter";
 import snakeGame from "./snake/snake-game";
+import cursorActions from "./cursor-actions/cursor-actions";
 import "./style.css";
 
 type MiniApp = (parent?: HTMLElement) => Engine<any, any>;
@@ -68,6 +69,14 @@ miniApps.push({
   symbol: "⚡",
   appId: "animation-demo-sketch",
   app: animationDemo,
+});
+
+miniApps.push({
+  name: "cursor-actions",
+  symbol: "🖱️",
+  appId: "cursor-actions-sketch",
+  controls: [["interact", "click + drag"]],
+  app: cursorActions,
 });
 
 miniApps.push({
