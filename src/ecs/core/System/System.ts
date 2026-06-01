@@ -1,15 +1,9 @@
 import World from "../World/World";
 import State from "../State/State";
 import { ResourcePool } from "../Engine/ResourcePool";
+import { EventEmitter } from "../Engine/EventEmitter";
 
 type Dispose = () => void;
-
-type EventEmitter<EventMap extends Record<string, unknown>> = {
-  emit: <M extends EventMap, K extends keyof M>(events: {
-    event: K;
-    payload?: M[K];
-  }) => void;
-};
 
 /**
  * An ECS system, create systems to implement behaviour on the ECS world

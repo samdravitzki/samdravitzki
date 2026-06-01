@@ -1,3 +1,5 @@
+import { EventEmitter } from "./EventEmitter";
+
 type EventListener<T> = (payload: T) => void;
 
 type ListenerStore<EventMap extends Record<string, unknown>> = {
@@ -48,6 +50,21 @@ class EventDipatcher<EventMap extends Record<string, unknown>> {
     for (const listener of listeners) {
       listener(payload);
     }
+  }
+
+  /**
+   * Creates emitter that publishes events to this dispatcher
+   */
+  createEmitter(): EventEmitter<EventMap> {
+    const emitter: EventEmitter<EventMap> = {
+      emit: ({ event, payload }) =>
+        this.publish(
+          event as keyof EventMap,
+          payload as EventMap[keyof EventMap],
+        ),
+    };
+
+    return emitter;
   }
 }
 
