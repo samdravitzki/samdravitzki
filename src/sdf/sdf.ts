@@ -21,6 +21,7 @@ import collisions, {
   CollisionEventPayload,
 } from "../ecs/parts/collision/collision";
 import { Collision } from "../ecs/parts/collision/components/Collision";
+import stateDebugPaneSystem from "./state-debug-pane";
 
 const circle = [
   {
@@ -286,46 +287,7 @@ export default function sdf(parent?: HTMLElement) {
   engine.system(
     "setup-debug-gui",
     engine.trigger.on("setup"),
-    (world, resources, state, emitter) => {
-      const p = resources.get<p5>("p5");
-      const canvasBounds = resources.get<Bounds>("canvas-bounds");
-
-      const debugGui = p.createDiv();
-      debugGui.position(0, canvasBounds.max.y + 40, "absolute");
-      debugGui.style("width", canvasBounds.width + "px");
-
-      const pane = new Pane({
-        container: debugGui.elt,
-        title: "Signed distance functions",
-      });
-
-      type BindableState = {
-        [K in keyof typeof state]: (typeof state)[K] extends State<infer U>
-          ? U
-          : never;
-      };
-
-      const bindableState = Object.fromEntries(
-        Object.entries(state).map(([key, state]) => [key, state.value]),
-      ) as BindableState;
-
-      const proxiedBindableState = new Proxy(bindableState, {
-        set(
-          target,
-          prop: keyof BindableState,
-          value: BindableState[typeof prop],
-        ) {
-          state[prop].setValue(value);
-          target[prop] = value;
-          return true;
-        },
-      });
-
-      pane.addBinding(proxiedBindableState, "sdf-renderer:debug");
-      pane.addBinding(proxiedBindableState, "sdf-renderer:enabled");
-
-      return () => pane.dispose();
-    },
+    stateDebugPaneSystem,
   );
 
   return engine;
