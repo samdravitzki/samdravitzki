@@ -1,8 +1,8 @@
 import State from "../State/State";
 import System, { Dispose } from "../System/System";
-import World from "../World/World";
+import World, { WorldEvents } from "../World/World";
 import EventDipatcher from "./EventDipatcher";
-import { Engine } from "./Engine";
+import { Engine, EngineEvents } from "./Engine";
 import { ResourcePool } from "./ResourcePool";
 import { Part } from "../Part/Part";
 import { Trigger } from "../Trigger/Trigger";
@@ -22,29 +22,35 @@ type SystemRegistration<
   trigger: Trigger<EventMap, StateMap, EventKey>;
 };
 
+export type DufusEngineEvents = EngineEvents & WorldEvents;
+
 /**
  * Designed based bevy ecs app builder api https://bevy-cheatbook.github.io/programming/app-builder.html
  */
 class DufusEngine<
-  EventMap extends Record<string, unknown> & { init: void } = {
-    init: void;
-  },
+  EventMap extends DufusEngineEvents = DufusEngineEvents,
   StateMap extends Record<string, unknown> = {},
 > implements Engine<EventMap, StateMap> {
-  private _eventDispatcher = new EventDipatcher<EventMap>();
+  private _eventDispatcher: EventDipatcher<EventMap>;
   private _store: States<StateMap>;
   /**
    * Number of times a state change a system is dependent on has occured
    * Needed so that when the event the system is dependent on triggers it can determine wheter it should run
    */
   private _stateChangeTracker = new Map<Function, number>();
-  private _world = new World();
+  private _world: World;
   private _resources = new ResourcePool();
   private _systems: SystemRegistration<EventMap, StateMap, keyof EventMap>[] =
     [];
   private _cleanup: Dispose[] = [];
 
   constructor(stateMap: StateMap) {
+    const eventDispatcher = new EventDipatcher<EventMap>();
+    const worldEventEmitter = eventDispatcher.createEmitter();
+    this._world = new World(worldEventEmitter);
+
+    this._eventDispatcher = eventDispatcher;
+
     this._store = Object.keys(stateMap).reduce((prev, next) => {
       return {
         ...prev,
@@ -61,14 +67,7 @@ class DufusEngine<
       this._world,
       this._resources,
       this._store,
-      {
-        emit: ({ event: emittedEvent, payload }) =>
-          // Would like to figure out why this type assertion is needed, and how it could be avoided
-          this._eventDispatcher.publish(
-            emittedEvent as keyof EventMap,
-            payload as EventMap[Event],
-          ),
-      },
+      this._eventDispatcher.createEmitter(),
       eventPayload,
     );
 

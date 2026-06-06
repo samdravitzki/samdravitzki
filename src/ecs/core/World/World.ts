@@ -1,6 +1,12 @@
 import Bundle from "../Bundle/Bundle";
 import Component from "../Component/Component";
-import Entity, { EntityId } from "../Entity/Entity";
+import { EventEmitter } from "../Engine/EventEmitter";
+import Entity, { EntityEvents, EntityId } from "../Entity/Entity";
+
+export type WorldEvents = {
+  "world:entity-created": { entityId: string };
+  "world:entity-removed": { entityId: string };
+} & EntityEvents;
 
 /**
  * Reason for choosing an ECS approach is that I have worked with alot of game engines before
@@ -15,6 +21,8 @@ import Entity, { EntityId } from "../Entity/Entity";
  */
 export default class World {
   private _entities = new Map<EntityId, Entity>();
+
+  constructor(private readonly emitter?: EventEmitter<WorldEvents>) {}
 
   get entities(): string[] {
     return Array.from(this._entities.keys());
@@ -31,8 +39,14 @@ export default class World {
    * @returns the entity added to the world
    */
   createEntity(): Entity {
-    const entity = new Entity();
+    const entity = new Entity(this.emitter);
     this._entities.set(entity.id, entity);
+    if (this.emitter) {
+      this.emitter.emit({
+        event: "world:entity-created",
+        payload: { entityId: entity.id },
+      });
+    }
     return entity;
   }
 
@@ -65,6 +79,12 @@ export default class World {
     }
 
     this._entities.delete(entityId);
+    if (this.emitter) {
+      this.emitter.emit({
+        event: "world:entity-removed",
+        payload: { entityId },
+      });
+    }
   }
 
   /**

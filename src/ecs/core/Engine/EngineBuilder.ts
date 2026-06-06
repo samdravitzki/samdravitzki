@@ -1,5 +1,5 @@
-import DufusEngine from "./DufusEngine";
-import { Engine } from "./Engine";
+import DufusEngine, { DufusEngineEvents } from "./DufusEngine";
+import { Engine, EngineEvents } from "./Engine";
 
 /**
  * Builder for creating an Engine with type safety and autocompletion for states and events.
@@ -8,9 +8,7 @@ import { Engine } from "./Engine";
  *
  */
 class EngineBuilder<
-  EventMap extends Record<string, unknown> & { init: void } = {
-    init: void;
-  },
+  EventMap extends DufusEngineEvents,
   StateMap extends Record<string, unknown> = {},
 > {
   private constructor(private readonly stateSet: StateMap) {}
@@ -57,8 +55,8 @@ class EngineBuilder<
     return new DufusEngine<EventMap, StateMap>(this.stateSet);
   }
 
-  static create(): EngineBuilder<{ init: void }> {
-    return new EngineBuilder<{ init: void }>({});
+  static create(): EngineBuilder<DufusEngineEvents> {
+    return new EngineBuilder<DufusEngineEvents>({});
   }
 }
 

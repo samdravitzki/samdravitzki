@@ -3,8 +3,10 @@ import { Trigger } from "../Trigger/Trigger";
 import { TriggerBuilder } from "../Trigger/TriggerBuilder";
 import { Part } from "../Part/Part";
 
+export type EngineEvents = { init: void };
+
 export interface Engine<
-  EventMap extends Record<string, unknown> & { init: void },
+  EventMap extends Record<string, unknown> & EngineEvents,
   StateMap extends Record<string, unknown>,
 > {
   get trigger(): TriggerBuilder<EventMap, StateMap>;

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import DufusEngine from "./DufusEngine";
+import DufusEngine, { DufusEngineEvents } from "./DufusEngine";
 
 describe("part method", () => {
   test("should call the provided part function", () => {
@@ -42,7 +42,7 @@ describe("when a system emits an event", () => {
   type TestState = "start" | "middle" | "end";
 
   let engine: DufusEngine<
-    { init: void; "test-event": void; "other-event": void },
+    DufusEngineEvents & { "test-event": void; "other-event": void },
     { testState: TestState }
   >;
 
