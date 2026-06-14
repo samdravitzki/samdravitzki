@@ -50,7 +50,7 @@ const circle = [
   } satisfies ShapeStyle,
   {
     name: "label",
-    text: "Circle",
+    text: "circle",
   } satisfies Label,
 ];
 
@@ -76,7 +76,7 @@ const square = [
   } satisfies ShapeStyle,
   {
     name: "label",
-    text: "Square",
+    text: "square",
   } satisfies Label,
 ];
 
@@ -140,7 +140,7 @@ function setupCursor(world: World) {
     } satisfies Collider,
     {
       name: "label",
-      text: "Cursor",
+      text: "cursor",
     } satisfies Label,
   ]);
 
