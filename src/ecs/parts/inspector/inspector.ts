@@ -1,23 +1,7 @@
 import { Part } from "../../core/Part/Part";
 import Label from "../../core/Component/Label";
-
-/**
- * helper to apply a styles object to an element with typings for autocompletion
- *
- * @param el the element to apply styles to
- * @param styles an object where keys are CSS properties and values are the corresponding CSS values
- * @returns the element with styles applied, for chaining
- */
-function applyStyles<T extends HTMLElement>(
-  el: T,
-  styles: Partial<Record<keyof CSSStyleDeclaration, string>>,
-): T {
-  Object.entries(styles).forEach(([k, v]) => {
-    // cast to any because CSSStyleDeclaration keys are camelCased
-    (el.style as any)[k] = v;
-  });
-  return el;
-}
+import "./inspector.css";
+import { Pane } from "tweakpane";
 
 type InspectorEvents = {
   // External events that the inspector listens to
@@ -32,40 +16,15 @@ type InspectorEvents = {
 
 function createInspectorPanelSection({
   title,
-  id,
 }: {
   title: string;
-  id: string;
 }): HTMLElement {
   const section = document.createElement("div");
-  section.id = `${id}-section`;
-
-  applyStyles(section, {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    width: "100%",
-    borderRadius: "6px",
-    lineHeight: "1.2",
-    fontFamily: "monospace",
-    boxSizing: "border-box",
-    color: "#fff",
-    fontSize: "11px",
-    overflowY: "auto",
-  });
+  section.classList.add("inspector__panel");
 
   const titleElement = document.createElement("div");
-  titleElement.id = `${id}-section-title`;
+  titleElement.classList.add("inspector__panel-title");
   titleElement.textContent = title;
-  applyStyles(titleElement, {
-    backgroundColor: "#bbbcc41a",
-    width: "100%",
-    borderRadius: "4px 4px 0 0",
-    marginBottom: "2px",
-    fontSize: "0.95em",
-    fontWeight: "600",
-    textAlign: "center",
-  });
 
   section.appendChild(titleElement);
 
@@ -76,50 +35,34 @@ function createEntityListItem(entityId: string): HTMLElement {
   const shortEntityId = entityId.slice(0, 6);
 
   const entityListItem = document.createElement("div");
+  entityListItem.classList.add("inspector__panel-list-item");
   entityListItem.textContent = shortEntityId;
   entityListItem.dataset.id = entityId;
-  applyStyles(entityListItem, {
-    padding: "0px 8px",
-    textAlign: "left",
-    overflow: "ellipsis",
-    width: "100%",
-    cursor: "pointer",
-    boxSizing: "border-box",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  });
 
   return entityListItem;
 }
 
 function inspector() {
   const part: Part<InspectorEvents> = ({ registerSystem, triggerBuilder }) => {
-    registerSystem("debug-panel", triggerBuilder.on("setup"), () => {
-      const inspectorPanel = document.createElement("div");
-      inspectorPanel.id = "inspector-panel";
-      applyStyles(inspectorPanel, {
-        position: "fixed",
-        height: "500px",
-        width: "200px",
-        backgroundColor: "#28292e",
-        margin: "8px",
-        display: "flex",
-        flexDirection: "column",
-      });
+    let inspectorRoot: HTMLElement;
+    let entityListPanel: HTMLElement;
+    let entityComponentListPanel: HTMLElement | null = null;
 
-      const entityListContainer = createInspectorPanelSection({
+    registerSystem("debug-panel", triggerBuilder.on("setup"), () => {
+      inspectorRoot = document.createElement("div");
+      inspectorRoot.classList.add("inspector__root");
+
+      entityListPanel = createInspectorPanelSection({
         title: "World",
-        id: "entity-list",
       });
 
       const body = document.body;
 
-      body.appendChild(inspectorPanel);
-      inspectorPanel.appendChild(entityListContainer);
+      body.appendChild(inspectorRoot);
+      inspectorRoot.appendChild(entityListPanel);
 
       return () => {
-        inspectorPanel?.remove();
+        inspectorRoot?.remove();
       };
     });
 
@@ -129,11 +72,7 @@ function inspector() {
       (world, resources, state, emitter, payload) => {
         const { entityId } = payload;
 
-        const entityListContainer = document.getElementById(
-          "entity-list-section",
-        );
-
-        if (!entityListContainer) {
+        if (!entityListPanel) {
           console.warn("Entity list container not found");
           return;
         }
@@ -147,7 +86,7 @@ function inspector() {
           });
         });
 
-        entityListContainer.appendChild(entityListItem);
+        entityListPanel.appendChild(entityListItem);
       },
     );
 
@@ -157,16 +96,12 @@ function inspector() {
       (world, _resources, _state, _emitter, payload) => {
         const { entityId, componentName } = payload;
 
-        const entityListContainer = document.getElementById(
-          "entity-list-section",
-        );
-
-        if (!entityListContainer) {
+        if (!entityListPanel) {
           console.warn("Entity list container not found");
           return;
         }
 
-        const entityText = entityListContainer.querySelector<HTMLElement>(
+        const entityText = entityListPanel.querySelector<HTMLElement>(
           `[data-id="${entityId}"]`,
         );
 
@@ -181,10 +116,14 @@ function inspector() {
           const component = entity.getComponent(componentName) as Label;
           entityText.innerHTML = `
             ${component.text}
-            <span style="background-color: #444;color: #fff; padding: 0px 4px; border-radius: 10px;font-size: 0.8em;">${entityId.slice(0, 6)}</span>
+            <span style="background-color: #444;color: #fff; padding: 0px 4px; border-radius: 10px;font-size: 0.8em;">
+              ${entityId.slice(0, 6)}
+            </span>
           `;
           return;
         }
+
+        // Add other components to list of selected components, on the other side remove component from list of selected components when its removted
       },
     );
 
@@ -193,22 +132,21 @@ function inspector() {
       triggerBuilder.on("entity:component-removed"),
       (world, resources, state, emitter, payload) => {
         const { entityId, componentName } = payload;
-        const entityListContainer = document.getElementById(
-          "entity-list-section",
-        );
 
-        if (!entityListContainer) {
+        if (!entityListPanel) {
           return;
         }
 
         if (componentName === "label") {
-          const entityText = entityListContainer.querySelector<HTMLElement>(
+          const entityText = entityListPanel.querySelector<HTMLElement>(
             `[data-id="${entityId}"]`,
           );
           if (!entityText) {
             return;
           }
-          entityText.textContent = entityId.slice(0, 6);
+
+          const shortEntityId = entityId.slice(0, 6);
+          entityText.textContent = shortEntityId;
           return;
         }
       },
@@ -220,15 +158,11 @@ function inspector() {
       (world, resources, state, emitter, payload) => {
         const { entityId } = payload;
 
-        const entityListContainer = document.getElementById(
-          "entity-list-section",
-        );
-
-        if (!entityListContainer) {
+        if (!entityListPanel) {
           return;
         }
 
-        const entityText = entityListContainer.querySelector<HTMLElement>(
+        const entityText = entityListPanel.querySelector<HTMLElement>(
           `[data-id="${entityId}"]`,
         );
         entityText?.remove();
@@ -240,94 +174,83 @@ function inspector() {
       triggerBuilder.on("inspector:entity-selected"),
       (world, resources, state, emitter, payload) => {
         const { entityId } = payload;
-
-        let componentInspectorPanel = document.getElementById(
-          "component-detail-section",
-        );
+        console.log(`${entityId} selected`);
 
         const entity = world.entity(entityId);
-
         const title = entity.hasComponent("label")
           ? `${(entity.getComponent("label") as Label).text} (${entityId.slice(0, 3)})`
           : `Entity ${entityId.slice(0, 6)}`;
 
-        // If the component inspector panel doesn't exist, create it, otherwise update the title
-        if (!componentInspectorPanel) {
-          componentInspectorPanel = createInspectorPanelSection({
-            title: title,
-            id: "component-detail",
+        if (!entityComponentListPanel) {
+          entityComponentListPanel = createInspectorPanelSection({
+            title,
           });
 
-          const inspectorPanel = document.getElementById("inspector-panel");
-
-          if (!inspectorPanel) {
-            console.warn("Inspector panel not found");
-            return;
-          }
-
           const componentInspectorPanelBody = document.createElement("div");
-          componentInspectorPanelBody.id = "component-detail-section-body";
-          componentInspectorPanel.appendChild(componentInspectorPanelBody);
+          componentInspectorPanelBody.classList.add("inspector__panel-body");
+          entityComponentListPanel.appendChild(componentInspectorPanelBody);
 
-          inspectorPanel.appendChild(componentInspectorPanel);
+          inspectorRoot.appendChild(entityComponentListPanel);
         } else {
-          const componentInspectorPanelTitle = document.getElementById(
-            "component-detail-section-title",
-          );
+          const titleElement = entityComponentListPanel.querySelector(
+            ".inspector__panel-title",
+          )!;
 
-          if (!componentInspectorPanelTitle) {
-            console.warn("Inspector panel title not found");
-            return;
-          }
-          componentInspectorPanelTitle.textContent = title;
+          titleElement.textContent = title;
         }
 
-        const components = entity.components;
-        components.sort((a, b) => a.name.localeCompare(b.name));
-
-        const children: Node[] = [];
+        const componentInspectorPanels: HTMLElement[] = [];
 
         for (const component of entity.components) {
           const { name, ...properties } = component;
 
-          if (name === "label") {
+          if (name === "label" || Object.keys(properties).length === 0) {
             continue;
           }
 
-          const componentSection = document.createElement("div");
+          const componentInspectorPanel = document.createElement("div");
 
           const componentTitle = document.createElement("div");
           componentTitle.textContent = name;
+          componentInspectorPanel.appendChild(componentTitle);
 
-          componentSection.appendChild(componentTitle);
+          // TODO: clean up panes when entity is unselected
 
-          const componentPropertyList = document.createElement("ul");
-          componentSection.appendChild(componentPropertyList);
+          const componentPane = new Pane({
+            container: componentInspectorPanel,
+          });
 
           for (const [propertyName, propertyValue] of Object.entries(
             properties,
           )) {
-            const componentProperty = document.createElement("li");
-            componentProperty.textContent = `${propertyName}: ${propertyValue}`;
-            componentPropertyList.appendChild(componentProperty);
+            try {
+              componentPane.addBinding(
+                component as {
+                  name: string;
+                } & Record<string, unknown>,
+                propertyName,
+              );
+            } catch (e) {
+              console.error(e);
+            }
           }
 
-          children.push(componentSection);
+          componentInspectorPanels.push(componentInspectorPanel);
         }
 
-        const componentInspectorPanelBody = document.getElementById(
-          "component-detail-section-body",
-        );
+        const bodyElement = entityComponentListPanel.querySelector(
+          ".inspector__panel-body",
+        )!;
 
-        if (!componentInspectorPanelBody) {
-          console.warn("Inspector panel body not found");
-          return;
-        }
-
-        componentInspectorPanelBody.replaceChildren(...children);
+        bodyElement.replaceChildren(...componentInspectorPanels);
       },
     );
   };
+
+  // Next
+  // - need the inspector to listen to changes in the state of components and update the component properties displayed
+  // - display component properties using tweakpane
+  // - add hover effects to the entity list
 
   return part;
 }
