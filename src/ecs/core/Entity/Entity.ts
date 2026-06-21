@@ -46,16 +46,30 @@ class Entity {
   }
 
   replaceComponent(component: Component) {
+    const hasComponent = this._components.has(component.name);
+
     this._components.set(component.name, component);
+
     if (this.emitter) {
-      this.emitter.emit({
-        event: "entity:component-replaced",
-        payload: { entityId: this.id, componentName: component.name },
-      });
+      if (!hasComponent) {
+        this.emitter.emit({
+          event: "entity:component-added",
+          payload: { entityId: this.id, componentName: component.name },
+        });
+      } else {
+        this.emitter.emit({
+          event: "entity:component-replaced",
+          payload: { entityId: this.id, componentName: component.name },
+        });
+      }
     }
   }
 
   removeComponent(componentName: string) {
+    if (!this._components.has(componentName)) {
+      return;
+    }
+
     this._components.delete(componentName);
     if (this.emitter) {
       this.emitter.emit({

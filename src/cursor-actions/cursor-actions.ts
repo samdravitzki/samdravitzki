@@ -299,7 +299,7 @@ export default function cursorActions(parent?: HTMLElement) {
     .event<"collision", CollisionEventPayload>("collision")
     .build();
 
-  engine.part(collisions(false));
+  engine.part(collisions());
   engine.part(p5Part([500, 500], parent, [0, 0, 14], true));
   engine.part(inspector());
 
