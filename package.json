@@ -17,7 +17,7 @@
     "prettier": "3.8.1",
     "typescript": "^5.9.3",
     "vite": "^8.0.1",
-    "vite-plugin-checker": "^0.10.3",
+    "vite-plugin-checker": "^0.14.4",
     "vitest": "^4.1.0"
   },
   "packageManager": "pnpm@9.1.0+sha1.217063ce3fcbf44f3051666f38b810f1ddefee4a",
