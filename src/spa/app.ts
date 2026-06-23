@@ -1,7 +1,8 @@
 import miniApps from "./mini-apps";
+import notFoundPage from "./pages/404";
 import homePage from "./pages/home";
-import home from "./pages/home";
 import createMiniAppPage from "./pages/mini-app";
+import { PageCleanup } from "./pages/Page";
 
 export default function app(
   container: HTMLElement,
@@ -13,10 +14,9 @@ export default function app(
     navigate,
   };
 
-  const render = (pathname: string) => {
+  const render = (pathname: string): PageCleanup | void => {
     if (pathname === "/") {
-      homePage(container, pageActions);
-      return;
+      return homePage(container, pageActions);
     }
 
     if (miniAppPaths.includes(pathname)) {
@@ -25,12 +25,11 @@ export default function app(
 
       if (miniApp) {
         const miniAppPage = createMiniAppPage(miniApp);
-        miniAppPage(container, pageActions);
-        return;
+        return miniAppPage(container, pageActions);
       }
     }
 
-    container.innerHTML = "<div> 404 Not Found </div>";
+    return notFoundPage(container);
   };
 
   return render;

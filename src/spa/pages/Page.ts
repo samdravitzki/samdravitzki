@@ -2,7 +2,12 @@ type PageActions = {
   navigate: (pathname: string) => void;
 };
 
-type Page = (container: HTMLElement, actions: PageActions) => void;
+type PageCleanup = () => void;
+
+type Page = (
+  container: HTMLElement,
+  actions: PageActions,
+) => PageCleanup | void;
 
 export default Page;
-export type { PageActions };
+export type { PageActions, PageCleanup };

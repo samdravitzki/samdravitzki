@@ -1,16 +1,5 @@
-import { Engine } from "../../ecs/core/Engine/Engine";
-import { MiniApp, MiniAppInfo } from "../mini-apps";
+import { MiniAppInfo } from "../mini-apps";
 import Page from "./Page";
-
-function createMiniAppSection({ name, controls }: MiniAppInfo) {
-  return `
-      <div id="${name}-app" style="display:none;">
-          <button id="exit-${name}-button" style="margin-bottom: 4px;">❌</button>
-          <div style="position: relative;" id="${name}-sketch"></div>
-          ${controls ? createControlInfo(controls) : ""}
-      </div>
-    `;
-}
 
 // Simple control helper info listed horzontally as key values in monospace font with key same size but wrapped in a box with radius, no border
 function createControlInfo(controls: [string, string][]) {
@@ -46,9 +35,12 @@ function createMiniAppPage(miniApp: MiniAppInfo): Page {
     document
       .getElementById(`exit-${miniApp.name}-button`)
       ?.addEventListener("click", () => {
-        app.stop();
         navigate("/");
       });
+
+    return () => {
+      app.stop();
+    };
   };
 }
 
