@@ -18,8 +18,10 @@ type InspectorEvents = {
 
 function createInspectorPanelSection({
   title,
+  onClose,
 }: {
   title: string;
+  onClose?: () => void;
 }): HTMLElement {
   const section = document.createElement("div");
   section.classList.add("inspector__panel");
@@ -27,6 +29,17 @@ function createInspectorPanelSection({
   const titleElement = document.createElement("div");
   titleElement.classList.add("inspector__panel-title");
   titleElement.textContent = title;
+
+  // Add close button if onClose is provided
+  if (onClose) {
+    const closeButton = document.createElement("button");
+    closeButton.classList.add("inspector__panel-close-button");
+    closeButton.textContent = "×"; // Close icon
+    closeButton.addEventListener("click", () => {
+      onClose();
+    });
+    titleElement.appendChild(closeButton);
+  }
 
   section.appendChild(titleElement);
 
@@ -87,6 +100,10 @@ function inspector() {
 
       worldPanel.classList.add("inspector__panel-world");
 
+      const worldPanelBody = document.createElement("div");
+      worldPanelBody.classList.add("inspector__panel-body");
+      worldPanel.appendChild(worldPanelBody);
+
       const body = document.body;
 
       body.appendChild(inspectorRoot);
@@ -108,6 +125,10 @@ function inspector() {
           return;
         }
 
+        const worldPanelBody = worldPanel.querySelector(
+          ".inspector__panel-body",
+        )!;
+
         const entityListItem = createEntityListItem(entityId);
 
         entityListItem.addEventListener("click", () => {
@@ -117,7 +138,7 @@ function inspector() {
           });
         });
 
-        worldPanel.appendChild(entityListItem);
+        worldPanelBody.appendChild(entityListItem);
       },
     );
 
@@ -143,7 +164,6 @@ function inspector() {
       triggerBuilder.on("entity:component-added"),
       (world, _resources, _state, _emitter, payload) => {
         const { entityId, componentName } = payload;
-        // console.log("add", componentName, entityId.slice(0, 6));
 
         const entity = world.entity(entityId);
 
@@ -182,47 +202,43 @@ function inspector() {
           return;
         }
 
-        if (!entityInspectorPanel) {
-          return;
-        }
+        if (entityInspectorPanel) {
+          const component = entity.getComponent(componentName);
 
-        const component = entity.getComponent(componentName);
+          if (!component) {
+            console.warn(
+              `component ${componentName} not found on entity ${entityId}`,
+            );
+            return;
+          }
 
-        if (!component) {
-          console.warn(
-            `component ${componentName} not found on entity ${entityId}`,
+          const { name, ...properties } = component;
+
+          if (Object.keys(properties).length === 0) {
+            return;
+          }
+
+          const entityInspectorPanelBody = entityInspectorPanel.querySelector(
+            ".inspector__panel-body",
+          )!;
+
+          const componentInspectorPanel = document.createElement("div");
+          componentInspectorPanel.dataset.component = componentName;
+          componentInspectorPanel.classList.add("inspector__panel-component");
+
+          const componentTitle = document.createElement("div");
+          componentTitle.textContent = componentName;
+          componentInspectorPanel.appendChild(componentTitle);
+
+          const componentPane = createComponentPane(
+            component,
+            componentInspectorPanel,
           );
-          return;
+
+          entityInspectorPanelBody.appendChild(componentInspectorPanel);
+
+          componentPanes.set(componentName, componentPane);
         }
-
-        const { name, ...properties } = component;
-
-        if (Object.keys(properties).length === 0) {
-          return;
-        }
-
-        const entityInspectorPanelBody = entityInspectorPanel.querySelector(
-          ".inspector__panel-body",
-        )!;
-
-        const componentInspectorPanel = document.createElement("div");
-        componentInspectorPanel.dataset.component = componentName;
-        componentInspectorPanel.classList.add("inspector__panel-component");
-
-        const componentTitle = document.createElement("div");
-        componentTitle.textContent = componentName;
-        componentInspectorPanel.appendChild(componentTitle);
-
-        const componentPane = createComponentPane(
-          component,
-          componentInspectorPanel,
-        );
-
-        entityInspectorPanelBody.appendChild(componentInspectorPanel);
-
-        componentPanes.set(componentName, componentPane);
-
-        // Add other components to list of selected components, on the other side remove component from list of selected components when its removted
       },
     );
 
@@ -231,13 +247,11 @@ function inspector() {
       triggerBuilder.on("entity:component-removed"),
       (world, resources, state, emitter, payload) => {
         const { entityId, componentName } = payload;
-        // console.log("remove", componentName, entityId.slice(0, 6));
 
-        if (!entityInspectorPanel) {
-          return;
-        }
-
-        if (entityInspectorPanel.dataset.entity === entityId) {
+        if (
+          entityInspectorPanel &&
+          entityInspectorPanel.dataset.entity === entityId
+        ) {
           const compoenentPanel = document.querySelector<HTMLElement>(
             `.inspector__panel-component[data-component="${componentName}"]`,
           );
@@ -279,6 +293,10 @@ function inspector() {
         if (!entityInspectorPanel) {
           entityInspectorPanel = createInspectorPanelSection({
             title,
+            onClose: () => {
+              entityInspectorPanel?.remove();
+              entityInspectorPanel = null;
+            },
           });
 
           entityInspectorPanel.classList.add("inspector__panel-entity");
