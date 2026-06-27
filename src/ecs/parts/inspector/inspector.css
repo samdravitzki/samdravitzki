@@ -25,7 +25,7 @@
 
 .inspector__root {
   position: fixed;
-  min-width: 300px;
+  width: 300px;
   height: 100%;
   margin: 8px;
   display: grid;
@@ -101,4 +101,20 @@
   padding: 0 4px;
 
   box-sizing: border-box;
+}
+
+.inspector__panel-entity-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+}
+
+.inspector__badge {
+  background-color: #444;
+  color: #fff;
+  padding: 0px 4px;
+  border-radius: 10px;
+  font-size: 0.8em;
+  width: fit-content;
 }

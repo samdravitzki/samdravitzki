@@ -11,7 +11,7 @@ type InspectorEvents = {
   "world:entity-created": { entityId: string };
   "world:entity-removed": { entityId: string };
   "entity:component-added": { entityId: string; componentName: string };
-  "entity:component-removed": { entityId: string; componentName: string };
+  "entity:component-removed": { entityId: string; component: Component };
   // Internal events that the inspector emits
   "inspector:entity-selected": { entityId: string };
 };
@@ -80,6 +80,11 @@ function createComponentPane(
   }
 
   return componentPane;
+}
+
+function isTagComponent(component: Component): boolean {
+  const { name, ...properties } = component;
+  return Object.keys(properties).length === 0;
 }
 
 function inspector() {
@@ -195,7 +200,7 @@ function inspector() {
 
           entityText.innerHTML = `
             ${component.text}
-            <span style="background-color: #444;color: #fff; padding: 0px 4px; border-radius: 10px;font-size: 0.8em;">
+            <span class="inspector__badge">
               ${entityId.slice(0, 6)}
             </span>
           `;
@@ -214,30 +219,43 @@ function inspector() {
 
           const { name, ...properties } = component;
 
-          if (Object.keys(properties).length === 0) {
-            return;
+          const isTag = isTagComponent(component);
+
+          if (isTag) {
+            const entityInspectorPanelTagList =
+              entityInspectorPanel.querySelector(
+                ".inspector__panel-entity-tag-list",
+              )!;
+
+            const tagComponent = document.createElement("div");
+            tagComponent.textContent = componentName;
+            tagComponent.classList.add("inspector__panel-tag-component");
+            tagComponent.classList.add("inspector__badge");
+            tagComponent.dataset.component = componentName;
+            entityInspectorPanelTagList.appendChild(tagComponent);
+          } else {
+            const entityInspectorPanelBody = entityInspectorPanel.querySelector(
+              ".inspector__panel-body",
+            )!;
+
+            const componentInspectorPanel = document.createElement("div");
+            componentInspectorPanel.dataset.component = componentName;
+            componentInspectorPanel.classList.add("inspector__panel-component");
+            componentInspectorPanel.classList.add("inspector__panel-component");
+
+            const componentTitle = document.createElement("div");
+            componentTitle.textContent = componentName;
+            componentInspectorPanel.appendChild(componentTitle);
+
+            const componentPane = createComponentPane(
+              component,
+              componentInspectorPanel,
+            );
+
+            entityInspectorPanelBody.appendChild(componentInspectorPanel);
+
+            componentPanes.set(componentName, componentPane);
           }
-
-          const entityInspectorPanelBody = entityInspectorPanel.querySelector(
-            ".inspector__panel-body",
-          )!;
-
-          const componentInspectorPanel = document.createElement("div");
-          componentInspectorPanel.dataset.component = componentName;
-          componentInspectorPanel.classList.add("inspector__panel-component");
-
-          const componentTitle = document.createElement("div");
-          componentTitle.textContent = componentName;
-          componentInspectorPanel.appendChild(componentTitle);
-
-          const componentPane = createComponentPane(
-            component,
-            componentInspectorPanel,
-          );
-
-          entityInspectorPanelBody.appendChild(componentInspectorPanel);
-
-          componentPanes.set(componentName, componentPane);
         }
       },
     );
@@ -246,21 +264,36 @@ function inspector() {
       "remove-component-from-component-list",
       triggerBuilder.on("entity:component-removed"),
       (world, resources, state, emitter, payload) => {
-        const { entityId, componentName } = payload;
+        const { entityId, component } = payload;
+
+        console.log(
+          `Removing component ${component.name} from entity ${entityId}`,
+        );
 
         if (
           entityInspectorPanel &&
           entityInspectorPanel.dataset.entity === entityId
         ) {
-          const compoenentPanel = document.querySelector<HTMLElement>(
-            `.inspector__panel-component[data-component="${componentName}"]`,
-          );
-          compoenentPanel?.remove();
+          const componentName = component.name;
 
-          const componentPane = componentPanes.get(componentName);
-          componentPane?.dispose();
+          const isTag = isTagComponent(component);
 
-          componentPanes.delete(componentName);
+          if (isTag) {
+            const tagComponent = document.querySelector<HTMLElement>(
+              `.inspector__panel-tag-component[data-component="${componentName}"]`,
+            );
+            tagComponent?.remove();
+          } else {
+            const componentPanel = document.querySelector<HTMLElement>(
+              `.inspector__panel-component[data-component="${componentName}"]`,
+            );
+            componentPanel?.remove();
+
+            const componentPane = componentPanes.get(componentName);
+            componentPane?.dispose();
+
+            componentPanes.delete(componentName);
+          }
         }
       },
     );
@@ -300,6 +333,12 @@ function inspector() {
           });
 
           entityInspectorPanel.classList.add("inspector__panel-entity");
+
+          const componentInspectorPanelTagList = document.createElement("div");
+          componentInspectorPanelTagList.classList.add(
+            "inspector__panel-entity-tag-list",
+          );
+          entityInspectorPanel.appendChild(componentInspectorPanelTagList);
 
           const componentInspectorPanelBody = document.createElement("div");
           componentInspectorPanelBody.classList.add("inspector__panel-body");

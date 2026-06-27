@@ -3,7 +3,7 @@ import { EventEmitter } from "../System/System";
 
 export type EntityEvents = {
   "entity:component-added": { entityId: string; componentName: string };
-  "entity:component-removed": { entityId: string; componentName: string };
+  "entity:component-removed": { entityId: string; component: Component };
   "entity:component-replaced": { entityId: string; componentName: string };
 };
 
@@ -66,7 +66,9 @@ class Entity {
   }
 
   removeComponent(componentName: string) {
-    if (!this._components.has(componentName)) {
+    const componentToDelete = this._components.get(componentName);
+
+    if (!componentToDelete) {
       return;
     }
 
@@ -74,7 +76,7 @@ class Entity {
     if (this.emitter) {
       this.emitter.emit({
         event: "entity:component-removed",
-        payload: { entityId: this.id, componentName: componentName },
+        payload: { entityId: this.id, component: componentToDelete },
       });
     }
   }
