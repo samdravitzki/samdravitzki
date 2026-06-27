@@ -117,7 +117,9 @@ type CursorHover = Component & {
 
 function setupCursor(world: World) {
   const cursorCollider = createBundle([
-    "cursor",
+    {
+      name: "cursor",
+    } satisfies Cursor,
     {
       name: "shape-style",
       stroke: "#ffffff",
@@ -189,17 +191,18 @@ function cursorGrab(
   eventEmitter: unknown,
   eventPayload: ClickEventPayload,
 ) {
-  const cursor = world.query<[Collision, Position]>([
+  const cursor = world.query<[Collision, Position, string]>([
     "collision",
     "position",
     "cursor",
+    "entity-id",
   ])[0];
 
   if (!cursor) {
     return;
   }
 
-  const [collision, position] = cursor;
+  const [collision, position, entityId] = cursor;
 
   const selected = world.entity(collision.entityId);
   const selectedShapeStyle = selected.getComponent("shape-style") as
@@ -222,6 +225,11 @@ function cursorGrab(
     } satisfies CursorGrabbed;
 
     selected.addComponent(grabbedComponent); // Just a name component to tag the component as selected
+
+    // debug list of components on cursor entity
+    // console.log("Components on cursor entity:", selected.getComponents());
+    for (const component of world.entity(entityId).components) {
+    }
   }
 
   if (eventPayload.type === "release") {

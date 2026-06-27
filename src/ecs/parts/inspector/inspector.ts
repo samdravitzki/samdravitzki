@@ -176,7 +176,11 @@ function inspector() {
           `.inspector__panel-component[data-component="${componentName}"]`,
         );
 
-        if (compoenentPanel) {
+        const componentTag = document.querySelector<HTMLElement>(
+          `.inspector__panel-tag-component[data-component="${componentName}"]`,
+        );
+
+        if (compoenentPanel || componentTag) {
           // Component already exists i.e. a component replace occured
           return;
         }
@@ -356,36 +360,52 @@ function inspector() {
         }
 
         const componentInspectorPanels: HTMLElement[] = [];
+        const componentTags: HTMLElement[] = [];
 
         for (const component of entity.components) {
           const { name, ...properties } = component;
 
-          if (name === "label" || Object.keys(properties).length === 0) {
+          if (name === "label") {
             continue;
           }
 
-          const componentInspectorPanel = document.createElement("div");
-          componentInspectorPanel.dataset.component = name;
-          componentInspectorPanel.classList.add("inspector__panel-component");
+          if (isTagComponent(component)) {
+            const tagComponent = document.createElement("div");
+            tagComponent.textContent = name;
+            tagComponent.classList.add("inspector__panel-tag-component");
+            tagComponent.classList.add("inspector__badge");
+            tagComponent.dataset.component = name;
 
-          const componentTitle = document.createElement("div");
-          componentTitle.textContent = name;
-          componentInspectorPanel.appendChild(componentTitle);
+            componentTags.push(tagComponent);
+          } else {
+            const componentInspectorPanel = document.createElement("div");
+            componentInspectorPanel.dataset.component = name;
+            componentInspectorPanel.classList.add("inspector__panel-component");
 
-          const componentPane = createComponentPane(
-            component,
-            componentInspectorPanel,
-          );
+            const componentTitle = document.createElement("div");
+            componentTitle.textContent = name;
+            componentInspectorPanel.appendChild(componentTitle);
 
-          componentInspectorPanels.push(componentInspectorPanel);
-          componentPanes.set(name, componentPane);
+            const componentPane = createComponentPane(
+              component,
+              componentInspectorPanel,
+            );
+
+            componentInspectorPanels.push(componentInspectorPanel);
+            componentPanes.set(name, componentPane);
+          }
         }
 
-        const bodyElement = entityInspectorPanel.querySelector(
+        const inspectorPanelBody = entityInspectorPanel.querySelector(
           ".inspector__panel-body",
         )!;
 
-        bodyElement.replaceChildren(...componentInspectorPanels);
+        inspectorPanelBody.replaceChildren(...componentInspectorPanels);
+
+        const inspectorPanelTagList = entityInspectorPanel.querySelector(
+          ".inspector__panel-entity-tag-list",
+        )!;
+        inspectorPanelTagList.replaceChildren(...componentTags);
       },
     );
   };
