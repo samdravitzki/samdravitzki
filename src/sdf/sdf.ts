@@ -14,14 +14,13 @@ import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
 import sdfRendererPart from "../ecs/parts/p5/sdf-renderer/sdf-renderer-part";
 import { Square } from "../ecs/parts/p5/shape-components";
 import { Circle } from "../ecs/parts/p5/shape-components";
-import State from "../ecs/core/State/State";
 import { SdfShape } from "../ecs/parts/p5/sdf-renderer/sdf-renderer";
 import { Collider } from "../ecs/parts/collision/components/Collider";
 import collisions, {
   CollisionEventPayload,
 } from "../ecs/parts/collision/collision";
-import { Collision } from "../ecs/parts/collision/components/Collision";
 import stateDebugPaneSystem from "./state-debug-pane";
+import { CollisionContact } from "../ecs/parts/collision/components/Collision";
 
 const circle = [
   {
@@ -194,43 +193,55 @@ export default function sdf(parent?: HTMLElement) {
     "shape-click",
     engine.trigger.on("click"),
     (world, resources, state, eventEmitter, eventPayload) => {
-      const cursor = world.query<[Collision, Position]>([
-        "collision",
-        "position",
-        "cursor",
-      ])[0];
+      const collisionContactQuery = world.query<[CollisionContact]>([
+        "collision-contact",
+      ]);
 
-      if (!cursor) {
-        return;
-      }
+      for (const [contact] of collisionContactQuery) {
+        const entityA = world.entity(contact.entityA);
+        const entityB = world.entity(contact.entityB);
 
-      const [collision, position] = cursor;
+        if (
+          !entityA.hasComponent("cursor") &&
+          !entityB.hasComponent("cursor")
+        ) {
+          continue;
+        }
 
-      const selected = world.entity(collision.entityId);
-      const selectedShapeStyle = selected.getComponent("shape-style") as
-        | ShapeStyle
-        | undefined;
+        const selected = !entityA.hasComponent("cursor") ? entityA : entityB;
+        const cursor = entityA.hasComponent("cursor") ? entityA : entityB;
 
-      const selectedShapePosition = selected.getComponent("position") as
-        | Position
-        | undefined;
+        const cursorPosition = cursor.getComponent("position") as
+          | Position
+          | undefined;
 
-      if (!selectedShapeStyle || !selectedShapePosition) {
-        return;
-      }
+        const selectedShapeStyle = selected.getComponent("shape-style") as
+          | ShapeStyle
+          | undefined;
 
-      if (eventPayload.type === "press") {
-        selectedShapeStyle.fill = "#ffffffd0";
-        const grabbedComponent = {
-          name: "grabbed",
-          offset: position.position.minus(selectedShapePosition.position),
-        };
+        const selectedShapePosition = selected.getComponent("position") as
+          | Position
+          | undefined;
 
-        selected.addComponent(grabbedComponent); // Just a name component to tag the component as selected
-      }
+        if (!selectedShapeStyle || !selectedShapePosition || !cursorPosition) {
+          return;
+        }
 
-      if (eventPayload.type === "release") {
-        selectedShapeStyle.fill = "#ffffff31";
+        if (eventPayload.type === "press") {
+          selectedShapeStyle.fill = "#ffffffd0";
+          const grabbedComponent = {
+            name: "grabbed",
+            offset: cursorPosition.position.minus(
+              selectedShapePosition.position,
+            ),
+          };
+
+          selected.addComponent(grabbedComponent); // Just a name component to tag the component as selected
+        }
+
+        if (eventPayload.type === "release") {
+          selectedShapeStyle.fill = "#ffffff31";
+        }
       }
     },
   );
@@ -265,11 +276,11 @@ export default function sdf(parent?: HTMLElement) {
       eventEmitter: unknown,
       eventPayload: CollisionEventPayload,
     ) => {
-      if (!world.entity(eventPayload.collidingEntity).hasComponent("cursor")) {
+      if (!world.entity(eventPayload.entityA).hasComponent("cursor")) {
         return;
       }
 
-      const collidedEntity = world.entity(eventPayload.collidedEntity);
+      const collidedEntity = world.entity(eventPayload.entityB);
 
       if (collidedEntity.hasComponent("shape-style")) {
         const style = collidedEntity.getComponent("shape-style") as ShapeStyle;

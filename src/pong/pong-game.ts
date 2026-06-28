@@ -9,7 +9,6 @@ import {
   PaddleComponent,
   TrajectoryLineSegmentComponent,
 } from "./components";
-import { Collision } from "../ecs/parts/collision/components/Collision";
 import { Position } from "../ecs/components/Position";
 import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
 import { Text } from "../ecs/parts/p5/shape-components";
@@ -20,7 +19,9 @@ import minionBongUrl from "./sounds/minion-bong.mp3";
 import State from "../ecs/core/State/State";
 import Component from "../ecs/core/Component/Component";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
-import collisions from "../ecs/parts/collision/collision";
+import collisions, {
+  CollisionEventPayload,
+} from "../ecs/parts/collision/collision";
 import { createEndMenu, createGameMenu, createMainMenu } from "./setup-ui";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
@@ -106,23 +107,50 @@ function hideMainMenu(_world: World, resources: ResourcePool) {
   mainMenu?.hide();
 }
 
-function ballCollisionHandlingSystem(world: World) {
-  for (const [velocity, collision, position] of world.query<
-    [Velocity, Collision, Position, BallComponent]
-  >(["velocity", "collision", "position", "ball"])) {
-    const collidee = world.entity(collision.entityId);
+function ballCollisionHandlingSystem(
+  world: World,
+  resources: ResourcePool,
+  state: unknown,
+  eventEmitter: unknown,
+  collisionContact: CollisionEventPayload,
+) {
+  if (collisionContact.type !== "enter") {
+    return;
+  }
 
-    velocity.velocity = velocity.velocity.reflect(collision.normal);
+  const entityA = world.entity(collisionContact.entityA);
+  const entityB = world.entity(collisionContact.entityB);
 
-    if (collidee.components.find((c) => c.name === "paddle")) {
-      const paddlePosition = collidee.getComponent("position") as Position;
+  const collisionEntities = [entityA, entityB];
+
+  const ballEntity = collisionEntities.find((entity) =>
+    entity.hasComponent("ball"),
+  );
+
+  const collideeEntity = collisionEntities.find(
+    (entity) => entity !== ballEntity,
+  )!;
+
+  // If the collision is between a ball and anything else
+  if (ballEntity) {
+    const ballVelocity = ballEntity.getComponent("velocity") as Velocity;
+
+    ballVelocity.velocity = ballVelocity.velocity.reflect(
+      collisionContact.normal,
+    );
+
+    if (collideeEntity.hasComponent("paddle")) {
+      const paddlePosition = collideeEntity.getComponent(
+        "position",
+      ) as Position;
+      const ballPosition = ballEntity.getComponent("position") as Position;
 
       const yDistanceFromPaddleCenter = paddlePosition.position.minus(
-        position.position,
+        ballPosition.position,
       ).y;
 
-      velocity.velocity = Vector.create(
-        velocity.velocity.x,
+      ballVelocity.velocity = Vector.create(
+        ballVelocity.velocity.x,
         -yDistanceFromPaddleCenter / 25,
       );
     }
@@ -133,30 +161,61 @@ function backboardCollisionHandlingSystem(
   world: World,
   resources: ResourcePool,
   state: { score: State<Score> },
+  eventEmitter: unknown,
+  collisionContact: CollisionEventPayload,
 ) {
-  for (const [backboard] of world.query<[BackboardComponent, Collision]>([
-    "backboard",
-    "collision",
-  ])) {
-    const [ballPosition, ballVelocity, ballSpeed] = world.query<
-      [Position, Velocity, Speed, BallComponent]
-    >(["position", "velocity", "speed", "ball"])[0];
+  if (collisionContact.type !== "enter") {
+    return;
+  }
 
-    // Reset ball position
+  /**
+   * Idea: Match collision helper function
+   * - pattern matching function that takes in the collision contact and
+   *   two sets of components to match against, one for each entity in the collison.
+   *
+   * - If the collision contact matches the pattern it will return the two entities
+   *   with the matched components, otherwise it will return undefined
+   *
+   * - Wild cards can be used to match against any component i.e. if there is only one
+   *   entity involved in the collision in which we care about its component
+   *
+   * - This will align more with the pattern matching style of the query function on the world
+   */
+  const entityA = world.entity(collisionContact.entityA);
+  const entityB = world.entity(collisionContact.entityB);
+
+  const collisionEntities = [entityA, entityB];
+
+  const ballEntity = collisionEntities.find((entity) =>
+    entity.hasComponent("ball"),
+  );
+
+  const backboardEntity = collisionEntities.find((entity) =>
+    entity.hasComponent("backboard"),
+  );
+
+  // If the collision is between a ball and a backboard
+  if (ballEntity && backboardEntity) {
+    const ballPosition = ballEntity.getComponent("position") as Position;
+    const ballVelocity = ballEntity.getComponent("velocity") as Velocity;
+    const ballSpeed = ballEntity.getComponent("speed") as Speed;
     ballPosition.position = Vector.create(200, 40);
 
     const [playerScore, aiScore] = state.score.value;
 
-    if (backboard.owner == "player") {
+    const backboardComponent = backboardEntity.getComponent(
+      "backboard",
+    ) as BackboardComponent;
+
+    if (backboardComponent.owner == "player") {
       state.score.setValue([playerScore, aiScore + 1]);
       // Reset ball directed towards player
-      ballVelocity.velocity = ballVelocity.velocity = new Vector(
-        -0.5,
-        -0.5,
-      ).plus(new Vector(-0.1, -0.1).times(playerScore + aiScore));
+      ballVelocity.velocity = new Vector(-0.5, -0.5).plus(
+        new Vector(-0.1, -0.1).times(playerScore + aiScore),
+      );
     }
 
-    if (backboard.owner == "ai") {
+    if (backboardComponent.owner == "ai") {
       state.score.setValue([playerScore + 1, aiScore]);
 
       // Reset ball directed towards ai
@@ -165,7 +224,6 @@ function backboardCollisionHandlingSystem(
       );
     }
 
-    // Reset ball speed
     ballSpeed.value = 3;
   }
 }
@@ -190,26 +248,33 @@ function updateScoreBoard(
 
 // Describes bow the collision handling worked in the orginial pong game
 // https://www.vbforums.com/showthread.php?634246-RESOLVED-How-did-collision-in-the-original-Pong-happen
-function paddleCollisionHandlingSystem(world: World) {
-  const [, ballSpeed] = world.query<[Velocity, Speed, BallComponent]>([
-    "velocity",
-    "speed",
-    "ball",
-  ])[0];
+function paddleCollisionHandlingSystem(
+  world: World,
+  resources: ResourcePool,
+  state: unknown,
+  eventEmitter: unknown,
+  collisionContact: CollisionEventPayload,
+) {
+  if (collisionContact.type !== "enter") {
+    return;
+  }
 
-  for (const [collision] of world.query<[Collision, PaddleComponent]>([
-    "collision",
-    "paddle",
-  ])) {
-    if (
-      world.entity(collision.entityId).components.find((c) => c.name === "ball")
-    ) {
-      ballSpeed.value += ballSpeed.value * 0.1;
-    }
+  const entityA = world.entity(collisionContact.entityA);
+  const entityB = world.entity(collisionContact.entityB);
 
-    if (sound) {
-      ballHitAudio.play();
-    }
+  const collisionEntities = [entityA, entityB];
+
+  const ballEntity = collisionEntities.find((entity) =>
+    entity.hasComponent("ball"),
+  );
+  const paddleEntity = collisionEntities.find((entity) =>
+    entity.hasComponent("paddle"),
+  );
+
+  // If the collision is between a ball and a paddle, increase the speed of the ball by 10%
+  if (paddleEntity && ballEntity) {
+    const ballSpeed = ballEntity.getComponent("speed") as Speed;
+    ballSpeed.value += ballSpeed.value * 0.1;
   }
 }
 
@@ -510,6 +575,7 @@ export default function pong(parent?: HTMLElement) {
     .event("setup")
     .event("update")
     .event("after-update")
+    .event<"collision", CollisionEventPayload>("collision")
     .event<"keyPressed", KeypressEvent>("keyPressed")
     .state("render-trajectory", false)
     .state<"score", [number, number]>("score", [0, 0])
@@ -563,12 +629,12 @@ export default function pong(parent?: HTMLElement) {
   );
   engine.system(
     "ballCollisionHandlingSystem",
-    engine.trigger.on("update").when("app-state").is("in-game"),
+    engine.trigger.on("collision").when("app-state").is("in-game"),
     ballCollisionHandlingSystem,
   );
   engine.system(
     "backboardCollisionHandlingSystem",
-    engine.trigger.on("update").when("app-state").is("in-game"),
+    engine.trigger.on("collision").when("app-state").is("in-game"),
     backboardCollisionHandlingSystem,
   );
   engine.system(
@@ -578,7 +644,7 @@ export default function pong(parent?: HTMLElement) {
   );
   engine.system(
     "paddleCollisionHandlingSystem",
-    engine.trigger.on("update").when("app-state").is("in-game"),
+    engine.trigger.on("collision").when("app-state").is("in-game"),
     paddleCollisionHandlingSystem,
   );
   engine.system(

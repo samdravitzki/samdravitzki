@@ -45,26 +45,6 @@ class Entity {
     }
   }
 
-  replaceComponent(component: Component) {
-    const hasComponent = this._components.has(component.name);
-
-    this._components.set(component.name, component);
-
-    if (this.emitter) {
-      if (!hasComponent) {
-        this.emitter.emit({
-          event: "entity:component-added",
-          payload: { entityId: this.id, componentName: component.name },
-        });
-      } else {
-        this.emitter.emit({
-          event: "entity:component-replaced",
-          payload: { entityId: this.id, componentName: component.name },
-        });
-      }
-    }
-  }
-
   removeComponent(componentName: string) {
     const componentToDelete = this._components.get(componentName);
 

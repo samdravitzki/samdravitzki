@@ -13,6 +13,7 @@ import {
   Animation,
 } from "../ecs/parts/animation/components/Animation";
 import animation from "../ecs/parts/animation/animation";
+import inspector from "../ecs/parts/inspector/inspector";
 
 const palette = {
   100: "#0A090A",
@@ -35,6 +36,7 @@ export default function animationDemo(parent?: HTMLElement) {
 
   engine.part(p5Part([700, 400], parent, palette[200]));
   engine.part(animation());
+  engine.part(inspector());
 
   const trigger = engine.trigger;
 

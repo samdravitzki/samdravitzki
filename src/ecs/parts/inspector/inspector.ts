@@ -172,19 +172,6 @@ function inspector() {
 
         const entity = world.entity(entityId);
 
-        const compoenentPanel = document.querySelector<HTMLElement>(
-          `.inspector__panel-component[data-component="${componentName}"]`,
-        );
-
-        const componentTag = document.querySelector<HTMLElement>(
-          `.inspector__panel-tag-component[data-component="${componentName}"]`,
-        );
-
-        if (compoenentPanel || componentTag) {
-          // Component already exists i.e. a component replace occured
-          return;
-        }
-
         if (componentName === "label") {
           if (!worldPanel) {
             console.warn("Entity list panel not found");
@@ -211,7 +198,10 @@ function inspector() {
           return;
         }
 
-        if (entityInspectorPanel) {
+        if (
+          entityInspectorPanel &&
+          entityInspectorPanel.dataset.entity === entityId
+        ) {
           const component = entity.getComponent(componentName);
 
           if (!component) {
@@ -270,10 +260,6 @@ function inspector() {
       (world, resources, state, emitter, payload) => {
         const { entityId, component } = payload;
 
-        console.log(
-          `Removing component ${component.name} from entity ${entityId}`,
-        );
-
         if (
           entityInspectorPanel &&
           entityInspectorPanel.dataset.entity === entityId
@@ -313,7 +299,6 @@ function inspector() {
       triggerBuilder.on("inspector:entity-selected"),
       (world, resources, state, emitter, payload) => {
         const { entityId } = payload;
-        console.log(`${entityId} selected`);
 
         // clean up any existing component panes
         for (const pane of componentPanes.values()) {

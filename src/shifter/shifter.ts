@@ -11,7 +11,7 @@ import { Circle } from "../ecs/parts/p5/shape-components";
 import gearText from "./gear-text";
 import GateNode, { commonGate, Direction } from "./gate";
 import animation from "../ecs/parts/animation/animation";
-import Vector from "../ecs/core/Vector/Vector";
+import inspector from "../ecs/parts/inspector/inspector";
 import {
   Animation,
   createAnimation,
@@ -58,7 +58,17 @@ function buildGate(world: World, resources: ResourcePool) {
         strokeWeight: 2,
       };
 
-      world.addBundle(createBundle([edge, position, style]));
+      world.addBundle(
+        createBundle([
+          edge,
+          position,
+          style,
+          {
+            name: "label",
+            text: "line",
+          },
+        ]),
+      );
     }
   }
 
@@ -86,7 +96,17 @@ function buildGate(world: World, resources: ResourcePool) {
       fill: point.name === "pass" ? [0, 0, 25] : [240, 60, 100],
     };
 
-    world.addBundle(createBundle([circle, position, style]));
+    world.addBundle(
+      createBundle([
+        circle,
+        position,
+        style,
+        {
+          name: "label",
+          text: "point",
+        },
+      ]),
+    );
   }
 
   // Shift Lever
@@ -97,6 +117,10 @@ function buildGate(world: World, resources: ResourcePool) {
         position: canvasBounds.center.center,
       } satisfies Position,
       "shift-lever",
+      {
+        name: "label",
+        text: "shift-lever",
+      },
       {
         name: "circle",
         radius: 15,
@@ -280,6 +304,7 @@ export default function shifter(parent?: HTMLElement) {
   engine.part(p5Part([500, 500], parent, [0, 0, 14]));
   engine.part(gearText());
   engine.part(animation());
+  engine.part(inspector());
 
   engine.system("setupGate", t.on("setup"), buildGate);
 

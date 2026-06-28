@@ -27,7 +27,6 @@ const homePage: Page = (container: HTMLElement, { navigate }) => {
     document
       .getElementById(`${miniApp.name}-button`)
       ?.addEventListener("click", () => {
-        console.log("hellop");
         navigate(`/${miniApp.appId}`);
       });
   });

@@ -17,6 +17,7 @@ import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import p5Part, { KeypressEvent } from "../ecs/parts/p5/p5-part";
 import { EventEmitter } from "../ecs/core/System/System";
 import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
+import inspector from "../ecs/parts/inspector/inspector";
 
 const tabs = {
   house: houseTab,
@@ -250,6 +251,7 @@ export default function drums(parent?: HTMLElement) {
   const t = engine.trigger;
 
   engine.part(p5Part([500, 500], parent));
+  engine.part(inspector());
 
   engine.system("calculate-bpm", t.on("keyPressed"), calculateBpm);
 

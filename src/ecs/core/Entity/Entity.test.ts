@@ -54,52 +54,6 @@ describe("addComponent method", () => {
   });
 });
 
-describe("replaceComponent method", () => {
-  test("should add a component", () => {
-    // ARRANGE
-    const entity = new Entity();
-    const componentA: Component = { name: "A" };
-
-    // ACT
-    entity.replaceComponent(componentA);
-
-    // ASSERT
-    expect(entity.components).toEqual([componentA]);
-  });
-
-  test("should replace component when one already exists associated with the same entity", () => {
-    // ARRANGE
-    const entity = new Entity();
-    const componentAV1 = { name: "A", value: 1 };
-    const componentAV2 = { name: "A", value: 2 };
-
-    entity.addComponent(componentAV1);
-
-    // ACT
-    entity.replaceComponent(componentAV2);
-
-    // ASSERT
-    expect(entity.components).toEqual([componentAV2]);
-  });
-
-  test("should cause existing components to be removed", () => {
-    // ARRANGE
-    const entity = new Entity();
-    const componentAV1 = { name: "A", value: 1 };
-    const componentAV2 = { name: "A", value: 2 };
-    const componentB = { name: "B" };
-
-    entity.addComponent(componentAV1);
-    entity.addComponent(componentB);
-
-    // ACT
-    entity.replaceComponent(componentAV2);
-
-    // ASSERT
-    expect(entity.components).toEqual([componentAV2, componentB]);
-  });
-});
-
 describe("removeComponent method", () => {
   test("should remove supplied component from entity", () => {
     // ARRANGE

@@ -13,7 +13,7 @@ import { Circle } from "../ecs/parts/p5/shape-components";
 import { Collider } from "../ecs/parts/collision/components/Collider";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import { ClickEventPayload } from "../ecs/parts/p5/p5-system";
-import { Collision } from "../ecs/parts/collision/components/Collision";
+import { CollisionContact } from "../ecs/parts/collision/components/Collision";
 import { CollisionEventPayload } from "../ecs/parts/collision/collision-systems";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import Label from "../ecs/core/Component/Label";
@@ -191,49 +191,50 @@ function cursorGrab(
   eventEmitter: unknown,
   eventPayload: ClickEventPayload,
 ) {
-  const cursor = world.query<[Collision, Position, string]>([
-    "collision",
-    "position",
-    "cursor",
-    "entity-id",
-  ])[0];
+  const collisionContactQuery = world.query<[CollisionContact]>([
+    "collision-contact",
+  ]);
 
-  if (!cursor) {
-    return;
-  }
+  for (const [contact] of collisionContactQuery) {
+    const entityA = world.entity(contact.entityA);
+    const entityB = world.entity(contact.entityB);
 
-  const [collision, position, entityId] = cursor;
-
-  const selected = world.entity(collision.entityId);
-  const selectedShapeStyle = selected.getComponent("shape-style") as
-    | ShapeStyle
-    | undefined;
-
-  const selectedShapePosition = selected.getComponent("position") as
-    | Position
-    | undefined;
-
-  if (!selectedShapeStyle || !selectedShapePosition) {
-    return;
-  }
-
-  if (eventPayload.type === "press") {
-    selectedShapeStyle.fill = "#ffffffd0";
-    const grabbedComponent = {
-      name: "cursor:grabbed",
-      offset: position.position.minus(selectedShapePosition.position),
-    } satisfies CursorGrabbed;
-
-    selected.addComponent(grabbedComponent); // Just a name component to tag the component as selected
-
-    // debug list of components on cursor entity
-    // console.log("Components on cursor entity:", selected.getComponents());
-    for (const component of world.entity(entityId).components) {
+    if (!entityA.hasComponent("cursor") && !entityB.hasComponent("cursor")) {
+      continue;
     }
-  }
 
-  if (eventPayload.type === "release") {
-    selectedShapeStyle.fill = "#ffffff31";
+    const selected = !entityA.hasComponent("cursor") ? entityA : entityB;
+    const cursor = entityA.hasComponent("cursor") ? entityA : entityB;
+
+    const selectedShapeStyle = selected.getComponent("shape-style") as
+      | ShapeStyle
+      | undefined;
+
+    const selectedShapePosition = selected.getComponent("position") as
+      | Position
+      | undefined;
+
+    const cursorPosition = cursor.getComponent("position") as
+      | Position
+      | undefined;
+
+    if (!selectedShapeStyle || !selectedShapePosition || !cursorPosition) {
+      return;
+    }
+
+    if (eventPayload.type === "press") {
+      selectedShapeStyle.fill = "#ffffffd0";
+      const grabbedComponent = {
+        name: "cursor:grabbed",
+        offset: cursorPosition.position.minus(selectedShapePosition.position),
+      } satisfies CursorGrabbed;
+
+      selected.addComponent(grabbedComponent); // Just a name component to tag the component as selected
+    }
+
+    if (eventPayload.type === "release") {
+      selectedShapeStyle.fill = "#ffffff31";
+    }
   }
 }
 
@@ -261,11 +262,14 @@ function cursorHover(
   eventEmitter: unknown,
   eventPayload: CollisionEventPayload,
 ) {
-  if (!world.entity(eventPayload.collidingEntity).hasComponent("cursor")) {
+  const entityA = world.entity(eventPayload.entityA);
+  const entityB = world.entity(eventPayload.entityB);
+
+  if (!entityA.hasComponent("cursor") && !entityB.hasComponent("cursor")) {
     return;
   }
 
-  const collidedEntity = world.entity(eventPayload.collidedEntity);
+  const collidedEntity = !entityA.hasComponent("cursor") ? entityA : entityB;
 
   if (collidedEntity.hasComponent("shape-style")) {
     const style = collidedEntity.getComponent("shape-style") as ShapeStyle;
