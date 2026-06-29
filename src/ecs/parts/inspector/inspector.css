@@ -56,15 +56,20 @@
   overflow-y: auto;
 }
 
-.inspector__panel-title {
+.inspector__panel-title-section {
   background-color: #bbbcc41a;
   width: 100%;
   border-radius: 4px 4px 0 0;
   margin-bottom: 2px;
+  position: relative;
+  display: flex;
+}
+
+.inspector__panel-title {
+  width: 100%;
   font-size: 0.95em;
   font-weight: 600;
   text-align: center;
-  position: relative;
 }
 
 .inspector__panel-close-button {

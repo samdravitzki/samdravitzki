@@ -26,9 +26,14 @@ function createInspectorPanelSection({
   const section = document.createElement("div");
   section.classList.add("inspector__panel");
 
-  const titleElement = document.createElement("div");
+  const titleSection = document.createElement("div");
+  titleSection.classList.add("inspector__panel-title-section");
+  section.appendChild(titleSection);
+
+  const titleElement = document.createElement("span");
   titleElement.classList.add("inspector__panel-title");
   titleElement.textContent = title;
+  titleSection.appendChild(titleElement);
 
   // Add close button if onClose is provided
   if (onClose) {
@@ -38,10 +43,10 @@ function createInspectorPanelSection({
     closeButton.addEventListener("click", () => {
       onClose();
     });
-    titleElement.appendChild(closeButton);
+    titleSection.appendChild(closeButton);
   }
 
-  section.appendChild(titleElement);
+  section.appendChild(titleSection);
 
   return section;
 }
@@ -179,7 +184,7 @@ function inspector() {
           }
 
           const entityText = worldPanel.querySelector<HTMLElement>(
-            `[data-id="${entityId}"]`,
+            `.inspector__panel-list-item[data-id="${entityId}"]`,
           );
 
           if (!entityText) {
