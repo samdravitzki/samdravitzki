@@ -128,13 +128,6 @@ function collisionSystem(
   }
 }
 
-function collisionLoggingSystem(world: World) {
-  for (const [collision] of world.query<[CollisionContact]>(["collision"])) {
-    console.debug(JSON.stringify(collision));
-  }
-}
-
 export default collisionSystem;
 
-export { collisionLoggingSystem };
 export type { CollisionEventPayload };
