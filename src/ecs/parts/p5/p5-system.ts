@@ -92,7 +92,8 @@ function createP5System(
         eventEmitter.emit({ event: "keyPressed", payload });
 
         // Prevent default browser behavior for certain keys (like arrow keys, space, etc.)
-        return false;
+        // Not enabled because it blocks inputs to the inspector feilds
+        // return true;
       };
 
       p.keyReleased = (event) => {
