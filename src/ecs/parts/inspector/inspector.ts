@@ -106,6 +106,9 @@ function inspector() {
 
       worldPanel = createInspectorPanelSection({
         title: "World",
+        onClose: () => {
+          worldPanel.style.display = "none";
+        },
       });
 
       worldPanel.classList.add("inspector__panel-world");
@@ -163,7 +166,7 @@ function inspector() {
         }
 
         const entityText = worldPanel.querySelector<HTMLElement>(
-          `[data-id="${entityId}"]`,
+          `.inspector__panel-list-item[data-id="${entityId}"]`,
         );
         entityText?.remove();
       },
