@@ -21,13 +21,14 @@ export type MiniAppInfo = {
 
 const miniApps: MiniAppInfo[] = [];
 
-miniApps.push({
-  name: "snake",
-  symbol: "🐍",
-  appId: "snake",
-  controls: [["move", "wasd or arrow keys"]],
-  app: snakeGame,
-});
+// Disabled because the standard of the rest of the mini apps has surpassed it
+// miniApps.push({
+//   name: "snake",
+//   symbol: "🐍",
+//   appId: "snake",
+//   controls: [["move", "wasd or arrow keys"]],
+//   app: snakeGame,
+// });
 
 miniApps.push({
   name: "pong",
