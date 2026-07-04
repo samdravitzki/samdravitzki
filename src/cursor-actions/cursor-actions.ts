@@ -196,6 +196,43 @@ function cursorGrab(
   ]);
 
   for (const [contact] of collisionContactQuery) {
+    /**
+     *
+     * Use pattern matching approach to simplify the logic of checking for the correct
+     * components in a collision contact. A pattern matching function can define
+     * that a collision contact must have a cursor and a shape-style component to be valid
+     * for processing declaritively. This reduces the amount of if statements and type checking
+     * significantly, and aligns with the apporach used for the query function on World.
+     *
+     * const matchResult = contact.match(
+     *  ["cursor", "position"],
+     *  ["shape-style", "position"],
+     * )
+     *
+     * if (!matchResult) {
+     *    return;
+     * }
+     *
+     * const [cursorMatch, shapeMatch] = matchResult;
+     *
+     * or
+     *
+     *  contact.match(
+     *    ["position", "cursor"],
+     *    ["position", "shape-style"],
+     *    ([cursorPosition], [shapePosition, shapeStyle]) => {
+     *      if (eventPayload.type === "press") {
+     *        selected.addComponent(grabbedComponent);
+     *        selectedShapeStyle.fill = "selected-color";
+     *      }
+     *
+     *      if (eventPayload.type === "release") {
+     *          selectedShapeStyle.fill = "hover-color";
+     *      }
+     *    }
+     *  )
+     */
+
     const entityA = world.entity(contact.entityA);
     const entityB = world.entity(contact.entityB);
 
