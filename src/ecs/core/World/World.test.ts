@@ -1,5 +1,5 @@
-import { describe, expect, test } from "vitest";
-import World from "./World";
+import { describe, expect, expectTypeOf, test } from "vitest";
+import World, { WithoutNever } from "./World";
 import Component from "../Component/Component";
 import Bundle from "../Bundle/Bundle";
 
@@ -37,7 +37,10 @@ describe("addBundle method", () => {
     const world = new World();
 
     const bundle: Bundle = {
-      components: [{ name: "A" }, { name: "B" }],
+      components: [
+        { name: "A", componentData: "test" },
+        { name: "B", componentData: "test" },
+      ],
     };
 
     // ACT
@@ -53,7 +56,7 @@ describe("removeEntity method", () => {
     // ARRANGE
     const world = new World();
     const entity1 = world.createEntity();
-    const componentA = { entityId: entity1.id, name: "A" };
+    const componentA = { name: "A", componentData: "test" };
     entity1.addComponent(componentA);
 
     // ACT
@@ -99,7 +102,7 @@ describe("entity method", () => {
 describe("query method", () => {
   test("should return id of entity when 'entity-id' is supplied as a query string", () => {
     // ARRANGE
-    const componentA1: Component = { name: "A" };
+    const componentA1: Component = { name: "A", componentData: "test" };
 
     const world = new World();
     const entity = world.createEntity();
@@ -114,8 +117,8 @@ describe("query method", () => {
 
   test("should return entities with component when requesting a single component type", () => {
     // ARRANGE
-    const componentA1: Component = { name: "A" };
-    const componentA2: Component = { name: "A" };
+    const componentA1: Component = { name: "A", componentData: "test" };
+    const componentA2: Component = { name: "A", componentData: "test" };
 
     const world = new World();
     const entity1 = world.createEntity();
@@ -133,10 +136,10 @@ describe("query method", () => {
 
   test("should return entities when requesting multiple component type", () => {
     // ARRANGE
-    const componentA1: Component = { name: "A" };
-    const componentB1: Component = { name: "B" };
-    const componentA2: Component = { name: "A" };
-    const componentB2: Component = { name: "B" };
+    const componentA1: Component = { name: "A", componentData: "test" };
+    const componentB1: Component = { name: "B", componentData: "test" };
+    const componentA2: Component = { name: "A", componentData: "test" };
+    const componentB2: Component = { name: "B", componentData: "test" };
 
     const world = new World();
     const entity1 = world.createEntity();
@@ -158,9 +161,9 @@ describe("query method", () => {
 
   test("should only return requested components of entities", () => {
     // ARRANGE
-    const componentA1: Component = { name: "A" };
-    const componentB1: Component = { name: "B" };
-    const componentC1: Component = { name: "C" };
+    const componentA1: Component = { name: "A", componentData: "test" };
+    const componentB1: Component = { name: "B", componentData: "test" };
+    const componentC1: Component = { name: "C", componentData: "test" };
 
     const world = new World();
     const entity1 = world.createEntity();
@@ -177,9 +180,9 @@ describe("query method", () => {
 
   test("should only return entities that have all requested components", () => {
     // ARRANGE
-    const componentA1: Component = { name: "A" };
-    const componentB1: Component = { name: "B" };
-    const componentA2: Component = { name: "A" };
+    const componentA1: Component = { name: "A", componentData: "test" };
+    const componentB1: Component = { name: "B", componentData: "test" };
+    const componentA2: Component = { name: "A", componentData: "test" };
 
     const world = new World();
     const entity1 = world.createEntity();
@@ -197,7 +200,10 @@ describe("query method", () => {
 
   test("should return empty list when requesting a component type that does not exist", () => {
     // ARRANGE
-    const componentA1: Component = { name: "A" };
+    const componentA1: Component<void> = {
+      name: "A",
+      componentData: undefined,
+    };
 
     const world = new World();
     const entity1 = world.createEntity();
@@ -236,9 +242,9 @@ describe("query method", () => {
 
   test("should return components in requested order", () => {
     // ARRANGE
-    const componentA1: Component = { name: "A" };
-    const componentB1: Component = { name: "B" };
-    const componentC1: Component = { name: "C" };
+    const componentA1: Component = { name: "A", componentData: "test" };
+    const componentB1: Component = { name: "B", componentData: "test" };
+    const componentC1: Component = { name: "C", componentData: "test" };
 
     const world = new World();
     const entity1 = world.createEntity();
@@ -251,5 +257,36 @@ describe("query method", () => {
 
     // ASSERT
     expect(result).toEqual([[componentC1, componentB1, componentA1]]);
+  });
+
+  test("should exclude tag components from query results", () => {
+    // ARRANGE
+    const componentA1: Component = { name: "A", componentData: "test" };
+    const tagComponent: Component<void> = {
+      name: "B",
+      componentData: undefined,
+    };
+    const componentC1: Component = { name: "C", componentData: "test" };
+
+    const world = new World();
+    const entity1 = world.createEntity();
+    entity1.addComponent(componentA1);
+    entity1.addComponent(tagComponent);
+    entity1.addComponent(componentC1);
+
+    // ACT
+    const result = world.query(["A", "B", "C"]);
+
+    // ASSERT
+    expect(result).toEqual([[componentA1, componentC1]]);
+  });
+});
+
+describe("WithoutNever type", () => {
+  test("should remove never types from tuple", () => {
+    type Test = [number, never, string, never, boolean];
+    type TestWithoutNever = WithoutNever<Test>; // [number, string, boolean]
+
+    expectTypeOf<TestWithoutNever>().toEqualTypeOf<[number, string, boolean]>();
   });
 });

@@ -1,11 +1,19 @@
 import p5 from "p5";
 import World from "../../../core/World/World";
-import { Position } from "../../../components/Position";
 import { Color, ShapeStyle } from "./ShapeStyle";
-import { Text } from "../shape-components";
-import { Square } from "../shape-components";
-import { Line } from "../shape-components";
+import {
+  Circle,
+  CircleData,
+  Line,
+  Square,
+  TextData,
+  Text,
+} from "../shape-components";
+import { SquareData } from "../shape-components";
+import { LineData } from "../shape-components";
 import { ResourcePool } from "../../../core/Engine/ResourcePool";
+import Component from "../../../core/Component/Component";
+import Position, { PositionData } from "../../../components/Position";
 
 function toP5Color(p: p5, color: string | number[]) {
   if (typeof color === "string") {
@@ -14,13 +22,13 @@ function toP5Color(p: p5, color: string | number[]) {
   return p.color(color);
 }
 
-function drawCircle(p: p5, position: Position, radius: number) {
+function drawCircle(p: p5, position: PositionData, radius: number) {
   p.circle(position.position.x, position.position.y, radius * 2);
 }
 
 function drawLine(
   p: p5,
-  position: Position,
+  position: PositionData,
   start: { x: number; y: number },
   end: { x: number; y: number },
 ) {
@@ -34,7 +42,7 @@ function drawLine(
 
 function drawSquare(
   p: p5,
-  position: Position,
+  position: PositionData,
   width: number,
   height: number,
   borderRadius?: number,
@@ -50,7 +58,7 @@ function drawSquare(
 
 function drawText(
   p: p5,
-  position: Position,
+  position: PositionData,
   text: string,
   size: number,
   align?: "left" | "right" | "center",
@@ -113,39 +121,50 @@ function applyPrimitiveStyle(
 function primitiveRendererSystem(world: World, resources: ResourcePool) {
   const p = resources.get<p5>("p5");
 
-  const squares = world.query<[string, Position, ShapeStyle]>([
-    "entity-id",
-    "position",
-    "shape-style",
-  ]);
+  const shapes = world.query(["entity-id", Position, ShapeStyle]);
 
-  for (const [entityId, position, style] of squares) {
+  for (const [entityId, position, style] of shapes) {
     p.push();
-    applyPrimitiveStyle(p, style);
+    applyPrimitiveStyle(p, style.componentData);
 
     const entity = world.entity(entityId);
 
-    if (entity.hasComponent("square")) {
-      const square = entity.getComponent("square") as Square;
-      drawSquare(p, position, square.width, square.height, square.borderRadius);
+    const square = entity.getComponent(Square);
+    if (square) {
+      drawSquare(
+        p,
+        position.componentData,
+        square.componentData.width,
+        square.componentData.height,
+        square.componentData.borderRadius,
+      );
     }
 
-    if (entity.hasComponent("line")) {
-      const line = entity.getComponent("line") as Line;
-      drawLine(p, position, line.start, line.end);
+    const line = entity.getComponent(Line);
+    if (line) {
+      drawLine(
+        p,
+        position.componentData,
+        line.componentData.start,
+        line.componentData.end,
+      );
     }
 
-    if (entity.hasComponent("circle")) {
-      const circle = entity.getComponent("circle") as {
-        name: "circle";
-        radius: number;
-      };
-      drawCircle(p, position, circle.radius);
+    const circle = entity.getComponent(Circle);
+    if (circle) {
+      drawCircle(p, position.componentData, circle.componentData.radius);
     }
 
-    if (entity.hasComponent("text")) {
-      const text = entity.getComponent("text") as Text;
-      drawText(p, position, text.text, text.size, text.align, text.font);
+    const text = entity.getComponent(Text);
+    if (text) {
+      drawText(
+        p,
+        position.componentData,
+        text.componentData.text,
+        text.componentData.size,
+        text.componentData.align,
+        text.componentData.font,
+      );
     }
     p.pop();
   }

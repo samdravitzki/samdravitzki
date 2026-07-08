@@ -4,161 +4,144 @@ import World from "../ecs/core/World/World";
 import Vector from "../ecs/core/Vector/Vector";
 import p5Part, { MousePosition } from "../ecs/parts/p5/p5-part";
 import collisions from "../ecs/parts/collision/collision";
-import Component from "../ecs/core/Component/Component";
+import Component, { component, tag } from "../ecs/core/Component/Component";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
-import { Position } from "../ecs/components/Position";
-import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
-import { Square } from "../ecs/parts/p5/shape-components";
-import { Circle } from "../ecs/parts/p5/shape-components";
+import Position, { PositionData } from "../ecs/components/Position";
+import {
+  ShapeStyle,
+  ShapeStyleData,
+} from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
+import { Circle, Square } from "../ecs/parts/p5/shape-components";
 import { Collider } from "../ecs/parts/collision/components/Collider";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import { ClickEventPayload } from "../ecs/parts/p5/p5-system";
-import { CollisionContact } from "../ecs/parts/collision/components/Collision";
 import { CollisionEventPayload } from "../ecs/parts/collision/collision-systems";
 import Bounds from "../ecs/core/Bounds/Bounds";
-import Label from "../ecs/core/Component/Label";
 import inspector from "../ecs/parts/inspector/inspector";
+import Label from "../ecs/core/Component/Label";
+import { CollisionContact } from "../ecs/parts/collision/components/Collision";
 
 // Component used to tag entities that should be interactable with the cursor
 // Making them easy to query for
-type TestShapeComponent = Component & {
-  name: "test-shape";
-};
+const TestShape = tag("test-shape");
 
-const testShape = {
-  name: "test-shape",
-} satisfies TestShapeComponent;
-
-const circle = [
-  testShape,
-  {
-    name: "circle",
+const testCircle = [
+  TestShape(),
+  Circle({
     radius: 75,
-  } satisfies Circle,
-  {
-    name: "collider",
+  }),
+  Collider({
     type: "aabb",
     layer: "wall",
     width: 150,
     height: 150,
-  } satisfies Collider,
-  {
-    name: "shape-style",
+  }),
+  ShapeStyle({
     stroke: "#ffffff78",
     strokeWeight: 3,
     dash: [10, 15],
-  } satisfies ShapeStyle,
-  {
-    name: "label",
+  }),
+  Label({
     text: "circle",
-  } satisfies Label,
+  }),
 ];
 
-const square = [
-  testShape,
-  {
-    name: "square",
+const testSquare = [
+  TestShape(),
+  Square({
     width: 150,
     height: 150,
-  } satisfies Square,
-  {
-    name: "collider",
+  }),
+  Collider({
     type: "aabb",
     layer: "wall",
     width: 150,
     height: 150,
-  } satisfies Collider,
-  {
-    name: "shape-style",
+  }),
+  ShapeStyle({
     stroke: "#ffffff78",
     strokeWeight: 3,
     dash: [10, 15],
-  } satisfies ShapeStyle,
-  {
-    name: "label",
+  }),
+  Label({
     text: "square",
-  } satisfies Label,
+  }),
 ];
 
-function setupShapes(world: World) {
+function startingShapes(world: World) {
   world.addBundle(
     createBundle([
-      ...square,
-      {
-        name: "position",
+      ...testSquare,
+      Position({
         position: Vector.create(200, 200),
-      } satisfies Position,
+      }),
     ]),
   );
   world.addBundle(
     createBundle([
-      ...circle,
-      {
-        name: "position",
+      ...testCircle,
+      Position({
         position: Vector.create(300, 300),
-      } satisfies Position,
+      }),
     ]),
   );
 }
 
 // Cursor components
-type Cursor = Component & {
-  name: "cursor";
-};
-
-type CursorGrabbed = Component & {
-  name: "cursor:grabbed";
+const Cursor = tag("cursor");
+type CursorGrabbedData = {
   offset: Vector;
 };
 
-type CursorHover = Component & {
-  name: "cursor:hover";
-};
+const CursorGrabbed = component<CursorGrabbedData>({ name: "cursor:grabbed" });
+
+const CursorHover = tag("cursor:hover");
+
+Position({
+  position: Vector.create(0, 0),
+});
 
 function setupCursor(world: World) {
   const cursorCollider = createBundle([
-    {
-      name: "cursor",
-    } satisfies Cursor,
-    {
-      name: "shape-style",
+    Cursor(),
+    ShapeStyle({
       stroke: "#ffffff",
       strokeWeight: 3,
-    } satisfies ShapeStyle,
-    {
-      name: "position",
+    }),
+    Position({
       position: Vector.create(0, 0),
-    } satisfies Position,
-    {
-      name: "circle",
+    }),
+    Circle({
       radius: 5,
-    } satisfies Circle,
-    {
-      name: "collider",
+    }),
+    Collider({
       type: "aabb",
       layer: "wall",
       width: 10,
       height: 10,
-    } satisfies Collider,
-    {
-      name: "label",
+    }),
+    Label({
       text: "cursor",
-    } satisfies Label,
+    }),
   ]);
 
   world.addBundle(cursorCollider);
 }
+
 function moveCursor(world: World, resources: ResourcePool) {
   const mousePosition = resources.get<MousePosition>("mouse-position");
-  const cursor = world.query<[Position]>(["position", "cursor"])[0];
+  const result = world.query([Position, Cursor])[0];
 
-  if (!cursor) {
+  if (!result) {
     return;
   }
 
-  const [position] = cursor;
+  const [cursorPosition] = result;
 
-  position.position = Vector.create(mousePosition.x, mousePosition.y);
+  cursorPosition.componentData.position = Vector.create(
+    mousePosition.x,
+    mousePosition.y,
+  );
 }
 
 function cursorClick(
@@ -168,19 +151,19 @@ function cursorClick(
   eventEmitter: unknown,
   eventPayload: ClickEventPayload,
 ) {
-  const cursor = world.query<[Circle]>(["circle", "cursor"])[0];
-  if (!cursor) {
+  const result = world.query([Circle, Cursor])[0];
+  if (!result) {
     return;
   }
 
-  const [circle] = cursor;
+  const [circleShape] = result;
 
   if (eventPayload.type === "press") {
-    circle.radius = 10;
+    circleShape.componentData.radius = 10;
   }
 
   if (eventPayload.type === "release") {
-    circle.radius = 5;
+    circleShape.componentData.radius = 5;
   }
 }
 
@@ -191,9 +174,7 @@ function cursorGrab(
   eventEmitter: unknown,
   eventPayload: ClickEventPayload,
 ) {
-  const collisionContactQuery = world.query<[CollisionContact]>([
-    "collision-contact",
-  ]);
+  const collisionContactQuery = world.query([CollisionContact]);
 
   for (const [contact] of collisionContactQuery) {
     /**
@@ -233,8 +214,8 @@ function cursorGrab(
      *  )
      */
 
-    const entityA = world.entity(contact.entityA);
-    const entityB = world.entity(contact.entityB);
+    const entityA = world.entity(contact.componentData.entityA);
+    const entityB = world.entity(contact.componentData.entityB);
 
     if (!entityA.hasComponent("cursor") && !entityB.hasComponent("cursor")) {
       continue;
@@ -243,34 +224,29 @@ function cursorGrab(
     const selected = !entityA.hasComponent("cursor") ? entityA : entityB;
     const cursor = entityA.hasComponent("cursor") ? entityA : entityB;
 
-    const selectedShapeStyle = selected.getComponent("shape-style") as
-      | ShapeStyle
-      | undefined;
+    const selectedShapeStyle = selected.getComponent(ShapeStyle);
 
-    const selectedShapePosition = selected.getComponent("position") as
-      | Position
-      | undefined;
+    const selectedShapePosition = selected.getComponent(Position);
 
-    const cursorPosition = cursor.getComponent("position") as
-      | Position
-      | undefined;
+    const cursorPosition = cursor.getComponent(Position);
 
     if (!selectedShapeStyle || !selectedShapePosition || !cursorPosition) {
       return;
     }
 
     if (eventPayload.type === "press") {
-      selectedShapeStyle.fill = "#ffffffd0";
-      const grabbedComponent = {
-        name: "cursor:grabbed",
-        offset: cursorPosition.position.minus(selectedShapePosition.position),
-      } satisfies CursorGrabbed;
+      selectedShapeStyle.componentData.fill = "#ffffffd0";
+      const grabbedComponent = CursorGrabbed({
+        offset: cursorPosition.componentData.position.minus(
+          selectedShapePosition.componentData.position,
+        ),
+      });
 
       selected.addComponent(grabbedComponent); // Just a name component to tag the component as selected
     }
 
     if (eventPayload.type === "release") {
-      selectedShapeStyle.fill = "#ffffff31";
+      selectedShapeStyle.componentData.fill = "#ffffff31";
     }
   }
 }
@@ -283,16 +259,13 @@ function cursorGrabRelease(
   eventPayload: ClickEventPayload,
 ) {
   if (eventPayload.type === "release") {
-    for (const [entityId] of world.query<[string]>([
-      "entity-id",
-      "cursor:grabbed",
-    ])) {
+    for (const [entityId] of world.query(["entity-id", CursorGrabbed])) {
       world.entity(entityId).removeComponent("cursor:grabbed");
     }
   }
 }
 
-function cursorHover(
+function cursorHoverSystem(
   world: World,
   resources: ResourcePool,
   state: unknown,
@@ -308,33 +281,35 @@ function cursorHover(
 
   const collidedEntity = !entityA.hasComponent("cursor") ? entityA : entityB;
 
-  if (collidedEntity.hasComponent("shape-style")) {
-    const style = collidedEntity.getComponent("shape-style") as ShapeStyle;
+  const style = collidedEntity.getComponent(ShapeStyle);
+
+  if (style) {
     if (eventPayload.type === "enter") {
-      style.fill = "#ffffff31";
-      collidedEntity.addComponent({
-        name: "cursor:hover",
-      } satisfies CursorHover);
+      style.componentData.fill = "#ffffff31";
+      collidedEntity.addComponent(CursorHover());
     }
 
     if (eventPayload.type === "exit") {
-      style.fill = undefined;
+      style.componentData.fill = undefined;
       collidedEntity.removeComponent("cursor:hover");
     }
   }
 }
 
 function cursorDrag(world: World) {
-  const cursor = world.query<[Position]>(["position", "cursor"])[0];
+  const cursorResult = world.query([Position, Cursor])[0];
 
-  for (const [position, grabbed] of world.query<[Position, CursorGrabbed]>([
-    "position",
-    "cursor:grabbed",
+  for (const [grabbedPosition, grabbed] of world.query([
+    Position,
+    CursorGrabbed,
   ])) {
-    if (cursor) {
-      const [cursorPosition] = cursor;
+    if (cursorResult) {
+      const [cursorPosition] = cursorResult;
 
-      position.position = cursorPosition.position.minus(grabbed.offset);
+      grabbedPosition.componentData.position =
+        cursorPosition.componentData.position.minus(
+          grabbed.componentData.offset,
+        );
     }
   }
 }
@@ -379,14 +354,13 @@ export default function cursorActions(parent?: HTMLElement) {
 
       addCircleButton.mousePressed(() => {
         const newCircle = createBundle([
-          ...structuredClone(circle),
-          {
-            name: "position",
+          ...structuredClone(testCircle),
+          Position({
             position: Vector.create(
               Math.random() * canvasBounds.size[0],
               Math.random() * canvasBounds.size[1],
             ),
-          } satisfies Position,
+          }),
         ]);
 
         world.addBundle(newCircle);
@@ -403,14 +377,13 @@ export default function cursorActions(parent?: HTMLElement) {
 
       addSquareButton.mousePressed(() => {
         const newSquare = createBundle([
-          ...structuredClone(square),
-          {
-            name: "position",
+          ...structuredClone(testSquare),
+          Position({
             position: Vector.create(
               Math.random() * canvasBounds.size[0],
               Math.random() * canvasBounds.size[1],
             ),
-          } satisfies Position,
+          }),
         ]);
 
         world.addBundle(newSquare);
@@ -426,10 +399,7 @@ export default function cursorActions(parent?: HTMLElement) {
       );
 
       removeRandom.mousePressed(() => {
-        const shapes = world.query<["entity-id", TestShapeComponent]>([
-          "entity-id",
-          "test-shape",
-        ]);
+        const shapes = world.query(["entity-id", TestShape]);
 
         if (shapes.length === 0) {
           return;
@@ -443,14 +413,18 @@ export default function cursorActions(parent?: HTMLElement) {
     },
   );
 
-  engine.system("setup-shapes", engine.trigger.on("setup"), setupShapes);
+  engine.system("setup-shapes", engine.trigger.on("setup"), startingShapes);
   engine.system("setup-cursor", engine.trigger.on("setup"), setupCursor);
 
   engine.system("move-cursor", engine.trigger.on("update"), moveCursor);
   engine.system("cursor-grab", engine.trigger.on("click"), cursorGrab);
   engine.system("grab-release", engine.trigger.on("click"), cursorGrabRelease);
   engine.system("cursor-click", engine.trigger.on("click"), cursorClick);
-  engine.system("cursor-hover", engine.trigger.on("collision"), cursorHover);
+  engine.system(
+    "cursor-hover",
+    engine.trigger.on("collision"),
+    cursorHoverSystem,
+  );
   engine.system("cursor-drag", engine.trigger.on("update"), cursorDrag);
 
   return engine;

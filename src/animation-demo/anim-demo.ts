@@ -1,5 +1,4 @@
 import p5 from "p5";
-import { Position } from "../ecs/components/Position";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
@@ -8,12 +7,13 @@ import p5Part from "../ecs/parts/p5/p5-part";
 import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
 import { Line } from "../ecs/parts/p5/shape-components";
 import { Circle } from "../ecs/parts/p5/shape-components";
-import {
+import Animation, {
   createAnimation,
-  Animation,
 } from "../ecs/parts/animation/components/Animation";
 import animation from "../ecs/parts/animation/animation";
 import inspector from "../ecs/parts/inspector/inspector";
+import Position from "../ecs/components/Position";
+import { tag } from "../ecs/core/Component/Component";
 
 const palette = {
   100: "#0A090A",
@@ -67,23 +67,20 @@ export default function animationDemo(parent?: HTMLElement) {
   });
 
   engine.system("setup-animation-path-lines", trigger.on("setup"), (world) => {
-    for (const [animation] of world.query<[Animation]>(["animation"])) {
+    for (const [animation] of world.query([Animation])) {
       world.addBundle(
         createBundle([
-          {
-            name: "position",
+          Position({
             position: new Vector(0, 0),
-          } satisfies Position,
-          {
-            name: "line",
-            start: animation.from,
-            end: animation.to,
-          } satisfies Line,
-          {
-            name: "shape-style",
+          }),
+          Line({
+            start: animation.componentData.from,
+            end: animation.componentData.to,
+          }),
+          ShapeStyle({
             stroke: palette[300],
             strokeWeight: 2,
-          } satisfies ShapeStyle,
+          }),
         ]),
       );
     }
@@ -95,23 +92,22 @@ export default function animationDemo(parent?: HTMLElement) {
     (world, resources) => {
       const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-      world.query<[Animation]>(["animation"]).forEach(([animation], i) => {
+      world.query([Animation]).forEach(([animation], i) => {
         world.addBundle(
           createBundle([
-            `animation-target-${i + 1}`,
-            {
-              name: "position",
-              position: animation.from.plus(canvasBounds.center.center),
-            } satisfies Position,
-            {
-              name: "circle",
+            tag(`animation-target-${i + 1}`)(),
+            Position({
+              position: animation.componentData.from.plus(
+                canvasBounds.center.center,
+              ),
+            }),
+            Circle({
               radius: 10,
-            } satisfies Circle,
-            {
-              name: "shape-style",
+            }),
+            ShapeStyle({
               fill: palette[600],
               strokeWeight: 2,
-            } satisfies ShapeStyle,
+            }),
           ]),
         );
       });
@@ -131,8 +127,8 @@ export default function animationDemo(parent?: HTMLElement) {
     const playButton = p.createButton("play");
 
     playButton.mousePressed(() => {
-      world.query<[Animation]>(["animation"]).forEach(([animation]) => {
-        animation.startTime = Date.now();
+      world.query([Animation]).forEach(([animation]) => {
+        animation.componentData.startTime = Date.now();
       });
     });
 

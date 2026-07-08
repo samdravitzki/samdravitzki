@@ -1,11 +1,13 @@
-import Component from "./Component";
+import { component } from "./Component";
 
 /**
  * Component used give entities a label. Used for debugging and development purposes.
  */
-type Label = Component & {
-  name: "label";
+type LabelData = {
   text: string;
 };
 
+const Label = component<LabelData>({ name: "label" });
+
 export default Label;
+export { type LabelData };

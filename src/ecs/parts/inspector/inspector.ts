@@ -1,5 +1,5 @@
 import { Part } from "../../core/Part/Part";
-import Label from "../../core/Component/Label";
+import Label, { LabelData } from "../../core/Component/Label";
 import "./inspector.css";
 import { Pane } from "tweakpane";
 import Component from "../../core/Component/Component";
@@ -66,15 +66,26 @@ function createComponentPane(
   component: Component,
   container: HTMLElement,
 ): Pane {
-  const { name, ...properties } = component;
+  const { name } = component;
+
+  const componentData = component.componentData;
+
+  if (typeof componentData !== "object" || componentData === null) {
+    throw new Error(
+      `Component properties for component '${name}' must be an object`,
+    );
+  }
 
   const componentPane = new Pane({
     container,
   });
 
-  for (const [propertyName, propertyValue] of Object.entries(properties)) {
+  for (const [propertyName, propertyValue] of Object.entries(componentData)) {
     try {
-      componentPane.addBinding(component, propertyName);
+      componentPane.addBinding(
+        componentData,
+        propertyName as keyof typeof componentData,
+      );
     } catch (e) {
       // Fallback for any properties types not supported by tweakpane natively
       const fallbackObj = { [propertyName]: String(propertyValue) };
@@ -88,8 +99,8 @@ function createComponentPane(
 }
 
 function isTagComponent(component: Component): boolean {
-  const { name, ...properties } = component;
-  return Object.keys(properties).length === 0;
+  const { componentData } = component;
+  return componentData === undefined;
 }
 
 function inspector() {
@@ -195,15 +206,17 @@ function inspector() {
             return;
           }
 
-          const component = entity.getComponent(componentName) as Label;
+          const component = entity.getComponent(Label);
 
-          entityText.innerHTML = `
-            ${component.text}
+          if (component) {
+            entityText.innerHTML = `
+            ${component.componentData.text}
             <span class="inspector__badge">
               ${entityId.slice(0, 6)}
             </span>
           `;
-          return;
+            return;
+          }
         }
 
         if (
@@ -218,8 +231,6 @@ function inspector() {
             );
             return;
           }
-
-          const { name, ...properties } = component;
 
           const isTag = isTagComponent(component);
 
@@ -316,8 +327,9 @@ function inspector() {
         componentPanes = new Map();
 
         const entity = world.entity(entityId);
-        const title = entity.hasComponent("label")
-          ? `${(entity.getComponent("label") as Label).text} (${entityId.slice(0, 3)})`
+        const labelComponent = entity.getComponent(Label);
+        const title = labelComponent
+          ? `${labelComponent.componentData.text} (${entityId.slice(0, 3)})`
           : `Entity ${entityId.slice(0, 6)}`;
 
         if (!entityInspectorPanel) {
@@ -356,7 +368,7 @@ function inspector() {
         const componentTags: HTMLElement[] = [];
 
         for (const component of entity.components) {
-          const { name, ...properties } = component;
+          const { name } = component;
 
           if (name === "label") {
             continue;

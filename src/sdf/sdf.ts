@@ -1,6 +1,6 @@
 import p5 from "p5";
 import { Pane } from "tweakpane";
-import { Position } from "../ecs/components/Position";
+import Position from "../ecs/components/Position";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
@@ -21,78 +21,77 @@ import collisions, {
 } from "../ecs/parts/collision/collision";
 import stateDebugPaneSystem from "./state-debug-pane";
 import { CollisionContact } from "../ecs/parts/collision/components/Collision";
+import { component, tag } from "../ecs/core/Component/Component";
 
 const circle = [
-  {
-    name: "circle",
+  Circle({
     radius: 75,
-  } satisfies Circle,
-  {
-    name: "sdf-shape",
-    // fill: [0, 0, 0],
+  }),
+  SdfShape({
     fill: [255, 255, 0],
-  } satisfies SdfShape,
-  {
-    name: "collider",
+  }),
+  Collider({
     type: "aabb",
     layer: "wall",
     width: 150,
     height: 150,
-  } satisfies Collider,
-  {
-    name: "shape-style",
+  }),
+  ShapeStyle({
     stroke: "#ffffff78",
     strokeWeight: 3,
     dash: [10, 15],
-  } satisfies ShapeStyle,
+  }),
 ];
 
 const square = [
-  {
-    name: "square",
+  Square({
     width: 150,
     height: 150,
-  } satisfies Square,
-  {
-    name: "sdf-shape",
-    // fill: [0, 0, 0],
+  }),
+  SdfShape({
     fill: [255, 0, 255],
-  } satisfies SdfShape,
-  {
-    name: "collider",
+  }),
+  Collider({
     type: "aabb",
     layer: "wall",
     width: 150,
     height: 150,
-  } satisfies Collider,
-  {
-    name: "shape-style",
+  }),
+  ShapeStyle({
     stroke: "#ffffff78",
     strokeWeight: 3,
     dash: [10, 15],
-  } satisfies ShapeStyle,
+  }),
 ];
 
 function sdfShapes(world: World) {
   world.addBundle(
     createBundle([
       ...square,
-      {
-        name: "position",
+      Position({
         position: Vector.create(200, 200),
-      } satisfies Position,
+      }),
     ]),
   );
   world.addBundle(
     createBundle([
       ...circle,
-      {
-        name: "position",
+      Position({
         position: Vector.create(300, 300),
-      } satisfies Position,
+      }),
     ]),
   );
 }
+
+// Cursor components
+const Cursor = tag("cursor");
+type CursorGrabbedData = {
+  offset: Vector;
+};
+
+const CursorGrabbed = component<CursorGrabbedData>({ name: "cursor:grabbed" });
+
+const CursorHover = tag("cursor:hover");
 
 export default function sdf(parent?: HTMLElement) {
   const engine = EngineBuilder.create()
@@ -121,31 +120,26 @@ export default function sdf(parent?: HTMLElement) {
 
   engine.system("setup-cursor", engine.trigger.on("setup"), (world) => {
     const cursorCollider = createBundle([
-      "cursor",
-      {
-        name: "shape-style",
+      Cursor(),
+      ShapeStyle({
         stroke: "#ffffff",
         strokeWeight: 3,
-      } satisfies ShapeStyle,
-      {
-        name: "position",
+      }),
+      Position({
         position: Vector.create(0, 0),
-      } satisfies Position,
-      {
-        name: "circle",
+      }),
+      Circle({
         radius: 5,
-      } satisfies Circle,
-      {
-        name: "sdf-shape",
+      }),
+      SdfShape({
         fill: [255, 255, 255],
-      } satisfies SdfShape,
-      {
-        name: "collider",
+      }),
+      Collider({
         type: "aabb",
         layer: "wall",
         width: 10,
         height: 10,
-      } satisfies Collider,
+      }),
     ]);
 
     world.addBundle(cursorCollider);
@@ -156,7 +150,7 @@ export default function sdf(parent?: HTMLElement) {
     engine.trigger.on("update"),
     (world, resources) => {
       const mousePosition = resources.get<MousePosition>("mouse-position");
-      const cursor = world.query<[Position]>(["position", "cursor"])[0];
+      const cursor = world.query([Position, "cursor"])[0];
 
       if (!cursor) {
         return;
@@ -164,7 +158,10 @@ export default function sdf(parent?: HTMLElement) {
 
       const [position] = cursor;
 
-      position.position = Vector.create(mousePosition.x, mousePosition.y);
+      position.componentData.position = Vector.create(
+        mousePosition.x,
+        mousePosition.y,
+      );
     },
   );
 
@@ -172,7 +169,7 @@ export default function sdf(parent?: HTMLElement) {
     "cursor-click",
     engine.trigger.on("click"),
     (world, resources, state, eventEmitter, eventPayload) => {
-      const cursor = world.query<[Circle]>(["circle", "cursor"])[0];
+      const cursor = world.query([Circle, "cursor"])[0];
       if (!cursor) {
         return;
       }
@@ -180,11 +177,11 @@ export default function sdf(parent?: HTMLElement) {
       const [circle] = cursor;
 
       if (eventPayload.type === "press") {
-        circle.radius = 10;
+        circle.componentData.radius = 10;
       }
 
       if (eventPayload.type === "release") {
-        circle.radius = 5;
+        circle.componentData.radius = 5;
       }
     },
   );
@@ -193,13 +190,11 @@ export default function sdf(parent?: HTMLElement) {
     "shape-click",
     engine.trigger.on("click"),
     (world, resources, state, eventEmitter, eventPayload) => {
-      const collisionContactQuery = world.query<[CollisionContact]>([
-        "collision-contact",
-      ]);
+      const collisionContactQuery = world.query([CollisionContact]);
 
       for (const [contact] of collisionContactQuery) {
-        const entityA = world.entity(contact.entityA);
-        const entityB = world.entity(contact.entityB);
+        const entityA = world.entity(contact.componentData.entityA);
+        const entityB = world.entity(contact.componentData.entityB);
 
         if (
           !entityA.hasComponent("cursor") &&
@@ -211,57 +206,55 @@ export default function sdf(parent?: HTMLElement) {
         const selected = !entityA.hasComponent("cursor") ? entityA : entityB;
         const cursor = entityA.hasComponent("cursor") ? entityA : entityB;
 
-        const cursorPosition = cursor.getComponent("position") as
-          | Position
-          | undefined;
+        const cursorPosition = cursor.getComponent(Position);
 
-        const selectedShapeStyle = selected.getComponent("shape-style") as
-          | ShapeStyle
-          | undefined;
+        const selectedShapeStyle = selected.getComponent(ShapeStyle);
 
-        const selectedShapePosition = selected.getComponent("position") as
-          | Position
-          | undefined;
+        const selectedShapePosition = selected.getComponent(Position);
 
         if (!selectedShapeStyle || !selectedShapePosition || !cursorPosition) {
           return;
         }
 
         if (eventPayload.type === "press") {
-          selectedShapeStyle.fill = "#ffffffd0";
-          const grabbedComponent = {
-            name: "grabbed",
-            offset: cursorPosition.position.minus(
-              selectedShapePosition.position,
+          selectedShapeStyle.componentData.fill = "#ffffffd0";
+          const grabbedComponent = CursorGrabbed({
+            offset: cursorPosition.componentData.position.minus(
+              selectedShapePosition.componentData.position,
             ),
-          };
+          });
 
           selected.addComponent(grabbedComponent); // Just a name component to tag the component as selected
         }
 
         if (eventPayload.type === "release") {
-          selectedShapeStyle.fill = "#ffffff31";
+          selectedShapeStyle.componentData.fill = "#ffffff31";
         }
       }
     },
   );
 
   engine.system("release-grab", engine.trigger.on("click:release"), (world) => {
-    for (const [entityId] of world.query<[string]>(["entity-id", "grabbed"])) {
-      world.entity(entityId).removeComponent("grabbed");
+    for (const [entityId] of world.query(["entity-id", CursorGrabbed])) {
+      world.entity(entityId).removeComponent(CursorGrabbed.componentName);
     }
   });
 
   engine.system("shape-drag", engine.trigger.on("update"), (world) => {
-    const cursor = world.query<[Position]>(["position", "cursor"])[0];
+    const cursor = world.query([Position, "cursor"])[0];
 
-    for (const [entityId, position, grabbed] of world.query<
-      [string, Position, any]
-    >(["entity-id", "position", "grabbed"])) {
+    for (const [entityId, position, grabbed] of world.query([
+      "entity-id",
+      Position,
+      CursorGrabbed,
+    ])) {
       if (cursor) {
         const [cursorPosition] = cursor;
 
-        position.position = cursorPosition.position.minus(grabbed.offset);
+        position.componentData.position =
+          cursorPosition.componentData.position.minus(
+            grabbed.componentData.offset,
+          );
       }
     }
   });
@@ -282,14 +275,14 @@ export default function sdf(parent?: HTMLElement) {
 
       const collidedEntity = world.entity(eventPayload.entityB);
 
-      if (collidedEntity.hasComponent("shape-style")) {
-        const style = collidedEntity.getComponent("shape-style") as ShapeStyle;
+      const style = collidedEntity.getComponent(ShapeStyle);
+      if (style) {
         if (eventPayload.type === "enter") {
-          style.fill = "#ffffff31";
+          style.componentData.fill = "#ffffff31";
         }
 
         if (eventPayload.type === "exit") {
-          style.fill = undefined;
+          style.componentData.fill = undefined;
         }
       }
     },

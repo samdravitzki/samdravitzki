@@ -1,5 +1,8 @@
 import Bundle from "../Bundle/Bundle";
-import Component from "../Component/Component";
+import Component, {
+  ComponentSpec,
+  ComponentToken,
+} from "../Component/Component";
 import { EventEmitter } from "../Engine/EventEmitter";
 import Entity, { EntityEvents, EntityId } from "../Entity/Entity";
 
@@ -87,6 +90,7 @@ export default class World {
     }
   }
 
+  // TODO: Revisit this query logic as its currenly messy and difficult to understand
   /**
    * Query the components of entities
    * Given a set of component names retrieve the list of the requested components for
@@ -99,29 +103,63 @@ export default class World {
    * associated with a particular entity that has those components)
    * @param query a list of components to query for (if 'entity-id' is supplied the it will return the entities id)
    */
-  query<T extends (EntityId | Component)[]>(
-    query: (string | "entity-id")[],
-  ): T[] {
-    const result: T[] = [];
+  query<const T extends Query>(q: T): QueryResult<T>[] {
+    const result: QueryResult<T>[] = [];
 
     for (var [entityId, entitiesComponents] of this._entities.entries()) {
-      const queriedComponents = query.map((queryItem) => {
+      const queryResult = q.map((queryItem) => {
         if (queryItem === "entity-id") {
           return entityId;
         }
 
-        return entitiesComponents.getComponent(queryItem);
+        if (typeof queryItem === "string") {
+          return entitiesComponents.getComponent(queryItem);
+        }
+
+        return entitiesComponents.getComponent(queryItem.componentName);
       });
 
-      const hasAllComponents = queriedComponents.every(
+      const hasAllComponents = queryResult.every(
         (queriedComponent) => queriedComponent !== undefined,
       );
 
-      if (hasAllComponents && queriedComponents.length > 0) {
-        result.push(queriedComponents as T);
+      if (hasAllComponents && queryResult.length > 0) {
+        result.push(
+          queryResult.filter(
+            // Filter out tag components
+            (item) =>
+              !(typeof item === "object" && item.componentData === undefined),
+          ) as QueryResult<T>,
+        );
       }
     }
 
     return result;
   }
 }
+
+export type Query = readonly (ComponentToken<unknown> | "entity-id" | string)[];
+
+// Filters out any `never` types from a tuple type
+export type WithoutNever<T extends readonly unknown[]> = T extends readonly [
+  infer First,
+  ...infer Rest,
+]
+  ? [First] extends [never]
+    ? WithoutNever<Rest>
+    : [First, ...WithoutNever<Rest>]
+  : [];
+
+// prettier-ignore
+export type QueryResultItem<T> =
+  T extends ComponentToken<infer U> ? U extends void 
+    ? never 
+    : Component<U>: 
+  T extends "entity-id" ? string : 
+  T extends string ? Component<unknown>
+    : never;
+
+// prettier-ignore
+export type QueryResult<T extends readonly unknown[]> = WithoutNever<{
+  [Index in keyof T]: QueryResultItem<T[Index]>
+}>;

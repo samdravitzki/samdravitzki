@@ -1,4 +1,4 @@
-import { Position } from "../../ecs/components/Position";
+import Position from "../../ecs/components/Position";
 import createBundle from "../../ecs/core/Bundle/createBundle";
 import Vector from "../../ecs/core/Vector/Vector";
 import { Collider } from "../../ecs/parts/collision/components/Collider";
@@ -7,26 +7,22 @@ import { Square } from "../../ecs/parts/p5/shape-components";
 
 function createWall(position: Vector, width: number, height: number) {
   return createBundle([
-    {
-      name: "square",
+    Square({
       width,
       height,
-    } satisfies Square,
-    {
-      name: "shape-style",
+    }),
+    ShapeStyle({
       fill: [240, 60, 100],
-    } satisfies ShapeStyle,
-    {
-      name: "collider",
+    }),
+    Collider({
       layer: "wall",
       type: "aabb",
       width: width,
       height: height,
-    } satisfies Collider,
-    {
-      name: "position",
+    }),
+    Position({
       position,
-    } satisfies Position,
+    }),
   ]);
 }
 

@@ -1,10 +1,13 @@
-import { Position } from "../ecs/components/Position";
+import Position from "../ecs/components/Position";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
+import { tag } from "../ecs/core/Component/Component";
 import Vector from "../ecs/core/Vector/Vector";
 import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
 import { Text } from "../ecs/parts/p5/shape-components";
 import randomInt from "../lib/randomInt/randomInt";
+
+export const fadedTag = tag("faded");
 
 export function createRandomlyPositionedTextBundle(
   text: string,
@@ -16,21 +19,18 @@ export function createRandomlyPositionedTextBundle(
   );
 
   const textBundle = createBundle([
-    "faded",
-    {
-      name: "position",
+    fadedTag(),
+    Position({
       position,
-    } satisfies Position,
-    {
-      name: "text",
+    }),
+    Text({
       text: text,
       align: "left",
       size: 25,
-    } satisfies Text,
-    {
-      name: "shape-style",
+    }),
+    ShapeStyle({
       fill: [240, 60, 100, 255],
-    } satisfies ShapeStyle,
+    }),
   ]);
 
   return textBundle;

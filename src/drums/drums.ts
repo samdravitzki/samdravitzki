@@ -6,7 +6,10 @@ import hiphopTab from "./tabs/hiphop";
 import houseTab from "./tabs/house";
 import { lofiHipHopDrumkit } from "./drumkits/lofi-hiphop";
 import { parisHouseDrumkit } from "./drumkits/paris-house";
-import { createRandomlyPositionedTextBundle } from "./createRandomlyPositionedTextBundle";
+import {
+  createRandomlyPositionedTextBundle,
+  fadedTag,
+} from "./createRandomlyPositionedTextBundle";
 import { deriveBpm } from "./deriveBpm";
 import volumeSliderPart from "./parts/volume-slider";
 import World from "../ecs/core/World/World";
@@ -214,12 +217,14 @@ export type TextEffectComponent = Component & {
  * longer visible remove them
  */
 function textFadeSystem(world: World, resources: ResourcePool) {
-  for (const [style, entityId] of world.query<
-    [ShapeStyle, string, TextEffectComponent]
-  >(["shape-style", "entity-id", "faded"])) {
+  for (const [style, entityId] of world.query([
+    ShapeStyle,
+    "entity-id",
+    fadedTag,
+  ])) {
     const p = resources.get<p5>("p5");
-    if (style.fill) {
-      const [r, g, b, alpha] = style.fill as number[];
+    if (style.componentData.fill) {
+      const [r, g, b, alpha] = style.componentData.fill as number[];
 
       const fadeSpeed = 0.4;
       const newAlpha = alpha - p.deltaTime * fadeSpeed;
@@ -228,7 +233,7 @@ function textFadeSystem(world: World, resources: ResourcePool) {
         world.removeEntity(entityId);
       }
 
-      style.fill = [r, g, b, newAlpha];
+      style.componentData.fill = [r, g, b, newAlpha];
     }
   }
 }

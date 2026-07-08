@@ -1,4 +1,3 @@
-import { Position } from "../ecs/components/Position";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
@@ -12,13 +11,16 @@ import gearText from "./gear-text";
 import GateNode, { commonGate, Direction } from "./gate";
 import animation from "../ecs/parts/animation/animation";
 import inspector from "../ecs/parts/inspector/inspector";
-import {
-  Animation,
+import Animation, {
+  AnimationData,
   createAnimation,
 } from "../ecs/parts/animation/components/Animation";
 import p5 from "p5";
 import State from "../ecs/core/State/State";
 import { EventEmitter } from "../ecs/core/System/System";
+import Position from "../ecs/components/Position";
+import Label from "../ecs/core/Component/Label";
+import { tag } from "../ecs/core/Component/Component";
 
 type ShiftEventPayload = { from: GateNode; to: GateNode };
 
@@ -40,33 +42,29 @@ function buildGate(world: World, resources: ResourcePool) {
     for (const neighbour of node.neighbours) {
       const midPoint = node.position.plus(neighbour.node.position).times(0.5);
 
-      const position: Position = {
-        name: "position",
+      const position = Position({
         position: midPoint.plus(canvasBounds.center.center),
-      };
+      });
 
-      const edge: Line = {
-        name: "line",
+      const edge = Line({
         start: node.position.minus(midPoint),
         end: neighbour.node.position.minus(midPoint),
-      };
+      });
 
-      const style: ShapeStyle = {
-        name: "shape-style",
+      const style = ShapeStyle({
         stroke: [0, 0, 25],
         fill: [0, 0, 25],
         strokeWeight: 2,
-      };
+      });
 
       world.addBundle(
         createBundle([
           edge,
           position,
           style,
-          {
-            name: "label",
+          Label({
             text: "line",
-          },
+          }),
         ]),
       );
     }
@@ -75,36 +73,31 @@ function buildGate(world: World, resources: ResourcePool) {
   for (const point of Object.values(commonGate)) {
     const pos = point.position.plus(canvasBounds.center.center);
 
-    const position: Position = {
-      name: "position",
+    const position = Position({
       position: pos,
-    };
+    });
 
-    const circle: Circle =
+    const circle =
       point.name === "pass"
-        ? {
-            name: "circle",
+        ? Circle({
             radius: 3,
-          }
-        : {
-            name: "circle",
+          })
+        : Circle({
             radius: 5,
-          };
+          });
 
-    const style: ShapeStyle = {
-      name: "shape-style",
+    const style = ShapeStyle({
       fill: point.name === "pass" ? [0, 0, 25] : [240, 60, 100],
-    };
+    });
 
     world.addBundle(
       createBundle([
         circle,
         position,
         style,
-        {
-          name: "label",
+        Label({
           text: "point",
-        },
+        }),
       ]),
     );
   }
@@ -112,23 +105,19 @@ function buildGate(world: World, resources: ResourcePool) {
   // Shift Lever
   world.addBundle(
     createBundle([
-      {
-        name: "position",
+      Position({
         position: canvasBounds.center.center,
-      } satisfies Position,
-      "shift-lever",
-      {
-        name: "label",
+      }),
+      tag("shift-lever")(),
+      Label({
         text: "shift-lever",
-      },
-      {
-        name: "circle",
+      }),
+      Circle({
         radius: 15,
-      } satisfies Circle,
-      {
-        name: "shape-style",
+      }),
+      ShapeStyle({
         fill: [0, 60, 100],
-      } satisfies ShapeStyle,
+      }),
     ]),
   );
 }
@@ -197,7 +186,7 @@ function completeShift(
     "next-shift-position": State<GateNode | null>;
   },
   emitter: EventEmitter<{ shift: ShiftEventPayload }>,
-  animation: Animation,
+  animation: AnimationData,
 ) {
   if (
     animation.target === "shift-lever" &&
@@ -221,7 +210,7 @@ function chainShift(
     "next-shift-position": State<GateNode | null>;
   },
   emitter: EventEmitter<{ shift: ShiftEventPayload }>,
-  animation: Animation,
+  animation: AnimationData,
 ) {
   const p = resources.get<p5>("p5");
 
@@ -292,8 +281,8 @@ export default function shifter(parent?: HTMLElement) {
     .event<"keyPressed", KeypressEvent>("keyPressed")
     .event<"keyReleased", KeypressEvent>("keyReleased")
     .event("after-update")
-    .event<"animation:started", Animation>("animation:started")
-    .event<"animation:completed", Animation>("animation:completed")
+    .event<"animation:started", AnimationData>("animation:started")
+    .event<"animation:completed", AnimationData>("animation:completed")
     .event<"shift", ShiftEventPayload>("shift")
     .state<"shift-position", GateNode>("shift-position", commonGate.neutral)
     .state<"next-shift-position", GateNode | null>("next-shift-position", null)

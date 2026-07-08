@@ -3,6 +3,7 @@ import Vector from "../Vector/Vector";
 import World from "../World/World";
 import { ShapeStyle } from "../../parts/p5/primitive-renderer/ShapeStyle";
 import { Line } from "../../parts/p5/shape-components";
+import Position from "../../components/Position";
 
 type PathEdge = { start: Vector; end: Vector };
 
@@ -30,22 +31,18 @@ export function drawDebugPath(
   for (const edge of path.edges()) {
     world.addBundle(
       createBundle([
-        "path-vis",
-        {
-          name: "position",
+        Position({
           position: position,
-        },
-        {
-          name: "line",
+        }),
+        Line({
           start: edge.start,
           end: edge.end,
-        } satisfies Line,
-        {
-          name: "shape-style",
+        }),
+        ShapeStyle({
           stroke: color,
           strokeWeight: 2,
           dash,
-        },
+        }),
       ]),
     );
   }

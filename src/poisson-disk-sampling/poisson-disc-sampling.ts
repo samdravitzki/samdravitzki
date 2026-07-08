@@ -10,9 +10,10 @@ import World from "../ecs/core/World/World";
 import p5Part, { MousePosition } from "../ecs/parts/p5/p5-part";
 import poissonDisc from "../lib/poisson-disc/poisson-disc";
 import randomDots from "./random-dots/random-dots";
-import { Position } from "../ecs/components/Position";
 import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
 import { Circle } from "../ecs/parts/p5/shape-components";
+import Position from "../ecs/components/Position";
+import { tag } from "../ecs/core/Component/Component";
 
 const pallete = {
   background: "#151515",
@@ -28,19 +29,16 @@ function placeRandomDots(world: World, resources: ResourcePool) {
   for (const dot of dots) {
     world.addBundle(
       createBundle([
-        {
-          name: "circle",
+        Circle({
           radius: 5,
-        } satisfies Circle,
-        {
-          name: "shape-style",
+        }),
+        ShapeStyle({
           stroke: pallete.secondary,
           strokeWeight: 2,
-        } satisfies ShapeStyle,
-        {
-          name: "position",
+        }),
+        Position({
           position: dot,
-        } satisfies Position,
+        }),
       ]),
     );
   }
@@ -50,21 +48,20 @@ const DEFAULT_MIN_DISTANCE = 12;
 const DEFAULT_SAMPLE_LIMIT = 30;
 const DOT_WIDTH = 2;
 
+const poissonDotTag = tag("poisson-dot");
+
 function createPoissonDot(dot: Vector) {
   return createBundle([
-    "poisson-dot",
-    {
-      name: "position",
+    poissonDotTag(),
+    Position({
       position: dot,
-    } satisfies Position,
-    {
-      name: "circle",
+    }),
+    Circle({
       radius: DOT_WIDTH,
-    } satisfies Circle,
-    {
-      name: "shape-style",
+    }),
+    ShapeStyle({
       fill: pallete.primary,
-    },
+    }),
   ]);
 }
 
@@ -112,11 +109,7 @@ export default function poissonDiscSamplingDemoApp(parent?: HTMLElement) {
     (world, resources, state) => {
       const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-      const poissonDots = world.query<[Position, string]>([
-        "position",
-        "entity-id",
-        "poisson-dot",
-      ]);
+      const poissonDots = world.query([Position, "entity-id", poissonDotTag]);
 
       const minDistance = state["poisson:min-distance"].value;
       const sampleLimit = state["poisson:sample-limit"].value;
@@ -129,7 +122,7 @@ export default function poissonDiscSamplingDemoApp(parent?: HTMLElement) {
         const dot = dots[index];
 
         if (dot) {
-          position.position = dot;
+          position.componentData.position = dot;
         } else {
           // Remove extra dots if the new config results in less dots being generated
           world.removeEntity(entityId);
@@ -159,20 +152,17 @@ export default function poissonDiscSamplingDemoApp(parent?: HTMLElement) {
       const HOVER_RADIUS = 100;
       const MAX_SCALE = 3;
 
-      const poissonDots = world.query<[Position, Circle]>([
-        "position",
-        "circle",
-        "poisson-dot",
-      ]);
+      const poissonDots = world.query([Position, Circle, poissonDotTag]);
 
       for (const [position, circle] of poissonDots) {
-        const distance = position.position.distance(mousePosition);
+        const distance =
+          position.componentData.position.distance(mousePosition);
 
         if (distance < HOVER_RADIUS) {
           const scale = 1 + (MAX_SCALE - 1) * (1 - distance / HOVER_RADIUS);
-          circle.radius = DOT_WIDTH * scale;
+          circle.componentData.radius = DOT_WIDTH * scale;
         } else {
-          circle.radius = DOT_WIDTH;
+          circle.componentData.radius = DOT_WIDTH;
         }
       }
     },

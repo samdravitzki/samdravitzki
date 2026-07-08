@@ -1,6 +1,7 @@
-import { Position } from "../ecs/components/Position";
+import Position from "../ecs/components/Position";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
+import { tag } from "../ecs/core/Component/Component";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import { Part } from "../ecs/core/Part/Part";
 import State from "../ecs/core/State/State";
@@ -20,31 +21,28 @@ function setupGearText(
   Object.values(commonGate)
     .filter((node) => node.name !== "pass")
     .forEach((node, index, array) => {
-      const text: Text = {
-        name: "text",
+      const text = Text({
         text: node.name[0].toUpperCase(),
         align: "center",
         size: 20,
-      };
+      });
 
-      const style: ShapeStyle = {
-        name: "shape-style",
+      const style = ShapeStyle({
         fill: [240, 60, 100, 255],
-      };
+      });
 
       const centerOffset = Vector.create((array.length - 1) * 30, 0);
 
-      const position: Position = {
-        name: "position",
+      const position = Position({
         position: canvasBounds.center.bottom
           .plus(Vector.create(index * 60, -50))
           .minus(centerOffset),
-      };
+      });
 
       world.addBundle(
         createBundle([
-          `gear-text`,
-          `gear-text-${node.name}`,
+          tag("gear-text")(),
+          tag(`gear-text-${node.name}`)(),
           text,
           position,
           style,
@@ -58,11 +56,7 @@ function currentGearDisplay(
   resources: ResourcePool,
   state: { "shift-position": State<GateNode> },
 ) {
-  const gearTextQuery = world.query<[ShapeStyle, string]>([
-    "shape-style",
-    "entity-id",
-    "gear-text",
-  ]);
+  const gearTextQuery = world.query([ShapeStyle, "entity-id", "gear-text"]);
 
   for (const [gearTextStyle, entityId] of gearTextQuery) {
     if (
@@ -70,9 +64,9 @@ function currentGearDisplay(
         .entity(entityId)
         .getComponent(`gear-text-${state["shift-position"].value.name}`)
     ) {
-      gearTextStyle.fill = [240, 60, 100, 255];
+      gearTextStyle.componentData.fill = [240, 60, 100, 255];
     } else {
-      gearTextStyle.fill = [0, 0, 25, 255];
+      gearTextStyle.componentData.fill = [0, 0, 25, 255];
     }
   }
 }

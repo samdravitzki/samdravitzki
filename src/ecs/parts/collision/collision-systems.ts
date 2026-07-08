@@ -1,12 +1,13 @@
 import World from "../../core/World/World";
-import { Position } from "../../components/Position";
-import { Collider } from "./components/Collider";
+import { Collider, ColliderData } from "./components/Collider";
 import { CollisionContact } from "./components/Collision";
 import aabbAabbIntersection from "./intersection/aabb-aabb-intersection";
 import { Aabb } from "./intersection/intersection-shapes";
 import { ResourcePool } from "../../core/Engine/ResourcePool";
 import { EventEmitter } from "../../core/System/System";
 import Vector from "../../core/Vector/Vector";
+import Label from "../../core/Component/Label";
+import Position from "../../components/Position";
 
 type CollisionEventPayload = {
   entityA: string;
@@ -33,11 +34,7 @@ function collisionSystem(
   state: unknown,
   eventEmitter: EventEmitter<CollisionSystemEvents>,
 ) {
-  const colliders = world.query<[string, Position, Collider]>([
-    "entity-id",
-    "position",
-    "collider",
-  ]);
+  const colliders = world.query(["entity-id", Position, Collider]);
 
   for (const [entityA, positionA, colliderA] of colliders) {
     for (const [entityB, positionB, colliderB] of colliders) {
@@ -46,41 +43,45 @@ function collisionSystem(
         continue;
       }
 
-      if (colliderA.type === "aabb" && colliderB.type === "aabb") {
+      if (
+        colliderA.componentData.type === "aabb" &&
+        colliderB.componentData.type === "aabb"
+      ) {
         const aabb1: Aabb = {
-          position: positionA.position,
-          width: colliderA.width,
-          height: colliderA.height,
+          position: positionA.componentData.position,
+          width: colliderA.componentData.width,
+          height: colliderA.componentData.height,
         };
 
         const aabb2: Aabb = {
-          position: positionB.position,
-          width: colliderB.width,
-          height: colliderB.height,
+          position: positionB.componentData.position,
+          width: colliderB.componentData.width,
+          height: colliderB.componentData.height,
         };
 
         const intersection = aabbAabbIntersection(aabb1, aabb2);
 
         // Not ideal to query the world for collisions every time, but this is a simple way to check if a collision already exists
         const existingContact = world
-          .query<[string, CollisionContact]>(["entity-id", "collision-contact"])
+          .query(["entity-id", CollisionContact])
           .find(([entity, existingContact]) => {
-            const existing = existingContact as CollisionContact;
+            const existing = existingContact;
             return (
-              (existing.entityA === entityA && existing.entityB === entityB) ||
-              (existing.entityA === entityB && existing.entityB === entityA)
+              (existing.componentData.entityA === entityA &&
+                existing.componentData.entityB === entityB) ||
+              (existing.componentData.entityA === entityB &&
+                existing.componentData.entityB === entityA)
             );
           });
 
         if (intersection) {
-          const collision: CollisionContact = {
-            name: "collision-contact",
+          const contact = CollisionContact({
             entityA: entityA,
             entityB: entityB,
             contactPoint: intersection.contactPoint, // Contact point on a AABB is just its local origin
             normal: intersection.normal,
             penetration: intersection.penetration,
-          };
+          });
 
           if (!existingContact) {
             eventEmitter.emit({
@@ -96,17 +97,18 @@ function collisionSystem(
             });
 
             const collisionEntity = world.createEntity();
-            collisionEntity.addComponent(collision);
+            collisionEntity.addComponent(contact);
             // add label
-            collisionEntity.addComponent({
-              name: "label",
-              text: `contact (${entityA.slice(0, 4)}, ${entityB.slice(0, 4)})`,
-            });
+            collisionEntity.addComponent(
+              Label({
+                text: `contact (${entityA.slice(0, 4)}, ${entityB.slice(0, 4)})`,
+              }),
+            );
           } else {
             const [entity, contact] = existingContact;
-            contact.contactPoint = intersection.contactPoint;
-            contact.normal = intersection.normal;
-            contact.penetration = intersection.penetration;
+            contact.componentData.contactPoint = intersection.contactPoint;
+            contact.componentData.normal = intersection.normal;
+            contact.componentData.penetration = intersection.penetration;
           }
         } else {
           if (existingContact) {

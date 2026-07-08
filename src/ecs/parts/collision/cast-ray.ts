@@ -2,7 +2,7 @@ import World from "../../core/World/World";
 import Vector from "../../core/Vector/Vector";
 import { Aabb, Line } from "./intersection/intersection-shapes";
 import lineAabbIntersection from "./intersection/line-aabb-intersection";
-import { Position } from "../../components/Position";
+import Position from "../../components/Position";
 import { Collider } from "./components/Collider";
 
 type Ray = {
@@ -31,30 +31,26 @@ type CastRayOptions = {
  * @returns the position and normal in which the ray collided
  */
 function castRay(world: World, ray: Ray, options?: CastRayOptions): Hit[] {
-  const colliders = world.query<[Position, Collider, string]>([
-    "position",
-    "collider",
-    "entity-id",
-  ]);
+  const colliders = world.query([Position, Collider, "entity-id"]);
 
   const filteredColliders =
     options?.layer === undefined
       ? colliders
-      : colliders.filter(([, c]) => c.layer === options.layer);
+      : colliders.filter(([, c]) => c.componentData.layer === options.layer);
 
   const hits: Hit[] = [];
 
   for (const [position, collider, entityId] of filteredColliders) {
-    if (collider.type === "aabb") {
+    if (collider.componentData.type === "aabb") {
       const line: Line = {
         start: ray.position,
         end: ray.position.plus(ray.direction.times(ray.length)),
       };
 
       const rectangle: Aabb = {
-        position: position.position,
-        width: collider.width,
-        height: collider.height,
+        position: position.componentData.position,
+        width: collider.componentData.width,
+        height: collider.componentData.height,
       };
 
       const intersections = lineAabbIntersection(line, rectangle);
@@ -63,7 +59,7 @@ function castRay(world: World, ray: Ray, options?: CastRayOptions): Hit[] {
       intersections.sort(
         (intersectionA, intersectionB) =>
           intersectionA.contactPoint.distance(ray.position) -
-          intersectionB.contactPoint.distance(ray.position)
+          intersectionB.contactPoint.distance(ray.position),
       );
 
       const closestIntersection = intersections[0];
