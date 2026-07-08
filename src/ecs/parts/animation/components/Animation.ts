@@ -1,5 +1,5 @@
 import Vector from "../../../core/Vector/Vector";
-import Component from "../../../core/Component/Component";
+import Component, { component, tag } from "../../../core/Component/Component";
 import { easings } from "../easing";
 import createBundle from "../../../core/Bundle/createBundle";
 
@@ -7,7 +7,7 @@ type EasingName = keyof typeof easings;
 
 export type AnimationState = "ready" | "running" | "completed";
 
-export type Animation = Component & {
+export type AnimationData = {
   name: "animation";
   // state of the animation
   startTime?: number;
@@ -26,6 +26,10 @@ export type Animation = Component & {
   previousState?: AnimationState;
 };
 
+const Animation = component<AnimationData>({
+  name: "animation",
+});
+
 /**
  * Factory used to create an animation component
  */
@@ -42,7 +46,7 @@ export function createAnimation(params: {
 }) {
   const { name, ...animationParams } = params;
 
-  const animations: Animation = {
+  const animations = Animation({
     t: 0,
     elapsedTime: 0,
     name: "animation",
@@ -51,7 +55,11 @@ export function createAnimation(params: {
     state: "ready",
     previousState: undefined,
     ...animationParams,
-  };
+  });
 
-  return createBundle([name, animations]);
+  const animationNameTag = tag(name);
+
+  return createBundle([animationNameTag(), animations]);
 }
+
+export default Animation;

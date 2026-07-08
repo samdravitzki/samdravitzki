@@ -1,18 +1,22 @@
 import p5 from "p5";
 import { ResourcePool } from "../../../core/Engine/ResourcePool";
 import World from "../../../core/World/World";
-import { Position } from "../../../components/Position";
+import Position from "../../../components/Position";
 import { Circle, Square } from "../shape-components";
 import Bounds from "../../../core/Bounds/Bounds";
 import State from "../../../core/State/State";
-import Component from "../../../core/Component/Component";
+import { component } from "../../../core/Component/Component";
 import vert from "./shader/shader.vert?raw";
 import frag from "./shader/shader.frag?raw";
 
-export type SdfShape = Component & {
-  name: "sdf-shape";
+// export type SdfShape = Component & {
+//   name: "sdf-shape";
+//   fill: number[];
+// };
+
+export const SdfShape = component<{
   fill: number[];
-};
+}>({ name: "sdf-shape" });
 
 function sdfRendererSetupSystem(world: World, resources: ResourcePool) {
   const p = resources.get<p5>("p5");
@@ -50,11 +54,7 @@ function sdfRendererSystem(
   const sdfShader = resources.get<p5.Shader>("sdf-shader");
   const sdfBuffer = resources.get<p5.Graphics>("sdf-buffer");
 
-  const shapes = world.query<[string, Position, SdfShape]>([
-    "entity-id",
-    "position",
-    "sdf-shape",
-  ]);
+  const shapes = world.query(["entity-id", Position, SdfShape]);
 
   sdfBuffer.shader(sdfShader);
 
@@ -67,35 +67,33 @@ function sdfRendererSystem(
     const entity = world.entity(entityId);
 
     shapeFill.push([
-      sdfShape.fill[0] / 255,
-      sdfShape.fill[1] / 255,
-      sdfShape.fill[2] / 255,
+      sdfShape.componentData.fill[0] / 255,
+      sdfShape.componentData.fill[1] / 255,
+      sdfShape.componentData.fill[2] / 255,
     ]);
 
-    if (entity.hasComponent("circle")) {
-      const circle = entity.getComponent("circle") as Circle;
-
+    const circle = entity.getComponent(Circle);
+    if (circle) {
       const type = 0;
       // Not sure why the positions have to be doulbed
-      const x = position.position.x * scale;
-      const y = bufferHeight - position.position.y * scale;
+      const x = position.componentData.position.x * scale;
+      const y = bufferHeight - position.componentData.position.y * scale;
 
-      const radius = circle.radius * scale;
+      const radius = circle.componentData.radius * scale;
 
       shapeType.push(type);
       shapePos.push([x, y]);
       shapeSize.push([radius, 0]);
     }
 
-    if (entity.hasComponent("square")) {
-      const square = entity.getComponent("square") as Square;
-
+    const square = entity.getComponent(Square);
+    if (square) {
       const type = 1;
       // Need to figure out the transformations, the WEBGL centering needs to be considered
-      const x = position.position.x * scale;
-      const y = bufferHeight - position.position.y * scale;
-      const sizeX = square.width * scale;
-      const sizeY = square.height * scale;
+      const x = position.componentData.position.x * scale;
+      const y = bufferHeight - position.componentData.position.y * scale;
+      const sizeX = square.componentData.width * scale;
+      const sizeY = square.componentData.height * scale;
 
       shapeType.push(type);
       shapePos.push([x, y]);

@@ -1,9 +1,10 @@
-import { Position } from "../../ecs/components/Position";
+import Position from "../../ecs/components/Position";
 import createBundle from "../../ecs/core/Bundle/createBundle";
 import Vector from "../../ecs/core/Vector/Vector";
 import { Collider } from "../../ecs/parts/collision/components/Collider";
 import { ShapeStyle } from "../../ecs/parts/p5/primitive-renderer/ShapeStyle";
 import { Square } from "../../ecs/parts/p5/shape-components";
+import { BackboardOwner } from "../components";
 
 function createBackboard(
   position: Vector,
@@ -12,30 +13,23 @@ function createBackboard(
   owner: "player" | "ai",
 ) {
   return createBundle([
-    {
-      name: "square",
+    Square({
       width,
       height,
-    } satisfies Square,
-    {
-      name: "shape-style",
+    }),
+    ShapeStyle({
       fill: [352, 94, 100],
-    } satisfies ShapeStyle,
-    {
-      name: "position",
+    }),
+    Position({
       position,
-    } satisfies Position,
-    {
-      name: "collider",
+    }),
+    Collider({
       type: "aabb",
       layer: "wall",
       width,
       height,
-    } satisfies Collider,
-    {
-      name: "backboard",
-      owner,
-    },
+    }),
+    BackboardOwner(owner),
   ]);
 }
 

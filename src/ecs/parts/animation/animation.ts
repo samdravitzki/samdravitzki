@@ -1,19 +1,18 @@
-import { Position } from "../../components/Position";
-import { EntityId } from "../../core/Entity/Entity";
+import Position from "../../components/Position";
 import { Part } from "../../core/Part/Part";
 import Vector from "../../core/Vector/Vector";
-import { Animation } from "./components/Animation";
+import Animation, { AnimationData } from "./components/Animation";
 import { easings } from "./easing";
 
-function isFinsihed(animation: Animation) {
+function isFinsihed(animation: AnimationData) {
   return !animation.loop && animation.t >= 1;
 }
 
-function calculateElapsedTime(animation: Animation) {
+function calculateElapsedTime(animation: AnimationData) {
   return animation.startTime ? Date.now() - animation.startTime : 0;
 }
 
-function tick(animation: Animation) {
+function tick(animation: AnimationData) {
   const elapsed = animation.elapsedTime;
 
   let t = 0;
@@ -34,29 +33,30 @@ function animation() {
   const part: Part<{
     update: void;
     "after-update": void;
-    "animation:started": Animation;
-    "animation:completed": Animation;
+    "animation:started": AnimationData;
+    "animation:completed": AnimationData;
   }> = ({ registerSystem, triggerBuilder }) => {
     registerSystem("animate", triggerBuilder.on("update"), (world) => {
-      const animations = world.query<[Animation]>(["animation"]);
+      const animations = world.query([Animation]);
 
       for (const [animation] of animations) {
-        animation.elapsedTime = calculateElapsedTime(animation);
+        const animationData = animation.componentData;
 
-        animation.t = tick(animation);
+        animationData.elapsedTime = calculateElapsedTime(animationData);
 
-        animation.previousState = animation.state;
-        animation.state = !isFinsihed(animation) ? "running" : "completed";
+        animationData.t = tick(animationData);
 
-        const [position] = world.query<[Position]>([
-          "position",
-          animation.target,
-        ])[0];
+        animationData.previousState = animationData.state;
+        animationData.state = !isFinsihed(animationData)
+          ? "running"
+          : "completed";
 
-        position.position = Vector.lerp(
-          animation.from,
-          animation.to,
-          animation.t,
+        const [position] = world.query([Position, animationData.target])[0];
+
+        position.componentData.position = Vector.lerp(
+          animationData.from,
+          animationData.to,
+          animationData.t,
         );
       }
     });
@@ -65,23 +65,31 @@ function animation() {
       "animation-events",
       triggerBuilder.on("update"),
       (world, resources, state, emitter) => {
-        const animations = world.query<[Animation]>(["animation"]);
+        const animations = world.query([Animation]);
 
         for (const [animation] of animations) {
+          const animationData = animation.componentData;
+
           const justStarted =
-            animation.state === "running" &&
-            animation.previousState === "ready";
+            animationData.state === "running" &&
+            animationData.previousState === "ready";
 
           if (justStarted) {
-            emitter.emit({ event: "animation:started", payload: animation });
+            emitter.emit({
+              event: "animation:started",
+              payload: animationData,
+            });
           }
 
           const justFinished =
-            animation.state === "completed" &&
-            animation.previousState === "running";
+            animationData.state === "completed" &&
+            animationData.previousState === "running";
 
           if (justFinished) {
-            emitter.emit({ event: "animation:completed", payload: animation });
+            emitter.emit({
+              event: "animation:completed",
+              payload: animationData,
+            });
           }
         }
       },
@@ -91,13 +99,11 @@ function animation() {
       "animation-cleanup",
       triggerBuilder.on("after-update"),
       (world) => {
-        const animations = world.query<[Animation, string]>([
-          "animation",
-          "entity-id",
-        ]);
+        const animations = world.query([Animation, "entity-id"]);
 
         for (const [animation, entityId] of animations) {
-          if (isFinsihed(animation)) {
+          const animationData = animation.componentData;
+          if (isFinsihed(animationData)) {
             world.removeEntity(entityId);
           }
         }

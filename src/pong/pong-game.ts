@@ -1,15 +1,7 @@
 import Vector from "../ecs/core/Vector/Vector";
 import World from "../ecs/core/World/World";
 import p5 from "p5";
-import {
-  Velocity,
-  BallComponent,
-  BackboardComponent,
-  Speed,
-  PaddleComponent,
-  TrajectoryLineSegmentComponent,
-} from "./components";
-import { Position } from "../ecs/components/Position";
+import { Velocity, Speed, BackboardOwner } from "./components";
 import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
 import { Text } from "../ecs/parts/p5/shape-components";
 import { Line } from "../ecs/parts/p5/shape-components";
@@ -17,7 +9,7 @@ import castRay from "../ecs/parts/collision/cast-ray";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import minionBongUrl from "./sounds/minion-bong.mp3";
 import State from "../ecs/core/State/State";
-import Component from "../ecs/core/Component/Component";
+import Component, { tag } from "../ecs/core/Component/Component";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import collisions, {
   CollisionEventPayload,
@@ -29,12 +21,13 @@ import p5Part, { KeypressEvent, MousePosition } from "../ecs/parts/p5/p5-part";
 import createBall from "./prefabs/ball";
 import createBackboard from "./prefabs/backboard";
 import createWall from "./prefabs/wall";
-import createPaddle from "./prefabs/paddle";
-import createScore from "./prefabs/score";
-
-const ballHitAudio = new Audio(minionBongUrl);
-
-const sound = false;
+import createPaddle, {
+  playerPaddleTag,
+  paddleTag,
+  aiPaddleTag,
+} from "./prefabs/paddle";
+import createScore, { aiScoreTag, playerScoreTag } from "./prefabs/score";
+import Position from "../ecs/components/Position";
 
 type Score = [number, number];
 
@@ -133,24 +126,23 @@ function ballCollisionHandlingSystem(
 
   // If the collision is between a ball and anything else
   if (ballEntity) {
-    const ballVelocity = ballEntity.getComponent("velocity") as Velocity;
+    const ballVelocity = ballEntity.getComponent(Velocity);
 
-    ballVelocity.velocity = ballVelocity.velocity.reflect(
+    ballVelocity!.componentData = ballVelocity!.componentData.reflect(
       collisionContact.normal,
     );
 
     if (collideeEntity.hasComponent("paddle")) {
-      const paddlePosition = collideeEntity.getComponent(
-        "position",
-      ) as Position;
-      const ballPosition = ballEntity.getComponent("position") as Position;
+      const paddlePosition = collideeEntity.getComponent(Position);
+      const ballPosition = ballEntity.getComponent(Position);
 
-      const yDistanceFromPaddleCenter = paddlePosition.position.minus(
-        ballPosition.position,
-      ).y;
+      const yDistanceFromPaddleCenter =
+        paddlePosition!.componentData.position.minus(
+          ballPosition!.componentData.position,
+        ).y;
 
-      ballVelocity.velocity = Vector.create(
-        ballVelocity.velocity.x,
+      ballVelocity!.componentData = Vector.create(
+        ballVelocity!.componentData.x,
         -yDistanceFromPaddleCenter / 25,
       );
     }
@@ -191,40 +183,38 @@ function backboardCollisionHandlingSystem(
   );
 
   const backboardEntity = collisionEntities.find((entity) =>
-    entity.hasComponent("backboard"),
+    entity.hasComponent(BackboardOwner),
   );
 
   // If the collision is between a ball and a backboard
   if (ballEntity && backboardEntity) {
-    const ballPosition = ballEntity.getComponent("position") as Position;
-    const ballVelocity = ballEntity.getComponent("velocity") as Velocity;
-    const ballSpeed = ballEntity.getComponent("speed") as Speed;
-    ballPosition.position = Vector.create(200, 40);
+    const ballPosition = ballEntity.getComponent(Position);
+    const ballVelocity = ballEntity.getComponent(Velocity);
+    const ballSpeed = ballEntity.getComponent(Speed);
+    ballPosition!.componentData.position = Vector.create(200, 40);
 
     const [playerScore, aiScore] = state.score.value;
 
-    const backboardComponent = backboardEntity.getComponent(
-      "backboard",
-    ) as BackboardComponent;
+    const backboardComponent = backboardEntity.getComponent(BackboardOwner);
 
-    if (backboardComponent.owner == "player") {
+    if (backboardComponent!.componentData == "player") {
       state.score.setValue([playerScore, aiScore + 1]);
       // Reset ball directed towards player
-      ballVelocity.velocity = new Vector(-0.5, -0.5).plus(
+      ballVelocity!.componentData = new Vector(-0.5, -0.5).plus(
         new Vector(-0.1, -0.1).times(playerScore + aiScore),
       );
     }
 
-    if (backboardComponent.owner == "ai") {
+    if (backboardComponent!.componentData == "ai") {
       state.score.setValue([playerScore + 1, aiScore]);
 
       // Reset ball directed towards ai
-      ballVelocity.velocity = new Vector(0.5, -0.5).plus(
+      ballVelocity!.componentData = new Vector(0.5, -0.5).plus(
         new Vector(0.1, -0.1).times(playerScore + aiScore),
       );
     }
 
-    ballSpeed.value = 3;
+    ballSpeed!.componentData = 3;
   }
 }
 
@@ -235,15 +225,15 @@ function updateScoreBoard(
 ) {
   const [playerScore, aiScore] = state.score.value;
 
-  const [playerScoreText] = world.query<[Text]>(["text", "player-score"])[0];
+  const [playerScoreText] = world.query([Text, playerScoreTag])[0];
 
   // Its pretty weird the type has to be narrowed after you receive it from a query
   // Seems like the query should be responsible for this
-  playerScoreText.text = playerScore.toString();
+  playerScoreText.componentData.text = playerScore.toString();
 
-  const [aiScoreText] = world.query<[Text]>(["text", "ai-score"])[0];
+  const [aiScoreText] = world.query([Text, aiScoreTag])[0];
 
-  aiScoreText.text = aiScore.toString();
+  aiScoreText.componentData.text = aiScore.toString();
 }
 
 // Describes bow the collision handling worked in the orginial pong game
@@ -273,8 +263,8 @@ function paddleCollisionHandlingSystem(
 
   // If the collision is between a ball and a paddle, increase the speed of the ball by 10%
   if (paddleEntity && ballEntity) {
-    const ballSpeed = ballEntity.getComponent("speed") as Speed;
-    ballSpeed.value += ballSpeed.value * 0.1;
+    const ballSpeed = ballEntity.getComponent(Speed);
+    ballSpeed!.componentData += ballSpeed!.componentData * 0.1;
   }
 }
 
@@ -282,26 +272,26 @@ function playerPaddleSystem(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
   const mousePosition = resources.get<MousePosition>("mouse-position");
 
-  for (const [position] of world.query<[Position]>([
-    "position",
-    "paddle",
-    "player",
+  for (const [position] of world.query([
+    Position,
+    paddleTag,
+    playerPaddleTag,
   ])) {
-    const positionChange = mousePosition.y - position.position.y;
-    position.position = position.position.plus(
+    const positionChange = mousePosition.y - position.componentData.position.y;
+    position.componentData.position = position.componentData.position.plus(
       Vector.create(0, positionChange),
     );
 
-    if (position.position.y < canvasBounds.min.y + 35) {
-      position.position = Vector.create(
-        position.position.x,
+    if (position.componentData.position.y < canvasBounds.min.y + 35) {
+      position.componentData.position = Vector.create(
+        position.componentData.position.x,
         canvasBounds.min.y + 35,
       );
     }
 
-    if (position.position.y > canvasBounds.max.y - 35) {
-      position.position = Vector.create(
-        position.position.x,
+    if (position.componentData.position.y > canvasBounds.max.y - 35) {
+      position.componentData.position = Vector.create(
+        position.componentData.position.x,
         canvasBounds.max.y - 35,
       );
     }
@@ -310,34 +300,34 @@ function playerPaddleSystem(world: World, resources: ResourcePool) {
 
 function aiPaddleSystem(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
-  const [targetPosition] = world.query<[Position]>([
-    "position",
-    "ai-paddle-target",
-  ])[0];
-  for (const [position, speed] of world.query<[Position, Speed]>([
-    "position",
-    "speed",
-    "paddle",
-    "ai",
+  const [targetPosition] = world.query([Position, "ai-paddle-target"])[0];
+
+  for (const [position, speed] of world.query([
+    Position,
+    Speed,
+    paddleTag,
+    aiPaddleTag,
   ])) {
     // Cant just move it to where the ball is, need to move it to where the ball is going to be when it hits on the ai side
-    position.position = position.position.plus(
+    position.componentData.position = position.componentData.position.plus(
       Vector.create(
         0,
-        (targetPosition.position.y - position.position.y) * speed.value,
+        (targetPosition.componentData.position.y -
+          position.componentData.position.y) *
+          speed.componentData,
       ),
     );
 
-    if (position.position.y < canvasBounds.min.y + 35) {
-      position.position = Vector.create(
-        position.position.x,
+    if (position.componentData.position.y < canvasBounds.min.y + 35) {
+      position.componentData.position = Vector.create(
+        position.componentData.position.x,
         canvasBounds.min.y + 35,
       );
     }
 
-    if (position.position.y > canvasBounds.max.y - 35) {
-      position.position = Vector.create(
-        position.position.x,
+    if (position.componentData.position.y > canvasBounds.max.y - 35) {
+      position.componentData.position = Vector.create(
+        position.componentData.position.x,
         canvasBounds.max.y - 35,
       );
     }
@@ -345,14 +335,19 @@ function aiPaddleSystem(world: World, resources: ResourcePool) {
 }
 
 function ballMovementSystem(world: World) {
-  const [velocity, position, speed] = world.query<
-    [Velocity, Position, Speed, BallComponent]
-  >(["velocity", "position", "speed", "ball"])[0];
+  const [velocity, position, speed] = world.query([
+    Velocity,
+    Position,
+    Speed,
+    "ball",
+  ])[0];
 
-  position.position = position.position.plus(
-    velocity.velocity.times(speed.value),
+  position.componentData.position = position.componentData.position.plus(
+    velocity.componentData.times(speed.componentData),
   );
 }
+
+const trajectoryLineTag = tag("trajectory-line");
 
 function ballTrajectorySystem(
   world: World,
@@ -361,18 +356,15 @@ function ballTrajectorySystem(
 ) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
   const renderTrajectory = state["render-trajectory"];
-  const [targetPosition] = world.query<[Position]>([
-    "position",
-    "ai-paddle-target",
+  const [targetPosition] = world.query([Position, "ai-paddle-target"])[0];
+
+  const [ballPosition, ballVelocity] = world.query([
+    Position,
+    Velocity,
+    "ball",
   ])[0];
 
-  const [ballPosition, ballVelocity] = world.query<
-    [Position, Velocity, BallComponent]
-  >(["position", "velocity", "ball"])[0];
-
-  for (const [entityId] of world.query<
-    [string, TrajectoryLineSegmentComponent]
-  >(["entity-id", "trajectory-line"])) {
+  for (const [entityId] of world.query(["entity-id", trajectoryLineTag])) {
     world.removeEntity(entityId);
   }
 
@@ -380,10 +372,10 @@ function ballTrajectorySystem(
   let linesAdded = 0;
 
   // Start the ray a little back from the start of the center of the ball to mitigate issues with tunneling
-  let start = ballPosition.position.minus(
-    ballVelocity.velocity.normalised().times(10),
+  let start = ballPosition.componentData.position.minus(
+    ballVelocity.componentData.normalised().times(10),
   );
-  let direction = ballVelocity.velocity;
+  let direction = ballVelocity.componentData;
 
   // render trajectory line of each collision
   while (linesAdded < bounces) {
@@ -403,39 +395,38 @@ function ballTrajectorySystem(
 
     const end = hit.position;
 
-    const trajectoryLineComponents: (string | Component)[] = [
-      "trajectory-line",
-      {
-        name: "position",
+    const trajectoryLineComponents: Component[] = [
+      trajectoryLineTag(),
+      Position({
         position: start,
-      } as Position,
+      }),
     ];
 
     if (renderTrajectory.value) {
-      trajectoryLineComponents.push({
-        name: "line",
-        start: Vector.create(0, 0),
-        end: end.minus(start),
-      } as Line);
+      trajectoryLineComponents.push(
+        Line({
+          start: Vector.create(0, 0),
+          end: end.minus(start),
+        }),
+      );
 
-      trajectoryLineComponents.push({
-        name: "shape-style",
-        stroke: [240, 60, 100],
-        dash: linesAdded === 0 ? 0 : [5, 5],
-        strokeWeight: 2,
-      } as ShapeStyle);
+      trajectoryLineComponents.push(
+        ShapeStyle({
+          stroke: [240, 60, 100],
+          dash: linesAdded === 0 ? [0] : [5, 5],
+          strokeWeight: 2,
+        }),
+      );
     }
 
     world.addBundle(createBundle(trajectoryLineComponents));
 
     const hitEntity = world.entity(hit.entityId);
 
-    const backBoardComponent = hitEntity.components.find(
-      (comp) => comp.name === "backboard",
-    ) as BackboardComponent | undefined;
+    const backboardOwner = hitEntity.getComponent(BackboardOwner);
 
-    if (backBoardComponent && backBoardComponent.owner === "ai") {
-      targetPosition.position = hit.position;
+    if (backboardOwner && backboardOwner.componentData === "ai") {
+      targetPosition.componentData.position = hit.position;
       break;
     }
 
@@ -477,22 +468,18 @@ function setupSceneSystem(world: World, resources: ResourcePool) {
   );
 
   const centerLineBundle = createBundle([
-    {
-      name: "line",
+    Line({
       start: new Vector(0, -canvasBounds.center.center.y),
       end: new Vector(0, canvasBounds.center.center.y),
-    } satisfies Line,
-    {
-      name: "shape-style",
-
+    }),
+    ShapeStyle({
       stroke: [240, 60, 100],
       strokeWeight: 2,
       fill: [240, 60, 100],
-    } satisfies ShapeStyle,
-    {
-      name: "position",
+    }),
+    Position({
       position: canvasBounds.center.center,
-    } satisfies Position,
+    }),
   ]);
 
   const leftBackboardBundle = createBackboard(
@@ -530,11 +517,10 @@ function setupSceneSystem(world: World, resources: ResourcePool) {
 
   // The position the ai paddle is aiming to end up in
   const aiPaddleTarget = createBundle([
-    "ai-paddle-target",
-    {
-      name: "position",
+    tag("ai-paddle-target")(),
+    Position({
       position: new Vector(0, 0),
-    },
+    }),
   ]);
 
   const aiPaddleBundle = createPaddle(

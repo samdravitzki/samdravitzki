@@ -1,4 +1,4 @@
-import { Position } from "../ecs/components/Position";
+import Position from "../ecs/components/Position";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
@@ -13,21 +13,18 @@ function templateInfo(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
   const text = createBundle([
-    {
-      name: "position",
+    Position({
       position: canvasBounds.center.center,
-    } satisfies Position,
-    {
-      name: "text",
+    }),
+    Text({
       text: "[template project]",
       size: 25,
       align: "center",
       font: "Courier New",
-    } satisfies Text,
-    {
-      name: "shape-style",
+    }),
+    ShapeStyle({
       fill: "#ffffffde",
-    } satisfies ShapeStyle,
+    }),
   ]);
 
   world.addBundle(text);
@@ -35,23 +32,20 @@ function templateInfo(world: World, resources: ResourcePool) {
   const borderInset = 50;
 
   const border = createBundle([
-    {
-      name: "position",
+    Position({
       position: canvasBounds.center.center,
-    } satisfies Position,
-    {
-      name: "square",
+    }),
+    Square({
       width: canvasBounds.width - borderInset,
       height: canvasBounds.height - borderInset,
       borderRadius: 20,
-    } satisfies Square,
-    {
-      name: "shape-style",
+    }),
+    ShapeStyle({
       stroke: "#ffffff78",
       strokeWeight: 3,
       dash: [10, 10],
       dashOffset: 0,
-    } satisfies ShapeStyle,
+    }),
   ]);
 
   world.addBundle(border);

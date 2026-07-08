@@ -1,11 +1,10 @@
 import Vector from "../../../core/Vector/Vector";
-import Component from "../../../core/Component/Component";
+import { component } from "../../../core/Component/Component";
 
-export type CollisionContact = Component & {
+export type CollisionContactData = {
   // The ids of the entities colliding
   entityA: string;
   entityB: string;
-  name: "collision-contact";
   // The collision point of the entity in local space
   contactPoint: Vector;
   // The normal of the point collided with
@@ -13,3 +12,7 @@ export type CollisionContact = Component & {
   // The depth in which the collision occured
   penetration: number;
 };
+
+export const CollisionContact = component<CollisionContactData>({
+  name: "collision-contact",
+});
