@@ -3,18 +3,7 @@ import Label, { LabelData } from "../../core/Component/Label";
 import "./inspector.css";
 import { Pane } from "tweakpane";
 import Component from "../../core/Component/Component";
-
-type InspectorEvents = {
-  // External events that the inspector listens to
-  setup: void;
-  update: void;
-  "world:entity-created": { entityId: string };
-  "world:entity-removed": { entityId: string };
-  "entity:component-added": { entityId: string; componentName: string };
-  "entity:component-removed": { entityId: string; component: Component };
-  // Internal events that the inspector emits
-  "inspector:entity-selected": { entityId: string };
-};
+import { KeypressEvent } from "../p5/p5-part";
 
 function createInspectorPanelSection({
   title,
@@ -103,13 +92,139 @@ function isTagComponent(component: Component): boolean {
   return componentData === undefined;
 }
 
+type InspectorCodeChar = "w" | "s" | "d" | "a";
+
+function upArrow() {
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-square" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm8.5 9.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707z"/>
+    </svg>
+  `;
+}
+
+function downArrow() {
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-square" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm8.5 2.5a.5.5 0 0 0-1 0v5.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293z"/>
+    </svg>
+  `;
+}
+
+function leftArrow() {
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-square" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm11.5 5.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z"/>
+    </svg>
+  `;
+}
+
+function rightArrow() {
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-square" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z"/>
+  </svg>
+  `;
+}
+
+function inspectorCodeCharToArrow(char: InspectorCodeChar): string {
+  switch (char) {
+    case "w":
+      return upArrow();
+    case "s":
+      return downArrow();
+    case "d":
+      return rightArrow();
+    case "a":
+      return leftArrow();
+  }
+}
+
+function renderInspectorCode(
+  inspectorCode: InspectorCodeChar[],
+  buffer: InspectorCodeChar[],
+) {
+  const charSpans = inspectorCode.map((char, index) => {
+    const charSpan = document.createElement("span");
+
+    charSpan.innerHTML = inspectorCodeCharToArrow(char);
+    charSpan.classList.add("inspector__code-char");
+
+    if (buffer[index] === char) {
+      charSpan.classList.add("inspector__code-char-correct");
+    } else if (buffer[index] !== undefined) {
+      charSpan.classList.add("inspector__code-char-incorrect");
+    } else if (buffer[index] === undefined) {
+      charSpan.classList.add("inspector__code-char-pending");
+    }
+    return charSpan;
+  });
+
+  const codeContainer = document.createElement("div");
+  codeContainer.classList.add("inspector__code-char-container");
+  charSpans.forEach((span) => codeContainer.appendChild(span));
+  return codeContainer;
+}
+
+type InspectorEvents = {
+  // External events that the inspector listens to
+  setup: void;
+  update: void;
+  "world:entity-created": { entityId: string };
+  "world:entity-removed": { entityId: string };
+  "entity:component-added": { entityId: string; componentName: string };
+  "entity:component-removed": { entityId: string; component: Component };
+  keyPressed: KeypressEvent;
+  // Internal events that the inspector emits
+  "inspector:entity-selected": { entityId: string };
+};
+
 function inspector() {
   const part: Part<InspectorEvents> = ({ registerSystem, triggerBuilder }) => {
     let inspectorRoot: HTMLElement;
+    let openInspectorCodeInput: HTMLElement;
     let worldPanel: HTMLElement;
     let entityInspectorPanel: HTMLElement | null = null;
 
     let componentPanes = new Map<string, Pane>();
+
+    const inspectorCode = "wwssddaa";
+
+    let inspectorCodeBuffer: InspectorCodeChar[] = [];
+
+    registerSystem(
+      "inspector-code-listener",
+      triggerBuilder.on("keyPressed"),
+      (world, resources, state, emitter, payload) => {
+        // Ignore keys that are not part of the code
+        if (
+          payload.key !== "w" &&
+          payload.key !== "s" &&
+          payload.key !== "d" &&
+          payload.key !== "a"
+        ) {
+          return;
+        }
+
+        inspectorCodeBuffer.push(payload.key);
+
+        const enteredCode = inspectorCodeBuffer.join("");
+
+        if (!inspectorCode.startsWith(enteredCode)) {
+          inspectorCodeBuffer = []; // Reset the buffer if the entered code doesn't match
+        }
+
+        if (enteredCode === inspectorCode) {
+          inspectorRoot.style.visibility = "visible";
+          openInspectorCodeInput.style.visibility = "hidden";
+          inspectorCodeBuffer = []; // Clear the buffer after successful code entry
+        }
+
+        openInspectorCodeInput.innerHTML = renderInspectorCode(
+          inspectorCode.split("") as InspectorCodeChar[],
+          inspectorCodeBuffer,
+        ).outerHTML;
+      },
+    );
 
     registerSystem("debug-panel", triggerBuilder.on("setup"), () => {
       inspectorRoot = document.createElement("div");
@@ -120,7 +235,7 @@ function inspector() {
         title: "World",
         onClose: () => {
           inspectorRoot.style.visibility = "hidden";
-          openInspectorButton.style.visibility = "visible";
+          openInspectorCodeInput.style.visibility = "visible";
         },
       });
 
@@ -130,22 +245,27 @@ function inspector() {
       worldPanelBody.classList.add("inspector__panel-body");
       worldPanel.appendChild(worldPanelBody);
 
-      const openInspectorButton = document.createElement("button");
-      openInspectorButton.classList.add("inspector__open-button");
-      openInspectorButton.textContent = "Open Inspector";
-      openInspectorButton.addEventListener("click", () => {
-        inspectorRoot.style.visibility = "visible";
-        openInspectorButton.style.visibility = "hidden";
-      });
+      const openInspectorCodeContainer = document.createElement("div");
+      openInspectorCodeContainer.title = "Type the code to open the inspector";
+      openInspectorCodeContainer.classList.add("inspector__code");
+
+      openInspectorCodeInput = document.createElement("div");
+      openInspectorCodeInput.classList.add("inspector__code-input");
+      openInspectorCodeInput.innerHTML = renderInspectorCode(
+        inspectorCode.split("") as InspectorCodeChar[],
+        inspectorCodeBuffer,
+      ).outerHTML;
+
+      openInspectorCodeContainer.appendChild(openInspectorCodeInput);
 
       const body = document.body;
 
-      body.appendChild(openInspectorButton);
+      body.appendChild(openInspectorCodeContainer);
       body.appendChild(inspectorRoot);
       inspectorRoot.appendChild(worldPanel);
 
       return () => {
-        openInspectorButton?.remove();
+        openInspectorCodeInput?.remove();
         inspectorRoot?.remove();
       };
     });
