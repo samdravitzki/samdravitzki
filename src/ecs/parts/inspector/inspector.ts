@@ -265,7 +265,7 @@ function inspector() {
       inspectorRoot.appendChild(worldPanel);
 
       return () => {
-        openInspectorCodeInput?.remove();
+        openInspectorCodeContainer?.remove();
         inspectorRoot?.remove();
       };
     });
