@@ -114,11 +114,13 @@ function inspector() {
     registerSystem("debug-panel", triggerBuilder.on("setup"), () => {
       inspectorRoot = document.createElement("div");
       inspectorRoot.classList.add("inspector__root");
+      inspectorRoot.style.visibility = "hidden"; // Hide the inspector by default
 
       worldPanel = createInspectorPanelSection({
         title: "World",
         onClose: () => {
-          worldPanel.style.display = "none";
+          inspectorRoot.style.visibility = "hidden";
+          openInspectorButton.style.visibility = "visible";
         },
       });
 
@@ -128,12 +130,22 @@ function inspector() {
       worldPanelBody.classList.add("inspector__panel-body");
       worldPanel.appendChild(worldPanelBody);
 
+      const openInspectorButton = document.createElement("button");
+      openInspectorButton.classList.add("inspector__open-button");
+      openInspectorButton.textContent = "Open Inspector";
+      openInspectorButton.addEventListener("click", () => {
+        inspectorRoot.style.visibility = "visible";
+        openInspectorButton.style.visibility = "hidden";
+      });
+
       const body = document.body;
 
+      body.appendChild(openInspectorButton);
       body.appendChild(inspectorRoot);
       inspectorRoot.appendChild(worldPanel);
 
       return () => {
+        openInspectorButton?.remove();
         inspectorRoot?.remove();
       };
     });
@@ -416,11 +428,8 @@ function inspector() {
   };
 
   // Next
-  // - need the inspector to listen to changes in the state of components and update the component properties displayed
-  // - display component properties using tweakpane
-  // - add hover effects to the entity list
-  // - fix bug: Cannot enter text using keyboard into the number fields
   // - test: adding label at runtime to entity and checking entity panel title updates and entity in list, then reverse when removing the label component
+  // - fun way to open the inspector
 
   return part;
 }

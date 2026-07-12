@@ -7,10 +7,7 @@ import collisions from "../ecs/parts/collision/collision";
 import Component, { component, tag } from "../ecs/core/Component/Component";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import Position, { PositionData } from "../ecs/components/Position";
-import {
-  ShapeStyle,
-  ShapeStyleData,
-} from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
+import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
 import { Circle, Square } from "../ecs/parts/p5/shape-components";
 import { Collider } from "../ecs/parts/collision/components/Collider";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
@@ -413,19 +410,21 @@ export default function cursorActions(parent?: HTMLElement) {
     },
   );
 
+  // Factor out the cursor system into its own part and share with sdf
+
   engine.system("setup-shapes", engine.trigger.on("setup"), startingShapes);
   engine.system("setup-cursor", engine.trigger.on("setup"), setupCursor);
 
   engine.system("move-cursor", engine.trigger.on("update"), moveCursor);
-  engine.system("cursor-grab", engine.trigger.on("click"), cursorGrab);
-  engine.system("grab-release", engine.trigger.on("click"), cursorGrabRelease);
+  engine.system("cursor-grab", engine.trigger.on("click"), cursorGrab); // cursor system
+  engine.system("grab-release", engine.trigger.on("click"), cursorGrabRelease); // cursor system
   engine.system("cursor-click", engine.trigger.on("click"), cursorClick);
-  engine.system(
+  engine.system( // cursor system
     "cursor-hover",
     engine.trigger.on("collision"),
     cursorHoverSystem,
   );
-  engine.system("cursor-drag", engine.trigger.on("update"), cursorDrag);
+  engine.system("cursor-drag", engine.trigger.on("update"), cursorDrag); // cursor system
 
   return engine;
 }
