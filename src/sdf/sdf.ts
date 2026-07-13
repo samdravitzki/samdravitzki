@@ -1,11 +1,7 @@
-import p5 from "p5";
-import { Pane } from "tweakpane";
 import Position from "../ecs/components/Position";
-import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
-import { EntityId } from "../ecs/core/Entity/Entity";
 import Vector from "../ecs/core/Vector/Vector";
 import World from "../ecs/core/World/World";
 import p5Part, { KeypressEvent, MousePosition } from "../ecs/parts/p5/p5-part";
@@ -22,6 +18,7 @@ import collisions, {
 import stateDebugPaneSystem from "./state-debug-pane";
 import { CollisionContact } from "../ecs/parts/collision/components/Collision";
 import { component, tag } from "../ecs/core/Component/Component";
+import inspector from "../ecs/parts/inspector/inspector";
 
 const circle = [
   Circle({
@@ -110,6 +107,7 @@ export default function sdf(parent?: HTMLElement) {
   engine.part(p5Part([500, 500], parent, [0, 0, 14], true));
   engine.part(collisions(false));
   engine.part(sdfRendererPart());
+  engine.part(inspector());
 
   engine.system("sdf-shapes", engine.trigger.on("setup"), sdfShapes);
 

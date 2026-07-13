@@ -7,13 +7,13 @@ import { Text } from "../ecs/parts/p5/shape-components";
 import { Line } from "../ecs/parts/p5/shape-components";
 import castRay from "../ecs/parts/collision/cast-ray";
 import createBundle from "../ecs/core/Bundle/createBundle";
-import minionBongUrl from "./sounds/minion-bong.mp3";
 import State from "../ecs/core/State/State";
 import Component, { tag } from "../ecs/core/Component/Component";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import collisions, {
   CollisionEventPayload,
 } from "../ecs/parts/collision/collision";
+import inspector from "../ecs/parts/inspector/inspector";
 import { createEndMenu, createGameMenu, createMainMenu } from "./setup-ui";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
@@ -570,6 +570,7 @@ export default function pong(parent?: HTMLElement) {
 
   engine.part(p5Part([500, 500], parent));
   engine.part(collisions());
+  engine.part(inspector());
 
   engine.system("setup-scene", engine.trigger.on("setup"), setupSceneSystem);
 

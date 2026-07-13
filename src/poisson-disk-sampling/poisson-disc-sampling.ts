@@ -14,6 +14,7 @@ import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
 import { Circle } from "../ecs/parts/p5/shape-components";
 import Position from "../ecs/components/Position";
 import { tag } from "../ecs/core/Component/Component";
+import inspector from "../ecs/parts/inspector/inspector";
 
 const pallete = {
   background: "#151515",
@@ -90,6 +91,7 @@ export default function poissonDiscSamplingDemoApp(parent?: HTMLElement) {
     .build();
 
   engine.part(p5Part([500, 500], parent, pallete.background));
+  engine.part(inspector());
 
   engine.system(
     "place-random-dots",

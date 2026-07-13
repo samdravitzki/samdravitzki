@@ -1,9 +1,11 @@
 import Position from "../ecs/components/Position";
 import Bounds from "../ecs/core/Bounds/Bounds";
 import createBundle from "../ecs/core/Bundle/createBundle";
+import Label from "../ecs/core/Component/Label";
 import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
 import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
 import World from "../ecs/core/World/World";
+import inspector from "../ecs/parts/inspector/inspector";
 import p5Part from "../ecs/parts/p5/p5-part";
 import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
 import { Text } from "../ecs/parts/p5/shape-components";
@@ -24,6 +26,9 @@ function templateInfo(world: World, resources: ResourcePool) {
     }),
     ShapeStyle({
       fill: "#ffffffde",
+    }),
+    Label({
+      text: "title",
     }),
   ]);
 
@@ -46,6 +51,9 @@ function templateInfo(world: World, resources: ResourcePool) {
       dash: [10, 10],
       dashOffset: 0,
     }),
+    Label({
+      text: "border",
+    }),
   ]);
 
   world.addBundle(border);
@@ -59,6 +67,7 @@ export default function projectTemplate(parent?: HTMLElement) {
     .build();
 
   engine.part(p5Part([500, 500], parent, [0, 0, 14]));
+  engine.part(inspector());
 
   engine.system("template-info", engine.trigger.on("setup"), templateInfo);
 
