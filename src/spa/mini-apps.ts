@@ -8,6 +8,7 @@ import shifter from "../shifter/shifter";
 import snakeGame from "../snake/snake-game";
 import poissonDiscSamplingDemo from "../poisson-disk-sampling/poisson-disc-sampling";
 import drumsGame from "../drums/drums";
+import collisionDemo from "../collision-demo/collision-demo";
 
 export type MiniApp = (parent?: HTMLElement) => Engine<any, any>;
 
@@ -82,6 +83,14 @@ miniApps.push({
   appId: "sdf",
   controls: [["interact", "click + drag"]],
   app: sdf,
+});
+
+miniApps.push({
+  name: "collision-demo",
+  symbol: "💥",
+  appId: "collision-demo",
+  controls: [["interact", "click + drag"]],
+  app: collisionDemo,
 });
 
 miniApps.push({

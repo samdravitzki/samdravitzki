@@ -12,8 +12,13 @@ import Position from "../../components/Position";
  * the functionality to be easily broken up and to share functionality between games
  */
 function collisions(
-  visualiseColliders: boolean = false,
-  logging: boolean = false,
+  {
+    visualiseColliders = false,
+    logging = false,
+  }: {
+    visualiseColliders: boolean;
+    logging: boolean;
+  } = { visualiseColliders: false, logging: false },
 ) {
   const part: Part<{
     update: void;

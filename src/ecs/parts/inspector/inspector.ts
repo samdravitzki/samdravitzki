@@ -60,9 +60,9 @@ function createComponentPane(
 
   const componentData = component.componentData;
 
-  if (typeof componentData !== "object" || componentData === null) {
+  if (!componentData) {
     throw new Error(
-      `Component properties for component '${name}' must be an object`,
+      `Component '${name}' is null or undefined, cannot create inspector pane for it`,
     );
   }
 
@@ -70,19 +70,23 @@ function createComponentPane(
     container,
   });
 
-  for (const [propertyName, propertyValue] of Object.entries(componentData)) {
-    try {
-      componentPane.addBinding(
-        componentData,
-        propertyName as keyof typeof componentData,
-      );
-    } catch (e) {
-      // Fallback for any properties types not supported by tweakpane natively
-      const fallbackObj = { [propertyName]: String(propertyValue) };
-      componentPane.addBinding(fallbackObj, propertyName, {
-        readonly: true,
-      });
+  if (typeof componentData === "object") {
+    for (const [propertyName, propertyValue] of Object.entries(componentData)) {
+      try {
+        componentPane.addBinding(
+          componentData,
+          propertyName as keyof typeof componentData,
+        );
+      } catch (e) {
+        // Fallback for any properties types not supported by tweakpane natively
+        const fallbackObj = { [propertyName]: String(propertyValue) };
+        componentPane.addBinding(fallbackObj, propertyName, {
+          readonly: true,
+        });
+      }
     }
+  } else {
+    componentPane.addBinding(component, "componentData");
   }
 
   return componentPane;

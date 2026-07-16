@@ -105,7 +105,7 @@ export default function sdf(parent?: HTMLElement) {
     .build();
 
   engine.part(p5Part([500, 500], parent, [0, 0, 14], true));
-  engine.part(collisions(false));
+  engine.part(collisions());
   engine.part(sdfRendererPart());
   engine.part(inspector());
 

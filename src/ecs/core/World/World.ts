@@ -66,12 +66,18 @@ export default class World {
     return entity;
   }
 
-  addBundle(bundle: Bundle) {
-    const entity = this.createEntity();
+  addBundle(bundles: Bundle | Bundle[]) {
+    if (!Array.isArray(bundles)) {
+      bundles = [bundles];
+    }
 
-    bundle.components.forEach((component) => {
-      entity.addComponent(component);
-    });
+    for (const bundle of bundles) {
+      const entity = this.createEntity();
+
+      bundle.components.forEach((component) => {
+        entity.addComponent(component);
+      });
+    }
   }
 
   removeEntity(entityId: string) {
