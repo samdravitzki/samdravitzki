@@ -419,7 +419,8 @@ export default function cursorActions(parent?: HTMLElement) {
   engine.system("cursor-grab", engine.trigger.on("click"), cursorGrab); // cursor system
   engine.system("grab-release", engine.trigger.on("click"), cursorGrabRelease); // cursor system
   engine.system("cursor-click", engine.trigger.on("click"), cursorClick);
-  engine.system( // cursor system
+  engine.system(
+    // cursor system
     "cursor-hover",
     engine.trigger.on("collision"),
     cursorHoverSystem,

@@ -10,56 +10,8 @@ The `src/` folder contains all of the projects. Each project contains a `README.
 
 ## General work
 
-Things to do that aren't related to any project in specific. Includes work on the site, devops and improvements to developer experience
+Possible additions to the repository that aren't related to any project in particular
 
-### The site
-
-- [ ] A cool logo
-  - A character logo. Style has the simplicity of a web icon
-  - inspo
-    - https://www.toools.design/free-open-source-icon-libraries
-    - https://iconmonstr.com/?s=face, specifically https://iconmonstr.com/smiley-15-svg/
-    - https://www.streamlinehq.com/icons/flex-remix?search=cat&icon=ico_nIkbkPG7WZL74GtV
-    - https://www.streamlinehq.com/icons/flex-remix?search=face
-- [ ] Cohesive design
-- [ ] Publish updates to social platforms
-- [ ] A layout that can support more information
-  - Each interactable thing should be the first thing someone sees
-  - There should be groups of interactable things such as collision system demos
-  - Each interactable thing should have a write up
-  - Each interactable thing should have a simple description of how to interact with it. Needs to be as simple as possible as the thing itself should afford how to interact with it
-  - Need a way to view all of the interactable things
-  - Something like https://www.redblobgames.com/ but more focused on the thing itself than the writeup
-
-- [ ] Some way of communicating what each project is and how to interact with them
-- [ ] Mobile friendly
-- [ ] Implement more extensible approach to adding new games to the site
-- [ ] Someway for any viewers to give feedback
-- [x] Analytics
-
-### Maintenance and maintainability
-
-All the things that need to be done to support building and maintain these projects
-
-- [ ] Linting
-- [x] Dependency bot
-- [ ] Publish coverage reports (using codecov?)
-- [x] Unit test runner
-- [x] Formatting
-
-### Continuous Integration
-
-- [ ] Automate lint checking in the CI
-- [x] Automate unit tests in the CI
-
-### Continuous deployment
-
-- [ ] Smoke tests to validate deployment was successful
-- [x] Define infrastructure using IaC and apply changes on commit to `main`
-- [x] Automate deployment on commit to `main`
-- [x] Move from GitHub pages to Azure
-  - swa supports route fallbacks
-
-### Development environment
-
-- [x] Use GitHub Codespaces making a portable development environment
+- Linting
+- Automate lint checking in the CI
+- Basic smoke tests to validate deployment was successful automatically

@@ -9,6 +9,7 @@ import Vector from "../../core/Vector/Vector";
 import Label from "../../core/Component/Label";
 import Position from "../../components/Position";
 
+// TODO: Renmame to CollisionContactEvent
 type CollisionEventPayload = {
   entityA: string;
   entityB: string;
