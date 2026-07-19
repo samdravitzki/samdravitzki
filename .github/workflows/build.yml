@@ -29,7 +29,7 @@ jobs:
 
       - name: Compress build
         run: |
-          zip -r personal-site.zip ./dist
+          zip -r personal-site.zip ./packages/dravitzki/dist
 
       - name: Upload build as workflow artifact
         uses: actions/upload-artifact@v6

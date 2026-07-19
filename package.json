@@ -2,29 +2,10 @@
   "name": "samdravitzki",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "test": "vitest"
-  },
-  "devDependencies": {
-    "@tweakpane/core": "^2.0.5",
-    "@types/p5": "^1.7.6",
-    "@vitest/coverage-v8": "^4.1.0",
-    "jsdom": "^27.4.0",
-    "prettier": "3.8.1",
-    "typescript": "^6.0.3",
-    "vite": "^8.1.0",
-    "vite-plugin-checker": "^0.14.4",
-    "vitest": "^4.1.0"
-  },
   "packageManager": "pnpm@9.1.0+sha1.217063ce3fcbf44f3051666f38b810f1ddefee4a",
-  "dependencies": {
-    "@tonejs/midi": "^2.0.28",
-    "p5": "^2.1.2",
-    "tone": "^15.1.22",
-    "tweakpane": "^4.0.5"
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter='./packages/*' run dev",
+    "build": "pnpm -r --filter='./packages/*' run build",
+    "test": "pnpm --filter='./packages/*' test"
   }
 }
