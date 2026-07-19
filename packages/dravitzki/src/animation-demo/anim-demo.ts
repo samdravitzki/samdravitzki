@@ -1,19 +1,19 @@
 import p5 from "p5";
-import Bounds from "../ecs/core/Bounds/Bounds";
-import createBundle from "../ecs/core/Bundle/createBundle";
-import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
-import Vector from "../ecs/core/Vector/Vector";
-import p5Part from "../ecs/parts/p5/p5-part";
-import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
-import { Line } from "../ecs/parts/p5/shape-components";
-import { Circle } from "../ecs/parts/p5/shape-components";
+import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
+import createBundle from "@samdravitzki/dufus-engine/src/core/Bundle/createBundle";
+import { EngineBuilder } from "@samdravitzki/dufus-engine/src/core/Engine/EngineBuilder";
+import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import p5Part from "@samdravitzki/dufus-engine/src/parts/p5/p5-part";
+import { ShapeStyle } from "@samdravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
+import { Line } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
+import { Circle } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
 import Animation, {
   createAnimation,
-} from "../ecs/parts/animation/components/Animation";
-import animation from "../ecs/parts/animation/animation";
-import inspector from "../ecs/parts/inspector/inspector";
-import Position from "../ecs/components/Position";
-import { tag } from "../ecs/core/Component/Component";
+} from "@samdravitzki/dufus-engine/src/parts/animation/components/Animation";
+import animation from "@samdravitzki/dufus-engine/src/parts/animation/animation";
+import inspector from "@samdravitzki/dufus-engine/src/parts/inspector/inspector";
+import Position from "@samdravitzki/dufus-engine/src/components/Position";
+import { tag } from "@samdravitzki/dufus-engine/src/core/Component/Component";
 
 const palette = {
   100: "#0A090A",

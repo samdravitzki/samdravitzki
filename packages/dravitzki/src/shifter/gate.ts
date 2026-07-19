@@ -1,4 +1,4 @@
-import Vector from "../ecs/core/Vector/Vector";
+import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
 
 type GatePosition =
   | "neutral"

@@ -1,14 +1,14 @@
-import Position from "../ecs/components/Position";
-import Bounds from "../ecs/core/Bounds/Bounds";
-import createBundle from "../ecs/core/Bundle/createBundle";
-import { tag } from "../ecs/core/Component/Component";
-import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
-import { Part } from "../ecs/core/Part/Part";
-import State from "../ecs/core/State/State";
-import Vector from "../ecs/core/Vector/Vector";
-import World from "../ecs/core/World/World";
-import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
-import { Text } from "../ecs/parts/p5/shape-components";
+import Position from "@samdravitzki/dufus-engine/src/components/Position";
+import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
+import createBundle from "@samdravitzki/dufus-engine/src/core/Bundle/createBundle";
+import { tag } from "@samdravitzki/dufus-engine/src/core/Component/Component";
+import { ResourcePool } from "@samdravitzki/dufus-engine/src/core/Engine/ResourcePool";
+import { Part } from "@samdravitzki/dufus-engine/src/core/Part/Part";
+import State from "@samdravitzki/dufus-engine/src/core/State/State";
+import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import World from "@samdravitzki/dufus-engine/src/core/World/World";
+import { ShapeStyle } from "@samdravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
+import { Text } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
 import GateNode, { commonGate } from "./gate";
 
 function setupGearText(

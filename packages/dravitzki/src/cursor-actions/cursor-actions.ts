@@ -1,22 +1,22 @@
 import p5 from "p5";
-import createBundle from "../ecs/core/Bundle/createBundle";
-import World from "../ecs/core/World/World";
-import Vector from "../ecs/core/Vector/Vector";
-import p5Part, { MousePosition } from "../ecs/parts/p5/p5-part";
-import collisions from "../ecs/parts/collision/collision";
-import Component, { component, tag } from "../ecs/core/Component/Component";
-import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
-import Position, { PositionData } from "../ecs/components/Position";
-import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
-import { Circle, Square } from "../ecs/parts/p5/shape-components";
-import { Collider } from "../ecs/parts/collision/components/Collider";
-import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
-import { ClickEventPayload } from "../ecs/parts/p5/p5-system";
-import { CollisionEventPayload } from "../ecs/parts/collision/collision-systems";
-import Bounds from "../ecs/core/Bounds/Bounds";
-import inspector from "../ecs/parts/inspector/inspector";
-import Label from "../ecs/core/Component/Label";
-import { CollisionContact } from "../ecs/parts/collision/components/Collision";
+import createBundle from "@samdravitzki/dufus-engine/src/core/Bundle/createBundle";
+import World from "@samdravitzki/dufus-engine/src/core/World/World";
+import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import p5Part, { MousePosition } from "@samdravitzki/dufus-engine/src/parts/p5/p5-part";
+import collisions from "@samdravitzki/dufus-engine/src/parts/collision/collision";
+import Component, { component, tag } from "@samdravitzki/dufus-engine/src/core/Component/Component";
+import { EngineBuilder } from "@samdravitzki/dufus-engine/src/core/Engine/EngineBuilder";
+import Position, { PositionData } from "@samdravitzki/dufus-engine/src/components/Position";
+import { ShapeStyle } from "@samdravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
+import { Circle, Square } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
+import { Collider } from "@samdravitzki/dufus-engine/src/parts/collision/components/Collider";
+import { ResourcePool } from "@samdravitzki/dufus-engine/src/core/Engine/ResourcePool";
+import { ClickEventPayload } from "@samdravitzki/dufus-engine/src/parts/p5/p5-system";
+import { CollisionEventPayload } from "@samdravitzki/dufus-engine/src/parts/collision/collision-systems";
+import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
+import inspector from "@samdravitzki/dufus-engine/src/parts/inspector/inspector";
+import Label from "@samdravitzki/dufus-engine/src/core/Component/Label";
+import { CollisionContact } from "@samdravitzki/dufus-engine/src/parts/collision/components/Collision";
 
 // Component used to tag entities that should be interactable with the cursor
 // Making them easy to query for

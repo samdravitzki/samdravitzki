@@ -1,5 +1,5 @@
-import Vector from "../../ecs/core/Vector/Vector";
-import Bounds from "../../ecs/core/Bounds/Bounds";
+import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
 import randomInt from "../../lib/randomInt/randomInt";
 
 /**

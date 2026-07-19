@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import Bounds from "../../../ecs/core/Bounds/Bounds";
-import Vector from "../../../ecs/core/Vector/Vector";
+import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
+import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
 import { BackgroundGrid } from "./BackgroundGrid";
 
 describe("constructor", () => {

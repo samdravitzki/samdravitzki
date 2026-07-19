@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import Bounds from "../../ecs/core/Bounds/Bounds";
-import Vector from "../../ecs/core/Vector/Vector";
+import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
+import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
 import randomDots from "./random-dots";
 
 test("should return dot in random position within bounds", () => {

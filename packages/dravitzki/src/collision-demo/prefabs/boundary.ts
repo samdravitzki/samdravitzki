@@ -1,11 +1,11 @@
-import Position from "../../ecs/components/Position";
-import Bundle from "../../ecs/core/Bundle/Bundle";
-import createBundle from "../../ecs/core/Bundle/createBundle";
-import Label from "../../ecs/core/Component/Label";
-import Vector from "../../ecs/core/Vector/Vector";
-import { Collider } from "../../ecs/parts/collision/components/Collider";
-import { ShapeStyle } from "../../ecs/parts/p5/primitive-renderer/ShapeStyle";
-import { Square } from "../../ecs/parts/p5/shape-components";
+import Position from "@samdravitzki/dufus-engine/src/components/Position";
+import Bundle from "@samdravitzki/dufus-engine/src/core/Bundle/Bundle";
+import createBundle from "@samdravitzki/dufus-engine/src/core/Bundle/createBundle";
+import Label from "@samdravitzki/dufus-engine/src/core/Component/Label";
+import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import { Collider } from "@samdravitzki/dufus-engine/src/parts/collision/components/Collider";
+import { ShapeStyle } from "@samdravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
+import { Square } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
 
 function boundary(position: Vector, width: number, height: number): Bundle[] {
   const borderInset = 50;

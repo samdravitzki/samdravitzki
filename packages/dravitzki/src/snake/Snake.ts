@@ -1,6 +1,6 @@
-import Bounds from "../ecs/core/Bounds/Bounds";
+import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
 import Direction from "./Direction/Direction";
-import Vector from "../ecs/core/Vector/Vector";
+import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
 import range from "../lib/range/range";
 
 class SnakeChunk {

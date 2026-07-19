@@ -1,8 +1,8 @@
 import p5 from "p5";
-import Bounds from "../ecs/core/Bounds/Bounds";
-import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
-import State from "../ecs/core/State/State";
-import World from "../ecs/core/World/World";
+import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
+import { ResourcePool } from "@samdravitzki/dufus-engine/src/core/Engine/ResourcePool";
+import State from "@samdravitzki/dufus-engine/src/core/State/State";
+import World from "@samdravitzki/dufus-engine/src/core/World/World";
 
 function createGameMenu(
   _world: World,

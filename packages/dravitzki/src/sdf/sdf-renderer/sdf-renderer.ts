@@ -1,11 +1,14 @@
 import p5 from "p5";
-import { ResourcePool } from "../../../core/Engine/ResourcePool";
-import World from "../../../core/World/World";
-import Position from "../../../components/Position";
-import { Circle, Square } from "../shape-components";
-import Bounds from "../../../core/Bounds/Bounds";
-import State from "../../../core/State/State";
-import { component } from "../../../core/Component/Component";
+import { ResourcePool } from "@samdravitzki/dufus-engine/src/core/Engine/ResourcePool";
+import World from "@samdravitzki/dufus-engine/src/core/World/World";
+import Position from "@samdravitzki/dufus-engine/src/components/Position";
+import {
+  Circle,
+  Square,
+} from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
+import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
+import State from "@samdravitzki/dufus-engine/src/core/State/State";
+import { component } from "@samdravitzki/dufus-engine/src/core/Component/Component";
 import vert from "./shader/shader.vert?raw";
 import frag from "./shader/shader.frag?raw";
 

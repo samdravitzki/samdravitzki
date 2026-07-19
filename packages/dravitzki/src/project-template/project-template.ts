@@ -1,15 +1,15 @@
-import Position from "../ecs/components/Position";
-import Bounds from "../ecs/core/Bounds/Bounds";
-import createBundle from "../ecs/core/Bundle/createBundle";
-import Label from "../ecs/core/Component/Label";
-import { EngineBuilder } from "../ecs/core/Engine/EngineBuilder";
-import { ResourcePool } from "../ecs/core/Engine/ResourcePool";
-import World from "../ecs/core/World/World";
-import inspector from "../ecs/parts/inspector/inspector";
-import p5Part from "../ecs/parts/p5/p5-part";
-import { ShapeStyle } from "../ecs/parts/p5/primitive-renderer/ShapeStyle";
-import { Text } from "../ecs/parts/p5/shape-components";
-import { Square } from "../ecs/parts/p5/shape-components";
+import Position from "@samdravitzki/dufus-engine/src/components/Position";
+import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
+import createBundle from "@samdravitzki/dufus-engine/src/core/Bundle/createBundle";
+import Label from "@samdravitzki/dufus-engine/src/core/Component/Label";
+import { EngineBuilder } from "@samdravitzki/dufus-engine/src/core/Engine/EngineBuilder";
+import { ResourcePool } from "@samdravitzki/dufus-engine/src/core/Engine/ResourcePool";
+import World from "@samdravitzki/dufus-engine/src/core/World/World";
+import inspector from "@samdravitzki/dufus-engine/src/parts/inspector/inspector";
+import p5Part from "@samdravitzki/dufus-engine/src/parts/p5/p5-part";
+import { ShapeStyle } from "@samdravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
+import { Text } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
+import { Square } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
 
 function templateInfo(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
