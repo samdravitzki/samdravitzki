@@ -1,23 +1,28 @@
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
-import World from "@samdravitzki/dufus-engine/src/core/World/World";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
+import World from "@dravitzki/dufus-engine/src/core/World/World";
 import p5 from "p5";
 import { Velocity, Speed, BackboardOwner } from "./components";
-import { ShapeStyle } from "@samdravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
-import { Text } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
-import { Line } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
-import castRay from "@samdravitzki/dufus-engine/src/parts/collision/cast-ray";
-import createBundle from "@samdravitzki/dufus-engine/src/core/Bundle/createBundle";
-import State from "@samdravitzki/dufus-engine/src/core/State/State";
-import Component, { tag } from "@samdravitzki/dufus-engine/src/core/Component/Component";
-import { EngineBuilder } from "@samdravitzki/dufus-engine/src/core/Engine/EngineBuilder";
+import { ShapeStyle } from "@dravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
+import { Text } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
+import { Line } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
+import castRay from "@dravitzki/dufus-engine/src/parts/collision/cast-ray";
+import createBundle from "@dravitzki/dufus-engine/src/core/Bundle/createBundle";
+import State from "@dravitzki/dufus-engine/src/core/State/State";
+import Component, {
+  tag,
+} from "@dravitzki/dufus-engine/src/core/Component/Component";
+import { EngineBuilder } from "@dravitzki/dufus-engine/src/core/Engine/EngineBuilder";
 import collisions, {
   CollisionEventPayload,
-} from "@samdravitzki/dufus-engine/src/parts/collision/collision";
-import inspector from "@samdravitzki/dufus-engine/src/parts/inspector/inspector";
+} from "@dravitzki/dufus-engine/src/parts/collision/collision";
+import inspector from "@dravitzki/dufus-engine/src/parts/inspector/inspector";
 import { createEndMenu, createGameMenu, createMainMenu } from "./setup-ui";
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
-import { ResourcePool } from "@samdravitzki/dufus-engine/src/core/Engine/ResourcePool";
-import p5Part, { KeypressEvent, MousePosition } from "@samdravitzki/dufus-engine/src/parts/p5/p5-part";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
+import { ResourcePool } from "@dravitzki/dufus-engine/src/core/Engine/ResourcePool";
+import p5Part, {
+  KeypressEvent,
+  MousePosition,
+} from "@dravitzki/dufus-engine/src/parts/p5/p5-part";
 import createBall from "./prefabs/ball";
 import createBackboard from "./prefabs/backboard";
 import createWall from "./prefabs/wall";
@@ -27,7 +32,7 @@ import createPaddle, {
   aiPaddleTag,
 } from "./prefabs/paddle";
 import createScore, { aiScoreTag, playerScoreTag } from "./prefabs/score";
-import Position from "@samdravitzki/dufus-engine/src/components/Position";
+import Position from "@dravitzki/dufus-engine/src/components/Position";
 
 type Score = [number, number];
 

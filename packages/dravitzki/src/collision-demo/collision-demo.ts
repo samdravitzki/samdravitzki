@@ -1,21 +1,24 @@
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
-import { EngineBuilder } from "@samdravitzki/dufus-engine/src/core/Engine/EngineBuilder";
-import { ResourcePool } from "@samdravitzki/dufus-engine/src/core/Engine/ResourcePool";
-import World from "@samdravitzki/dufus-engine/src/core/World/World";
-import inspector from "@samdravitzki/dufus-engine/src/parts/inspector/inspector";
-import p5Part from "@samdravitzki/dufus-engine/src/parts/p5/p5-part";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
+import { EngineBuilder } from "@dravitzki/dufus-engine/src/core/Engine/EngineBuilder";
+import { ResourcePool } from "@dravitzki/dufus-engine/src/core/Engine/ResourcePool";
+import World from "@dravitzki/dufus-engine/src/core/World/World";
+import inspector from "@dravitzki/dufus-engine/src/parts/inspector/inspector";
+import p5Part from "@dravitzki/dufus-engine/src/parts/p5/p5-part";
 import boundary from "./prefabs/boundary";
 import collision, {
   CollisionEventPayload,
-} from "@samdravitzki/dufus-engine/src/parts/collision/collision";
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
-import Position from "@samdravitzki/dufus-engine/src/components/Position";
-import createBundle from "@samdravitzki/dufus-engine/src/core/Bundle/createBundle";
-import { Circle } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
-import { ShapeStyle } from "@samdravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
-import Label from "@samdravitzki/dufus-engine/src/core/Component/Label";
-import { Collider } from "@samdravitzki/dufus-engine/src/parts/collision/components/Collider";
-import { component, tag } from "@samdravitzki/dufus-engine/src/core/Component/Component";
+} from "@dravitzki/dufus-engine/src/parts/collision/collision";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
+import Position from "@dravitzki/dufus-engine/src/components/Position";
+import createBundle from "@dravitzki/dufus-engine/src/core/Bundle/createBundle";
+import { Circle } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
+import { ShapeStyle } from "@dravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
+import Label from "@dravitzki/dufus-engine/src/core/Component/Label";
+import { Collider } from "@dravitzki/dufus-engine/src/parts/collision/components/Collider";
+import {
+  component,
+  tag,
+} from "@dravitzki/dufus-engine/src/core/Component/Component";
 
 const pallete = {
   background: "#151515",

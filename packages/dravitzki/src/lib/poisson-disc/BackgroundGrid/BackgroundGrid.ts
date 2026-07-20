@@ -1,5 +1,5 @@
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
 import range from "../../range/range";
 import { indiciesSurroundingIndex } from "../indiciesSurroundingIndex/indiciesSurroundingIndex";
 
@@ -54,7 +54,7 @@ export class BackgroundGrid {
       index,
       this.gridWidth,
       this.gridHeight,
-      radius
+      radius,
     );
   }
 

@@ -1,19 +1,19 @@
 import p5 from "p5";
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
-import createBundle from "@samdravitzki/dufus-engine/src/core/Bundle/createBundle";
-import { EngineBuilder } from "@samdravitzki/dufus-engine/src/core/Engine/EngineBuilder";
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
-import p5Part from "@samdravitzki/dufus-engine/src/parts/p5/p5-part";
-import { ShapeStyle } from "@samdravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
-import { Line } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
-import { Circle } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
+import createBundle from "@dravitzki/dufus-engine/src/core/Bundle/createBundle";
+import { EngineBuilder } from "@dravitzki/dufus-engine/src/core/Engine/EngineBuilder";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
+import p5Part from "@dravitzki/dufus-engine/src/parts/p5/p5-part";
+import { ShapeStyle } from "@dravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
+import { Line } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
+import { Circle } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
 import Animation, {
   createAnimation,
-} from "@samdravitzki/dufus-engine/src/parts/animation/components/Animation";
-import animation from "@samdravitzki/dufus-engine/src/parts/animation/animation";
-import inspector from "@samdravitzki/dufus-engine/src/parts/inspector/inspector";
-import Position from "@samdravitzki/dufus-engine/src/components/Position";
-import { tag } from "@samdravitzki/dufus-engine/src/core/Component/Component";
+} from "@dravitzki/dufus-engine/src/parts/animation/components/Animation";
+import animation from "@dravitzki/dufus-engine/src/parts/animation/animation";
+import inspector from "@dravitzki/dufus-engine/src/parts/inspector/inspector";
+import Position from "@dravitzki/dufus-engine/src/components/Position";
+import { tag } from "@dravitzki/dufus-engine/src/core/Component/Component";
 
 const palette = {
   100: "#0A090A",

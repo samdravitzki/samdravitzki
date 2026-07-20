@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
 import randomDots from "./random-dots";
 
 test("should return dot in random position within bounds", () => {
@@ -20,7 +20,7 @@ test("should return number of dots equal to supplied count", () => {
 
   const result = randomDots(
     count,
-    Bounds.create(Vector.create(1, 1), Vector.create(3, 3))
+    Bounds.create(Vector.create(1, 1), Vector.create(3, 3)),
   );
 
   expect(result.length).toEqual(count);

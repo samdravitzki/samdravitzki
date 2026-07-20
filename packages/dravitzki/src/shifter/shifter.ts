@@ -1,26 +1,28 @@
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
-import createBundle from "@samdravitzki/dufus-engine/src/core/Bundle/createBundle";
-import { EngineBuilder } from "@samdravitzki/dufus-engine/src/core/Engine/EngineBuilder";
-import { ResourcePool } from "@samdravitzki/dufus-engine/src/core/Engine/ResourcePool";
-import World from "@samdravitzki/dufus-engine/src/core/World/World";
-import p5Part, { KeypressEvent } from "@samdravitzki/dufus-engine/src/parts/p5/p5-part";
-import { ShapeStyle } from "@samdravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
-import { Line } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
-import { Circle } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
+import createBundle from "@dravitzki/dufus-engine/src/core/Bundle/createBundle";
+import { EngineBuilder } from "@dravitzki/dufus-engine/src/core/Engine/EngineBuilder";
+import { ResourcePool } from "@dravitzki/dufus-engine/src/core/Engine/ResourcePool";
+import World from "@dravitzki/dufus-engine/src/core/World/World";
+import p5Part, {
+  KeypressEvent,
+} from "@dravitzki/dufus-engine/src/parts/p5/p5-part";
+import { ShapeStyle } from "@dravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
+import { Line } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
+import { Circle } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
 import gearText from "./gear-text";
 import GateNode, { commonGate, Direction } from "./gate";
-import animation from "@samdravitzki/dufus-engine/src/parts/animation/animation";
-import inspector from "@samdravitzki/dufus-engine/src/parts/inspector/inspector";
+import animation from "@dravitzki/dufus-engine/src/parts/animation/animation";
+import inspector from "@dravitzki/dufus-engine/src/parts/inspector/inspector";
 import Animation, {
   AnimationData,
   createAnimation,
-} from "@samdravitzki/dufus-engine/src/parts/animation/components/Animation";
+} from "@dravitzki/dufus-engine/src/parts/animation/components/Animation";
 import p5 from "p5";
-import State from "@samdravitzki/dufus-engine/src/core/State/State";
-import { EventEmitter } from "@samdravitzki/dufus-engine/src/core/System/System";
-import Position from "@samdravitzki/dufus-engine/src/components/Position";
-import Label from "@samdravitzki/dufus-engine/src/core/Component/Label";
-import { tag } from "@samdravitzki/dufus-engine/src/core/Component/Component";
+import State from "@dravitzki/dufus-engine/src/core/State/State";
+import { EventEmitter } from "@dravitzki/dufus-engine/src/core/System/System";
+import Position from "@dravitzki/dufus-engine/src/components/Position";
+import Label from "@dravitzki/dufus-engine/src/core/Component/Label";
+import { tag } from "@dravitzki/dufus-engine/src/core/Component/Component";
 
 type ShiftEventPayload = { from: GateNode; to: GateNode };
 

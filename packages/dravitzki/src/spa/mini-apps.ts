@@ -1,6 +1,6 @@
 import animationDemo from "../animation-demo/anim-demo";
 import cursorActions from "../cursor-actions/cursor-actions";
-import { Engine } from "@samdravitzki/dufus-engine/src/core/Engine/Engine";
+import { Engine } from "@dravitzki/dufus-engine/src/core/Engine/Engine";
 import pong from "../pong/pong-game";
 import projectTemplate from "../project-template/project-template";
 import sdf from "../sdf/sdf";

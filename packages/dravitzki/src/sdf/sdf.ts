@@ -1,30 +1,30 @@
-import Position from "@samdravitzki/dufus-engine/src/components/Position";
-import createBundle from "@samdravitzki/dufus-engine/src/core/Bundle/createBundle";
-import { EngineBuilder } from "@samdravitzki/dufus-engine/src/core/Engine/EngineBuilder";
-import { ResourcePool } from "@samdravitzki/dufus-engine/src/core/Engine/ResourcePool";
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
-import World from "@samdravitzki/dufus-engine/src/core/World/World";
+import Position from "@dravitzki/dufus-engine/src/components/Position";
+import createBundle from "@dravitzki/dufus-engine/src/core/Bundle/createBundle";
+import { EngineBuilder } from "@dravitzki/dufus-engine/src/core/Engine/EngineBuilder";
+import { ResourcePool } from "@dravitzki/dufus-engine/src/core/Engine/ResourcePool";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
+import World from "@dravitzki/dufus-engine/src/core/World/World";
 import p5Part, {
   KeypressEvent,
   MousePosition,
-} from "@samdravitzki/dufus-engine/src/parts/p5/p5-part";
-import { ClickEventPayload } from "@samdravitzki/dufus-engine/src/parts/p5/p5-system";
-import { ShapeStyle } from "@samdravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
+} from "@dravitzki/dufus-engine/src/parts/p5/p5-part";
+import { ClickEventPayload } from "@dravitzki/dufus-engine/src/parts/p5/p5-system";
+import { ShapeStyle } from "@dravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
 import sdfRendererPart from "./sdf-renderer/sdf-renderer-part";
-import { Square } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
-import { Circle } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
+import { Square } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
+import { Circle } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
 import { SdfShape } from "./sdf-renderer/sdf-renderer";
-import { Collider } from "@samdravitzki/dufus-engine/src/parts/collision/components/Collider";
+import { Collider } from "@dravitzki/dufus-engine/src/parts/collision/components/Collider";
 import collisions, {
   CollisionEventPayload,
-} from "@samdravitzki/dufus-engine/src/parts/collision/collision";
+} from "@dravitzki/dufus-engine/src/parts/collision/collision";
 import stateDebugPaneSystem from "./state-debug-pane";
-import { CollisionContact } from "@samdravitzki/dufus-engine/src/parts/collision/components/Collision";
+import { CollisionContact } from "@dravitzki/dufus-engine/src/parts/collision/components/Collision";
 import {
   component,
   tag,
-} from "@samdravitzki/dufus-engine/src/core/Component/Component";
-import inspector from "@samdravitzki/dufus-engine/src/parts/inspector/inspector";
+} from "@dravitzki/dufus-engine/src/core/Component/Component";
+import inspector from "@dravitzki/dufus-engine/src/parts/inspector/inspector";
 
 const circle = [
   Circle({

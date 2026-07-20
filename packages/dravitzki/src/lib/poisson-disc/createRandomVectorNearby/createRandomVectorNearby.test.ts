@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import range from "../../range/range";
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
 import createRandomVectorNearby from "./createRandomVectorNearby";
 
 // This tests many points to account for randomness

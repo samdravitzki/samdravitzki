@@ -1,6 +1,6 @@
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
 import Direction from "./Direction/Direction";
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
 import range from "../lib/range/range";
 
 class SnakeChunk {
@@ -37,7 +37,7 @@ export default class Snake {
 
   static create(length: number, start: Vector, chunkSize: number) {
     const chunks = range(length).map(
-      (i) => new SnakeChunk(Vector.create(start.x + i * chunkSize, start.y))
+      (i) => new SnakeChunk(Vector.create(start.x + i * chunkSize, start.y)),
     );
 
     return new Snake(chunks, chunkSize);
@@ -72,7 +72,7 @@ export default class Snake {
     const [head] = this.chunks;
 
     const nextHeadPosition = head.position.plus(
-      changeInPosition.times(this.chunkSize)
+      changeInPosition.times(this.chunkSize),
     );
     const nextHeadPositionInBounds = bounds.boundedMod(nextHeadPosition);
 

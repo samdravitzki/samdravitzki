@@ -21,7 +21,7 @@
     "vitest": "^4.1.0"
   },
   "dependencies": {
-    "@samdravitzki/dufus-engine": "workspace:*",
+    "@dravitzki/dufus-engine": "workspace:*",
     "@tonejs/midi": "^2.0.28",
     "p5": "^2.1.2",
     "tone": "^15.1.22",

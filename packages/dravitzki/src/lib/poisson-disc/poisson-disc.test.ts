@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
 import poissonDisc from "./poisson-disc";
 const bounds = Bounds.create(Vector.create(0, 0), Vector.create(3, 3));
 
@@ -28,5 +28,4 @@ test("should not generate a vector within the minDistance of another point", () 
       expect(v1.distance(v2)).toBeGreaterThanOrEqual(minDistance);
     });
   });
-
 });

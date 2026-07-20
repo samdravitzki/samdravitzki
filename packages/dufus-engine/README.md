@@ -1,10 +1,10 @@
-# @samdravitzki/dufus-engine
+# @dravitzki/dufus-engine
 
 A lightweight Entity Component System (ECS) engine for building interactive 2D experiments and games.
 
 ## What It Is
 
-`@samdravitzki/dufus-engine` provides:
+`@dravitzki/dufus-engine` provides:
 
 - ECS core primitives: `Entity`, `Component`, `System`, `World`
 - Type-safe engine composition via `EngineBuilder`
@@ -25,7 +25,7 @@ Goals:
 ## Current Status
 
 - Actively used by demos in `packages/dravitzki/src`
-- Uses deep imports (`@samdravitzki/dufus-engine/src/...`) while API stabilizes
+- Uses deep imports (`@dravitzki/dufus-engine/src/...`) while API stabilizes
 - Top-level barrel exports are planned, but not the default yet
 
 ## Getting Started
@@ -37,7 +37,7 @@ In this monorepo, add it as a workspace dependency:
 ```json
 {
   "dependencies": {
-    "@samdravitzki/dufus-engine": "workspace:*"
+    "@dravitzki/dufus-engine": "workspace:*"
   }
 }
 ```
@@ -45,19 +45,16 @@ In this monorepo, add it as a workspace dependency:
 ### Minimal Example (Current API)
 
 ```ts
-import { EngineBuilder } from "@samdravitzki/dufus-engine/src/core/Engine/EngineBuilder";
-import { component } from "@samdravitzki/dufus-engine/src/core/Component/Component";
-import createBundle from "@samdravitzki/dufus-engine/src/core/Bundle/createBundle";
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import { EngineBuilder } from "@dravitzki/dufus-engine/src/core/Engine/EngineBuilder";
+import { component } from "@dravitzki/dufus-engine/src/core/Component/Component";
+import createBundle from "@dravitzki/dufus-engine/src/core/Bundle/createBundle";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
 
 const Position = component<{ position: Vector }>({ name: "position" });
 const Velocity = component<Vector>({ name: "velocity" });
 
 export default function demo(parent?: HTMLElement) {
-  const engine = EngineBuilder.create()
-    .event("setup")
-    .event("update")
-    .build();
+  const engine = EngineBuilder.create().event("setup").event("update").build();
 
   engine.system("spawn", engine.trigger.on("setup"), (world) => {
     world.addBundle(
@@ -162,8 +159,8 @@ What it demonstrates:
 ## Development
 
 ```bash
-pnpm --filter @samdravitzki/dufus-engine build
-pnpm --filter @samdravitzki/dufus-engine test
+pnpm --filter @dravitzki/dufus-engine build
+pnpm --filter @dravitzki/dufus-engine test
 ```
 
 ## Limitations (Current)

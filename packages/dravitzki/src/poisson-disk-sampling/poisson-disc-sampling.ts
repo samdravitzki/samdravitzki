@@ -1,20 +1,22 @@
 import p5 from "p5";
 import { Pane } from "tweakpane";
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
-import createBundle from "@samdravitzki/dufus-engine/src/core/Bundle/createBundle";
-import { EngineBuilder } from "@samdravitzki/dufus-engine/src/core/Engine/EngineBuilder";
-import { ResourcePool } from "@samdravitzki/dufus-engine/src/core/Engine/ResourcePool";
-import State from "@samdravitzki/dufus-engine/src/core/State/State";
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
-import World from "@samdravitzki/dufus-engine/src/core/World/World";
-import p5Part, { MousePosition } from "@samdravitzki/dufus-engine/src/parts/p5/p5-part";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
+import createBundle from "@dravitzki/dufus-engine/src/core/Bundle/createBundle";
+import { EngineBuilder } from "@dravitzki/dufus-engine/src/core/Engine/EngineBuilder";
+import { ResourcePool } from "@dravitzki/dufus-engine/src/core/Engine/ResourcePool";
+import State from "@dravitzki/dufus-engine/src/core/State/State";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
+import World from "@dravitzki/dufus-engine/src/core/World/World";
+import p5Part, {
+  MousePosition,
+} from "@dravitzki/dufus-engine/src/parts/p5/p5-part";
 import poissonDisc from "../lib/poisson-disc/poisson-disc";
 import randomDots from "./random-dots/random-dots";
-import { ShapeStyle } from "@samdravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
-import { Circle } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
-import Position from "@samdravitzki/dufus-engine/src/components/Position";
-import { tag } from "@samdravitzki/dufus-engine/src/core/Component/Component";
-import inspector from "@samdravitzki/dufus-engine/src/parts/inspector/inspector";
+import { ShapeStyle } from "@dravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
+import { Circle } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
+import Position from "@dravitzki/dufus-engine/src/components/Position";
+import { tag } from "@dravitzki/dufus-engine/src/core/Component/Component";
+import inspector from "@dravitzki/dufus-engine/src/parts/inspector/inspector";
 
 const pallete = {
   background: "#151515",

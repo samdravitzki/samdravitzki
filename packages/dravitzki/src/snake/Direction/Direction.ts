@@ -1,4 +1,4 @@
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
 
 type DirectionValue = "north" | "east" | "south" | "west";
 

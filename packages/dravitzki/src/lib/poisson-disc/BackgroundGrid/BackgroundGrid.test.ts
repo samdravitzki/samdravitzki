@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
 import { BackgroundGrid } from "./BackgroundGrid";
 
 describe("constructor", () => {
@@ -10,7 +10,7 @@ describe("constructor", () => {
     const cellSize = 0.1;
     const bounds = Bounds.create(
       Vector.create(0, 0),
-      Vector.create(width, height)
+      Vector.create(width, height),
     );
 
     const result = new BackgroundGrid(bounds, cellSize);
@@ -75,7 +75,7 @@ describe("vectorHasVectorsNearby", () => {
 
     const result = testBackgroundGrid.vectorHasVectorsNearby(
       testPoint,
-      distance
+      distance,
     );
 
     expect(result).toBe(true);
@@ -86,7 +86,7 @@ describe("vectorHasVectorsNearby", () => {
 
     const result = testBackgroundGrid.vectorHasVectorsNearby(
       testPoint,
-      distance
+      distance,
     );
 
     expect(result).toBe(false);

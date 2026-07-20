@@ -1,4 +1,4 @@
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
 
 /**
  * Generate a dot within a radius of a supplied dot
@@ -6,7 +6,7 @@ import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
 function createRandomVectorNearby(
   point: Vector,
   radius: number,
-  minRadius: number = 0
+  minRadius: number = 0,
 ) {
   const randomAngle = 2 * Math.PI * Math.random();
   const randomRadius = (radius - minRadius) * Math.random() + minRadius;

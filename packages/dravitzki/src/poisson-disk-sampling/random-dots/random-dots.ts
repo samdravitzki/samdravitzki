@@ -1,5 +1,5 @@
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
 import randomInt from "../../lib/randomInt/randomInt";
 
 /**
@@ -15,8 +15,8 @@ function randomDots(count: number, bounds: Bounds) {
   return [...Array(count).keys()].map((dot) =>
     Vector.create(
       randomInt(bounds.max.x - bounds.min.x),
-      randomInt(bounds.max.y - bounds.min.y)
-    )
+      randomInt(bounds.max.y - bounds.min.y),
+    ),
   );
 }
 

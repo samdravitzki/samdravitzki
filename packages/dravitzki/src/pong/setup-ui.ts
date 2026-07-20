@@ -1,8 +1,8 @@
 import p5 from "p5";
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
-import { ResourcePool } from "@samdravitzki/dufus-engine/src/core/Engine/ResourcePool";
-import State from "@samdravitzki/dufus-engine/src/core/State/State";
-import World from "@samdravitzki/dufus-engine/src/core/World/World";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
+import { ResourcePool } from "@dravitzki/dufus-engine/src/core/Engine/ResourcePool";
+import State from "@dravitzki/dufus-engine/src/core/State/State";
+import World from "@dravitzki/dufus-engine/src/core/World/World";
 
 function createGameMenu(
   _world: World,
@@ -26,7 +26,7 @@ function createGameMenu(
   const gameMenuContainer = p.createDiv();
   gameMenuContainer.style("display", "flex");
   gameMenuContainer.style("flex-direction", "row-reverse");
-  gameMenuContainer.style("gap", "4px")
+  gameMenuContainer.style("gap", "4px");
   gameMenuContainer.parent(gameMenu);
 
   const pauseButton = p.createButton("pause");

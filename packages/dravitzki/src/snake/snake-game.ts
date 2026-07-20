@@ -1,9 +1,9 @@
 import p5 from "p5";
 import Direction from "./Direction/Direction";
 import Snake from "./Snake";
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
-import Vector from "@samdravitzki/dufus-engine/src/core/Vector/Vector";
-import { Engine } from "@samdravitzki/dufus-engine/src/core/Engine/Engine";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
+import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
+import { Engine } from "@dravitzki/dufus-engine/src/core/Engine/Engine";
 
 function generateSnackPosition(bounds: Bounds) {
   return bounds.randomPosition(10).minus(Vector.create(10, 10));

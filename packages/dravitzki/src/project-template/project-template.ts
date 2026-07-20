@@ -1,15 +1,15 @@
-import Position from "@samdravitzki/dufus-engine/src/components/Position";
-import Bounds from "@samdravitzki/dufus-engine/src/core/Bounds/Bounds";
-import createBundle from "@samdravitzki/dufus-engine/src/core/Bundle/createBundle";
-import Label from "@samdravitzki/dufus-engine/src/core/Component/Label";
-import { EngineBuilder } from "@samdravitzki/dufus-engine/src/core/Engine/EngineBuilder";
-import { ResourcePool } from "@samdravitzki/dufus-engine/src/core/Engine/ResourcePool";
-import World from "@samdravitzki/dufus-engine/src/core/World/World";
-import inspector from "@samdravitzki/dufus-engine/src/parts/inspector/inspector";
-import p5Part from "@samdravitzki/dufus-engine/src/parts/p5/p5-part";
-import { ShapeStyle } from "@samdravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
-import { Text } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
-import { Square } from "@samdravitzki/dufus-engine/src/parts/p5/shape-components";
+import Position from "@dravitzki/dufus-engine/src/components/Position";
+import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
+import createBundle from "@dravitzki/dufus-engine/src/core/Bundle/createBundle";
+import Label from "@dravitzki/dufus-engine/src/core/Component/Label";
+import { EngineBuilder } from "@dravitzki/dufus-engine/src/core/Engine/EngineBuilder";
+import { ResourcePool } from "@dravitzki/dufus-engine/src/core/Engine/ResourcePool";
+import World from "@dravitzki/dufus-engine/src/core/World/World";
+import inspector from "@dravitzki/dufus-engine/src/parts/inspector/inspector";
+import p5Part from "@dravitzki/dufus-engine/src/parts/p5/p5-part";
+import { ShapeStyle } from "@dravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
+import { Text } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
+import { Square } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
 
 function templateInfo(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
