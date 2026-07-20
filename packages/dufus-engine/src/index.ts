@@ -3,7 +3,7 @@ import { EngineBuilder } from "./core/Engine/EngineBuilder";
 import World from "./core/World/World";
 import { ResourcePool } from "./core/Engine/ResourcePool";
 import { component, tag } from "./core/Component/Component";
-import Label from "./core/Component/Label";
+import Label from "./components/Label";
 import Bounds from "./core/Bounds/Bounds";
 import Vector from "./core/Vector/Vector";
 import Position from "./components/Position";

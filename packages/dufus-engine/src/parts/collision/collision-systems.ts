@@ -6,7 +6,7 @@ import { Aabb } from "./intersection/intersection-shapes";
 import { ResourcePool } from "../../core/Engine/ResourcePool";
 import { EventEmitter } from "../../core/System/System";
 import Vector from "../../core/Vector/Vector";
-import Label from "../../core/Component/Label";
+import Label from "../../components/Label";
 import Position from "../../components/Position";
 
 // TODO: Renmame to CollisionContactEvent

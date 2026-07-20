@@ -1,5 +1,5 @@
 import DufusEngine, { DufusEngineEvents } from "./DufusEngine";
-import { Engine, EngineEvents } from "./Engine";
+import { Engine } from "./Engine";
 
 /**
  * Builder for creating an Engine with type safety and autocompletion for states and events.
