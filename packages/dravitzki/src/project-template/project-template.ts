@@ -11,7 +11,7 @@ import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import {
   ShapeStyle,
   Square,
-  Text,
+  Typography,
   p5Part,
 } from "@dravitzki/dufus-engine/parts/p5";
 
@@ -22,7 +22,7 @@ function templateInfo(world: World, resources: ResourcePool) {
     Position({
       position: canvasBounds.center.center,
     }),
-    Text({
+    Typography({
       text: "[template project]",
       size: 25,
       align: "center",

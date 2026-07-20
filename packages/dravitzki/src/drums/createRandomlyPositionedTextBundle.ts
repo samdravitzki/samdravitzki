@@ -6,7 +6,7 @@ import {
   Position,
 } from "@dravitzki/dufus-engine";
 import randomInt from "../lib/randomInt/randomInt";
-import { ShapeStyle, Text } from "@dravitzki/dufus-engine/parts/p5";
+import { ShapeStyle, Typography } from "@dravitzki/dufus-engine/parts/p5";
 
 export const fadedTag = tag("faded");
 
@@ -24,7 +24,7 @@ export function createRandomlyPositionedTextBundle(
     Position({
       position,
     }),
-    Text({
+    Typography({
       text: text,
       align: "left",
       size: 25,

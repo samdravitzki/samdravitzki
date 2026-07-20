@@ -1,5 +1,5 @@
 import { tag, Vector, createBundle, Position } from "@dravitzki/dufus-engine";
-import { ShapeStyle, Text } from "@dravitzki/dufus-engine/parts/p5";
+import { ShapeStyle, Typography } from "@dravitzki/dufus-engine/parts/p5";
 
 export const playerScoreTag = tag("player-score");
 export const aiScoreTag = tag("ai-score");
@@ -14,7 +14,7 @@ function createScore(
     Position({
       position,
     }),
-    Text({
+    Typography({
       text: "0",
       align,
       size: 25,

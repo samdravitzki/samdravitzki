@@ -1,7 +1,7 @@
 import p5 from "p5";
 import World from "../../../core/World/World";
 import { Color, ShapeStyle } from "./ShapeStyle";
-import { Circle, Line, Square, Text } from "../shape-components";
+import { Circle, Line, Square, Typography } from "../shape-components";
 import { ResourcePool } from "../../../core/Engine/ResourcePool";
 import { Position, PositionData } from "../../../components";
 
@@ -145,7 +145,7 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
       drawCircle(p, position.componentData, circle.componentData.radius);
     }
 
-    const text = entity.getComponent(Text);
+    const text = entity.getComponent(Typography);
     if (text) {
       drawText(
         p,

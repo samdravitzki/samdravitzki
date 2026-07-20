@@ -24,4 +24,4 @@ export type TextData = {
 export const Circle = component<CircleData>({ name: "circle" });
 export const Line = component<LineData>({ name: "line" });
 export const Square = component<SquareData>({ name: "square" });
-export const Text = component<TextData>({ name: "text" });
+export const Typography = component<TextData>({ name: "text" });

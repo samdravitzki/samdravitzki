@@ -10,7 +10,7 @@ import {
   tag,
   Part,
 } from "@dravitzki/dufus-engine";
-import { ShapeStyle, Text } from "@dravitzki/dufus-engine/parts/p5";
+import { ShapeStyle, Typography } from "@dravitzki/dufus-engine/parts/p5";
 
 function setupGearText(
   world: World,
@@ -22,7 +22,7 @@ function setupGearText(
   Object.values(commonGate)
     .filter((node) => node.name !== "pass")
     .forEach((node, index, array) => {
-      const text = Text({
+      const text = Typography({
         text: node.name[0].toUpperCase(),
         align: "center",
         size: 20,

@@ -9,7 +9,7 @@ import {
   State,
   Part,
 } from "@dravitzki/dufus-engine";
-import { ShapeStyle, Text } from "@dravitzki/dufus-engine/parts/p5";
+import { ShapeStyle, Typography } from "@dravitzki/dufus-engine/parts/p5";
 
 export type Keypress = {
   key: string;
@@ -35,7 +35,7 @@ const bpmCounterPart: Part<
       Position({
         position: canvasBounds.top.left.plus(Vector.create(10, 30)),
       }),
-      Text({
+      Typography({
         text: "0",
         align: "left",
         size: 25,
@@ -50,7 +50,7 @@ const bpmCounterPart: Part<
       Position({
         position: canvasBounds.top.left.plus(Vector.create(10, 50)),
       }),
-      Text({
+      Typography({
         text: "0",
         align: "left",
         size: 15,
@@ -69,12 +69,12 @@ const bpmCounterPart: Part<
     resources: ResourcePool,
     state: { bpm: State<number> },
   ) {
-    const [bpmText] = world.query([Text, bpmTextTag])[0];
+    const [bpmText] = world.query([Typography, bpmTextTag])[0];
 
     // Each press atm triggers two beats atm (all the second beats triggered by a keypress is empty atm)
     bpmText.componentData.text = `${Math.round(state.bpm.value).toString()} bpm`;
 
-    const [genreText] = world.query([Text, genreTextTag])[0];
+    const [genreText] = world.query([Typography, genreTextTag])[0];
 
     if (state.bpm.value <= 95) {
       genreText.componentData.text = "hiphop";

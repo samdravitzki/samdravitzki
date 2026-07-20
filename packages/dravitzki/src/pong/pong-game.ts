@@ -14,7 +14,7 @@ import {
 import {
   p5Part,
   ShapeStyle,
-  Text,
+  Typography,
   Line,
   KeypressEvent,
   MousePosition,
@@ -234,13 +234,13 @@ function updateScoreBoard(
 ) {
   const [playerScore, aiScore] = state.score.value;
 
-  const [playerScoreText] = world.query([Text, playerScoreTag])[0];
+  const [playerScoreText] = world.query([Typography, playerScoreTag])[0];
 
   // Its pretty weird the type has to be narrowed after you receive it from a query
   // Seems like the query should be responsible for this
   playerScoreText.componentData.text = playerScore.toString();
 
-  const [aiScoreText] = world.query([Text, aiScoreTag])[0];
+  const [aiScoreText] = world.query([Typography, aiScoreTag])[0];
 
   aiScoreText.componentData.text = aiScore.toString();
 }
