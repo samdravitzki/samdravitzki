@@ -9,7 +9,7 @@ import {
   tag,
   State,
   EventEmitter,
-  EngineBuilder,
+  DufusEngineBuilder,
 } from "@dravitzki/dufus-engine";
 import {
   animation,
@@ -280,7 +280,7 @@ function moveShifter(
  * add animation curves to make the input as satifying as possible
  */
 export default function shifter(parent?: HTMLElement) {
-  const engine = EngineBuilder.create()
+  const engine = DufusEngineBuilder.create()
     .event("setup")
     .event("update")
     .event<"keyPressed", KeypressEvent>("keyPressed")

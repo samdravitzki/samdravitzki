@@ -1,5 +1,5 @@
 import { Part } from "../../core/Part/Part";
-import Label from "../../components/Label";
+import { Label } from "../../components";
 import "./inspector.css";
 import { Pane } from "tweakpane";
 import Component from "../../core/Component/Component";

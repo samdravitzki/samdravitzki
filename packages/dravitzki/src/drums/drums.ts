@@ -1,7 +1,7 @@
 import * as Tone from "tone";
 import p5 from "p5";
 import {
-  EngineBuilder,
+  DufusEngineBuilder,
   World,
   ResourcePool,
   Bounds,
@@ -213,7 +213,7 @@ function textFadeSystem(world: World, resources: ResourcePool) {
 type DrumHitEventPayload = { element: string; time: number };
 
 export default function drums(parent?: HTMLElement) {
-  const engine = EngineBuilder.create()
+  const engine = DufusEngineBuilder.create()
     .event("setup")
     .event("update")
     .event<"keyPressed", KeypressEvent>("keyPressed")

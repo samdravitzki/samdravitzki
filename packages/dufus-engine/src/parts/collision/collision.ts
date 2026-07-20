@@ -1,11 +1,11 @@
 import p5 from "p5";
 import World from "../../core/World/World";
-import { Collider, ColliderData } from "./components/Collider";
+import { Collider } from "./components/Collider";
 import collisionSystem, { CollisionEventPayload } from "./collision-systems";
 import { ResourcePool } from "../../core/Engine/ResourcePool";
 import { Part } from "../../core/Part/Part";
-import { CollisionContact, CollisionContactData } from "./components/Collision";
-import Position from "../../components/Position";
+import { CollisionContact } from "./components/Collision";
+import { Position } from "../../components";
 
 /**
  * A part is a grouping of systems and other things that can be added onto a system enabling

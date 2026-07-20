@@ -5,11 +5,8 @@ import { component } from "../core/Component/Component";
 //       - Could resolve this by allowing the component to take any type where the position component would be defined like so...
 //         const position = component<Vector>({ name: "position" });
 
-type PositionData = {
+export type PositionData = {
   position: Vector;
 };
 
-const Position = component<PositionData>({ name: "position" });
-
-export default Position;
-export type { PositionData };
+export const Position = component<PositionData>({ name: "position" });

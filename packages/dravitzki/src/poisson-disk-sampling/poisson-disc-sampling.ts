@@ -7,7 +7,7 @@ import {
   createBundle,
   tag,
   Vector,
-  EngineBuilder,
+  DufusEngineBuilder,
   State,
   Position,
 } from "@dravitzki/dufus-engine";
@@ -86,7 +86,7 @@ function placePoissonDots(world: World, resources: ResourcePool) {
 }
 
 export default function poissonDiscSamplingDemoApp(parent?: HTMLElement) {
-  const engine = EngineBuilder.create()
+  const engine = DufusEngineBuilder.create()
     .state("poisson:min-distance", DEFAULT_MIN_DISTANCE)
     .state("poisson:sample-limit", DEFAULT_SAMPLE_LIMIT)
     .event("poisson:config-change")

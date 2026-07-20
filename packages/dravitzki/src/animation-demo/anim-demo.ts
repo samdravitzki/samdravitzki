@@ -1,6 +1,6 @@
 import p5 from "p5";
 import {
-  EngineBuilder,
+  DufusEngineBuilder,
   tag,
   Bounds,
   Vector,
@@ -33,7 +33,7 @@ const palette = {
 };
 
 export default function animationDemo(parent?: HTMLElement) {
-  const engine = EngineBuilder.create()
+  const engine = DufusEngineBuilder.create()
     .event("setup")
     .event("update")
     .event("after-update")

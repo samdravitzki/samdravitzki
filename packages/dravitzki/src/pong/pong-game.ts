@@ -1,6 +1,6 @@
 import p5 from "p5";
 import {
-  EngineBuilder,
+  DufusEngineBuilder,
   World,
   ResourcePool,
   tag,
@@ -566,7 +566,7 @@ function setupSceneSystem(world: World, resources: ResourcePool) {
 }
 
 export default function pong(parent?: HTMLElement) {
-  const engine = EngineBuilder.create()
+  const engine = DufusEngineBuilder.create()
     .event("setup")
     .event("update")
     .event("after-update")

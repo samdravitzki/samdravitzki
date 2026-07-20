@@ -3,7 +3,7 @@ import World from "../../../core/World/World";
 import { Color, ShapeStyle } from "./ShapeStyle";
 import { Circle, Line, Square, Text } from "../shape-components";
 import { ResourcePool } from "../../../core/Engine/ResourcePool";
-import Position, { PositionData } from "../../../components/Position";
+import { Position, PositionData } from "../../../components";
 
 function toP5Color(p: p5, color: string | number[]) {
   if (typeof color === "string") {

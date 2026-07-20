@@ -7,7 +7,7 @@ import { Engine } from "./Engine";
  * got this trick from https://medium.hexlabs.io/the-builder-pattern-with-typescript-using-advanced-types-e05a03ffc36e
  *
  */
-class EngineBuilder<
+class DufusEngineBuilder<
   EventMap extends DufusEngineEvents,
   StateMap extends Record<string, unknown> = {},
 > {
@@ -23,7 +23,7 @@ class EngineBuilder<
   state<const K extends string, T>(name: K, value: T) {
     const newState = { [name]: value };
 
-    return new EngineBuilder<
+    return new DufusEngineBuilder<
       EventMap,
       StateMap & {
         [k in K]: T;
@@ -35,7 +35,7 @@ class EngineBuilder<
   }
 
   event<const K extends string, Payload = void>(name: K) {
-    return new EngineBuilder<
+    return new DufusEngineBuilder<
       EventMap & {
         [k in K]: Payload;
       },
@@ -55,9 +55,9 @@ class EngineBuilder<
     return new DufusEngine<EventMap, StateMap>(this.stateSet);
   }
 
-  static create(): EngineBuilder<DufusEngineEvents> {
-    return new EngineBuilder<DufusEngineEvents>({});
+  static create(): DufusEngineBuilder<DufusEngineEvents> {
+    return new DufusEngineBuilder<DufusEngineEvents>({});
   }
 }
 
-export { EngineBuilder };
+export { DufusEngineBuilder };
