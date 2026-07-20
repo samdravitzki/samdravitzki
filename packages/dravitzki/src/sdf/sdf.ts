@@ -5,7 +5,7 @@ import {
   Vector,
   tag,
   component,
-  DufusEngineBuilder,
+  dufus,
   ResourcePool,
 } from "@dravitzki/dufus-engine";
 import {
@@ -99,7 +99,7 @@ const CursorGrabbed = component<CursorGrabbedData>({ name: "cursor:grabbed" });
 const CursorHover = tag("cursor:hover");
 
 export default function sdf(parent?: HTMLElement) {
-  const engine = DufusEngineBuilder.create()
+  const engine = dufus()
     .state("sdf-renderer:debug", false)
     .state("sdf-renderer:enabled", true)
     .event("setup")

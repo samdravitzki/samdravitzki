@@ -1,5 +1,5 @@
 import {
-  DufusEngineBuilder,
+  dufus,
   World,
   ResourcePool,
   component,
@@ -57,7 +57,7 @@ function ball(position: Vector, radius: number) {
 }
 
 export default function collisionDemo(parent?: HTMLElement) {
-  const engine = DufusEngineBuilder.create()
+  const engine = dufus()
     .event("setup")
     .event("update")
     .event("after-update")

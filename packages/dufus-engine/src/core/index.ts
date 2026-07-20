@@ -1,3 +1,4 @@
+import { dufus } from "./dufus-engine";
 import { Engine } from "./Engine/Engine";
 import { DufusEngineBuilder } from "./Engine/DufusEngineBuilder";
 import World from "./World/World";
@@ -13,6 +14,7 @@ import { Part } from "./Part/Part";
 import Bundle from "./Bundle/Bundle";
 
 export {
+  dufus,
   DufusEngineBuilder,
   World,
   ResourcePool,

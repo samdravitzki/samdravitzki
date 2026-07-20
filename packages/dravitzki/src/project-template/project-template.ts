@@ -5,7 +5,7 @@ import {
   createBundle,
   Position,
   Label,
-  DufusEngineBuilder,
+  dufus,
 } from "@dravitzki/dufus-engine";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import {
@@ -64,7 +64,7 @@ function templateInfo(world: World, resources: ResourcePool) {
 }
 
 export default function projectTemplate(parent?: HTMLElement) {
-  const engine = DufusEngineBuilder.create()
+  const engine = dufus()
     .event("setup")
     .event("update")
     .event("after-update")

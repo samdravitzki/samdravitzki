@@ -1,6 +1,6 @@
 import p5 from "p5";
 import {
-  DufusEngineBuilder,
+  dufus,
   World,
   ResourcePool,
   tag,
@@ -321,7 +321,7 @@ function cursorDrag(world: World) {
 }
 
 export default function cursorActions(parent?: HTMLElement) {
-  const engine = DufusEngineBuilder.create()
+  const engine = dufus()
     .event("setup")
     .event("update")
     .event("after-update")
