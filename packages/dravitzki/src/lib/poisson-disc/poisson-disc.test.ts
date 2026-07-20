@@ -1,6 +1,5 @@
 import { expect, test } from "vitest";
-import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
-import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
+import { Vector, Bounds } from "@dravitzki/dufus-engine";
 import poissonDisc from "./poisson-disc";
 const bounds = Bounds.create(Vector.create(0, 0), Vector.create(3, 3));
 

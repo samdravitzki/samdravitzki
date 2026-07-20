@@ -3,7 +3,7 @@ import Label from "../../core/Component/Label";
 import "./inspector.css";
 import { Pane } from "tweakpane";
 import Component from "../../core/Component/Component";
-import { KeypressEvent } from "../p5/p5-part";
+import { KeypressEvent } from "../p5";
 import { upArrow, downArrow, rightArrow, leftArrow } from "./assets/arrows";
 
 function createInspectorPanelSection({

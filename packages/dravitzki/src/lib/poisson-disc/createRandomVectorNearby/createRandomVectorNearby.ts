@@ -1,4 +1,4 @@
-import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
+import { Vector } from "@dravitzki/dufus-engine";
 
 /**
  * Generate a dot within a radius of a supplied dot

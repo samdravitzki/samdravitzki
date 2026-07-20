@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
-import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
-import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
 import { BackgroundGrid } from "./BackgroundGrid";
+import { Bounds, Vector } from "@dravitzki/dufus-engine";
 
 describe("constructor", () => {
   test("should construct BackgroundGrid with grid length to the number of cells in supplied bounds", () => {

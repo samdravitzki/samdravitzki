@@ -1,9 +1,6 @@
+import { World, ResourcePool, State, Bounds } from "@dravitzki/dufus-engine";
 import p5 from "p5";
 import { Pane } from "tweakpane";
-import { ResourcePool } from "@dravitzki/dufus-engine/src/core/Engine/ResourcePool";
-import World from "@dravitzki/dufus-engine/src/core/World/World";
-import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
-import State from "@dravitzki/dufus-engine/src/core/State/State";
 
 function stateDebugPaneSystem(
   world: World,

@@ -1,6 +1,17 @@
 import * as Tone from "tone";
-import { EngineBuilder } from "@dravitzki/dufus-engine/src/core/Engine/EngineBuilder";
-import Component from "@dravitzki/dufus-engine/src/core/Component/Component";
+import p5 from "p5";
+import {
+  EngineBuilder,
+  World,
+  ResourcePool,
+  Bounds,
+  Component,
+  State,
+  EventEmitter,
+} from "@dravitzki/dufus-engine";
+import { p5Part } from "@dravitzki/dufus-engine/parts/p5";
+import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
+import { KeypressEvent, ShapeStyle } from "@dravitzki/dufus-engine/parts/p5";
 import bpmCounterPart, { Keypress } from "./parts/bpm-counter";
 import hiphopTab from "./tabs/hiphop";
 import houseTab from "./tabs/house";
@@ -12,17 +23,6 @@ import {
 } from "./createRandomlyPositionedTextBundle";
 import { deriveBpm } from "./deriveBpm";
 import volumeSliderPart from "./parts/volume-slider";
-import World from "@dravitzki/dufus-engine/src/core/World/World";
-import p5 from "p5";
-import State from "@dravitzki/dufus-engine/src/core/State/State";
-import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
-import { ResourcePool } from "@dravitzki/dufus-engine/src/core/Engine/ResourcePool";
-import p5Part, {
-  KeypressEvent,
-} from "@dravitzki/dufus-engine/src/parts/p5/p5-part";
-import { EventEmitter } from "@dravitzki/dufus-engine/src/core/System/System";
-import { ShapeStyle } from "@dravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
-import inspector from "@dravitzki/dufus-engine/src/parts/inspector/inspector";
 
 const tabs = {
   house: houseTab,

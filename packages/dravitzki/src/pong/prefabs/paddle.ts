@@ -1,11 +1,7 @@
-import Position from "@dravitzki/dufus-engine/src/components/Position";
-import createBundle from "@dravitzki/dufus-engine/src/core/Bundle/createBundle";
-import { tag } from "@dravitzki/dufus-engine/src/core/Component/Component";
-import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
-import { Collider } from "@dravitzki/dufus-engine/src/parts/collision/components/Collider";
-import { ShapeStyle } from "@dravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
-import { Square } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
+import { Collider } from "@dravitzki/dufus-engine/parts/collision";
+import { Square, ShapeStyle } from "@dravitzki/dufus-engine/parts/p5";
 import { Speed } from "../components";
+import { tag, Vector, createBundle, Position } from "@dravitzki/dufus-engine";
 
 export const paddleTag = tag("paddle");
 export const playerPaddleTag = tag("player");

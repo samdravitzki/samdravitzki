@@ -5,23 +5,23 @@ import Vector from "../../core/Vector/Vector";
 import { ResourcePool } from "../../core/Engine/ResourcePool";
 import { EventEmitter } from "../../core/System/System";
 
-type MousePosition = {
+export type MousePosition = {
   x: number;
   y: number;
 };
 
-type KeypressEvent = {
+export type KeypressEvent = {
   key: string;
   keyCode: string;
 };
 
-type ClickEventPayload = {
+export type ClickEventPayload = {
   type: "press" | "release";
   position: MousePosition;
   button: number; // 0 = left click, 1 = middle click, 2 = right click
 };
 
-type P5Events = {
+export type P5Events = {
   update: void;
   "after-update": void;
   init: void;
@@ -144,5 +144,3 @@ function createP5System(
 }
 
 export default createP5System;
-
-export type { MousePosition, P5Events, KeypressEvent, ClickEventPayload };

@@ -1,10 +1,6 @@
 import { Part } from "../../core/Part/Part";
 import primitiveRendererSystem from "./primitive-renderer/primitive-renderer";
-import createP5System, {
-  KeypressEvent,
-  MousePosition,
-  P5Events,
-} from "./p5-system";
+import createP5System, { P5Events } from "./p5-system";
 
 function p5Part(
   size: [number, number],
@@ -29,4 +25,3 @@ function p5Part(
 }
 
 export default p5Part;
-export type { KeypressEvent, MousePosition };

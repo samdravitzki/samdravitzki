@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import range from "../../range/range";
-import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
 import createRandomVectorNearby from "./createRandomVectorNearby";
+import { Vector } from "@dravitzki/dufus-engine";
 
 // This tests many points to account for randomness
 test("should generate random points only within annulus from given point", () => {

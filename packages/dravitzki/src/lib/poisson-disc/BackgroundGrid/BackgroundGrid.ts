@@ -1,5 +1,4 @@
-import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
-import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
+import { Bounds, Vector } from "@dravitzki/dufus-engine";
 import range from "../../range/range";
 import { indiciesSurroundingIndex } from "../indiciesSurroundingIndex/indiciesSurroundingIndex";
 

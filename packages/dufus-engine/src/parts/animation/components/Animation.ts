@@ -1,9 +1,9 @@
 import Vector from "../../../core/Vector/Vector";
-import Component, { component, tag } from "../../../core/Component/Component";
+import { component, tag } from "../../../core/Component/Component";
 import { easings } from "../easing";
 import createBundle from "../../../core/Bundle/createBundle";
 
-type EasingName = keyof typeof easings;
+export type EasingName = keyof typeof easings;
 
 export type AnimationState = "ready" | "running" | "completed";
 
@@ -26,7 +26,7 @@ export type AnimationData = {
   previousState?: AnimationState;
 };
 
-const Animation = component<AnimationData>({
+export const Animation = component<AnimationData>({
   name: "animation",
 });
 

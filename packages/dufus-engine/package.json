@@ -8,7 +8,11 @@
     "test": "vitest"
   },
   "exports": {
-    "./src/*": "./src/*.ts"
+    ".": "./src/index.ts",
+    "./parts/animation": "./src/parts/animation/index.ts",
+    "./parts/inspector": "./src/parts/inspector/index.ts",
+    "./parts/p5": "./src/parts/p5/index.ts",
+    "./parts/collision": "./src/parts/collision/index.ts"
   },
   "devDependencies": {
     "@tweakpane/core": "^2.0.5",

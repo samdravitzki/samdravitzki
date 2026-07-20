@@ -5,19 +5,19 @@ import lineAabbIntersection from "./intersection/line-aabb-intersection";
 import Position from "../../components/Position";
 import { Collider } from "./components/Collider";
 
-type Ray = {
+export type Ray = {
   position: Vector;
   direction: Vector;
   length: number; // Prob should have infinitly long rays by default, not sure how to do this tho
 };
 
-type Hit = {
+export type Hit = {
   position: Vector;
   normal: Vector;
   entityId: string;
 };
 
-type CastRayOptions = {
+export type CastRayOptions = {
   layer?: string; // The collision layer that ray will collide with
 };
 
@@ -30,7 +30,11 @@ type CastRayOptions = {
  * @param ray the ray that is cast within the world
  * @returns the position and normal in which the ray collided
  */
-function castRay(world: World, ray: Ray, options?: CastRayOptions): Hit[] {
+export function castRay(
+  world: World,
+  ray: Ray,
+  options?: CastRayOptions,
+): Hit[] {
   const colliders = world.query([Position, Collider, "entity-id"]);
 
   const filteredColliders =
@@ -76,6 +80,3 @@ function castRay(world: World, ray: Ray, options?: CastRayOptions): Hit[] {
 
   return hits;
 }
-
-export default castRay;
-export type { Ray, CastRayOptions, Hit };

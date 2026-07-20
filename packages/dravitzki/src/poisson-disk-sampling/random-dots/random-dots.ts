@@ -1,5 +1,4 @@
-import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
-import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
+import { Vector, Bounds } from "@dravitzki/dufus-engine";
 import randomInt from "../../lib/randomInt/randomInt";
 
 /**

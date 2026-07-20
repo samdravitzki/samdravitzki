@@ -1,21 +1,15 @@
 import p5 from "p5";
-import { ResourcePool } from "@dravitzki/dufus-engine/src/core/Engine/ResourcePool";
-import World from "@dravitzki/dufus-engine/src/core/World/World";
-import Position from "@dravitzki/dufus-engine/src/components/Position";
-import {
-  Circle,
-  Square,
-} from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
-import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
-import State from "@dravitzki/dufus-engine/src/core/State/State";
-import { component } from "@dravitzki/dufus-engine/src/core/Component/Component";
 import vert from "./shader/shader.vert?raw";
 import frag from "./shader/shader.frag?raw";
-
-// export type SdfShape = Component & {
-//   name: "sdf-shape";
-//   fill: number[];
-// };
+import {
+  component,
+  World,
+  ResourcePool,
+  Bounds,
+  State,
+  Position,
+} from "@dravitzki/dufus-engine";
+import { Circle, Square } from "@dravitzki/dufus-engine/parts/p5";
 
 export const SdfShape = component<{
   fill: number[];

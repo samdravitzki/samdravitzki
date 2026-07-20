@@ -1,32 +1,31 @@
 import p5 from "p5";
-import createBundle from "@dravitzki/dufus-engine/src/core/Bundle/createBundle";
-import World from "@dravitzki/dufus-engine/src/core/World/World";
-import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
-import p5Part, {
-  MousePosition,
-} from "@dravitzki/dufus-engine/src/parts/p5/p5-part";
-import collisions from "@dravitzki/dufus-engine/src/parts/collision/collision";
-import Component, {
-  component,
+import {
+  EngineBuilder,
+  World,
+  ResourcePool,
   tag,
-} from "@dravitzki/dufus-engine/src/core/Component/Component";
-import { EngineBuilder } from "@dravitzki/dufus-engine/src/core/Engine/EngineBuilder";
-import Position, {
-  PositionData,
-} from "@dravitzki/dufus-engine/src/components/Position";
-import { ShapeStyle } from "@dravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
+  component,
+  Bounds,
+  Vector,
+  Position,
+  createBundle,
+  Label,
+} from "@dravitzki/dufus-engine";
+import {
+  Collider,
+  CollisionContact,
+  CollisionEventPayload,
+  collisions,
+} from "@dravitzki/dufus-engine/parts/collision";
+import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import {
   Circle,
+  ShapeStyle,
   Square,
-} from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
-import { Collider } from "@dravitzki/dufus-engine/src/parts/collision/components/Collider";
-import { ResourcePool } from "@dravitzki/dufus-engine/src/core/Engine/ResourcePool";
-import { ClickEventPayload } from "@dravitzki/dufus-engine/src/parts/p5/p5-system";
-import { CollisionEventPayload } from "@dravitzki/dufus-engine/src/parts/collision/collision-systems";
-import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
-import inspector from "@dravitzki/dufus-engine/src/parts/inspector/inspector";
-import Label from "@dravitzki/dufus-engine/src/core/Component/Label";
-import { CollisionContact } from "@dravitzki/dufus-engine/src/parts/collision/components/Collision";
+  MousePosition,
+  ClickEventPayload,
+  p5Part,
+} from "@dravitzki/dufus-engine/parts/p5";
 
 // Component used to tag entities that should be interactable with the cursor
 // Making them easy to query for

@@ -1,6 +1,5 @@
 import animationDemo from "../animation-demo/anim-demo";
 import cursorActions from "../cursor-actions/cursor-actions";
-import { Engine } from "@dravitzki/dufus-engine/src/core/Engine/Engine";
 import pong from "../pong/pong-game";
 import projectTemplate from "../project-template/project-template";
 import sdf from "../sdf/sdf";
@@ -8,6 +7,7 @@ import shifter from "../shifter/shifter";
 import poissonDiscSamplingDemo from "../poisson-disk-sampling/poisson-disc-sampling";
 import drumsGame from "../drums/drums";
 import collisionDemo from "../collision-demo/collision-demo";
+import { Engine } from "@dravitzki/dufus-engine";
 
 export type MiniApp = (parent?: HTMLElement) => Engine<any, any>;
 
@@ -27,7 +27,7 @@ const miniApps: MiniAppInfo[] = [];
 //   symbol: "🐍",
 //   appId: "snake",
 //   controls: [["move", "wasd or arrow keys"]],
-//   app: snakeGame,
+//   app: snake,
 // });
 
 miniApps.push({

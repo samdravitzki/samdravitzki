@@ -1,18 +1,8 @@
 import p5 from "p5";
 import World from "../../../core/World/World";
 import { Color, ShapeStyle } from "./ShapeStyle";
-import {
-  Circle,
-  CircleData,
-  Line,
-  Square,
-  TextData,
-  Text,
-} from "../shape-components";
-import { SquareData } from "../shape-components";
-import { LineData } from "../shape-components";
+import { Circle, Line, Square, Text } from "../shape-components";
 import { ResourcePool } from "../../../core/Engine/ResourcePool";
-import Component from "../../../core/Component/Component";
 import Position, { PositionData } from "../../../components/Position";
 
 function toP5Color(p: p5, color: string | number[]) {

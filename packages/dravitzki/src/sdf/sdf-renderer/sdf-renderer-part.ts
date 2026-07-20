@@ -1,4 +1,4 @@
-import { Part } from "@dravitzki/dufus-engine/src/core/Part/Part";
+import { Part } from "@dravitzki/dufus-engine";
 import sdfRendererSystem, { sdfRendererSetupSystem } from "./sdf-renderer";
 
 function sdfRendererPart() {

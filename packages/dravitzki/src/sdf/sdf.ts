@@ -1,30 +1,32 @@
-import Position from "@dravitzki/dufus-engine/src/components/Position";
-import createBundle from "@dravitzki/dufus-engine/src/core/Bundle/createBundle";
-import { EngineBuilder } from "@dravitzki/dufus-engine/src/core/Engine/EngineBuilder";
-import { ResourcePool } from "@dravitzki/dufus-engine/src/core/Engine/ResourcePool";
-import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
-import World from "@dravitzki/dufus-engine/src/core/World/World";
-import p5Part, {
-  KeypressEvent,
-  MousePosition,
-} from "@dravitzki/dufus-engine/src/parts/p5/p5-part";
-import { ClickEventPayload } from "@dravitzki/dufus-engine/src/parts/p5/p5-system";
-import { ShapeStyle } from "@dravitzki/dufus-engine/src/parts/p5/primitive-renderer/ShapeStyle";
-import sdfRendererPart from "./sdf-renderer/sdf-renderer-part";
-import { Square } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
-import { Circle } from "@dravitzki/dufus-engine/src/parts/p5/shape-components";
-import { SdfShape } from "./sdf-renderer/sdf-renderer";
-import { Collider } from "@dravitzki/dufus-engine/src/parts/collision/components/Collider";
-import collisions, {
-  CollisionEventPayload,
-} from "@dravitzki/dufus-engine/src/parts/collision/collision";
-import stateDebugPaneSystem from "./state-debug-pane";
-import { CollisionContact } from "@dravitzki/dufus-engine/src/parts/collision/components/Collision";
 import {
-  component,
+  World,
+  createBundle,
+  Position,
+  Vector,
   tag,
-} from "@dravitzki/dufus-engine/src/core/Component/Component";
-import inspector from "@dravitzki/dufus-engine/src/parts/inspector/inspector";
+  component,
+  EngineBuilder,
+  ResourcePool,
+} from "@dravitzki/dufus-engine";
+import {
+  Collider,
+  CollisionEventPayload,
+  collisions,
+  CollisionContact,
+} from "@dravitzki/dufus-engine/parts/collision";
+import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
+import {
+  Circle,
+  ShapeStyle,
+  Square,
+  KeypressEvent,
+  ClickEventPayload,
+  p5Part,
+  MousePosition,
+} from "@dravitzki/dufus-engine/parts/p5";
+import sdfRendererPart from "./sdf-renderer/sdf-renderer-part";
+import { SdfShape } from "./sdf-renderer/sdf-renderer";
+import stateDebugPaneSystem from "./state-debug-pane";
 
 const circle = [
   Circle({

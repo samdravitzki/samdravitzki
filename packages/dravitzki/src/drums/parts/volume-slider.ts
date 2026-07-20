@@ -1,9 +1,6 @@
 import p5 from "p5";
 import * as Tone from "tone";
-import Bounds from "@dravitzki/dufus-engine/src/core/Bounds/Bounds";
-import World from "@dravitzki/dufus-engine/src/core/World/World";
-import { ResourcePool } from "@dravitzki/dufus-engine/src/core/Engine/ResourcePool";
-import { Part } from "@dravitzki/dufus-engine/src/core/Part/Part";
+import { Part, World, ResourcePool, Bounds } from "@dravitzki/dufus-engine";
 
 const volumeSliderPart: Part<{
   setup: void;
