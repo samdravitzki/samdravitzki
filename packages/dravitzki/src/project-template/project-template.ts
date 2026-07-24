@@ -1,18 +1,18 @@
 import {
+  dufus,
   World,
   ResourcePool,
   Bounds,
   createBundle,
   Position,
   Label,
-  dufus,
 } from "@dravitzki/dufus-engine";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import {
+  p5Part,
   ShapeStyle,
   Square,
   Typography,
-  p5Part,
 } from "@dravitzki/dufus-engine/parts/p5";
 
 function templateInfo(world: World, resources: ResourcePool) {

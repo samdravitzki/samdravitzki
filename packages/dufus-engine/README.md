@@ -1,36 +1,28 @@
-# @dravitzki/dufus-engine
+# dufus engine
 
-A lightweight Entity Component System (ECS) engine for building interactive 2D experiments and games.
+A data-driven game engine built to make it easy for web developers to prototype games and any other highly interactive experiments.
 
-## What It Is
+Prototype ideas quickly with the developer experience you're used to. Once you have something you like select the engine and tooling it best suits
 
-`@dravitzki/dufus-engine` provides:
+```ts
+import { dufus } from "@dravitzki/dufus-engine";
 
-- ECS core primitives: `Entity`, `Component`, `System`, `World`
-- Type-safe engine composition via `EngineBuilder`
-- Event and state driven system scheduling with triggers
-- Shared math and geometry utilities (`Vector`, `Bounds`)
-- Optional parts for p5 rendering, collision, animation, and inspector tooling
+const engine = dufus()
+  .event("setup")
+  .event("update")
+  .event("after-update")
+  .build();
 
-## Why It Exists
+engine.part(p5Part([500, 500], parent, "#0A090A"));
 
-The engine started inside the dravitzki demos and was extracted into a shared package so game/demo code and engine code can evolve separately.
+// Make a demo that actually does something
+engine.system("demo-setup", engine.trigger.on("setup"), () => {});
+engine.system("demo-update", engine.trigger.on("update"), () => {});
 
-Goals:
+engine.run();
+```
 
-- Keep gameplay logic modular with ECS composition
-- Reuse one engine foundation across many mini-projects
-- Iterate on engine design using real demos as proving grounds
-
-## Current Status
-
-- Actively used by demos in `packages/dravitzki/src`
-- Uses deep imports (`@dravitzki/dufus-engine/src/...`) while API stabilizes
-- Top-level barrel exports are planned, but not the default yet
-
-## Getting Started
-
-### Install
+## Installation
 
 In this monorepo, add it as a workspace dependency:
 
@@ -42,112 +34,39 @@ In this monorepo, add it as a workspace dependency:
 }
 ```
 
-### Minimal Example (Current API)
+Dufus engine is currently not a published library and so cannot be installed via `npm`. If you want dufus-engine published get in contact and let me know @paulblartsequel
 
-```ts
-import { EngineBuilder } from "@dravitzki/dufus-engine/src/core/Engine/EngineBuilder";
-import { component } from "@dravitzki/dufus-engine/src/core/Component/Component";
-import createBundle from "@dravitzki/dufus-engine/src/core/Bundle/createBundle";
-import Vector from "@dravitzki/dufus-engine/src/core/Vector/Vector";
+## Features
 
-const Position = component<{ position: Vector }>({ name: "position" });
-const Velocity = component<Vector>({ name: "velocity" });
+`@dravitzki/dufus-engine` provides:
 
-export default function demo(parent?: HTMLElement) {
-  const engine = EngineBuilder.create().event("setup").event("update").build();
-
-  engine.system("spawn", engine.trigger.on("setup"), (world) => {
-    world.addBundle(
-      createBundle([
-        Position({ position: Vector.create(50, 50) }),
-        Velocity(Vector.create(1, 0)),
-      ]),
-    );
-  });
-
-  engine.system("move", engine.trigger.on("update"), (world) => {
-    for (const [position, velocity] of world.query([Position, Velocity])) {
-      position.componentData.position = position.componentData.position.plus(
-        velocity.componentData,
-      );
-    }
-  });
-
-  return engine;
-}
-```
-
-In dravitzki, apps returned from demo functions are started and stopped by the SPA host (`run()`/`stop()`).
-
-## Core Concepts
-
-### Entity
-
-A lightweight identifier that holds components.
-
-### Component
-
-Pure data. Components should not contain behavior.
-
-### System
-
-Behavior that runs when a trigger condition is satisfied. Systems receive:
-
-- `world`
-- `resources`
-- `state`
-- `eventEmitter`
-- event `payload`
-
-### World
-
-Stores entities and supports component-based queries with `world.query([...])`.
-
-### Bundle
-
-A set of components that can be spawned together via `world.addBundle(...)`.
-
-### Part
-
-A pluggable extension that can register systems and setup logic.
-
-### State and Trigger
-
-Systems can be gated by event and state conditions:
-
-- `engine.trigger.on("update")`
-- `engine.trigger.on("update").when("mode").is("play")`
-- `engine.trigger.on("update").when("mode").enters("play")`
-- `engine.trigger.on("update").when("mode").exits("play")`
+- A custom Entity Component System (ECS) with core primitives `Entity`, `Component`, `System`, `World`
+- Type-safe engine composition via the `DufusEngineBuilder` or `dufus()`
+- Event and state driven system scheduling with triggers
+- Optional plugins (called parts) for p5.js, collision, animation, and inspector tooling
 
 ## Included Parts
 
-- `src/parts/p5`: p5 canvas setup, frame events, primitive rendering, input events
-- `src/parts/collision`: collider components, contact tracking, collision events
+Parts are pluggable extensions that can register systems and setup logic.
+
+- `src/parts/p5`: p5 canvas setup, update events, primitive rendering, input events
+- `src/parts/collision`: collider components, contact events
 - `src/parts/animation`: tween-like animation components/systems
-- `src/parts/inspector`: dev inspector UI integrations
+- `src/parts/inspector`: entity inspector UI
 
-## Demo Guide
+## Why does it exist?
 
-The best reference for real-world usage is the collision demo.
+The engine started inside the `dravitzki` (a personal-site and playground) demos and was extracted into a shared package so game/demo code and engine code can evolve separately, and maybe even become something that others can find a use for in their own projects
 
-### Collision Demo (Recommended First)
+Goals:
 
-Path: `packages/dravitzki/src/collision-demo/collision-demo.ts`
+- A clean developer experience any modern web developer would appreciate
+- Iterate and extend on engine using real demos and more importantly real games
+- Keep gameplay logic modular with ECS composition
 
-What it demonstrates:
+## Why's it called that?
 
-- Defining typed engine events (including `collision` payloads)
-- Composing parts (`p5Part`, `collision`, `inspector`)
-- Spawning entities with bundles and tags
-- Query-driven physics updates (gravity + movement)
-- Collision response with depenetration and reflected velocity
-
-### Additional Good References
-
-- `packages/dravitzki/src/project-template/project-template.ts`: minimal app scaffold
-- `packages/dravitzki/src/animation-demo/anim-demo.ts`: animation part usage
-- `packages/dravitzki/src/cursor-actions/cursor-actions.ts`: input + collision interaction patterns
+If you cant come up with any good reasons to build something it probably isn't a good idea. So if you decide to build it anyways you're probably a dufus
 
 ## Package Layout
 
@@ -159,12 +78,15 @@ What it demonstrates:
 ## Development
 
 ```bash
-pnpm --filter @dravitzki/dufus-engine build
-pnpm --filter @dravitzki/dufus-engine test
+> pnpm --filter @dravitzki/dufus-engine build
+> pnpm --filter @dravitzki/dufus-engine test
 ```
 
-## Limitations (Current)
+## Current status and roadmap
 
-- Deep import paths are required today
-- Public top-level API is still evolving
-- Some ordering and lifecycle concerns are still tracked as TODOs in code/comments
+Grab from the NOTES.md readme
+
+### Roadmap
+
+- parts can handle registering events and state - example issue atm: p5 defines the setup event so you should be able to trigger systems on the setup event without having the register it yourself
+- parts can register resources that are typesafe
