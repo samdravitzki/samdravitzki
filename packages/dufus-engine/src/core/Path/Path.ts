@@ -3,7 +3,7 @@ import Vector from "../Vector/Vector";
 import World from "../World/World";
 import { ShapeStyle } from "../../parts/p5/primitive-renderer/ShapeStyle";
 import { Line } from "../../parts/p5/shape-components";
-import Position from "../../components/Position";
+import { Position } from "../../components";
 
 type PathEdge = { start: Vector; end: Vector };
 
