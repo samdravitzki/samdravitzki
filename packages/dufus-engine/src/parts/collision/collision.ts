@@ -77,6 +77,17 @@ function collisions(
                 col.componentData.height,
               );
             }
+
+            if (col.componentData.type === "circle") {
+              p.stroke(111, 100, 100);
+              p.strokeWeight(1);
+              p.noFill();
+              p.circle(
+                pos.componentData.position.x,
+                pos.componentData.position.y,
+                col.componentData.radius * 2,
+              );
+            }
           }
         },
       );

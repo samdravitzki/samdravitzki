@@ -13,3 +13,8 @@ export type Aabb = {
   width: number;
   height: number;
 };
+
+export type Circle = {
+  position: Vector;
+  radius: number;
+};

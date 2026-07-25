@@ -9,6 +9,7 @@ import drumsGame from "../drums/drums";
 import collisionDemo from "../collision-demo/collision-demo";
 import { Engine } from "@dravitzki/dufus-engine";
 import collisionDemo2 from "../collision-demo-2/collision-demo-2";
+import collisionDemo3 from "../collision-demo-3/collision-demo-3";
 
 export type MiniApp = (parent?: HTMLElement) => Engine<any, any>;
 
@@ -98,6 +99,14 @@ miniApps.push({
   appId: "collision-demo-2",
   controls: [["interact", "click + drag"]],
   app: collisionDemo2,
+});
+
+miniApps.push({
+  name: "collision-demo-3",
+  symbol: "💥₃",
+  appId: "collision-demo-3",
+  controls: [["interact", "click + drag"]],
+  app: collisionDemo3,
 });
 
 miniApps.push({
