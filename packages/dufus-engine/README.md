@@ -15,7 +15,6 @@ const engine = dufus()
 
 engine.part(p5Part([500, 500], parent, "#0A090A"));
 
-// Make a demo that actually does something
 engine.system("demo-setup", engine.trigger.on("setup"), () => {});
 engine.system("demo-update", engine.trigger.on("update"), () => {});
 

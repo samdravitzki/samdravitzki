@@ -66,18 +66,18 @@ export default class World {
     return entity;
   }
 
-  addBundle(bundles: Bundle | Bundle[]) {
-    if (!Array.isArray(bundles)) {
-      bundles = [bundles];
-    }
+  addBundle(bundle: Bundle) {
+    const entity = this.createEntity();
 
-    for (const bundle of bundles) {
-      const entity = this.createEntity();
+    bundle.components.forEach((component) => {
+      entity.addComponent(component);
+    });
 
-      bundle.components.forEach((component) => {
-        entity.addComponent(component);
-      });
-    }
+    return entity;
+  }
+
+  addBundles(bundles: Bundle[]) {
+    return bundles.map((bundle) => this.addBundle(bundle));
   }
 
   removeEntity(entityId: string) {

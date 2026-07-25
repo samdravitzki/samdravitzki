@@ -8,6 +8,7 @@ import poissonDiscSamplingDemo from "../poisson-disk-sampling/poisson-disc-sampl
 import drumsGame from "../drums/drums";
 import collisionDemo from "../collision-demo/collision-demo";
 import { Engine } from "@dravitzki/dufus-engine";
+import collisionDemo2 from "../collision-demo-2/collision-demo-2";
 
 export type MiniApp = (parent?: HTMLElement) => Engine<any, any>;
 
@@ -88,8 +89,15 @@ miniApps.push({
   name: "collision-demo",
   symbol: "💥",
   appId: "collision-demo",
-  controls: [["interact", "click + drag"]],
   app: collisionDemo,
+});
+
+miniApps.push({
+  name: "collision-demo-2",
+  symbol: "💥₂",
+  appId: "collision-demo-2",
+  controls: [["interact", "click + drag"]],
+  app: collisionDemo2,
 });
 
 miniApps.push({

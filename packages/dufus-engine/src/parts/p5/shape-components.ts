@@ -14,7 +14,7 @@ export type SquareData = {
   height: number;
   borderRadius?: number;
 };
-export type TextData = {
+export type TypographyData = {
   align: "left" | "right" | "center";
   size: number;
   text: string;
@@ -24,4 +24,4 @@ export type TextData = {
 export const Circle = component<CircleData>({ name: "circle" });
 export const Line = component<LineData>({ name: "line" });
 export const Square = component<SquareData>({ name: "square" });
-export const Typography = component<TextData>({ name: "text" });
+export const Typography = component<TypographyData>({ name: "text" });
