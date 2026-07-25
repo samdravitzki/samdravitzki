@@ -1,3 +1,4 @@
+import p5 from "p5";
 import {
   dufus,
   World,
@@ -37,7 +38,7 @@ function ball(position: Vector, radius: number) {
       position: position,
     }),
     Velocity(Vector.create(0.2, 0.5)),
-    Speed(5),
+    Speed(200),
     Circle({
       radius: radius,
     }),
@@ -66,6 +67,7 @@ export default function collisionDemo(parent?: HTMLElement) {
 
   engine.part(p5Part([500, 500], parent, pallete.background));
   engine.part(inspector());
+
   engine.part(
     collision({
       visualiseColliders: true,
@@ -79,7 +81,7 @@ export default function collisionDemo(parent?: HTMLElement) {
     (world: World, resources: ResourcePool) => {
       const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-      world.addBundle(
+      world.addBundles(
         boundary(
           canvasBounds.center.center,
           canvasBounds.width,
@@ -90,16 +92,39 @@ export default function collisionDemo(parent?: HTMLElement) {
       world.addBundle(ball(canvasBounds.center.center, 20));
     },
   );
-  const GRAVITY = new Vector(0, 0.1);
+  const GRAVITY = new Vector(0, 9.8);
 
   // The order of the gravity, bounce balls and move balls systems is important. Need to find a way to gaurantee this
   // with the engine. The bounce balls system triggering on the collision event makes this difficult.
 
-  engine.system("gravity", engine.trigger.on("update"), (world) => {
+  engine.system("gravity", engine.trigger.on("update"), (world, resources) => {
+    const p = resources.get<p5>("p5");
     for (const [vel] of world.query([Velocity, Position, Speed, ballTag])) {
-      vel.componentData = vel.componentData.plus(GRAVITY);
+      const gravity = GRAVITY.times(p.deltaTime / 1000);
+
+      vel.componentData = vel.componentData.plus(gravity);
     }
   });
+
+  engine.system(
+    "move-balls",
+    engine.trigger.on("update"),
+    (world, resources) => {
+      const p = resources.get<p5>("p5");
+      for (const [pos, vel, speed] of world.query([
+        Position,
+        Velocity,
+        Speed,
+        ballTag,
+      ])) {
+        pos.componentData.position = pos.componentData.position.plus(
+          vel.componentData
+            .times(speed.componentData)
+            .times(p.deltaTime / 1000),
+        );
+      }
+    },
+  );
 
   engine.system(
     "bounce-balls",
@@ -139,19 +164,6 @@ export default function collisionDemo(parent?: HTMLElement) {
       );
     },
   );
-
-  engine.system("move-balls", engine.trigger.on("update"), (world) => {
-    for (const [pos, vel, speed] of world.query([
-      Position,
-      Velocity,
-      Speed,
-      ballTag,
-    ])) {
-      pos.componentData.position = pos.componentData.position.plus(
-        vel.componentData.times(speed.componentData),
-      );
-    }
-  });
 
   return engine;
 }
