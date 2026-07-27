@@ -48,8 +48,8 @@ importers:
         specifier: ^8.1.0
         version: 8.1.5
       vite-plugin-checker:
-        specifier: ^0.14.4
-        version: 0.14.4(typescript@6.0.3)(vite@8.1.5)
+        specifier: ^0.14.5
+        version: 0.14.5(typescript@6.0.3)(vite@8.1.5)
       vitest:
         specifier: ^4.1.0
         version: 4.1.10(@vitest/coverage-v8@4.1.10)(jsdom@27.4.0)(vite@8.1.5)
@@ -792,8 +792,8 @@ packages:
     resolution: {integrity: sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA==}
     engines: {node: '>=18'}
 
-  vite-plugin-checker@0.14.4:
-    resolution: {integrity: sha512-Tw0U9UgHIRiZ+Yoe4Gh0RrYoBiCVmO9j4tomVdYr0KUjUsqXMPhqW8ouoSWmOzGp5Iimipbl3bNXZcK7OeP7Qg==}
+  vite-plugin-checker@0.14.5:
+    resolution: {integrity: sha512-c9lQ92eisUO+F7Fd93aelojmiOS+NQpPgQ1XR2LTQHox1/laZf4yAoQj+L3RA9Vgh10e2nFd9b8r2LLyYZsbpA==}
     engines: {node: '>=20.19.0'}
     peerDependencies:
       '@biomejs/biome': '>=2.4.12'
@@ -1598,7 +1598,7 @@ snapshots:
 
   unicorn-magic@0.3.0: {}
 
-  vite-plugin-checker@0.14.4(typescript@6.0.3)(vite@8.1.5):
+  vite-plugin-checker@0.14.5(typescript@6.0.3)(vite@8.1.5):
     dependencies:
       '@babel/code-frame': 7.29.7
       chokidar: 5.0.0
