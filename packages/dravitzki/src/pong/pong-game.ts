@@ -23,7 +23,7 @@ import {
   collisions,
   CollisionEventPayload,
   castRay,
-} from "@dravitzki/dufus-engine/parts/collision";
+} from "@dravitzki/dufus-engine/parts/collisions";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 
 import { Velocity, Speed, BackboardOwner } from "./components";

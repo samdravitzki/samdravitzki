@@ -5,7 +5,7 @@ import {
   Label,
   Bundle,
 } from "@dravitzki/dufus-engine";
-import { Collider } from "@dravitzki/dufus-engine/parts/collision";
+import { Collider } from "@dravitzki/dufus-engine/parts/collisions";
 import { Square, ShapeStyle } from "@dravitzki/dufus-engine/parts/p5";
 
 function boundary(position: Vector, width: number, height: number): Bundle[] {

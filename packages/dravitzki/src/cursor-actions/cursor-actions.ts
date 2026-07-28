@@ -16,7 +16,7 @@ import {
   CollisionContact,
   CollisionEventPayload,
   collisions,
-} from "@dravitzki/dufus-engine/parts/collision";
+} from "@dravitzki/dufus-engine/parts/collisions";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import {
   Circle,

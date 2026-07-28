@@ -13,10 +13,12 @@ import {
 } from "@dravitzki/dufus-engine";
 
 import boundary from "./prefabs/boundary";
+
 import {
+  collisions,
   Collider,
   CollisionEventPayload,
-} from "@dravitzki/dufus-engine/parts/collision";
+} from "@dravitzki/dufus-engine/parts/collisions";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import {
   Circle,
@@ -24,7 +26,6 @@ import {
   Typography,
   p5Part,
 } from "@dravitzki/dufus-engine/parts/p5";
-import collision from "../../../dufus-engine/src/parts/collision/collision";
 
 const pallete = {
   background: "#151515",
@@ -73,7 +74,7 @@ export default function collisionDemo2(parent?: HTMLElement) {
   engine.part(p5Part([500, 500], parent, pallete.background));
   engine.part(inspector());
   engine.part(
-    collision({
+    collisions({
       visualiseColliders: true,
       logging: false,
     }),

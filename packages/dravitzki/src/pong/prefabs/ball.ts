@@ -1,4 +1,4 @@
-import { Collider } from "@dravitzki/dufus-engine/parts/collision";
+import { Collider } from "@dravitzki/dufus-engine/parts/collisions";
 import { Circle, ShapeStyle } from "@dravitzki/dufus-engine/parts/p5";
 import { Speed, Velocity } from "../components";
 import { tag, Vector, createBundle, Position } from "@dravitzki/dufus-engine";

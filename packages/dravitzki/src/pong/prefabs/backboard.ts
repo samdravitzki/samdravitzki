@@ -1,4 +1,4 @@
-import { Collider } from "@dravitzki/dufus-engine/parts/collision";
+import { Collider } from "@dravitzki/dufus-engine/parts/collisions";
 import { Square, ShapeStyle } from "@dravitzki/dufus-engine/parts/p5";
 import { BackboardOwner } from "../components";
 import { Vector, createBundle, Position } from "@dravitzki/dufus-engine";
