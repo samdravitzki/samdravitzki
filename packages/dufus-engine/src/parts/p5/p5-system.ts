@@ -67,7 +67,7 @@ function createP5System(
         eventEmitter.emit({ event: "setup" });
       };
 
-      const fixedDeltaTime = (1 / 60) * 1000; // 60 FPS
+      const fixedDeltaTime = (1 / 100) * 1000; // Run fixed update at 100Hz, convert to milliseconds
 
       p.draw = () => {
         p.background(
