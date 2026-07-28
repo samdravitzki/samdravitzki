@@ -14,7 +14,7 @@ import {
 import {
   Collider,
   CollisionContact,
-  CollisionEventPayload,
+  CollisionContactEvent,
   collisions,
 } from "@dravitzki/dufus-engine/parts/collisions";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
@@ -276,7 +276,7 @@ function cursorHoverSystem(
   resources: ResourcePool,
   state: unknown,
   eventEmitter: unknown,
-  eventPayload: CollisionEventPayload,
+  eventPayload: CollisionContactEvent,
 ) {
   const entityA = world.entity(eventPayload.entityA);
   const entityB = world.entity(eventPayload.entityB);
@@ -326,7 +326,7 @@ export default function cursorActions(parent?: HTMLElement) {
     .event("update")
     .event("after-update")
     .event<"click", ClickEventPayload>("click")
-    .event<"collision", CollisionEventPayload>("collision")
+    .event<"collision", CollisionContactEvent>("collision")
     .build();
 
   engine.part(collisions());

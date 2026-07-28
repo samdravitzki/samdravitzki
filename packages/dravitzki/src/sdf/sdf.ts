@@ -10,7 +10,7 @@ import {
 } from "@dravitzki/dufus-engine";
 import {
   Collider,
-  CollisionEventPayload,
+  CollisionContactEvent,
   collisions,
   CollisionContact,
 } from "@dravitzki/dufus-engine/parts/collisions";
@@ -109,7 +109,7 @@ export default function sdf(parent?: HTMLElement) {
     .event<"click", ClickEventPayload>("click")
     .event<"click:press", ClickEventPayload>("click:press")
     .event<"click:release", ClickEventPayload>("click:release")
-    .event<"collision", CollisionEventPayload>("collision")
+    .event<"collision", CollisionContactEvent>("collision")
     .build();
 
   engine.part(p5Part([500, 500], parent, [0, 0, 14], true));
@@ -273,7 +273,7 @@ export default function sdf(parent?: HTMLElement) {
       resources: ResourcePool,
       state: unknown,
       eventEmitter: unknown,
-      eventPayload: CollisionEventPayload,
+      eventPayload: CollisionContactEvent,
     ) => {
       if (!world.entity(eventPayload.entityA).hasComponent("cursor")) {
         return;

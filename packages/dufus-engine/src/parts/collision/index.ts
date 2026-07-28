@@ -1,6 +1,6 @@
-import collisions, { CollisionEventPayload } from "./collision";
+import collisions, { CollisionContactEvent } from "./collision";
 
 export * from "./cast-ray";
 export * from "./components/Collider";
 export * from "./components/Collision";
-export { collisions, type CollisionEventPayload };
+export { collisions, type CollisionContactEvent };

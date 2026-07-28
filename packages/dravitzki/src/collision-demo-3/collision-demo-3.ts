@@ -17,7 +17,7 @@ import {
   collisions,
   Collider,
   ColliderData,
-  CollisionEventPayload,
+  CollisionContactEvent,
 } from "@dravitzki/dufus-engine/parts/collisions";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import {
@@ -137,7 +137,7 @@ export default function collisionDemo3(parent?: HTMLElement) {
     .event("update")
     .event<"fixed-update", { deltaTime: number }>("fixed-update")
     .event("after-update")
-    .event<"collision", CollisionEventPayload>("collision")
+    .event<"collision", CollisionContactEvent>("collision")
     .build();
 
   engine.part(p5Part([500, 500], parent, pallete.background));
@@ -232,7 +232,7 @@ export default function collisionDemo3(parent?: HTMLElement) {
   engine.system(
     "collision-hanlder",
     engine.trigger.on("collision"),
-    (world, resources, state, eventEmitter, contact: CollisionEventPayload) => {
+    (world, resources, state, eventEmitter, contact: CollisionContactEvent) => {
       const entityA = world.entity(contact.entityA);
       const entityB = world.entity(contact.entityB);
 

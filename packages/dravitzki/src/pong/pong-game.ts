@@ -21,7 +21,7 @@ import {
 } from "@dravitzki/dufus-engine/parts/p5";
 import {
   collisions,
-  CollisionEventPayload,
+  CollisionContactEvent,
   castRay,
 } from "@dravitzki/dufus-engine/parts/collisions";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
@@ -114,7 +114,7 @@ function ballCollisionHandlingSystem(
   resources: ResourcePool,
   state: unknown,
   eventEmitter: unknown,
-  collisionContact: CollisionEventPayload,
+  collisionContact: CollisionContactEvent,
 ) {
   if (collisionContact.type !== "enter") {
     return;
@@ -163,7 +163,7 @@ function backboardCollisionHandlingSystem(
   resources: ResourcePool,
   state: { score: State<Score> },
   eventEmitter: unknown,
-  collisionContact: CollisionEventPayload,
+  collisionContact: CollisionContactEvent,
 ) {
   if (collisionContact.type !== "enter") {
     return;
@@ -252,7 +252,7 @@ function paddleCollisionHandlingSystem(
   resources: ResourcePool,
   state: unknown,
   eventEmitter: unknown,
-  collisionContact: CollisionEventPayload,
+  collisionContact: CollisionContactEvent,
 ) {
   if (collisionContact.type !== "enter") {
     return;
@@ -570,7 +570,7 @@ export default function pong(parent?: HTMLElement) {
     .event("setup")
     .event("update")
     .event("after-update")
-    .event<"collision", CollisionEventPayload>("collision")
+    .event<"collision", CollisionContactEvent>("collision")
     .event<"keyPressed", KeypressEvent>("keyPressed")
     .state("render-trajectory", false)
     .state<"score", [number, number]>("score", [0, 0])

@@ -17,7 +17,7 @@ import boundary from "./prefabs/boundary";
 import {
   collisions,
   Collider,
-  CollisionEventPayload,
+  CollisionContactEvent,
 } from "@dravitzki/dufus-engine/parts/collisions";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import {
@@ -69,7 +69,7 @@ export default function collisionDemo2(parent?: HTMLElement) {
     .event("update")
     .event<"fixed-update", { deltaTime: number }>("fixed-update")
     .event("after-update")
-    .event<"collision", CollisionEventPayload>("collision")
+    .event<"collision", CollisionContactEvent>("collision")
     .build();
 
   engine.part(p5Part([500, 500], parent, pallete.background));

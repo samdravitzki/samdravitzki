@@ -9,8 +9,7 @@ import Vector from "../../core/Vector/Vector";
 import { Label, Position } from "../../components";
 import { cirlceCirlceIntersection } from "./intersection/circle-cirlce-intersection";
 
-// TODO: Renmame to CollisionContactEvent
-type CollisionEventPayload = {
+type CollisionContactEvent = {
   entityA: string;
   entityB: string;
 } & (
@@ -26,7 +25,7 @@ type CollisionEventPayload = {
 );
 
 type CollisionSystemEvents = {
-  collision: CollisionEventPayload;
+  collision: CollisionContactEvent;
 };
 
 function calculateIntersection(
@@ -159,4 +158,4 @@ function collisionSystem(
 
 export default collisionSystem;
 
-export type { CollisionEventPayload };
+export type { CollisionContactEvent };

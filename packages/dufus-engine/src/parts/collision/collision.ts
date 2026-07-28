@@ -1,7 +1,7 @@
 import p5 from "p5";
 import World from "../../core/World/World";
 import { Collider } from "./components/Collider";
-import collisionSystem, { CollisionEventPayload } from "./collision-systems";
+import collisionSystem, { CollisionContactEvent } from "./collision-systems";
 import { ResourcePool } from "../../core/Engine/ResourcePool";
 import { Part } from "../../core/Part/Part";
 import { CollisionContact } from "./components/Collision";
@@ -24,7 +24,7 @@ function collisions(
     update: void;
     "fixed-update": { deltaTime: number };
     "after-update": void;
-    collision: CollisionEventPayload;
+    collision: CollisionContactEvent;
     "world:entity-removed": { entityId: string };
   }> = ({ registerSystem, triggerBuilder }) => {
     registerSystem(
@@ -111,4 +111,4 @@ function collisions(
 }
 
 export default collisions;
-export type { CollisionEventPayload };
+export type { CollisionContactEvent };
