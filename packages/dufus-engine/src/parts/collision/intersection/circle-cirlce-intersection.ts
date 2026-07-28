@@ -19,7 +19,7 @@ export function cirlceCirlceIntersection(
   if (deltaPosition.length() < combinedRadius) {
     const normal = deltaPosition.normalised();
     const penetration = combinedRadius - deltaPosition.length();
-    const contactPoint = circle1.position.plus(normal.times(circle1.radius));
+    const contactPoint = normal.times(circle1.radius);
 
     return {
       contactPoint,

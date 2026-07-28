@@ -67,6 +67,7 @@ export default function collisionDemo2(parent?: HTMLElement) {
   const engine = dufus()
     .event("setup")
     .event("update")
+    .event<"fixed-update", { deltaTime: number }>("fixed-update")
     .event("after-update")
     .event<"collision", CollisionEventPayload>("collision")
     .build();
@@ -110,9 +111,7 @@ export default function collisionDemo2(parent?: HTMLElement) {
         ]),
       );
 
-      world.addBundle(
-        ball(canvasBounds.center.left.plus(Vector.create(60, 0)), 20),
-      );
+      world.addBundle(ball(canvasBounds.center.center, 20));
     },
   );
 
@@ -120,18 +119,18 @@ export default function collisionDemo2(parent?: HTMLElement) {
 
   engine.system(
     "move-balls",
-    engine.trigger.on("update"),
-    (world, resources) => {
-      const p = resources.get<p5>("p5");
+    engine.trigger.on("fixed-update"),
+    (world, resources, state, eventEmitter, payload) => {
       for (const [pos, vel, speed] of world.query([
         Position,
         Velocity,
         Speed,
         ballTag,
       ])) {
-        t += p.deltaTime / 1000;
+        const speed = 2;
+        t += (payload.deltaTime / 1000) * speed;
         pos.componentData.position = pos.componentData.position.plus(
-          Vector.create(Math.sin(t) * 3, 0),
+          Vector.create(Math.cos(t) * 3, 0),
         );
       }
     },

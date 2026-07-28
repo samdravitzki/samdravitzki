@@ -61,6 +61,7 @@ export default function collisionDemo(parent?: HTMLElement) {
   const engine = dufus()
     .event("setup")
     .event("update")
+    .event<"fixed-update", { deltaTime: number }>("fixed-update")
     .event("after-update")
     .event<"collision", CollisionEventPayload>("collision")
     .build();
@@ -97,20 +98,22 @@ export default function collisionDemo(parent?: HTMLElement) {
   // The order of the gravity, bounce balls and move balls systems is important. Need to find a way to gaurantee this
   // with the engine. The bounce balls system triggering on the collision event makes this difficult.
 
-  engine.system("gravity", engine.trigger.on("update"), (world, resources) => {
-    const p = resources.get<p5>("p5");
-    for (const [vel] of world.query([Velocity, Position, Speed, ballTag])) {
-      const gravity = GRAVITY.times(p.deltaTime / 1000);
+  engine.system(
+    "gravity",
+    engine.trigger.on("fixed-update"),
+    (world, resources, state, eventEmitter, payload) => {
+      for (const [vel] of world.query([Velocity, Position, Speed, ballTag])) {
+        const gravity = GRAVITY.times(payload.deltaTime / 1000);
 
-      vel.componentData = vel.componentData.plus(gravity);
-    }
-  });
+        vel.componentData = vel.componentData.plus(gravity);
+      }
+    },
+  );
 
   engine.system(
     "move-balls",
-    engine.trigger.on("update"),
-    (world, resources) => {
-      const p = resources.get<p5>("p5");
+    engine.trigger.on("fixed-update"),
+    (world, resources, state, eventEmitter, payload) => {
       for (const [pos, vel, speed] of world.query([
         Position,
         Velocity,
@@ -120,7 +123,7 @@ export default function collisionDemo(parent?: HTMLElement) {
         pos.componentData.position = pos.componentData.position.plus(
           vel.componentData
             .times(speed.componentData)
-            .times(p.deltaTime / 1000),
+            .times(payload.deltaTime / 1000),
         );
       }
     },

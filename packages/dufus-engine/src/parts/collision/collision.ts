@@ -22,13 +22,14 @@ function collisions(
 ) {
   const part: Part<{
     update: void;
+    "fixed-update": { deltaTime: number };
     "after-update": void;
     collision: CollisionEventPayload;
     "world:entity-removed": { entityId: string };
   }> = ({ registerSystem, triggerBuilder }) => {
     registerSystem(
       "collisionSystem",
-      triggerBuilder.on("update"),
+      triggerBuilder.on("fixed-update"),
       collisionSystem,
     );
 

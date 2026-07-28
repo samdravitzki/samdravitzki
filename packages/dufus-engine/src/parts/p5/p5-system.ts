@@ -24,6 +24,7 @@ export type ClickEventPayload = {
 export type P5Events = {
   update: void;
   "after-update": void;
+  "fixed-update": { deltaTime: number };
   init: void;
   setup: void;
   keyPressed: KeypressEvent;
@@ -66,6 +67,8 @@ function createP5System(
         eventEmitter.emit({ event: "setup" });
       };
 
+      const fixedDeltaTime = (1 / 60) * 1000; // 60 FPS
+
       p.draw = () => {
         p.background(
           Array.isArray(background)
@@ -78,6 +81,18 @@ function createP5System(
           y: p.mouseY,
         } satisfies MousePosition);
         eventEmitter.emit({ event: "update" });
+
+        // https://www.gafferongames.com/post/fix_your_timestep
+        let frameTime = p.deltaTime;
+        while (frameTime > 0) {
+          const deltaTime = Math.min(frameTime, fixedDeltaTime);
+          eventEmitter.emit({
+            event: "fixed-update",
+            payload: { deltaTime: deltaTime },
+          });
+          frameTime -= deltaTime;
+        }
+
         eventEmitter.emit({ event: "after-update" });
       };
 

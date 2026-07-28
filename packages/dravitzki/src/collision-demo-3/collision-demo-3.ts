@@ -135,6 +135,7 @@ export default function collisionDemo3(parent?: HTMLElement) {
   const engine = dufus()
     .event("setup")
     .event("update")
+    .event<"fixed-update", { deltaTime: number }>("fixed-update")
     .event("after-update")
     .event<"collision", CollisionEventPayload>("collision")
     .build();
@@ -166,13 +167,7 @@ export default function collisionDemo3(parent?: HTMLElement) {
           stationaryObject(basePosition, 50, scenario.stationaryObject),
         );
 
-        world.addBundle(
-          movingObject(
-            basePosition.minus(Vector.create(150, 0)),
-            20,
-            scenario.movingObject,
-          ),
-        );
+        world.addBundle(movingObject(basePosition, 20, scenario.movingObject));
       }
 
       world.addBundles(
@@ -189,9 +184,8 @@ export default function collisionDemo3(parent?: HTMLElement) {
 
   engine.system(
     "move-balls",
-    engine.trigger.on("update"),
-    (world, resources) => {
-      const p = resources.get<p5>("p5");
+    engine.trigger.on("fixed-update"),
+    (world, resources, state, eventEmitter, payload) => {
       for (const [pos, vel, speed] of world.query([
         Position,
         Velocity,
@@ -199,9 +193,9 @@ export default function collisionDemo3(parent?: HTMLElement) {
         movingObjectTag,
       ])) {
         const speed = 0.5;
-        t += (p.deltaTime / 1000) * speed;
+        t += (payload.deltaTime / 1000) * speed;
         pos.componentData.position = pos.componentData.position.plus(
-          Vector.create(Math.sin(t) * 4, 0),
+          Vector.create(Math.cos(t) * 2.5, 0),
         );
       }
     },
@@ -238,7 +232,7 @@ export default function collisionDemo3(parent?: HTMLElement) {
   engine.system(
     "collision-hanlder",
     engine.trigger.on("collision"),
-    (world, resources, state, eventEmitter, contact) => {
+    (world, resources, state, eventEmitter, contact: CollisionEventPayload) => {
       const entityA = world.entity(contact.entityA);
       const entityB = world.entity(contact.entityB);
 
@@ -248,9 +242,33 @@ export default function collisionDemo3(parent?: HTMLElement) {
         entity.hasComponent(movingObjectTag),
       );
 
-      const movingObjectPosition =
-        movingObject?.getComponent(Position)!.componentData;
+      const staticObject = collisionEntities.find(
+        (entity) => !entity.hasComponent(movingObjectTag),
+      );
 
+      const movingObjectPosition =
+        movingObject?.getComponent(Position)!.componentData!;
+
+      const staticObjectPosition =
+        staticObject?.getComponent(Position)!.componentData!;
+
+      // dot at collision point
+      if (contact.type === "enter") {
+        world.addBundle(
+          createBundle([
+            fadedTag(),
+            Position({
+              position: staticObjectPosition.position.plus(
+                contact.contactPoint,
+              ),
+            }),
+            Square({ width: 10, height: 2 }),
+            ShapeStyle({
+              fill: [0, 100, 100, 255],
+            }),
+          ]),
+        );
+      }
       world.addBundle(
         createBundle([
           fadedTag(),
