@@ -73,7 +73,7 @@ function movingObject(
       fill: pallete.primary,
     }),
     Label({
-      text: "hero-ball",
+      text: "moving-object",
     }),
   ]);
   return movingObject;
@@ -102,7 +102,7 @@ function stationaryObject(
     }),
     collider,
     Label({
-      text: "box",
+      text: "stationary-object",
     }),
   ]);
 }
@@ -262,9 +262,9 @@ export default function collisionDemo3(parent?: HTMLElement) {
                 contact.contactPoint,
               ),
             }),
-            Square({ width: 10, height: 2 }),
+            Square({ width: 20, height: 2 }),
             ShapeStyle({
-              fill: [0, 100, 100, 255],
+              fill: [0, 0, 100, 255],
             }),
           ]),
         );
@@ -273,7 +273,9 @@ export default function collisionDemo3(parent?: HTMLElement) {
         createBundle([
           fadedTag(),
           Position({
-            position: movingObjectPosition!.position,
+            position: movingObjectPosition!.position.plus(
+              Vector.create(0, -20),
+            ),
           }),
           Typography({
             align: "center",
@@ -284,7 +286,7 @@ export default function collisionDemo3(parent?: HTMLElement) {
             fill: [0, 0, 100, 255],
           }),
           Label({
-            text: contact.type,
+            text: `${contact.type} label`,
           }),
         ]),
       );

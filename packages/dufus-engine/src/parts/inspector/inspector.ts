@@ -36,8 +36,6 @@ function createInspectorPanelSection({
     titleSection.appendChild(closeButton);
   }
 
-  section.appendChild(titleSection);
-
   return section;
 }
 
@@ -357,7 +355,6 @@ function inspector() {
 
             const componentInspectorPanel = document.createElement("div");
             componentInspectorPanel.dataset.component = componentName;
-            componentInspectorPanel.classList.add("inspector__panel-component");
             componentInspectorPanel.classList.add("inspector__panel-component");
 
             const componentTitle = document.createElement("div");
