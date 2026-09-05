@@ -115,6 +115,7 @@ miniApps.push({
   name: "coin-game",
   symbol: "🪙",
   appId: "coin-game",
+  type: "experience",
   app: coinGame,
 });
 
