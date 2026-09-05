@@ -21,7 +21,7 @@ const homePage: Page = (container: HTMLElement, { navigate }) => {
           .map((appInfo) => createMiniAppButton(appInfo.name, appInfo.symbol))
           .join("")}
       </div>
-      <h4>Workshop</h4>
+      <h4>The Lab</h4>
       <div
         style="display: flex; gap: 4px"
       >
