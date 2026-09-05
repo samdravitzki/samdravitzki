@@ -57,6 +57,11 @@ function ball(position: Vector, radius: number) {
   return ball;
 }
 
+/**
+ * Still an issue with this demo:
+ * The ball looks to loose energy on each bounce and eventually looses all of its bounce height. The ball
+ * should be bouncing infinitely in this demo
+ */
 export default function collisionDemo(parent?: HTMLElement) {
   const engine = dufus()
     .event("setup")

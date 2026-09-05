@@ -11,6 +11,7 @@ import { Engine } from "@dravitzki/dufus-engine";
 import collisionDemo2 from "../collision-demo-2/collision-demo-2";
 import collisionDemo3 from "../collision-demo-3/collision-demo-3";
 import coinGame from "../coin-game/coin-game";
+import pathPhysicsDemo from "../path-physics/path-physics";
 
 export type MiniApp = (parent?: HTMLElement) => Engine<any, any>;
 
@@ -51,6 +52,7 @@ miniApps.push({
 
 miniApps.push({
   name: "drums",
+  type: "experience",
   symbol: "🥁",
   appId: "drums",
   controls: [["hit drum", "any key"]],
@@ -114,6 +116,13 @@ miniApps.push({
   symbol: "🪙",
   appId: "coin-game",
   app: coinGame,
+});
+
+miniApps.push({
+  name: "path-physics",
+  symbol: "🧪",
+  appId: "path-physics",
+  app: pathPhysicsDemo,
 });
 
 miniApps.push({
