@@ -18,6 +18,7 @@ export type MiniAppInfo = {
   name: string;
   symbol: string;
   appId: string;
+  type?: "experience" | "experiment/test";
   controls?: [string, string][];
   app: MiniApp;
 };

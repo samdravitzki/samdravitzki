@@ -12,11 +12,23 @@ const homePage: Page = (container: HTMLElement, { navigate }) => {
       <p role="doc-subtitle">
         <i>Built by <b>Sam Dravitzki</b> <span class="emoji"></span></i>
       </p>
-      <h4>Projects</h4>
+      <h4>Apps and Games</h4>
+      <div
+        style="display: flex; gap: 4px; justify-content: center;"
+      >
+        ${miniApps
+          .filter((appInfo) => appInfo.type === "experience")
+          .map((appInfo) => createMiniAppButton(appInfo.name, appInfo.symbol))
+          .join("")}
+      </div>
+      <h4>Workshop</h4>
       <div
         style="display: flex; gap: 4px"
       >
         ${miniApps
+          .filter(
+            (appInfo) => appInfo.type === "experiment/test" || !appInfo.type,
+          )
           .map((appInfo) => createMiniAppButton(appInfo.name, appInfo.symbol))
           .join("")}
       </div>
