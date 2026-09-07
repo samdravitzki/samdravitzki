@@ -21,6 +21,7 @@ export type MiniAppInfo = {
   appId: string;
   type?: "experience" | "experiment/test";
   controls?: [string, string][];
+  tags?: string[];
   app: MiniApp;
 };
 
@@ -47,6 +48,7 @@ miniApps.push({
   name: "poisson-disc-sampling",
   symbol: "⋆.˚",
   appId: "poisson-disc-sampling",
+  tags: ["algorithm"],
   app: poissonDiscSamplingDemo,
 });
 
@@ -63,14 +65,17 @@ miniApps.push({
   name: "shifter",
   symbol: "🕹️",
   appId: "shifter",
+  tags: ["input"],
   controls: [["move", "wasd or arrow keys"]],
   app: shifter,
 });
 
+// dufus-animations = demos of the dufus animations part
 miniApps.push({
   name: "animation-demo",
   symbol: "⚡",
   appId: "animation-demo-sketch",
+  tags: ["animation", "dufus-animations"],
   app: animationDemo,
 });
 
@@ -79,6 +84,7 @@ miniApps.push({
   symbol: "🖱️",
   appId: "cursor-actions",
   controls: [["interact", "click + drag"]],
+  tags: ["input"],
   app: cursorActions,
 });
 
@@ -87,13 +93,16 @@ miniApps.push({
   symbol: "💧",
   appId: "sdf",
   controls: [["interact", "click + drag"]],
+  tags: ["graphics"],
   app: sdf,
 });
 
+// dufus-collisions = demos of dufus collisions part (the first attempt at creating physics simulations)
 miniApps.push({
   name: "collision-demo",
   symbol: "💥",
   appId: "collision-demo",
+  tags: ["physics", "dufus-collisions"],
   app: collisionDemo,
 });
 
@@ -101,6 +110,7 @@ miniApps.push({
   name: "collision-demo-2",
   symbol: "💥₂",
   appId: "collision-demo-2",
+  tags: ["physics", "dufus-collisions"],
   app: collisionDemo2,
 });
 
@@ -108,6 +118,7 @@ miniApps.push({
   name: "collision-demo-3",
   symbol: "💥₃",
   appId: "collision-demo-3",
+  tags: ["physics", "dufus-collisions"],
   app: collisionDemo3,
 });
 

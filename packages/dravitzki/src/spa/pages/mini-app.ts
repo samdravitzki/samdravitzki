@@ -19,12 +19,25 @@ function createControlInfo(controls: [string, string][]) {
   `;
 }
 
+function createTagsInfo(tags: string[]) {
+  return `
+    <div>
+      ${tags.map((tag) => `<span style="font-family: monospace;">${tag}</span>`).join(", ")}
+    </div>
+  `;
+}
+
 function createMiniAppPage(miniApp: MiniAppInfo): Page {
   return (container, { navigate }) => {
     container.innerHTML = `<div id="${miniApp.name}-app">
       <button id="exit-${miniApp.name}-button" style="margin-bottom: 4px;">❌</button>
       <div style="position: relative;" id="${miniApp.name}-sketch"></div>
-      ${miniApp.controls ? createControlInfo(miniApp.controls) : ""}
+      <div style="display: flex;">
+        ${miniApp.controls ? createControlInfo(miniApp.controls) : ""}
+        <div style="margin-left: auto;">
+          ${miniApp.tags ? createTagsInfo(miniApp.tags) : ""}
+        </div>
+      </div>
     </div>`;
 
     const canvasParent = document.getElementById(`${miniApp.name}-sketch`)!;
