@@ -3,7 +3,8 @@ import World from "../../../core/World/World";
 import { Color, ShapeStyle } from "./ShapeStyle";
 import { Circle, Line, Square, Typography } from "../shape-components";
 import { ResourcePool } from "../../../core/Engine/ResourcePool";
-import { Position, PositionData } from "../../../components";
+import { Position, Rotation } from "../../../components";
+import Vector from "../../../core/Vector/Vector";
 
 function toP5Color(p: p5, color: string | number[]) {
   if (typeof color === "string") {
@@ -12,43 +13,37 @@ function toP5Color(p: p5, color: string | number[]) {
   return p.color(color);
 }
 
-function drawCircle(p: p5, position: PositionData, radius: number) {
-  p.circle(position.position.x, position.position.y, radius * 2);
+function drawCircle(p: p5, position: Vector, radius: number) {
+  p.circle(position.x, position.y, radius * 2);
 }
 
 function drawLine(
   p: p5,
-  position: PositionData,
+  position: Vector,
   start: { x: number; y: number },
   end: { x: number; y: number },
 ) {
   p.line(
-    start.x + position.position.x,
-    start.y + position.position.y,
-    end.x + position.position.x,
-    end.y + position.position.y,
+    start.x + position.x,
+    start.y + position.y,
+    end.x + position.x,
+    end.y + position.y,
   );
 }
 
 function drawSquare(
   p: p5,
-  position: PositionData,
+  position: Vector,
   width: number,
   height: number,
   borderRadius?: number,
 ) {
-  p.rect(
-    position.position.x,
-    position.position.y,
-    width,
-    height,
-    borderRadius ?? 0,
-  );
+  p.rect(position.x, position.y, width, height, borderRadius ?? 0);
 }
 
 function drawText(
   p: p5,
-  position: PositionData,
+  position: Vector,
   text: string,
   size: number,
   align?: "left" | "right" | "center",
@@ -63,7 +58,7 @@ function drawText(
   }
   p.textSize(size);
 
-  p.text(text, position.position.x, position.position.y);
+  p.text(text, position.x, position.y);
 }
 
 function applyPrimitiveStyle(
@@ -119,11 +114,22 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
 
     const entity = world.entity(entityId);
 
+    p.translate(
+      position.componentData.position.x,
+      position.componentData.position.y,
+    );
+
+    const rotation = entity.getComponent(Rotation);
+
+    if (rotation) {
+      p.rotate(rotation.componentData.rotation);
+    }
+
     const square = entity.getComponent(Square);
     if (square) {
       drawSquare(
         p,
-        position.componentData,
+        Vector.create(0, 0),
         square.componentData.width,
         square.componentData.height,
         square.componentData.borderRadius,
@@ -134,7 +140,7 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
     if (line) {
       drawLine(
         p,
-        position.componentData,
+        Vector.create(0, 0),
         line.componentData.start,
         line.componentData.end,
       );
@@ -142,20 +148,23 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
 
     const circle = entity.getComponent(Circle);
     if (circle) {
-      drawCircle(p, position.componentData, circle.componentData.radius);
+      drawCircle(p, Vector.create(0, 0), circle.componentData.radius);
     }
 
     const text = entity.getComponent(Typography);
     if (text) {
       drawText(
         p,
-        position.componentData,
+        Vector.create(0, 0),
         text.componentData.text,
         text.componentData.size,
         text.componentData.align,
         text.componentData.font,
       );
     }
+
+    // p.rotate(0);
+
     p.pop();
   }
 }

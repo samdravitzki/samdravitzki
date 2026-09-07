@@ -7,11 +7,35 @@ import {
   Position,
   component,
   createBundle,
+  Label,
+  Rotation,
 } from "@dravitzki/dufus-engine";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
-import { p5Part } from "@dravitzki/dufus-engine/parts/p5";
+import { p5Part, ShapeStyle, Square } from "@dravitzki/dufus-engine/parts/p5";
 import { pathEdge, pathNode } from "../coin-game/prefabs/path";
-import { coin } from "../coin-game/prefabs/coin";
+
+export function thing(position: Vector, size: number) {
+  // TODO: rename bundles to prefabs, that you add to the world by calling world.add(prefab)
+  return createBundle([
+    Position({
+      position: position,
+    }),
+    Rotation({
+      rotation: 0,
+    }),
+    Square({
+      width: size,
+      height: size,
+    }),
+    ShapeStyle({
+      fill: "#DAA520",
+      strokeWeight: 2,
+    }),
+    Label({
+      text: "square",
+    }),
+  ]);
+}
 
 /**
  * Path builder
@@ -51,7 +75,7 @@ const path = (start: Vector) => {
 
 const GRAVITY = new Vector(0, 9.8);
 export const Velocity = component<Vector>({ name: "velocity" });
-export const Speed = component<number>({ name: "speed" });
+export const AngularVelocity = component<number>({ name: "angular-velocity" });
 
 function setupPath(world: World, resources: ResourcePool) {
   const canvasBounds = resources.get<Bounds>("canvas-bounds");
@@ -74,9 +98,9 @@ function setupPath(world: World, resources: ResourcePool) {
 
   world.addBundle(
     createBundle([
-      ...coin(startingPoint, 10).components,
+      ...thing(startingPoint, 20).components,
       Velocity(Vector.create(0, 0.5)),
-      Speed(200),
+      AngularVelocity(2),
     ]),
   );
 }
@@ -98,7 +122,7 @@ export default function pathPhysicsDemo(parent?: HTMLElement) {
     "gravity",
     engine.trigger.on("fixed-update"),
     (world, resources, state, eventEmitter, payload) => {
-      for (const [vel] of world.query([Velocity, Position, Speed])) {
+      for (const [vel] of world.query([Velocity, Position])) {
         const gravity = GRAVITY.times(payload.deltaTime / 1000);
 
         vel.componentData = vel.componentData.plus(gravity);
@@ -110,16 +134,19 @@ export default function pathPhysicsDemo(parent?: HTMLElement) {
     "physics",
     engine.trigger.on("fixed-update"),
     (world, resources, state, eventEmitter, payload) => {
-      for (const [pos, vel, speed] of world.query([
+      for (const [pos, vel, rot, angVel] of world.query([
         Position,
         Velocity,
-        Speed,
+        Rotation,
+        AngularVelocity,
       ])) {
         pos.componentData.position = pos.componentData.position.plus(
-          vel.componentData
-            .times(speed.componentData)
-            .times(payload.deltaTime / 1000),
+          vel.componentData.times(payload.deltaTime / 1000),
         );
+
+        rot.componentData.rotation =
+          rot.componentData.rotation +
+          angVel.componentData * (payload.deltaTime / 1000);
       }
     },
   );
