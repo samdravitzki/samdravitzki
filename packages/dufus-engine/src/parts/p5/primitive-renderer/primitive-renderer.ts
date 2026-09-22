@@ -1,7 +1,7 @@
 import p5 from "p5";
 import World from "../../../core/World/World";
 import { Color, ShapeStyle } from "./ShapeStyle";
-import { Circle, Line, Square, Typography } from "../shape-components";
+import { Circle, Line, Polygon, Square, Typography } from "../shape-components";
 import { ResourcePool } from "../../../core/Engine/ResourcePool";
 import { Position, Rotation } from "../../../components";
 import Vector from "../../../core/Vector/Vector";
@@ -59,6 +59,14 @@ function drawText(
   p.textSize(size);
 
   p.text(text, position.x, position.y);
+}
+
+function drawPolygon(p: p5, position: Vector, vertices: Vector[]) {
+  p.beginShape();
+  for (const vertex of vertices) {
+    p.vertex(position.x + vertex.x, position.y + vertex.y);
+  }
+  p.endShape(p.CLOSE);
 }
 
 function applyPrimitiveStyle(
@@ -163,7 +171,10 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
       );
     }
 
-    // p.rotate(0);
+    const polygon = entity.getComponent(Polygon);
+    if (polygon) {
+      drawPolygon(p, Vector.create(0, 0), polygon.componentData.vertices);
+    }
 
     p.pop();
   }

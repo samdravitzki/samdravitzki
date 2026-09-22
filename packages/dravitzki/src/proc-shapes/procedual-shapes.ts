@@ -9,7 +9,12 @@ import {
   tag,
 } from "@dravitzki/dufus-engine";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
-import { Circle, p5Part, ShapeStyle } from "@dravitzki/dufus-engine/parts/p5";
+import {
+  Circle,
+  p5Part,
+  Polygon,
+  ShapeStyle,
+} from "@dravitzki/dufus-engine/parts/p5";
 
 export default function procedualShapes(parent?: HTMLElement) {
   const engine = dufus()
@@ -39,7 +44,7 @@ export default function procedualShapes(parent?: HTMLElement) {
           radius: radius,
         }),
         ShapeStyle({
-          stroke: "#ffffff78",
+          stroke: "#5a5a5a",
           strokeWeight: 2,
         }),
         Label({
@@ -54,10 +59,10 @@ export default function procedualShapes(parent?: HTMLElement) {
           position: canvasBounds.center.center.plus(Vector.create(0, -radius)),
         }),
         Circle({
-          radius: 10,
+          radius: 5,
         }),
         ShapeStyle({
-          fill: "#fff",
+          fill: "#5a5a5a",
         }),
         orbitingBallTag(),
         Label({
@@ -82,12 +87,76 @@ export default function procedualShapes(parent?: HTMLElement) {
         const x = p.cos(p.radians(t)) * radius;
         const y = p.sin(p.radians(t)) * radius;
 
-        t += p.deltaTime * 0.05;
-
         position.componentData.position = canvasBounds.center.center.plus(
           Vector.create(x, -y),
         );
       }
+
+      t += p.deltaTime * 0.05;
+    },
+  );
+
+  engine.system(
+    "draw-procedural-shape",
+    engine.trigger.on("setup"),
+    (world, resources) => {
+      const p = resources.get<p5>("p5");
+      const canvasBounds = resources.get<Bounds>("canvas-bounds");
+
+      const createVertex = (pos: Vector) =>
+        createBundle([
+          Position({
+            position: canvasBounds.center.center.plus(pos),
+          }),
+          Circle({
+            radius: 5,
+          }),
+          ShapeStyle({
+            fill: "#fff",
+          }),
+          Label({
+            text: "dot",
+          }),
+        ]);
+
+      // Configuration for the procedural shape
+      const sides = 10;
+      const maxRadius = radius;
+      const radiusPattern = [maxRadius, maxRadius / 2];
+
+      const verts = [];
+
+      for (let i = 0; i < sides; i++) {
+        const r = radiusPattern[i % radiusPattern.length];
+
+        const x = p.cos(p.radians(i * (360 / sides))) * r;
+        const y = p.sin(p.radians(i * (360 / sides))) * r;
+
+        const vert = Vector.create(x, -y);
+
+        verts.push(vert);
+
+        const vertex = createVertex(vert);
+        world.addBundle(vertex);
+      }
+
+      const polygon = createBundle([
+        Position({
+          position: canvasBounds.center.center,
+        }),
+        Polygon({
+          vertices: verts,
+        }),
+        ShapeStyle({
+          stroke: "#fff",
+          strokeWeight: 2,
+        }),
+        Label({
+          text: "polygon",
+        }),
+      ]);
+
+      world.addBundle(polygon);
     },
   );
 
