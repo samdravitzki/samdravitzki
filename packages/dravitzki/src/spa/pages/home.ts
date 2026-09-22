@@ -12,7 +12,6 @@ const homePage: Page = (container: HTMLElement, { navigate }) => {
       <p role="doc-subtitle">
         <i>Built by <b>Sam Dravitzki</b> <span class="emoji"></span></i>
       </p>
-      <h4>Apps and Games</h4>
       <div
         style="display: flex; gap: 4px; justify-content: center;"
       >
