@@ -12,6 +12,8 @@ import collisionDemo2 from "../collision-demo-2/collision-demo-2";
 import collisionDemo3 from "../collision-demo-3/collision-demo-3";
 import coinGame from "../coin-game/coin-game";
 import pathPhysicsDemo from "../path-physics/path-physics";
+import snake from "../snake/snake-game";
+import procedualShapes from "../proc-shapes/procedual-shapes";
 
 export type MiniApp = (parent?: HTMLElement) => Engine<any, any>;
 
@@ -26,15 +28,6 @@ export type MiniAppInfo = {
 };
 
 const miniApps: MiniAppInfo[] = [];
-
-// Disabled because the standard of the rest of the mini apps has surpassed it
-// miniApps.push({
-//   name: "snake",
-//   symbol: "🐍",
-//   appId: "snake",
-//   controls: [["move", "wasd or arrow keys"]],
-//   app: snake,
-// });
 
 miniApps.push({
   name: "pong",
@@ -63,6 +56,7 @@ miniApps.push({
 
 miniApps.push({
   name: "shifter",
+  type: "experience",
   symbol: "🕹️",
   appId: "shifter",
   tags: ["input"],
@@ -95,6 +89,14 @@ miniApps.push({
   controls: [["interact", "click + drag"]],
   tags: ["graphics"],
   app: sdf,
+});
+
+miniApps.push({
+  name: "snake",
+  symbol: "🐍",
+  appId: "snake",
+  controls: [["move", "wasd or arrow keys"]],
+  app: snake,
 });
 
 // dufus-collisions = demos of dufus collisions part (the first attempt at creating physics simulations)
@@ -135,6 +137,14 @@ miniApps.push({
   symbol: "🧪",
   appId: "path-physics",
   app: pathPhysicsDemo,
+  tags: ["not-working"],
+});
+
+miniApps.push({
+  name: "proc-shapes",
+  symbol: "🧩",
+  appId: "proc-shapes",
+  app: procedualShapes,
 });
 
 miniApps.push({
