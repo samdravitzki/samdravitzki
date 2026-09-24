@@ -29,6 +29,10 @@ function tick(animation: AnimationData) {
   return easedT;
 }
 
+function lerp(from: number, to: number, t: number) {
+  return from + (to - from) * t;
+}
+
 function animation() {
   const part: Part<{
     update: void;
@@ -51,13 +55,50 @@ function animation() {
           ? "running"
           : "completed";
 
-        const [position] = world.query([Position, animationData.target])[0];
+        const [component] = world.query([
+          animationData.Component,
+          animationData.target,
+        ])[0];
 
-        position.componentData.position = Vector.lerp(
-          animationData.from,
-          animationData.to,
-          animationData.t,
-        );
+        if (
+          component.componentData &&
+          typeof component.componentData === "object" &&
+          "position" in component.componentData &&
+          typeof animationData.from === "object" &&
+          animationData.from !== null &&
+          "position" in animationData.from &&
+          animationData.from.position instanceof Vector &&
+          typeof animationData.to === "object" &&
+          animationData.to !== null &&
+          "position" in animationData.to &&
+          animationData.to.position instanceof Vector
+        ) {
+          component.componentData.position = Vector.lerp(
+            animationData.from.position,
+            animationData.to.position,
+            animationData.t,
+          );
+        }
+
+        if (
+          component.componentData &&
+          typeof component.componentData === "object" &&
+          "rotation" in component.componentData &&
+          typeof animationData.from === "object" &&
+          typeof animationData.to === "object" &&
+          animationData.from !== null &&
+          animationData.to !== null &&
+          "rotation" in animationData.from &&
+          "rotation" in animationData.to &&
+          typeof animationData.to.rotation === "number" &&
+          typeof animationData.from.rotation === "number"
+        ) {
+          component.componentData.rotation = lerp(
+            animationData.from.rotation,
+            animationData.to.rotation,
+            animationData.t,
+          );
+        }
       }
     });
 

@@ -102,7 +102,6 @@
 .inspector__panel-body {
   scrollbar-width: thin;
   scrollbar-gutter: stable;
-  overflow-y: auto;
 }
 
 .inspector__panel-title-section {

@@ -259,8 +259,13 @@ function moveShifter(
 
     const shifterAnimation = createAnimation({
       name: "shift-lever-animation",
-      from: from.position.plus(canvasBounds.center.center),
-      to: to.position.plus(canvasBounds.center.center),
+      Component: Position,
+      from: {
+        position: from.position.plus(canvasBounds.center.center),
+      },
+      to: {
+        position: to.position.plus(canvasBounds.center.center),
+      },
       target: "shift-lever",
       duration: 120,
       loop: false,

@@ -7,6 +7,8 @@ import {
   Label,
   Vector,
   tag,
+  Rotation,
+  ComponentSpec,
 } from "@dravitzki/dufus-engine";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import {
@@ -15,6 +17,11 @@ import {
   Polygon,
   ShapeStyle,
 } from "@dravitzki/dufus-engine/parts/p5";
+import {
+  animation,
+  createAnimation,
+  EasingName,
+} from "@dravitzki/dufus-engine/parts/animation";
 
 export default function procedualShapes(parent?: HTMLElement) {
   const engine = dufus()
@@ -25,6 +32,7 @@ export default function procedualShapes(parent?: HTMLElement) {
 
   engine.part(p5Part([500, 500], parent, [0, 0, 14]));
   engine.part(inspector());
+  engine.part(animation());
 
   const orbitingBallTag = tag("orbiting-ball");
 
@@ -154,11 +162,54 @@ export default function procedualShapes(parent?: HTMLElement) {
         Label({
           text: "polygon",
         }),
+        Rotation({
+          rotation: p.radians(180),
+        }),
+        tag("animation-target")(),
       ]);
 
       world.addBundle(polygon);
+
+      const rotationAnimation = animate(Rotation, {
+        from: { rotation: 0 },
+        to: { rotation: p.radians(180) },
+        duration: 2000,
+        easing: "easeInOutCirc",
+        loop: true,
+        target: `animation-target`, // replace with match or query on world
+      });
+
+      world.addBundle(rotationAnimation);
     },
   );
 
   return engine;
+}
+
+type AnimationConfig<T> = {
+  from: T;
+  to: T;
+  duration: number;
+  target: string;
+  easing?: EasingName;
+  loop?: boolean;
+};
+
+type ComponentData<T> = T extends ComponentSpec<infer U> ? U : never;
+
+function animate<T extends ComponentSpec<any>>(
+  Component: T,
+  config: AnimationConfig<ComponentData<T>>,
+) {
+  return createAnimation({
+    name: "test",
+    Component: Component,
+    from: config.from,
+    to: config.to,
+    target: config.target,
+    duration: config.duration,
+    loop: config.loop,
+    easing: config.easing,
+    startTime: Date.now(),
+  });
 }

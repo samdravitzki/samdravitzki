@@ -50,8 +50,13 @@ export default function animationDemo(parent?: HTMLElement) {
 
     const basicLoopAnimation = createAnimation({
       name: "basic-loop",
-      from: Vector.create(-300, -100).plus(canvasBounds.center.center),
-      to: Vector.create(300, -100).plus(canvasBounds.center.center),
+      Component: Position,
+      from: {
+        position: Vector.create(-300, -100).plus(canvasBounds.center.center),
+      },
+      to: {
+        position: Vector.create(300, -100).plus(canvasBounds.center.center),
+      },
       target: `animation-target-1`,
       duration: 2000,
       loop: true,
@@ -59,8 +64,13 @@ export default function animationDemo(parent?: HTMLElement) {
 
     const notLoopingAnimation = createAnimation({
       name: "not-looping",
-      from: Vector.create(-300, 0).plus(canvasBounds.center.center),
-      to: Vector.create(300, 0).plus(canvasBounds.center.center),
+      Component: Position,
+      from: {
+        position: Vector.create(-300, 0).plus(canvasBounds.center.center),
+      },
+      to: {
+        position: Vector.create(300, 0).plus(canvasBounds.center.center),
+      },
       target: `animation-target-2`,
       duration: 2000,
       loop: false,
@@ -73,21 +83,33 @@ export default function animationDemo(parent?: HTMLElement) {
 
   engine.system("setup-animation-path-lines", trigger.on("setup"), (world) => {
     for (const [animation] of world.query([Animation])) {
-      world.addBundle(
-        createBundle([
-          Position({
-            position: new Vector(0, 0),
-          }),
-          Line({
-            start: animation.componentData.from,
-            end: animation.componentData.to,
-          }),
-          ShapeStyle({
-            stroke: palette[300],
-            strokeWeight: 2,
-          }),
-        ]),
-      );
+      const animationData = animation.componentData;
+      if (
+        typeof animationData.from === "object" &&
+        animationData.from !== null &&
+        "position" in animationData.from &&
+        animationData.from.position instanceof Vector &&
+        typeof animationData.to === "object" &&
+        animationData.to !== null &&
+        "position" in animationData.to &&
+        animationData.to.position instanceof Vector
+      ) {
+        world.addBundle(
+          createBundle([
+            Position({
+              position: new Vector(0, 0),
+            }),
+            Line({
+              start: animationData.from.position,
+              end: animationData.to.position,
+            }),
+            ShapeStyle({
+              stroke: palette[300],
+              strokeWeight: 2,
+            }),
+          ]),
+        );
+      }
     }
   });
 
@@ -98,23 +120,35 @@ export default function animationDemo(parent?: HTMLElement) {
       const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
       world.query([Animation]).forEach(([animation], i) => {
-        world.addBundle(
-          createBundle([
-            tag(`animation-target-${i + 1}`)(),
-            Position({
-              position: animation.componentData.from.plus(
-                canvasBounds.center.center,
-              ),
-            }),
-            Circle({
-              radius: 10,
-            }),
-            ShapeStyle({
-              fill: palette[600],
-              strokeWeight: 2,
-            }),
-          ]),
-        );
+        const animationData = animation.componentData;
+        if (
+          typeof animationData.from === "object" &&
+          animationData.from !== null &&
+          "position" in animationData.from &&
+          animationData.from.position instanceof Vector &&
+          typeof animationData.to === "object" &&
+          animationData.to !== null &&
+          "position" in animationData.to &&
+          animationData.to.position instanceof Vector
+        ) {
+          world.addBundle(
+            createBundle([
+              tag(`animation-target-${i + 1}`)(),
+              Position({
+                position: animationData.from.position.plus(
+                  canvasBounds.center.center,
+                ),
+              }),
+              Circle({
+                radius: 10,
+              }),
+              ShapeStyle({
+                fill: palette[600],
+                strokeWeight: 2,
+              }),
+            ]),
+          );
+        }
       });
     },
   );

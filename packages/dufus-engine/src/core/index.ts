@@ -8,7 +8,7 @@ import Bounds from "./Bounds/Bounds";
 import Vector from "./Vector/Vector";
 import createBundle from "./Bundle/createBundle";
 import State from "./State/State";
-import Component from "./Component/Component";
+import Component, { ComponentSpec } from "./Component/Component";
 import { EventEmitter } from "./Engine/EventEmitter";
 import { Part } from "./Part/Part";
 import Bundle from "./Bundle/Bundle";
@@ -26,6 +26,7 @@ export {
   createBundle,
   type Engine,
   type Component,
+  type ComponentSpec,
   type EventEmitter,
   type Part,
   type Bundle,
