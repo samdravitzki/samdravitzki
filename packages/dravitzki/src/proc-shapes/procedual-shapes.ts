@@ -163,7 +163,7 @@ export default function procedualShapes(parent?: HTMLElement) {
           text: "polygon",
         }),
         Rotation({
-          rotation: p.radians(180),
+          rotation: p.radians(0),
         }),
         tag("animation-target")(),
       ]);
@@ -172,7 +172,7 @@ export default function procedualShapes(parent?: HTMLElement) {
 
       const rotationAnimation = animate(Rotation, {
         from: { rotation: 0 },
-        to: { rotation: p.radians(180) },
+        to: { rotation: p.radians(360) },
         duration: 2000,
         easing: "easeInOutCirc",
         loop: true,
