@@ -1,4 +1,3 @@
-import { Position } from "../../components";
 import { Part } from "../../core/Part/Part";
 import Vector from "../../core/Vector/Vector";
 import Animation, { AnimationData } from "./components/Animation";

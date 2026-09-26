@@ -1,7 +1,6 @@
-import Vector from "../../../core/Vector/Vector";
 import {
   component,
-  ComponentSpec,
+  ComponentToken,
   tag,
 } from "../../../core/Component/Component";
 import { easings } from "../easing";
@@ -11,10 +10,10 @@ export type EasingName = keyof typeof easings;
 
 export type AnimationState = "ready" | "running" | "completed";
 
-type ComponentData<T> = T extends ComponentSpec<infer U> ? U : never;
+type ComponentData<T> = T extends ComponentToken<infer U> ? U : never;
 
 export type AnimationData<
-  T extends ComponentSpec<unknown> = ComponentSpec<unknown>,
+  T extends ComponentToken<unknown> = ComponentToken<unknown>,
 > = {
   name: "animation";
   Component: T;
@@ -42,7 +41,7 @@ export const Animation = component<AnimationData>({
 /**
  * Factory used to create an animation component
  */
-export function createAnimation<T extends ComponentSpec<any>>(params: {
+export function createAnimation<T extends ComponentToken<unknown>>(params: {
   name: string;
   Component: T;
   from: ComponentData<T>;

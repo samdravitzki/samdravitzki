@@ -3,7 +3,7 @@ import { Engine } from "./Engine/Engine";
 import { DufusEngineBuilder } from "./Engine/DufusEngineBuilder";
 import World from "./World/World";
 import { ResourcePool } from "./Engine/ResourcePool";
-import { component, tag } from "./Component/Component";
+import { component, ComponentToken, tag } from "./Component/Component";
 import Bounds from "./Bounds/Bounds";
 import Vector from "./Vector/Vector";
 import createBundle from "./Bundle/createBundle";
@@ -27,6 +27,7 @@ export {
   type Engine,
   type Component,
   type ComponentSpec,
+  type ComponentToken,
   type EventEmitter,
   type Part,
   type Bundle,

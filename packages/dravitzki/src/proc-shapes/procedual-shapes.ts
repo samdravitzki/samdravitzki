@@ -8,7 +8,7 @@ import {
   Vector,
   tag,
   Rotation,
-  ComponentSpec,
+  ComponentToken,
 } from "@dravitzki/dufus-engine";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import {
@@ -174,7 +174,7 @@ export default function procedualShapes(parent?: HTMLElement) {
         from: { rotation: 0 },
         to: { rotation: p.radians(360) },
         duration: 2000,
-        easing: "easeInOutCirc",
+        easing: "easeInOutCubic",
         loop: true,
         target: `animation-target`, // replace with match or query on world
       });
@@ -195,9 +195,9 @@ type AnimationConfig<T> = {
   loop?: boolean;
 };
 
-type ComponentData<T> = T extends ComponentSpec<infer U> ? U : never;
+type ComponentData<T> = T extends ComponentToken<infer U> ? U : never;
 
-function animate<T extends ComponentSpec<any>>(
+function animate<T extends ComponentToken<unknown>>(
   Component: T,
   config: AnimationConfig<ComponentData<T>>,
 ) {
