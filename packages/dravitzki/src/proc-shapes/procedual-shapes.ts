@@ -108,22 +108,6 @@ export default function procedualShapes(parent?: HTMLElement) {
       const p = resources.get<p5>("p5");
       const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-      const createVertex = (pos: Vector) =>
-        createBundle([
-          Position({
-            position: canvasBounds.center.center.plus(pos),
-          }),
-          Circle({
-            radius: 5,
-          }),
-          ShapeStyle({
-            fill: "#fff",
-          }),
-          Label({
-            text: "dot",
-          }),
-        ]);
-
       // Configuration for the procedural shape
       const sides = 10;
       const maxRadius = radius;
@@ -140,9 +124,6 @@ export default function procedualShapes(parent?: HTMLElement) {
         const vert = Vector.create(x, -y);
 
         verts.push(vert);
-
-        const vertex = createVertex(vert);
-        world.addBundle(vertex);
       }
 
       const polygon = createBundle([
@@ -189,6 +170,17 @@ export default function procedualShapes(parent?: HTMLElement) {
       });
 
       world.addBundle(scaleAnimation);
+
+      const strokeAnimation = animate(ShapeStyle, {
+        from: { strokeWeight: 2 },
+        to: { strokeWeight: 100 },
+        duration: 2000,
+        easing: "easeInOutCubic",
+        loop: true,
+        target: `animation-target`, // replace with match or query on world
+      });
+
+      world.addBundle(strokeAnimation);
     },
   );
 
