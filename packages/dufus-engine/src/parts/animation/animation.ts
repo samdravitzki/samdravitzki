@@ -1,9 +1,9 @@
 import { Part } from "../../core/Part/Part";
-import Vector from "../../core/Vector/Vector";
 import Animation, { AnimationData } from "./components/Animation";
 import { easings } from "./easing";
+import { selectInterpolationFunction } from "./interpolation";
 
-function isFinsihed(animation: AnimationData) {
+function isFinished(animation: AnimationData) {
   return !animation.loop && animation.t >= 1;
 }
 
@@ -28,8 +28,18 @@ function tick(animation: AnimationData) {
   return easedT;
 }
 
-function lerp(from: number, to: number, t: number) {
-  return from + (to - from) * t;
+function selectKeyframe(animation: AnimationData) {
+  if (animation.keyframes.length === 1) {
+    return animation.keyframes[0];
+  }
+
+  const keyframeDuration = animation.duration / animation.keyframes.length;
+
+  const elapsed = animation.elapsedTime % animation.duration;
+
+  const keyframeIndex = Math.floor(elapsed / keyframeDuration);
+
+  return animation.keyframes[keyframeIndex];
 }
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
@@ -41,21 +51,6 @@ function isPlainRecord(value: unknown): value is Record<string, unknown> {
     !Array.isArray(value) &&
     proto === Object.prototype
   );
-}
-
-type InterpolationFunction<T> = (from: T, to: T, t: number) => T;
-
-function selectInterpolationFunction(
-  from: unknown,
-  to: unknown,
-): InterpolationFunction<any> | undefined {
-  if (typeof from === "number" && typeof to === "number") {
-    return lerp;
-  }
-
-  if (from instanceof Vector && to instanceof Vector) {
-    return Vector.lerp;
-  }
 }
 
 function animation() {
@@ -76,7 +71,7 @@ function animation() {
         animationData.t = tick(animationData);
 
         animationData.previousState = animationData.state;
-        animationData.state = !isFinsihed(animationData)
+        animationData.state = !isFinished(animationData)
           ? "running"
           : "completed";
 
@@ -84,6 +79,8 @@ function animation() {
           animationData.Component,
           animationData.target,
         ])[0];
+
+        const keyframe = selectKeyframe(animationData);
 
         /**
          * DevX improvement:
@@ -94,8 +91,8 @@ function animation() {
          * the targe entity shouldn't need to have that component specified
          */
 
-        if (isPlainRecord(animationData.to)) {
-          const keys = Object.keys(animationData.to);
+        if (isPlainRecord(keyframe.to)) {
+          const keys = Object.keys(keyframe.to);
 
           for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
@@ -104,36 +101,33 @@ function animation() {
               continue;
             }
 
-            if (
-              !isPlainRecord(animationData.from) ||
-              !(key in animationData.from)
-            ) {
+            if (!isPlainRecord(keyframe.from) || !(key in keyframe.from)) {
               continue;
             }
 
             const interpolationFunction = selectInterpolationFunction(
-              animationData.from[key],
-              animationData.to[key],
+              keyframe.from[key],
+              keyframe.to[key],
             );
 
             if (interpolationFunction) {
               component.componentData[key] = interpolationFunction(
-                animationData.from[key],
-                animationData.to[key],
+                keyframe.from[key],
+                keyframe.to[key],
                 animationData.t,
               );
             }
           }
         } else {
           const interpolationFunction = selectInterpolationFunction(
-            animationData.from,
-            animationData.to,
+            keyframe.from,
+            keyframe.to,
           );
 
           if (interpolationFunction) {
             component.componentData = interpolationFunction(
-              animationData.from,
-              animationData.to,
+              keyframe.from,
+              keyframe.to,
               animationData.t,
             );
           }
@@ -183,7 +177,7 @@ function animation() {
 
         for (const [animation, entityId] of animations) {
           const animationData = animation.componentData;
-          if (isFinsihed(animationData) && !animationData.persistent) {
+          if (isFinished(animationData) && !animationData.persistent) {
             world.removeEntity(entityId);
           }
         }

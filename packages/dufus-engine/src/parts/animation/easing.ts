@@ -1,3 +1,7 @@
+function linear(x: number): number {
+  return x;
+}
+
 // https://easings.net/#easeInOutCubic
 function easeInOutCubic(x: number): number {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
@@ -43,6 +47,7 @@ function easeOutBounce(x: number): number {
 }
 
 const easings = {
+  linear,
   easeInOutCubic,
   easeInOutSine,
   easeInOutCirc,

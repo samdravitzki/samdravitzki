@@ -82,7 +82,7 @@ export default function animationDemo(parent?: HTMLElement) {
 
   engine.system("setup-animation-path-lines", trigger.on("setup"), (world) => {
     for (const [animation] of world.query([Animation])) {
-      const animationData = animation.componentData;
+      const animationData = animation.componentData.keyframes[0];
       if (
         typeof animationData.from === "object" &&
         animationData.from !== null &&
@@ -119,7 +119,7 @@ export default function animationDemo(parent?: HTMLElement) {
       const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
       world.query([Animation]).forEach(([animation], i) => {
-        const animationData = animation.componentData;
+        const animationData = animation.componentData.keyframes[0];
         if (
           typeof animationData.from === "object" &&
           animationData.from !== null &&

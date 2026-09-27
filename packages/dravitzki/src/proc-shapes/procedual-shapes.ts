@@ -161,23 +161,39 @@ export default function procedualShapes(parent?: HTMLElement) {
       world.addBundle(rotationAnimation);
 
       const scaleAnimation = animate(Scale, {
-        from: Vector.create(1, 1),
-        to: Vector.create(0.5, 0.5),
+        keyframes: [
+          {
+            from: Vector.create(1, 1),
+            to: Vector.create(0.5, 0.5),
+          },
+          {
+            from: Vector.create(0.5, 0.5),
+            to: Vector.create(1, 1),
+          },
+        ],
         duration: 2000,
         easing: "easeInOutCubic",
         loop: true,
-        target: `animation-target`, // replace with match or query on world
+        target: `animation-target`,
       });
 
       world.addBundle(scaleAnimation);
 
       const strokeAnimation = animate(ShapeStyle, {
-        from: { strokeWeight: 2 },
-        to: { strokeWeight: 100 },
+        keyframes: [
+          {
+            from: { strokeWeight: 2 }, // TODO: First frame should pull the initial stroke weight defined on the shape style component if it exists
+            to: { strokeWeight: 100 },
+          },
+          {
+            from: { strokeWeight: 100 }, // TODO: Subsequent frames should pull the previous keyframe's 'to' value if it exists
+            to: { strokeWeight: 2 },
+          },
+        ],
         duration: 2000,
         easing: "easeInOutCubic",
         loop: true,
-        target: `animation-target`, // replace with match or query on world
+        target: `animation-target`,
       });
 
       world.addBundle(strokeAnimation);

@@ -14,6 +14,13 @@ export type AnimationState = "ready" | "running" | "completed";
 
 type ComponentData<T> = T extends ComponentToken<infer U> ? U : never;
 
+type Keyframe<T extends ComponentToken<unknown>> = {
+  from?: ComponentData<T>;
+  to: ComponentData<T>;
+  easing?: EasingName;
+  duration?: number;
+};
+
 export type AnimationData<
   T extends ComponentToken<unknown> = ComponentToken<unknown>,
 > = {
@@ -24,8 +31,7 @@ export type AnimationData<
   t: number;
   elapsedTime: number;
   // configurable properties
-  from: ComponentData<T>;
-  to: ComponentData<T>;
+  keyframes: Keyframe<T>[];
   target: string;
   duration: number;
   loop?: boolean;
@@ -41,9 +47,7 @@ export const Animation = component<AnimationData>({
   name: "animation",
 });
 
-type AnimationConfig<T> = {
-  from: T;
-  to: T;
+type AnimationConfig<T extends ComponentToken<unknown>> = {
   duration: number;
   target: string;
   easing?: EasingName;
@@ -51,7 +55,15 @@ type AnimationConfig<T> = {
   loop?: boolean;
   startTime?: number;
   name?: string;
-};
+} & (
+  | {
+      from: ComponentData<T>;
+      to: ComponentData<T>;
+    }
+  | {
+      keyframes: Keyframe<T>[];
+    }
+);
 
 /**
  * Define an animation for a given component based on the provided configuration.
@@ -66,8 +78,18 @@ type AnimationConfig<T> = {
  */
 export function animate<T extends ComponentToken<unknown>>(
   Component: T,
-  config: AnimationConfig<ComponentData<T>>,
+  config: AnimationConfig<T>,
 ) {
+  const keyframes =
+    "keyframes" in config
+      ? config.keyframes
+      : [
+          {
+            from: config.from,
+            to: config.to,
+          },
+        ];
+
   const animation = Animation({
     t: 0,
     elapsedTime: 0,
@@ -76,8 +98,7 @@ export function animate<T extends ComponentToken<unknown>>(
     previousState: undefined,
     persistent: config.persistent ?? false,
     Component: Component,
-    from: config.from,
-    to: config.to,
+    keyframes: keyframes,
     target: config.target,
     duration: config.duration,
     loop: config.loop,
