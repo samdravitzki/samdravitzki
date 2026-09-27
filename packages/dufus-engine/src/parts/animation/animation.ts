@@ -46,8 +46,8 @@ function isPlainRecord(value: unknown): value is Record<string, unknown> {
 type InterpolationFunction<T> = (from: T, to: T, t: number) => T;
 
 function selectInterpolationFunction(
-  from: any,
-  to: any,
+  from: unknown,
+  to: unknown,
 ): InterpolationFunction<any> | undefined {
   if (typeof from === "number" && typeof to === "number") {
     return lerp;
