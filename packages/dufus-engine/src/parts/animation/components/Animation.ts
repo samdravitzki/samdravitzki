@@ -1,3 +1,4 @@
+import { Label } from "../../..";
 import {
   createBundle,
   Component,
@@ -84,7 +85,11 @@ export function animate<T extends ComponentToken<unknown>>(
     startTime: config.startTime ?? Date.now(),
   });
 
-  const components: Component[] = [animation];
+  const label = Label({
+    text: config.name ?? "animation",
+  });
+
+  const components: Component[] = [animation, label];
 
   if (config.name) {
     const animationNameTag = tag(config.name);
