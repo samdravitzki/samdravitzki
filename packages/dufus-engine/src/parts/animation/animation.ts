@@ -32,6 +32,32 @@ function lerp(from: number, to: number, t: number) {
   return from + (to - from) * t;
 }
 
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  const proto = Object.getPrototypeOf(value);
+
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    proto === Object.prototype
+  );
+}
+
+type InterpolationFunction<T> = (from: T, to: T, t: number) => T;
+
+function selectInterpolationFunction(
+  from: any,
+  to: any,
+): InterpolationFunction<any> | undefined {
+  if (typeof from === "number" && typeof to === "number") {
+    return lerp;
+  }
+
+  if (from instanceof Vector && to instanceof Vector) {
+    return Vector.lerp;
+  }
+}
+
 function animation() {
   const part: Part<{
     update: void;
@@ -59,44 +85,58 @@ function animation() {
           animationData.target,
         ])[0];
 
-        if (
-          component.componentData &&
-          typeof component.componentData === "object" &&
-          "position" in component.componentData &&
-          typeof animationData.from === "object" &&
-          animationData.from !== null &&
-          "position" in animationData.from &&
-          animationData.from.position instanceof Vector &&
-          typeof animationData.to === "object" &&
-          animationData.to !== null &&
-          "position" in animationData.to &&
-          animationData.to.position instanceof Vector
-        ) {
-          component.componentData.position = Vector.lerp(
-            animationData.from.position,
-            animationData.to.position,
-            animationData.t,
-          );
-        }
+        /**
+         * DevX improvement:
+         * Would be a nice addition to not have to specify a 'from' state for the animation
+         * if the target entity already has that component with the desired initial state.
+         *
+         * Also the other way around where if you configure a 'from' state on the animation
+         * the targe entity shouldn't need to have that component specified
+         */
 
-        if (
-          component.componentData &&
-          typeof component.componentData === "object" &&
-          "rotation" in component.componentData &&
-          typeof animationData.from === "object" &&
-          typeof animationData.to === "object" &&
-          animationData.from !== null &&
-          animationData.to !== null &&
-          "rotation" in animationData.from &&
-          "rotation" in animationData.to &&
-          typeof animationData.to.rotation === "number" &&
-          typeof animationData.from.rotation === "number"
-        ) {
-          component.componentData.rotation = lerp(
-            animationData.from.rotation,
-            animationData.to.rotation,
-            animationData.t,
+        if (isPlainRecord(animationData.to)) {
+          const keys = Object.keys(animationData.to);
+
+          for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+
+            if (!component || !isPlainRecord(component.componentData)) {
+              continue;
+            }
+
+            if (
+              !isPlainRecord(animationData.from) ||
+              !(key in animationData.from)
+            ) {
+              continue;
+            }
+
+            const interpolationFunction = selectInterpolationFunction(
+              animationData.from[key],
+              animationData.to[key],
+            );
+
+            if (interpolationFunction) {
+              component.componentData[key] = interpolationFunction(
+                animationData.from[key],
+                animationData.to[key],
+                animationData.t,
+              );
+            }
+          }
+        } else {
+          const interpolationFunction = selectInterpolationFunction(
+            animationData.from,
+            animationData.to,
           );
+
+          if (interpolationFunction) {
+            component.componentData = interpolationFunction(
+              animationData.from,
+              animationData.to,
+              animationData.t,
+            );
+          }
         }
       }
     });

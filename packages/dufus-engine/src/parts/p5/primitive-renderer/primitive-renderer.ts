@@ -3,7 +3,7 @@ import World from "../../../core/World/World";
 import { Color, ShapeStyle } from "./ShapeStyle";
 import { Circle, Line, Polygon, Square, Typography } from "../shape-components";
 import { ResourcePool } from "../../../core/Engine/ResourcePool";
-import { Position, Rotation } from "../../../components";
+import { Position, Rotation, Scale } from "../../../components";
 import Vector from "../../../core/Vector/Vector";
 
 function toP5Color(p: p5, color: string | number[]) {
@@ -133,47 +133,90 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
       p.rotate(rotation.componentData.rotation);
     }
 
+    const scale = entity.getComponent(Scale);
+
     const square = entity.getComponent(Square);
     if (square) {
+      let width = square.componentData.width;
+      let height = square.componentData.height;
+
+      if (scale) {
+        width *= scale.componentData.x;
+        height *= scale.componentData.y;
+      }
+
       drawSquare(
         p,
         Vector.create(0, 0),
-        square.componentData.width,
-        square.componentData.height,
+        width,
+        height,
         square.componentData.borderRadius,
       );
     }
 
     const line = entity.getComponent(Line);
     if (line) {
-      drawLine(
-        p,
-        Vector.create(0, 0),
-        line.componentData.start,
-        line.componentData.end,
-      );
+      let start = line.componentData.start;
+      let end = line.componentData.end;
+
+      if (scale) {
+        start = Vector.create(
+          start.x * scale.componentData.x,
+          start.y * scale.componentData.y,
+        );
+        end = Vector.create(
+          end.x * scale.componentData.x,
+          end.y * scale.componentData.y,
+        );
+      }
+
+      drawLine(p, Vector.create(0, 0), start, end);
     }
 
     const circle = entity.getComponent(Circle);
     if (circle) {
-      drawCircle(p, Vector.create(0, 0), circle.componentData.radius);
+      let radius = circle.componentData.radius;
+      if (scale) {
+        radius *= scale.componentData.x; // Assuming uniform scaling for the circle
+      }
+
+      drawCircle(p, Vector.create(0, 0), radius);
     }
 
     const text = entity.getComponent(Typography);
     if (text) {
+      let textSize = text.componentData.size;
+
+      if (scale) {
+        textSize *= scale.componentData.y; // Assuming uniform scaling for the text
+      }
+
       drawText(
         p,
         Vector.create(0, 0),
         text.componentData.text,
-        text.componentData.size,
+        textSize,
         text.componentData.align,
         text.componentData.font,
       );
     }
 
     const polygon = entity.getComponent(Polygon);
+
     if (polygon) {
-      drawPolygon(p, Vector.create(0, 0), polygon.componentData.vertices);
+      let verts = polygon.componentData.vertices;
+
+      // Scale this way to preserve shape style i.e. stroke width
+      if (scale) {
+        verts = verts.map((v) =>
+          Vector.create(
+            v.x * scale.componentData.x,
+            v.y * scale.componentData.y,
+          ),
+        );
+      }
+
+      drawPolygon(p, Vector.create(0, 0), verts);
     }
 
     p.pop();

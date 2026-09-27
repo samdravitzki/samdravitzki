@@ -9,6 +9,7 @@ import {
   tag,
   Rotation,
   ComponentToken,
+  Scale,
 } from "@dravitzki/dufus-engine";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import {
@@ -145,9 +146,6 @@ export default function procedualShapes(parent?: HTMLElement) {
       }
 
       const polygon = createBundle([
-        Position({
-          position: canvasBounds.center.center,
-        }),
         Polygon({
           vertices: verts,
         }),
@@ -158,9 +156,13 @@ export default function procedualShapes(parent?: HTMLElement) {
         Label({
           text: "polygon",
         }),
+        Position({
+          position: canvasBounds.center.center,
+        }),
         Rotation({
           rotation: p.radians(0),
         }),
+        Scale(Vector.create(1, 1)),
         tag("animation-target")(),
       ]);
 
@@ -176,6 +178,17 @@ export default function procedualShapes(parent?: HTMLElement) {
       });
 
       world.addBundle(rotationAnimation);
+
+      const scaleAnimation = animate(Scale, {
+        from: Vector.create(1, 1),
+        to: Vector.create(0.5, 0.5),
+        duration: 2000,
+        easing: "easeInOutCubic",
+        loop: true,
+        target: `animation-target`, // replace with match or query on world
+      });
+
+      world.addBundle(scaleAnimation);
     },
   );
 
