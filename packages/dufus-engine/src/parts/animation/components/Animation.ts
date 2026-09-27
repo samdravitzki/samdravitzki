@@ -1,10 +1,11 @@
 import {
+  createBundle,
+  Component,
   component,
   ComponentToken,
   tag,
-} from "../../../core/Component/Component";
+} from "../../../core";
 import { easings } from "../easing";
-import createBundle from "../../../core/Bundle/createBundle";
 
 export type EasingName = keyof typeof easings;
 
@@ -28,6 +29,7 @@ export type AnimationData<
   duration: number;
   loop?: boolean;
   easing?: EasingName;
+  persistent?: boolean; // whether the animation should be cleaned up after completion
 
   // animation state tracking
   state: AnimationState;
@@ -38,37 +40,58 @@ export const Animation = component<AnimationData>({
   name: "animation",
 });
 
-/**
- * Factory used to create an animation component
- */
-export function createAnimation<T extends ComponentToken<unknown>>(params: {
-  name: string;
-  Component: T;
-  from: ComponentData<T>;
-  to: ComponentData<T>;
-  target: string;
+type AnimationConfig<T> = {
+  from: T;
+  to: T;
   duration: number;
-  startTime?: number;
-  loop?: boolean;
-  paused?: boolean;
+  target: string;
   easing?: EasingName;
-}) {
-  const { name, ...animationParams } = params;
+  persistent?: boolean;
+  loop?: boolean;
+  startTime?: number;
+  name?: string;
+};
 
-  const animations = Animation({
+/**
+ * Define an animation for a given component based on the provided configuration.
+ *
+ * A factory function used to create an Animation entity.
+ *
+ * The interface is very much inspired by anime.js animate function.
+ *
+ * @param Component The component token representing the type of component being animated.
+ * @param config The configuration object containing animation parameters such as from, to, duration, target, easing, loop, and startTime.
+ * @returns A bundle containing the created animation component.
+ */
+export function animate<T extends ComponentToken<unknown>>(
+  Component: T,
+  config: AnimationConfig<ComponentData<T>>,
+) {
+  const animation = Animation({
     t: 0,
     elapsedTime: 0,
     name: "animation",
-    startTime: undefined,
-    loop: false,
     state: "ready",
     previousState: undefined,
-    ...animationParams,
+    persistent: config.persistent ?? false,
+    Component: Component,
+    from: config.from,
+    to: config.to,
+    target: config.target,
+    duration: config.duration,
+    loop: config.loop,
+    easing: config.easing,
+    startTime: config.startTime ?? Date.now(),
   });
 
-  const animationNameTag = tag(name);
+  const components: Component[] = [animation];
 
-  return createBundle([animationNameTag(), animations]);
+  if (config.name) {
+    const animationNameTag = tag(config.name);
+    components.push(animationNameTag());
+  }
+
+  return createBundle(components);
 }
 
 export default Animation;

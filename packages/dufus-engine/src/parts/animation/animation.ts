@@ -143,7 +143,7 @@ function animation() {
 
         for (const [animation, entityId] of animations) {
           const animationData = animation.componentData;
-          if (isFinsihed(animationData)) {
+          if (isFinsihed(animationData) && !animationData.persistent) {
             world.removeEntity(entityId);
           }
         }

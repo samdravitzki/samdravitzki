@@ -17,11 +17,7 @@ import {
   Polygon,
   ShapeStyle,
 } from "@dravitzki/dufus-engine/parts/p5";
-import {
-  animation,
-  createAnimation,
-  EasingName,
-} from "@dravitzki/dufus-engine/parts/animation";
+import { animate, animation } from "@dravitzki/dufus-engine/parts/animation";
 
 export default function procedualShapes(parent?: HTMLElement) {
   const engine = dufus()
@@ -184,32 +180,4 @@ export default function procedualShapes(parent?: HTMLElement) {
   );
 
   return engine;
-}
-
-type AnimationConfig<T> = {
-  from: T;
-  to: T;
-  duration: number;
-  target: string;
-  easing?: EasingName;
-  loop?: boolean;
-};
-
-type ComponentData<T> = T extends ComponentToken<infer U> ? U : never;
-
-function animate<T extends ComponentToken<unknown>>(
-  Component: T,
-  config: AnimationConfig<ComponentData<T>>,
-) {
-  return createAnimation({
-    name: "test",
-    Component: Component,
-    from: config.from,
-    to: config.to,
-    target: config.target,
-    duration: config.duration,
-    loop: config.loop,
-    easing: config.easing,
-    startTime: Date.now(),
-  });
 }

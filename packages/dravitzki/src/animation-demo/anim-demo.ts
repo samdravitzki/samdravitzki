@@ -9,8 +9,8 @@ import {
 } from "@dravitzki/dufus-engine";
 import {
   animation,
-  createAnimation,
   Animation,
+  animate,
 } from "@dravitzki/dufus-engine/parts/animation";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import {
@@ -48,9 +48,8 @@ export default function animationDemo(parent?: HTMLElement) {
   engine.system("setup-animations", trigger.on("setup"), (world, resources) => {
     const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-    const basicLoopAnimation = createAnimation({
+    const basicLoopAnimation = animate(Position, {
       name: "basic-loop",
-      Component: Position,
       from: {
         position: Vector.create(-300, -100).plus(canvasBounds.center.center),
       },
@@ -62,9 +61,8 @@ export default function animationDemo(parent?: HTMLElement) {
       loop: true,
     });
 
-    const notLoopingAnimation = createAnimation({
+    const notLoopingAnimation = animate(Position, {
       name: "not-looping",
-      Component: Position,
       from: {
         position: Vector.create(-300, 0).plus(canvasBounds.center.center),
       },
@@ -75,6 +73,7 @@ export default function animationDemo(parent?: HTMLElement) {
       duration: 2000,
       loop: false,
       easing: "easeOutBounce",
+      persistent: true,
     });
 
     world.addBundle(basicLoopAnimation);

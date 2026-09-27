@@ -12,9 +12,9 @@ import {
   dufus,
 } from "@dravitzki/dufus-engine";
 import {
+  animate,
   animation,
   AnimationData,
-  createAnimation,
 } from "@dravitzki/dufus-engine/parts/animation";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import {
@@ -257,9 +257,7 @@ function moveShifter(
   if (state["next-shift-position"].value === null) {
     const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
-    const shifterAnimation = createAnimation({
-      name: "shift-lever-animation",
-      Component: Position,
+    const shifterAnimation = animate(Position, {
       from: {
         position: from.position.plus(canvasBounds.center.center),
       },
