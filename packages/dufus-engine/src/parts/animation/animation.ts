@@ -71,25 +71,27 @@ function animation() {
       for (const [animation] of animations) {
         const animationData = animation.componentData;
 
-        const elapsedTime = calculateElapsedTime(animationData);
-        const t = tick(
-          elapsedTime,
+        animationData.elapsedTime = calculateElapsedTime(animationData);
+        animationData.t = tick(
+          animationData.elapsedTime,
           animationData.duration,
           animationData.easing,
           animationData.loop,
         );
-        const previousState = animationData.state;
-        const newState = !isFinished(animationData) ? "running" : "completed";
+        animationData.previousState = animationData.state;
+        animationData.state = !isFinished(animationData)
+          ? "running"
+          : "completed";
 
         let keyframe = null;
-        let keyframeT = t;
+        let keyframeT = animationData.t;
 
         if (animationData.keyframes.length === 1) {
           keyframe = animationData.keyframes[0];
         } else {
           const totalKeyframes = animationData.keyframes.length;
 
-          const overallKeyframeProgress = t * totalKeyframes;
+          const overallKeyframeProgress = animationData.t * totalKeyframes;
 
           const keyframeIndex = Math.floor(overallKeyframeProgress);
 
@@ -99,11 +101,6 @@ function animation() {
             keyframe.easing,
           );
         }
-
-        animationData.elapsedTime = elapsedTime;
-        animationData.t = t;
-        animationData.previousState = previousState;
-        animationData.state = newState;
 
         /**
          * DevX improvement:
