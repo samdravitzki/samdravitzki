@@ -1,31 +1,17 @@
 import { Part } from "../../core/Part/Part";
-import Animation, { AnimationData } from "./components/Animation";
+import Animation, { AnimationData, EasingName } from "./components/Animation";
 import { easings } from "./easing";
 import { selectInterpolationFunction } from "./interpolation";
 
-function isFinished(animation: AnimationData) {
-  return !animation.loop && animation.t >= 1;
-}
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  const proto = Object.getPrototypeOf(value);
 
-function calculateElapsedTime(animation: AnimationData) {
-  return animation.startTime ? Date.now() - animation.startTime : 0;
-}
-
-function tick(animation: AnimationData) {
-  const elapsed = animation.elapsedTime;
-
-  let t = 0;
-  if (animation.loop) {
-    t = (elapsed % animation.duration) / animation.duration; // Normalize elapsed time to a value between 0 and 1
-  } else {
-    t = Math.min(elapsed / animation.duration, 1); // Clamp to 1 if elapsed time exceeds duration
-  }
-
-  const selectedEasing = animation.easing || "easeInOutCubic";
-
-  const easedT = easings[selectedEasing](t);
-
-  return easedT;
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    proto === Object.prototype
+  );
 }
 
 function selectKeyframe(animation: AnimationData) {
@@ -42,15 +28,34 @@ function selectKeyframe(animation: AnimationData) {
   return animation.keyframes[keyframeIndex];
 }
 
-function isPlainRecord(value: unknown): value is Record<string, unknown> {
-  const proto = Object.getPrototypeOf(value);
+function isFinished(animation: AnimationData) {
+  return !animation.loop && animation.t >= 1;
+}
 
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    !Array.isArray(value) &&
-    proto === Object.prototype
-  );
+function calculateElapsedTime(animation: AnimationData) {
+  return animation.startTime ? Date.now() - animation.startTime : 0;
+}
+
+function ease(t: number, easing: EasingName = "linear") {
+  return easings[easing](t);
+}
+
+function tick(
+  elapsed: number,
+  duration: number,
+  easing: EasingName = "linear",
+  loop: boolean = false,
+) {
+  let t = 0;
+  if (loop) {
+    t = (elapsed % duration) / duration; // Normalize elapsed time to a value between 0 and 1
+  } else {
+    t = Math.min(elapsed / duration, 1); // Clamp to 1 if elapsed time exceeds duration
+  }
+
+  const easedT = ease(t, easing);
+
+  return easedT;
 }
 
 function animation() {
@@ -66,21 +71,39 @@ function animation() {
       for (const [animation] of animations) {
         const animationData = animation.componentData;
 
-        animationData.elapsedTime = calculateElapsedTime(animationData);
+        const elapsedTime = calculateElapsedTime(animationData);
+        const t = tick(
+          elapsedTime,
+          animationData.duration,
+          animationData.easing,
+          animationData.loop,
+        );
+        const previousState = animationData.state;
+        const newState = !isFinished(animationData) ? "running" : "completed";
 
-        animationData.t = tick(animationData);
+        let keyframe = null;
+        let keyframeT = t;
 
-        animationData.previousState = animationData.state;
-        animationData.state = !isFinished(animationData)
-          ? "running"
-          : "completed";
+        if (animationData.keyframes.length === 1) {
+          keyframe = animationData.keyframes[0];
+        } else {
+          const totalKeyframes = animationData.keyframes.length;
 
-        const [component] = world.query([
-          animationData.Component,
-          animationData.target,
-        ])[0];
+          const overallKeyframeProgress = t * totalKeyframes;
 
-        const keyframe = selectKeyframe(animationData);
+          const keyframeIndex = Math.floor(overallKeyframeProgress);
+
+          keyframe = animationData.keyframes[keyframeIndex];
+          keyframeT = ease(
+            overallKeyframeProgress - keyframeIndex,
+            keyframe.easing,
+          );
+        }
+
+        animationData.elapsedTime = elapsedTime;
+        animationData.t = t;
+        animationData.previousState = previousState;
+        animationData.state = newState;
 
         /**
          * DevX improvement:
@@ -90,6 +113,11 @@ function animation() {
          * Also the other way around where if you configure a 'from' state on the animation
          * the targe entity shouldn't need to have that component specified
          */
+
+        const [component] = world.query([
+          animationData.Component,
+          animationData.target,
+        ])[0];
 
         if (isPlainRecord(keyframe.to)) {
           const keys = Object.keys(keyframe.to);
@@ -114,7 +142,7 @@ function animation() {
               component.componentData[key] = interpolationFunction(
                 keyframe.from[key],
                 keyframe.to[key],
-                animationData.t,
+                keyframeT,
               );
             }
           }
@@ -128,7 +156,7 @@ function animation() {
             component.componentData = interpolationFunction(
               keyframe.from,
               keyframe.to,
-              animationData.t,
+              keyframeT,
             );
           }
         }

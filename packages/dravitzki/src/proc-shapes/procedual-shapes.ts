@@ -8,7 +8,6 @@ import {
   Vector,
   tag,
   Rotation,
-  ComponentToken,
   Scale,
 } from "@dravitzki/dufus-engine";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";

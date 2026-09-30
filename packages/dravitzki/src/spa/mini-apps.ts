@@ -14,6 +14,7 @@ import coinGame from "../coin-game/coin-game";
 import pathPhysicsDemo from "../path-physics/path-physics";
 import snake from "../snake/snake-game";
 import procedualShapes from "../proc-shapes/procedual-shapes";
+import procedualShapes2 from "../proc-shapes-2/procedual-shapes";
 
 export type MiniApp = (parent?: HTMLElement) => Engine<any, any>;
 
@@ -145,6 +146,13 @@ miniApps.push({
   symbol: "🧩",
   appId: "proc-shapes",
   app: procedualShapes,
+});
+
+miniApps.push({
+  name: "proc-shapes-2",
+  symbol: "🧩₂",
+  appId: "proc-shapes-2",
+  app: procedualShapes2,
 });
 
 miniApps.push({
