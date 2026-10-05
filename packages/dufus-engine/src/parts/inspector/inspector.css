@@ -62,6 +62,12 @@
   padding: 4px;
 }
 
+@media (max-width: 600px) {
+  #inspector__code-char-container {
+    visibility: hidden;
+  }
+}
+
 .inspector__code-char {
   display: inline-block;
   width: 1ch;
