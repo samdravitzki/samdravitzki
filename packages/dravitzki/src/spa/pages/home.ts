@@ -2,18 +2,17 @@ import miniApps from "../mini-apps";
 import Page from "./Page";
 
 function createMiniAppButton(name: string, symbol: string) {
-  return `<button id="${name}-button">${symbol}</button>`;
+  return `<button id="${name}-button" style="width: 72px;">${symbol}</button>`;
 }
 
 const homePage: Page = (container: HTMLElement, { navigate }) => {
   container.innerHTML = `
-    <div>
       <h1>dravitzki.com</h1>
       <p role="doc-subtitle">
         <i>Built by <b>Sam Dravitzki</b> <span class="emoji"></span></i>
       </p>
       <div
-        style="display: flex; gap: 4px; justify-content: center;"
+        style="display: flex; gap: 4px; flex-wrap: wrap; justify-content: center;"
       >
         ${miniApps
           .filter((appInfo) => appInfo.type === "experience")
@@ -22,7 +21,7 @@ const homePage: Page = (container: HTMLElement, { navigate }) => {
       </div>
       <h4>The Lab</h4>
       <div
-        style="display: flex; gap: 4px"
+        style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;"
       >
         ${miniApps
           .filter(
@@ -31,7 +30,6 @@ const homePage: Page = (container: HTMLElement, { navigate }) => {
           .map((appInfo) => createMiniAppButton(appInfo.name, appInfo.symbol))
           .join("")}
       </div>
-    </div>
 `;
 
   miniApps.forEach((miniApp) => {

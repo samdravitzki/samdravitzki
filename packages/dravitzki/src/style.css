@@ -33,9 +33,14 @@ body {
 }
 
 h1 {
-  font-size: 3.2em;
   line-height: 1.1;
   margin-bottom: 0;
+}
+
+@media (min-width: 600px) {
+  h1 {
+    font-size: 3.2em;
+  }
 }
 
 #app,
@@ -76,15 +81,8 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-/* @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-} */
+.p5Canvas {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+}
