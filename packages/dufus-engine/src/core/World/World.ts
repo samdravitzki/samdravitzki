@@ -66,6 +66,26 @@ export default class World {
     return entity;
   }
 
+  /**
+   * Spit an entity into the world with the supplied components
+   *
+   * spit = spawn or instantiate. Why? just a bit of fun tbh
+   * @param components
+   */
+  spit(components: Component[]): Entity;
+  spit(...args: Component[]): Entity;
+  spit(...args: any[]) {
+    const entity = this.createEntity();
+
+    const components = Array.isArray(args[0]) ? args[0] : args;
+
+    components.forEach((component) => {
+      entity.addComponent(component);
+    });
+
+    return entity;
+  }
+
   addBundle(bundle: Bundle) {
     const entity = this.createEntity();
 
