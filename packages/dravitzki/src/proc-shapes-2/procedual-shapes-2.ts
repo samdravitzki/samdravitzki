@@ -104,7 +104,6 @@ export default function procedualShapes2(parent?: HTMLElement) {
     "draw-procedural-shape",
     engine.trigger.on("setup"),
     (world, resources) => {
-      const p = resources.get<p5>("p5");
       const canvasBounds = resources.get<Bounds>("canvas-bounds");
 
       const directions = [
@@ -118,71 +117,65 @@ export default function procedualShapes2(parent?: HTMLElement) {
         const pos = Vector.create(radius * dir.x, radius * dir.y);
 
         // circle end
-        world.addBundle(
-          createBundle([
-            Circle({
-              radius: radius / 10,
-            }),
-            ShapeStyle({
-              fill: "#fff",
-            }),
-            Label({
-              text: "polygon",
-            }),
-            Position({
-              position: canvasBounds.center.center,
-            }),
-            Scale(Vector.create(1, 1)),
-            tag(`animation-target-end-${index}`)(),
-          ]),
+        world.spit(
+          Circle({
+            radius: radius / 10,
+          }),
+          ShapeStyle({
+            fill: "#fff",
+          }),
+          Label({
+            text: "polygon",
+          }),
+          Position({
+            position: canvasBounds.center.center,
+          }),
+          Scale(Vector.create(1, 1)),
+          tag(`animation-target-end-${index}`)(),
         );
 
         const stretchHeight = radius / 10;
 
         // stretch
-        world.addBundle(
-          createBundle([
-            Polygon({
-              vertices: [
-                Vector.create(0, -stretchHeight),
-                Vector.create(0, -stretchHeight),
-                Vector.create(0, stretchHeight),
-                Vector.create(0, stretchHeight),
-              ],
-            }),
-            ShapeStyle({
-              fill: "#fff",
-            }),
-            Label({
-              text: "polygon",
-            }),
-            Position({
-              position: canvasBounds.center.center,
-            }),
-            Scale(Vector.create(1, 1)),
-            tag(`animation-target-stretch-${index}`)(),
-          ]),
+        world.spit(
+          Polygon({
+            vertices: [
+              Vector.create(0, -stretchHeight),
+              Vector.create(0, -stretchHeight),
+              Vector.create(0, stretchHeight),
+              Vector.create(0, stretchHeight),
+            ],
+          }),
+          ShapeStyle({
+            fill: "#fff",
+          }),
+          Label({
+            text: "polygon",
+          }),
+          Position({
+            position: canvasBounds.center.center,
+          }),
+          Scale(Vector.create(1, 1)),
+          tag(`animation-target-stretch-${index}`)(),
         );
 
         // circle start
-        world.addBundle(
-          createBundle([
-            Circle({
-              radius: radius / 10,
-            }),
-            ShapeStyle({
-              fill: "#fff",
-            }),
-            Label({
-              text: "polygon",
-            }),
-            Position({
-              position: canvasBounds.center.center,
-            }),
-            Scale(Vector.create(1, 1)),
-            tag(`animation-target-start-${index}`)(),
-          ]),
-        );
+        world.spit([
+          Circle({
+            radius: radius / 10,
+          }),
+          ShapeStyle({
+            fill: "#fff",
+          }),
+          Label({
+            text: "polygon",
+          }),
+          Position({
+            position: canvasBounds.center.center,
+          }),
+          Scale(Vector.create(1, 1)),
+          tag(`animation-target-start-${index}`)(),
+        ]);
 
         // animate position
         world.addBundle(
