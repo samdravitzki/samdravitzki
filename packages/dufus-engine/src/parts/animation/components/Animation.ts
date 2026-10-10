@@ -90,6 +90,17 @@ export function animate<T extends ComponentToken<unknown>>(
           },
         ];
 
+  const populatedKeyframes = keyframes.map((kf, i) => {
+    if (i === 0) {
+      return kf;
+    }
+
+    return {
+      from: kf.from ?? keyframes[i - 1].to,
+      ...kf,
+    };
+  });
+
   const animation = Animation({
     t: 0,
     elapsedTime: 0,
@@ -98,7 +109,7 @@ export function animate<T extends ComponentToken<unknown>>(
     previousState: undefined,
     persistent: config.persistent ?? false,
     Component: Component,
-    keyframes: keyframes,
+    keyframes: populatedKeyframes,
     target: config.target,
     duration: config.duration,
     loop: config.loop,
