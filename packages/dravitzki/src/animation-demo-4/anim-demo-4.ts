@@ -19,7 +19,7 @@ import {
 } from "@dravitzki/dufus-engine/parts/p5";
 import { animate, animation } from "@dravitzki/dufus-engine/parts/animation";
 
-export default function procedualShapes2(parent?: HTMLElement) {
+export default function animationDemo4(parent?: HTMLElement) {
   const engine = dufus()
     .event("setup")
     .event("update")

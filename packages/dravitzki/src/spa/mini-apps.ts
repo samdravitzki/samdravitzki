@@ -13,9 +13,9 @@ import collisionDemo3 from "../collision-demo-3/collision-demo-3";
 import coinGame from "../coin-game/coin-game";
 import pathPhysicsDemo from "../path-physics/path-physics";
 import snake from "../snake/snake-game";
-import procedualShapes from "../proc-shapes/procedual-shapes";
+import animationDemo3 from "../animation-demo-3/anim-demo-3";
 import animationDemo2 from "../animation-demo-2/anim-demo-2";
-import procedualShapes2 from "../proc-shapes-2/procedual-shapes-2";
+import animationDemo4 from "../animation-demo-4/anim-demo-4";
 
 export type MiniApp = (parent?: HTMLElement) => Engine<any, any>;
 
@@ -83,6 +83,20 @@ miniApps.push({
 });
 
 miniApps.push({
+  name: "proc-shapes",
+  symbol: "⚡₃",
+  appId: "proc-shapes",
+  app: animationDemo3,
+});
+
+miniApps.push({
+  name: "proc-shapes-2",
+  symbol: "⚡₄",
+  appId: "proc-shapes-2",
+  app: animationDemo4,
+});
+
+miniApps.push({
   name: "cursor-actions",
   symbol: "🖱️",
   appId: "cursor-actions",
@@ -137,7 +151,7 @@ miniApps.push({
   name: "coin-game",
   symbol: "🪙",
   appId: "coin-game",
-  type: "experience",
+  // type: "experience",
   app: coinGame,
 });
 
@@ -147,20 +161,6 @@ miniApps.push({
   appId: "path-physics",
   app: pathPhysicsDemo,
   tags: ["not-working"],
-});
-
-miniApps.push({
-  name: "proc-shapes",
-  symbol: "🧩",
-  appId: "proc-shapes",
-  app: procedualShapes,
-});
-
-miniApps.push({
-  name: "proc-shapes-2",
-  symbol: "🧩₂",
-  appId: "proc-shapes-2",
-  app: procedualShapes2,
 });
 
 miniApps.push({
