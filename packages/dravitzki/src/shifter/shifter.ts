@@ -266,6 +266,7 @@ function moveShifter(
       },
       target: "shift-lever",
       duration: 120,
+      easing: "easeInOutCubic",
       loop: false,
       startTime: Date.now(),
     });
