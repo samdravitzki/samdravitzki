@@ -16,6 +16,7 @@ import snake from "../snake/snake-game";
 import animationDemo3 from "../animation-demo-3/anim-demo-3";
 import animationDemo2 from "../animation-demo-2/anim-demo-2";
 import animationDemo4 from "../animation-demo-4/anim-demo-4";
+import transformHeirachyDemo from "../transform-heirachy-demo/transform-heirachy-demo";
 
 export type MiniApp = (parent?: HTMLElement) => Engine<any, any>;
 
@@ -161,6 +162,14 @@ miniApps.push({
   appId: "path-physics",
   app: pathPhysicsDemo,
   tags: ["not-working"],
+});
+
+miniApps.push({
+  name: "transform-heirachy-demo",
+  symbol: "⧉",
+  appId: "transform-heirachy-demo",
+  app: transformHeirachyDemo,
+  tags: ["transforms", "heirachy"],
 });
 
 miniApps.push({

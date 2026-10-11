@@ -12,6 +12,7 @@ import Component, { ComponentSpec } from "./Component/Component";
 import { EventEmitter } from "./Engine/EventEmitter";
 import { Part } from "./Part/Part";
 import Bundle from "./Bundle/Bundle";
+import Entity from "./Entity/Entity";
 
 export {
   dufus,
@@ -31,4 +32,5 @@ export {
   type EventEmitter,
   type Part,
   type Bundle,
+  type Entity,
 };

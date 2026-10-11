@@ -1,7 +1,4 @@
-import Component, {
-  ComponentSpec,
-  ComponentToken,
-} from "../Component/Component";
+import Component, { ComponentToken } from "../Component/Component";
 import { EventEmitter } from "../System/System";
 
 export type EntityEvents = {
