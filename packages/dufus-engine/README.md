@@ -65,7 +65,7 @@ Goals:
 
 ## Why's it called that?
 
-If you cant come up with any good reasons to build something it probably isn't a good idea. So if you decide to build it anyways you're probably a dufus
+If you cant come up with any good reasons to build something it probably isn't a good idea. So if you decide to build it anyways..
 
 ## Package Layout
 
@@ -83,9 +83,8 @@ If you cant come up with any good reasons to build something it probably isn't a
 
 ## Current status and roadmap
 
-Grab from the NOTES.md readme
-
 ### Roadmap
 
 - parts can handle registering events and state - example issue atm: p5 defines the setup event so you should be able to trigger systems on the setup event without having the register it yourself
 - parts can register resources that are typesafe
+- Currently it difficult to separate concerns when building larger projects with Dufus engine. Parts should make this possible, but the interface is just too verbose currently to justify using it for things other that generic plugins
