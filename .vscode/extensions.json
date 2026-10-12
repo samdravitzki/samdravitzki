@@ -1,5 +1,8 @@
 {
     "recommendations": [
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "github.codespaces",
+        "ms-vscode-remote.remote-wsl",
+        "ms-vscode-remote.remote-containers"
     ]
 }
