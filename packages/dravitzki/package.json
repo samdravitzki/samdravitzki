@@ -23,7 +23,7 @@
   "dependencies": {
     "@dravitzki/dufus-engine": "workspace:*",
     "@tonejs/midi": "^2.0.28",
-    "p5": "^2.1.2",
+    "p5": "^2.3.1",
     "tone": "^15.1.22",
     "tweakpane": "^4.0.5"
   }

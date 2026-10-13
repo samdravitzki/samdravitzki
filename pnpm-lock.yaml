@@ -17,8 +17,8 @@ importers:
         specifier: ^2.0.28
         version: 2.0.28
       p5:
-        specifier: ^2.1.2
-        version: 2.3.0
+        specifier: ^2.3.1
+        version: 2.3.1
       tone:
         specifier: ^15.1.22
         version: 15.1.22
@@ -57,8 +57,8 @@ importers:
   packages/dufus-engine:
     dependencies:
       p5:
-        specifier: ^2.1.2
-        version: 2.3.0
+        specifier: ^2.3.1
+        version: 2.3.1
       tweakpane:
         specifier: ^4.0.5
         version: 4.0.5
@@ -359,8 +359,8 @@ packages:
     resolution: {integrity: sha512-HEHNfbars9v4pgpW6SO1KSPkfoS0xVOM/9UzkJltjlsHZmJasxg8aXkuZa7SMf8vKGIBhpUsPluQSqhJFCqebw==}
     engines: {node: '>=0.4.0'}
 
-  acorn@8.17.0:
-    resolution: {integrity: sha512-xRQbDb9BnwDafYNn6Vwl839DYVjqXYb1XVGtWAZ1kcDc6iwAL4hg3B1dZlRiuENFeO2H53gFG3in621AdERVAg==}
+  acorn@8.18.0:
+    resolution: {integrity: sha512-lGq+9yr1/GuAWaVYIHRjvvySG5/4VfKIvC8EWxStPdcDh/Ka7FG3twP6v4d5BkravUilhIAsG4Qj83t02LWUPQ==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -646,8 +646,8 @@ packages:
   omggif@1.0.10:
     resolution: {integrity: sha512-LMJTtvgc/nugXj0Vcrrs68Mn2D1r0zf630VNtqtpI1FEO7e+O9FP4gqs9AcnBaSEeoHIPm28u6qgPR0oyEpGSw==}
 
-  p5@2.3.0:
-    resolution: {integrity: sha512-akBaN7KbLo5Y6fQ6xJ3w5KKVSfkHGLmqxkJZ7IwZkKw7QlEuVFlLuFTkx9/5o8AAyuJttzucXh7aWk2natRNMA==}
+  p5@2.3.1:
+    resolution: {integrity: sha512-YOzt3oP+xagNKtCiOfXK6EaEi4i7F4+5MNGFPUu6/yEJ1QhIsZQl1Tp/uYFNldi3Y0Uwmre997Ke0vDoFwBFBw==}
 
   pako@2.2.0:
     resolution: {integrity: sha512-zJq6RP/5q+TO2OpFV3FHzlPnFjmkb7Nc99a5SNjJE+uu/PkpChs+NIZSSzbBoD+6kjiISXjfYdwj1ZRQ81dz/w==}
@@ -1196,9 +1196,9 @@ snapshots:
 
   acorn-walk@8.3.5:
     dependencies:
-      acorn: 8.17.0
+      acorn: 8.18.0
 
-  acorn@8.17.0: {}
+  acorn@8.18.0: {}
 
   agent-base@7.1.4: {}
 
@@ -1454,11 +1454,11 @@ snapshots:
 
   omggif@1.0.10: {}
 
-  p5@2.3.0:
+  p5@2.3.1:
     dependencies:
       '@davepagurek/bezier-path': 0.0.7
       '@japont/unicode-range': 1.0.0
-      acorn: 8.17.0
+      acorn: 8.18.0
       acorn-walk: 8.3.5
       colorjs.io: 0.6.1
       escodegen: 2.1.0
