@@ -1,6 +1,7 @@
 import animationDemo from "../animation-demo/anim-demo";
 import cursorActions from "../cursor-actions/cursor-actions";
 import pong from "../pong/pong-game";
+import modularPong from "../modular-pong/modular-pong";
 import projectTemplate from "../project-template/project-template";
 import sdf from "../sdf/sdf";
 import shifter from "../shifter/shifter";
@@ -38,6 +39,15 @@ miniApps.push({
   appId: "pong",
   controls: [["move paddle", "mouse"]],
   app: pong,
+});
+
+miniApps.push({
+  name: "Modular Pong",
+  symbol: "🎾",
+  appId: "modular-pong",
+  controls: [["move paddle", "mouse"]],
+  tags: ["dufus-modularity"],
+  app: modularPong,
 });
 
 miniApps.push({
