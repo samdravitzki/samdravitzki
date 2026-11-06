@@ -15,6 +15,19 @@ import { p5Part, ShapeStyle, Square } from "@dravitzki/dufus-engine/parts/p5";
 
 const ChildOf = component<{ parentId: string }>({ name: "child-of" });
 
+// prettier-ignore
+type TransformData = [
+  number, number, number,
+  number, number, number,
+  number, number, number
+];
+
+const Transform = component<TransformData>({ name: "transform" });
+
+function transformFromPosition(position: Vector) {
+  return Transform([0, 0, 0, 0, position.x, position.x, 0, 0, 1]);
+}
+
 export default function transformHeirachyDemo(parent?: HTMLElement) {
   const engine = dufus()
     .event("setup")
@@ -27,15 +40,11 @@ export default function transformHeirachyDemo(parent?: HTMLElement) {
   engine.part(animation());
 
   engine.system("heirachy", engine.trigger.on("update"), (world, resources) => {
-    for (const [position, childOf, label] of world.query([
-      Position,
-      ChildOf,
-      Label,
-    ])) {
+    for (const [position, childOf] of world.query([Position, ChildOf])) {
       let hasParent = true;
       let current = childOf.componentData.parentId;
 
-      let heirachy = [label.componentData.text];
+      let positionStack = [];
 
       while (hasParent) {
         const entity = world.entity(current);
@@ -43,16 +52,21 @@ export default function transformHeirachyDemo(parent?: HTMLElement) {
 
         if (parentChildOf) {
           current = parentChildOf.componentData.parentId;
-          const parentLabel = entity.getComponent(Label);
-          if (parentLabel) {
-            heirachy.push(parentLabel.componentData.text);
+
+          const parentPosition = entity.getComponent(Position);
+          if (parentPosition) {
+            positionStack.push(parentPosition.componentData.position);
           }
         } else {
           hasParent = false;
         }
       }
+      const finalPosition = positionStack.reduce(
+        (acc, pos) => acc.plus(pos),
+        Vector.create(0, 0),
+      );
 
-      console.log(heirachy);
+      position.componentData.position = finalPosition;
     }
   });
 
