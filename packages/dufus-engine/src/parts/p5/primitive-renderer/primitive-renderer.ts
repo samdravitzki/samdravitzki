@@ -153,6 +153,8 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
 
     const worldMatrix = getWorldMatrix(world, entityId);
 
+    // p5 requires all but final row of the 2d matrix for applyMatrix. 
+    // Every third item of the worldMatrix is skipped because glMatrix stores the values as a single array in a column major format.
     // prettier-ignore
     p.applyMatrix(
       worldMatrix.value[0], worldMatrix.value[1], 
