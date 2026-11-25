@@ -2,18 +2,15 @@ import {
   dufus,
   Bounds,
   Position,
-  Entity,
   Label,
   tag,
   Rotation,
   Vector,
-  component,
+  ChildOf,
 } from "@dravitzki/dufus-engine";
 import { animation, animate } from "@dravitzki/dufus-engine/parts/animation";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import { p5Part, ShapeStyle, Square } from "@dravitzki/dufus-engine/parts/p5";
-
-const ChildOf = component<{ parentId: string }>({ name: "child-of" });
 
 export default function transformHeirachyDemo(parent?: HTMLElement) {
   const engine = dufus()
@@ -26,35 +23,6 @@ export default function transformHeirachyDemo(parent?: HTMLElement) {
   engine.part(inspector());
   engine.part(animation());
 
-  engine.system("heirachy", engine.trigger.on("update"), (world, resources) => {
-    for (const [position, childOf, label] of world.query([
-      Position,
-      ChildOf,
-      Label,
-    ])) {
-      let hasParent = true;
-      let current = childOf.componentData.parentId;
-
-      let heirachy = [label.componentData.text];
-
-      while (hasParent) {
-        const entity = world.entity(current);
-        const parentChildOf = entity.getComponent(ChildOf);
-
-        if (parentChildOf) {
-          current = parentChildOf.componentData.parentId;
-          const parentLabel = entity.getComponent(Label);
-          if (parentLabel) {
-            heirachy.push(parentLabel.componentData.text);
-          }
-        } else {
-          hasParent = false;
-        }
-      }
-
-      console.log(heirachy);
-    }
-  });
 
   engine.system(
     "template-info",
