@@ -2,31 +2,15 @@ import {
   dufus,
   Bounds,
   Position,
-  Entity,
   Label,
   tag,
   Rotation,
   Vector,
-  component,
+  ChildOf,
 } from "@dravitzki/dufus-engine";
 import { animation, animate } from "@dravitzki/dufus-engine/parts/animation";
 import { inspector } from "@dravitzki/dufus-engine/parts/inspector";
 import { p5Part, ShapeStyle, Square } from "@dravitzki/dufus-engine/parts/p5";
-
-const ChildOf = component<{ parentId: string }>({ name: "child-of" });
-
-// prettier-ignore
-type TransformData = [
-  number, number, number,
-  number, number, number,
-  number, number, number
-];
-
-const Transform = component<TransformData>({ name: "transform" });
-
-function transformFromPosition(position: Vector) {
-  return Transform([0, 0, 0, 0, position.x, position.x, 0, 0, 1]);
-}
 
 export default function transformHeirachyDemo(parent?: HTMLElement) {
   const engine = dufus()
@@ -39,36 +23,6 @@ export default function transformHeirachyDemo(parent?: HTMLElement) {
   engine.part(inspector());
   engine.part(animation());
 
-  engine.system("heirachy", engine.trigger.on("update"), (world, resources) => {
-    for (const [position, childOf] of world.query([Position, ChildOf])) {
-      let hasParent = true;
-      let current = childOf.componentData.parentId;
-
-      let positionStack = [];
-
-      while (hasParent) {
-        const entity = world.entity(current);
-        const parentChildOf = entity.getComponent(ChildOf);
-
-        if (parentChildOf) {
-          current = parentChildOf.componentData.parentId;
-
-          const parentPosition = entity.getComponent(Position);
-          if (parentPosition) {
-            positionStack.push(parentPosition.componentData.position);
-          }
-        } else {
-          hasParent = false;
-        }
-      }
-      const finalPosition = positionStack.reduce(
-        (acc, pos) => acc.plus(pos),
-        Vector.create(0, 0),
-      );
-
-      position.componentData.position = finalPosition;
-    }
-  });
 
   engine.system(
     "template-info",

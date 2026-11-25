@@ -3,8 +3,9 @@ import World from "../../../core/World/World";
 import { Color, ShapeStyle } from "./ShapeStyle";
 import { Circle, Line, Polygon, Square, Typography } from "../shape-components";
 import { ResourcePool } from "../../../core/Engine/ResourcePool";
-import { Position, Rotation, Scale } from "../../../components";
+import { ChildOf, getAncestors, Position, Rotation, Scale } from "../../../components";
 import Vector from "../../../core/Vector/Vector";
+import Matrix3x3 from "../../../core/Matrix3x3/Matrix3x3";
 
 function toP5Color(p: p5, color: string | number[]) {
   if (typeof color === "string") {
@@ -19,31 +20,28 @@ function drawCircle(p: p5, position: Vector, radius: number) {
 
 function drawLine(
   p: p5,
-  position: Vector,
   start: { x: number; y: number },
   end: { x: number; y: number },
 ) {
   p.line(
-    start.x + position.x,
-    start.y + position.y,
-    end.x + position.x,
-    end.y + position.y,
+    start.x,
+    start.y,
+    end.x,
+    end.y,
   );
 }
 
 function drawSquare(
   p: p5,
-  position: Vector,
   width: number,
   height: number,
   borderRadius?: number,
 ) {
-  p.rect(position.x, position.y, width, height, borderRadius ?? 0);
+  p.rect(0, 0, width, height, borderRadius ?? 0);
 }
 
 function drawText(
   p: p5,
-  position: Vector,
   text: string,
   size: number,
   align?: "left" | "right" | "center",
@@ -58,13 +56,13 @@ function drawText(
   }
   p.textSize(size);
 
-  p.text(text, position.x, position.y);
+  p.text(text, 0, 0);
 }
 
-function drawPolygon(p: p5, position: Vector, vertices: Vector[]) {
+function drawPolygon(p: p5, vertices: Vector[]) {
   p.beginShape();
   for (const vertex of vertices) {
-    p.vertex(position.x + vertex.x, position.y + vertex.y);
+    p.vertex(vertex.x, vertex.y);
   }
   p.endShape(p.CLOSE);
 }
@@ -111,27 +109,56 @@ function applyPrimitiveStyle(
   }
 }
 
+
+function getModelMatrix(world: World, entityId: string) {
+  const entity = world.entity(entityId);
+  const posComp = entity.getComponent(Position);
+  const rotComp = entity.getComponent(Rotation);
+
+  const pos = posComp?.componentData.position ? posComp.componentData.position : Vector.create(0, 0);
+  const rot = rotComp?.componentData.rotation ? rotComp.componentData.rotation : 0;
+
+  const posMatrix = Matrix3x3.fromTranslation(pos);
+  const rotMatrix = Matrix3x3.fromRotation(rot);
+
+  const modelMatrix = posMatrix.times(rotMatrix);
+  return modelMatrix;
+}
+
+
+function getWorldMatrix(world: World, entityId: string) {
+
+  const modelMatrix = getModelMatrix(world, entityId);
+
+  const worldMatrix = [...getAncestors(world, entityId)].reduce((m, id) => {
+   const ancestorModelMatrix = getModelMatrix(world, id);
+   return ancestorModelMatrix.times(m);
+  }, modelMatrix);
+
+  return worldMatrix;
+
+}
+
+
 function primitiveRendererSystem(world: World, resources: ResourcePool) {
   const p = resources.get<p5>("p5");
 
-  const shapes = world.query(["entity-id", Position, ShapeStyle]);
+  const shapes = world.query(["entity-id", ShapeStyle, Position]);
 
-  for (const [entityId, position, style] of shapes) {
+  for (const [entityId, style] of shapes) {
     p.push();
     applyPrimitiveStyle(p, style.componentData);
 
     const entity = world.entity(entityId);
 
-    p.translate(
-      position.componentData.position.x,
-      position.componentData.position.y,
+    const worldMatrix = getWorldMatrix(world, entityId);
+
+    // prettier-ignore
+    p.applyMatrix(
+      worldMatrix.value[0], worldMatrix.value[1], 
+      worldMatrix.value[3], worldMatrix.value[4], 
+      worldMatrix.value[6], worldMatrix.value[7]
     );
-
-    const rotation = entity.getComponent(Rotation);
-
-    if (rotation) {
-      p.rotate(rotation.componentData.rotation);
-    }
 
     const scale = entity.getComponent(Scale);
 
@@ -147,7 +174,6 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
 
       drawSquare(
         p,
-        Vector.create(0, 0),
         width,
         height,
         square.componentData.borderRadius,
@@ -170,7 +196,7 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
         );
       }
 
-      drawLine(p, Vector.create(0, 0), start, end);
+      drawLine(p, start, end);
     }
 
     const circle = entity.getComponent(Circle);
@@ -193,7 +219,6 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
 
       drawText(
         p,
-        Vector.create(0, 0),
         text.componentData.text,
         textSize,
         text.componentData.align,
@@ -216,7 +241,7 @@ function primitiveRendererSystem(world: World, resources: ResourcePool) {
         );
       }
 
-      drawPolygon(p, Vector.create(0, 0), verts);
+      drawPolygon(p, verts);
     }
 
     p.pop();
